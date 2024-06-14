@@ -1,0 +1,13 @@
+name: dart_model
+version: 0.0.1-wip
+description: >-
+  Data model for information about Dart code, queries about Dart code and
+  augmentations to Dart code. Serializable with a versioned JSON schema for
+  use by macros, generators and other tools.
+repository: https://github.com/dart-lang/macros/tree/master/pkgs/dart_model
+
+environment:
+  sdk: ^3.4.0
+
+dev_dependencies:
+  test: ^1.25.0
