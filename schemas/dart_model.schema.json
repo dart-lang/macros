@@ -1,0 +1,76 @@
+{
+  "$id": "https://github.com/dart-lang/macros/blob/main/schemas/dart_model.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {"$ref": "#/$defs/Model"}
+  ],
+  "$defs": {
+    "Annotation": {
+      "type": "object",
+      "description": "An annotation.",
+      "properties": {
+        "type": {"$ref": "#/$defs/QualifiedName"}
+      }
+    },
+    "Interface": {
+      "type": "object",
+      "description": "An interface.",
+      "properties": {
+        "annotations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Annotation"}
+        },
+        "members": {
+          "type": "object",
+          "description": "Map of members by name.",
+          "additionalProperties": {"$ref": "#/$defs/Member"}
+        },
+        "properties": {"$ref": "#/$defs/Properties"}
+      }
+    },
+    "Member": {
+      "type": "object",
+      "description": "Member of a scope.",
+      "properties": {
+        "properties": {"$ref": "#/$defs/Properties"}
+      }
+    },
+    "Model": {
+      "type": "object",
+      "properties": {
+        "uris": {
+          "type": "object",
+          "description": "Libraries by URI.",
+          "additionalProperties": {"$ref": "#/$defs/Library"}
+        }
+      }
+    },
+    "Properties": {
+      "type": "object",
+      "description": "Set of boolean properties.",
+      "properties": {
+        "isAbstract": {"type": "boolean"},
+        "isClass": {"type": "boolean"},
+        "isGetter": {"type": "boolean"},
+        "isField": {"type": "boolean"},
+        "isMethod": {"type": "boolean"},
+        "isStatic": {"type": "boolean"},
+        "isSynthetic": {"type": "boolean"}
+      }
+    },
+    "Library": {
+      "description": "Library.",
+      "type": "object",
+      "properties": {
+        "scopes": {
+          "type": "object",
+          "description": "Scopes by name.",
+          "additionalProperties": {"$ref": "#/$defs/Interface"}
+        }
+      }
+    },
+    "QualifiedName": {
+      "type": "string"
+    }
+  }
+}

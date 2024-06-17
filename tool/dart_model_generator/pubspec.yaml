@@ -1,0 +1,18 @@
+name: generate_dart_model
+publish-to: none
+
+environment:
+  sdk: ^3.4.0
+
+dependencies:
+  dart_model: any
+  dart_style: ^2.3.6
+
+dev_dependencies:
+  json_schema: ^5.1.7
+  test: ^1.25.7
+
+dependency_overrides:
+  dart_model:
+    path:
+      ../../pkgs/dart_model
