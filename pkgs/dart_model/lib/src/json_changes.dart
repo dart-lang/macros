@@ -4,55 +4,29 @@
 
 import 'json.dart';
 
-/// The changes between two [Json] instances.
+/// The changes between two [JsonData] instances.
+///
+/// To apply changes, the tree of [updates] should be "copied in" to the
+/// target tree.
+///
+/// To apply removals, the [removals] tree should be traversed like the target
+/// tree, removing any node where the [removals] tree has a `null` value.
+///
+/// TODO(davidmorgan): finalize the changes format. Should it include changes
+/// to lists? Should updates and removals be merged in one tree?
 extension type JsonChanges.fromJson(Map<String, Object?> node) {
   JsonChanges({
-    required List<Update> updates,
-    required List<Removal> removals,
+    required JsonData updates,
+    required JsonData removals,
   }) : this.fromJson({
           'updates': updates,
           'removals': removals,
         });
 
-  /// The nodes that were updated by these changes.
-  List<Update> get updates => (node['updates']! as List).cast();
+  /// The nodes that were updated by these changes, or `null` for none.
+  Map<String, Object?>? get updates => node['updates'] as Map<String, Object?>?;
 
-  /// The nodes that were removed by these changes.
-  List<Removal> get removals => (node['removals']! as List).cast();
-}
-
-/// A path into JSON data.
-extension type Path.fromJson(List<Object?> node) {
-  Path(List<String> path) : this.fromJson(path);
-
-  List<String> get path => (node as List).cast();
-
-  String? get uri => path.isEmpty ? null : path.first;
-
-  /// This path followed by [element].
-  Path followedByOne(String element) =>
-      Path(path.followedBy([element]).toList());
-
-  /// This path except the first entry.
-  Path skipOne() => Path(path.skip(1).toList());
-}
-
-/// One update to JSON data: a [Path] and a node.
-extension type Update.fromJson(List<Object?> node) {
-  Update({
-    required Path path,
-    required Object? value,
-  }) : this.fromJson([path, value]);
-
-  Path get path => node[0] as Path;
-  Object? get value => node[1];
-}
-
-/// One removal from JSON data: a [Path].
-extension type Removal.fromJson(List<Object?> node) {
-  Removal({
-    required Path path,
-  }) : this.fromJson(path.path);
-
-  Path get path => node as Path;
+  /// The nodes that were removed by these changes, or `null` for none.
+  Map<String, Object?>? get removals =>
+      node['removals'] as Map<String, Object?>?;
 }

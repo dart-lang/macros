@@ -8,22 +8,20 @@ import 'package:test/test.dart';
 void main() {
   group(JsonChanges, () {
     test('describes new data as updates', () {
-      final previous = Json.fromJson({'a': 'a', 'c': 'c'});
-      final current = Json.fromJson({'a': 'a', 'b': 'b'});
+      final previous = JsonData.deepCopyAndCheck({'a': 'a', 'c': 'c'});
+      final current = JsonData.deepCopyAndCheck({'a': 'a', 'b': 'b'});
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.updates, [
-        Update(path: Path(['b']), value: 'b')
-      ]);
+      expect(changes.updates, {'b': 'b'});
     });
 
     test('describes deeply nested new data as updates', () {
-      final previous = Json.fromJson({
+      final previous = JsonData.deepCopyAndCheck({
         'a': {
           'b': {'c': 'd'}
         },
       });
-      final current = Json.fromJson({
+      final current = JsonData.deepCopyAndCheck({
         'a': {
           'b': {
             'c': {
@@ -34,31 +32,33 @@ void main() {
       });
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.updates, [
-        Update(path: Path(['a', 'b', 'c']), value: {
-          'd': {'e': 'f'}
-        })
-      ]);
+      expect(changes.updates, {
+        'a': {
+          'b': {
+            'c': {
+              'd': {'e': 'f'}
+            }
+          }
+        }
+      });
     });
 
     test('describes changed data as updates', () {
-      final previous = Json.fromJson({'a': 'a', 'c': 'c'});
-      final current = Json.fromJson({'a': 'a2', 'c': 'c'});
+      final previous = JsonData.deepCopyAndCheck({'a': 'a', 'c': 'c'});
+      final current = JsonData.deepCopyAndCheck({'a': 'a2', 'c': 'c'});
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.updates, [
-        Update(path: Path(['a']), value: 'a2')
-      ]);
+      expect(changes.updates, {'a': 'a2'});
     });
 
     test('describes deeply nested changed data as updates', () {
-      final previous = Json.fromJson({
+      final previous = JsonData.deepCopyAndCheck({
         'a': {
           'b': {'c': 'a'}
         },
         'c': 'c'
       });
-      final current = Json.fromJson({
+      final current = JsonData.deepCopyAndCheck({
         'a': {
           'b': {'c': 'a2'}
         },
@@ -66,23 +66,23 @@ void main() {
       });
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.updates, [
-        Update(path: Path(['a', 'b', 'c']), value: 'a2')
-      ]);
+      expect(changes.updates, {
+        'a': {
+          'b': {'c': 'a2'}
+        }
+      });
     });
 
     test('describes removed data', () {
-      final previous = Json.fromJson({'a': 'a', 'c': 'c'});
-      final current = Json.fromJson({'a': 'a'});
+      final previous = JsonData.deepCopyAndCheck({'a': 'a', 'c': 'c'});
+      final current = JsonData.deepCopyAndCheck({'a': 'a'});
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.removals, [
-        Removal(path: Path(['c']))
-      ]);
+      expect(changes.removals, {'c': null});
     });
 
     test('describes deeply nested removed data', () {
-      final previous = Json.fromJson({
+      final previous = JsonData.deepCopyAndCheck({
         'a': 'a',
         'c': {
           'd': {
@@ -90,7 +90,7 @@ void main() {
           }
         }
       });
-      final current = Json.fromJson({
+      final current = JsonData.deepCopyAndCheck({
         'a': 'a',
         'c': {
           'd': {'e': <String, Object?>{}}
@@ -98,39 +98,63 @@ void main() {
       });
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.removals, [
-        Removal(path: Path(['c', 'd', 'e', 'c']))
-      ]);
+      expect(changes.removals, {
+        'c': {
+          'd': {
+            'e': {'c': null}
+          }
+        }
+      });
     });
 
     test('can handle lists', () {
-      final previous = Json.fromJson({
+      final previous = JsonData.deepCopyAndCheck({
         'a': ['a'],
       });
-      final current = Json.fromJson({
+      final current = JsonData.deepCopyAndCheck({
         'a': ['b'],
       });
       final changes = current.computeChangesFrom(previous);
 
-      expect(changes.updates, [
-        Update(path: Path(['a']), value: ['b'])
-      ]);
+      expect(changes.updates, {
+        'a': ['b']
+      });
     });
 
-    test('can be applied to a Json instance', () {
-      final previous = Json.fromJson({
+    test('can be applied on top of a JsonData instance', () {
+      final previous = JsonData.deepCopyAndCheck({
         'a': 'a',
         'b': 'b',
+        'c': 'c',
       });
-      final current = Json.fromJson({
+      final current = JsonData.deepCopyAndCheck({
         'a': {'b': 'c'},
         'b': {'c': 'a'},
       });
       final changes = current.computeChangesFrom(previous);
 
-      expect(previous, isNot(current));
+      expect(previous.asMap, isNot(current.asMap));
       final alsoCurrent = previous.change(changes);
-      expect(alsoCurrent, current);
+      expect(alsoCurrent.asMap, current.asMap);
+    });
+
+    test('does not mutate the JsonData applied to ', () {
+      final previous = JsonData.deepCopyAndCheck({
+        'a': 'a',
+        'b': 'b',
+        'c': 'c',
+      });
+      final current = JsonData.deepCopyAndCheck({
+        'a': {'b': 'c'},
+        'b': {'c': 'a'},
+      });
+      final changes = current.computeChangesFrom(previous);
+      previous.change(changes);
+      expect(previous.asMap, {
+        'a': 'a',
+        'b': 'b',
+        'c': 'c',
+      });
     });
   });
 }

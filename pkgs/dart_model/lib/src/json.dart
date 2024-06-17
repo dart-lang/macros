@@ -2,35 +2,98 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 
 import 'json_changes.dart';
 
-/// JSON data.
-final class Json {
-  Map<String, Object?> _root;
+/// Immutable, serializable JSON data.
+///
+/// Views onto the data are provided as [Map] instances, see [asMap].
+final class JsonData {
+  Map<String, Object?> _root = {};
 
-  Json.fromJson(Map<String, Object?> json) : _root = json;
-
-  JsonChanges computeChangesFrom(Json previous) {
-    final updates = <Update>[];
-    final removals = <Removal>[];
-    _compute(previous._root, _root, Path([]), updates, removals);
-    return JsonChanges(updates: updates, removals: removals);
+  /// Instantiates with a deep copy of [json].
+  ///
+  /// Throws if any values not allowed in JSON data are present.
+  ///
+  /// TODO(davidmorgan): add a way to build without copying.
+  JsonData.deepCopyAndCheck(Map<String, Object?> json) {
+    _deepCopyAndCheckMap(json, _root);
   }
 
-  static void _compute(
-      Map<String, Object?> previous,
-      Map<String, Object?> current,
-      Path path,
-      List<Update> updates,
-      List<Removal> removals) {
+  /// A `Map` view onto the root of this JSON data.
+  Map<String, Object?> get asMap => JsonMap._(_root);
+
+  static void _deepCopyAndCheckMap(
+      Map<String, Object?> from, Map<String, Object?> to) {
+    from.forEach((key, value) {
+      to[key] = _deepCopyAndCheckValue(value);
+    });
+  }
+
+  static void _deepCopyAndCheckList(List<Object?> from, List<Object?> to) {
+    for (final value in from) {
+      to.add(_deepCopyAndCheckValue(value));
+    }
+  }
+
+  static Object? _deepCopyAndCheckValue(Object? value) {
+    if (value is Map<String, Object?>) {
+      final copy = <String, Object?>{};
+      _deepCopyAndCheckMap(value, copy);
+      return copy;
+    } else if (value is String ||
+        value is bool ||
+        value is num ||
+        value == null) {
+      return value;
+    } else if (value is List<Object?>) {
+      final copy = <Object?>[];
+      _deepCopyAndCheckList(value, copy);
+      return copy;
+    } else {
+      throw UnsupportedError(
+          'JsonData cannot hold value of type ${value.runtimeType}: $value');
+    }
+  }
+
+  /// Computes [JsonChanges] that is this data minus [previous].
+  ///
+  /// The result of `previous.change(changes)` is equal to `this`.
+  JsonChanges computeChangesFrom(JsonData previous) {
+    Map<String, Object?>? updates;
+    Map<String, Object?>? removals;
+    _computeChanges(
+        previous: previous.asMap,
+        current: this.asMap,
+        updatesFactory: () => updates ??= {},
+        removalsFactory: () => removals ??= {});
+    return JsonChanges.fromJson(JsonData.deepCopyAndCheck({
+      if (updates != null) 'updates': updates,
+      if (removals != null) 'removals': removals,
+    }).asMap);
+  }
+
+  /// Outputs changes between [previous] and [current] into `updates` and
+  /// `removals` maps.
+  ///
+  /// Because there might be no updates, or no removals, the updates and
+  /// removals maps are passed in as functions that create the maps,
+  /// [updatesFactory] and [removalsFactory].
+  static void _computeChanges(
+      {required Map<String, Object?> previous,
+      required Map<String, Object?> current,
+      required Map<String, Object?> Function() updatesFactory,
+      required Map<String, Object?> Function() removalsFactory}) {
     for (final key in previous.keys.followedBy(current.keys).toSet()) {
       final keyIsInPrevious = previous.containsKey(key);
       final keyIsInCurrent = current.containsKey(key);
 
       if (keyIsInPrevious && !keyIsInCurrent) {
-        removals.add(Removal(path: path.followedByOne(key)));
+        // It's a removal.
+        removalsFactory()[key] = null;
       } else if (keyIsInPrevious && keyIsInCurrent) {
         // It's either the same or a change.
         final previousValue = previous[key]!;
@@ -38,76 +101,110 @@ final class Json {
 
         if (currentValue is Map<String, Object?>) {
           if (previousValue is Map<String, Object?>) {
-            _compute(previousValue, currentValue, path.followedByOne(key),
-                updates, removals);
+            _computeChanges(
+                previous: previousValue,
+                current: currentValue,
+                updatesFactory: () => (updatesFactory()[key] ??=
+                    <String, Object?>{}) as Map<String, Object?>,
+                removalsFactory: () => (removalsFactory()[key] ??=
+                    <String, Object?>{}) as Map<String, Object?>);
           } else {
-            updates.add(
-                Update(path: path.followedByOne(key), value: currentValue));
+            updatesFactory()[key] = currentValue;
           }
         } else if (currentValue is String) {
           if (previousValue is! String || previousValue != currentValue) {
-            updates.add(
-                Update(path: path.followedByOne(key), value: currentValue));
+            updatesFactory()[key] = currentValue;
           }
         } else if (currentValue is List) {
           if (previousValue is! List ||
               !const DeepCollectionEquality()
                   .equals(previousValue, currentValue)) {
-            updates.add(
-                Update(path: path.followedByOne(key), value: currentValue));
+            updatesFactory()[key] = currentValue;
           }
         } else {
+          // TODO(davidmorgan): support all JSON primitive types.
           throw UnsupportedError(
               'Unsupported change: $previousValue to $currentValue');
         }
-      } else {
+      } else if (!keyIsInPrevious && keyIsInCurrent) {
         // It's new.
-        updates.add(Update(path: path.followedByOne(key), value: current[key]));
+        updatesFactory()[key] = current[key];
       }
     }
   }
 
-  /// Returns a new [Json] instance with [changes] made.
+  /// Returns a new [JsonData] instance with [changes] made.
+  JsonData change(JsonChanges changes) {
+    // TODO(davidmorgan): implement a faster way.
+    final result = JsonData.deepCopyAndCheck(_root);
+    if (changes.updates != null) {
+      _applyUpdates(root: result._root, updates: changes.updates!);
+    }
+    if (changes.removals != null) {
+      _applyRemovals(root: result._root, removals: changes.removals!);
+    }
+    return result;
+  }
+
+  /// Applies [updates] to [root] in place.
   ///
-  /// TODO(davidmorgan): actually return a new model, copying as needd.
-  Json change(JsonChanges changes) {
-    for (final update in changes.updates) {
-      _updateAtPath(_root, update.path, update.value);
-    }
-    for (final removal in changes.removals) {
-      _removeAtPath(_root, removal.path);
-    }
-    return this;
-  }
-
-  static void _updateAtPath(
-      Map<String, Object?> node, Path path, Object? value) {
-    if (path.path.length == 1) {
-      node[path.path.single] = value;
-    } else {
-      if (!node.containsKey(path.path.first)) {
-        node[path.path.first] = <String, Object?>{};
+  /// Take care not to call this on public data.
+  static void _applyUpdates(
+      {required Map<String, Object?> root,
+      required Map<String, Object?> updates}) {
+    updates.forEach((key, value) {
+      if (value is Map<String, Object?>) {
+        if (root[key] is! Map<String, Object?>) {
+          root[key] = <String, Object?>{};
+        }
+        _applyUpdates(
+            root: (root[key] ??= <String, Object?>{}) as Map<String, Object?>,
+            updates: value);
+      } else {
+        root[key] = value;
       }
-      _updateAtPath(node[path.path.first]! as Map<String, Object?>,
-          path.skipOne(), value);
-    }
+    });
   }
 
-  static void _removeAtPath(Map<String, Object?> node, Path path) {
-    if (path.path.length == 1) {
-      node.remove(path.path.single);
-    } else {
-      final first = path.path.first;
-      final rest = path.skipOne();
-      _removeAtPath(node[first]! as Map<String, Object?>, rest);
-    }
+  /// Applies [removals] to [root] in place.
+  ///
+  /// Take care not to call this on public data.
+  static void _applyRemovals(
+      {required Map<String, Object?> root,
+      required Map<String, Object?> removals}) {
+    removals.forEach((key, value) {
+      if (value is Map<String, Object?>) {
+        _applyRemovals(
+            root: root[key]! as Map<String, Object?>, removals: value);
+      } else {
+        root.remove(key);
+      }
+    });
   }
+}
+
+/// An immutable `Map` view onto part of [JsonData].
+final class JsonMap
+    with MapMixin<String, Object?>
+    implements Map<String, Object?> {
+  final Map<String, Object?> _map;
+
+  JsonMap._(this._map);
 
   @override
-  bool operator ==(Object other) =>
-      other is Json &&
-      const DeepCollectionEquality().equals(_root, other._root);
+  Iterable<String> get keys => _map.keys;
 
   @override
-  int get hashCode => const DeepCollectionEquality().hash(_root);
+  Object? operator [](Object? key) => _map[key];
+
+  @override
+  void operator []=(String key, Object? value) =>
+      throw UnsupportedError('JsonData is immutable.');
+
+  @override
+  void clear() => throw UnsupportedError('JsonData is immutable.');
+
+  @override
+  Object? remove(Object? key) =>
+      throw UnsupportedError('JsonData is immutable.');
 }
