@@ -59,7 +59,7 @@ final class JsonData {
     Map<String, Object?>? removals;
     _computeChanges(
         previous: previous.asMap,
-        current: this.asMap,
+        current: asMap,
         updatesFactory: () => updates ??= {},
         removalsFactory: () => removals ??= {});
     return JsonChanges.fromJson(JsonData.deepCopyAndCheck({
