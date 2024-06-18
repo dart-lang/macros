@@ -12,51 +12,43 @@ import 'json_changes.dart';
 ///
 /// Views onto the data are provided as [Map] instances, see [asMap].
 final class JsonData {
-  Map<String, Object?> _root = {};
+  final Map<String, Object?> _root;
 
   /// Instantiates with a deep copy of [json].
   ///
   /// Throws if any values not allowed in JSON data are present.
   ///
   /// TODO(davidmorgan): add a way to build without copying.
-  JsonData.deepCopyAndCheck(Map<String, Object?> json) {
-    _deepCopyAndCheckMap(json, _root);
-  }
+  JsonData.deepCopyAndCheck(Map<String, Object?> json)
+      : _root = _deepCopyAndCheckMap(json);
 
   /// A `Map` view onto the root of this JSON data.
   Map<String, Object?> get asMap => JsonMap._(_root);
 
-  static void _deepCopyAndCheckMap(
-      Map<String, Object?> from, Map<String, Object?> to) {
-    from.forEach((key, value) {
-      to[key] = _deepCopyAndCheckValue(value);
+  static Map<String, Object?> _deepCopyAndCheckMap(Map<String, Object?> map) {
+    final result = <String, Object?>{};
+    map.forEach((key, value) {
+      result[key] = _deepCopyAndCheckValue(value);
     });
+    return result;
   }
 
-  static void _deepCopyAndCheckList(List<Object?> from, List<Object?> to) {
-    for (final value in from) {
-      to.add(_deepCopyAndCheckValue(value));
+  static List<Object?> _deepCopyAndCheckList(List<Object?> list) {
+    final result = <Object?>[];
+    for (final value in list) {
+      result.add(_deepCopyAndCheckValue(value));
     }
+    return result;
   }
 
   static Object? _deepCopyAndCheckValue(Object? value) {
-    if (value is Map<String, Object?>) {
-      final copy = <String, Object?>{};
-      _deepCopyAndCheckMap(value, copy);
-      return copy;
-    } else if (value is String ||
-        value is bool ||
-        value is num ||
-        value == null) {
-      return value;
-    } else if (value is List<Object?>) {
-      final copy = <Object?>[];
-      _deepCopyAndCheckList(value, copy);
-      return copy;
-    } else {
-      throw UnsupportedError(
-          'JsonData cannot hold value of type ${value.runtimeType}: $value');
-    }
+    return switch (value) {
+      Map<String, Object?>() => _deepCopyAndCheckMap(value),
+      List<Object?>() => _deepCopyAndCheckList(value),
+      String() || bool() || num() || null => value,
+      Object() => throw UnsupportedError(
+          'JsonData cannot hold value of type ${value.runtimeType}: $value'),
+    };
   }
 
   /// Computes [JsonChanges] that is this data minus [previous].
@@ -154,12 +146,11 @@ final class JsonData {
       required Map<String, Object?> updates}) {
     updates.forEach((key, value) {
       if (value is Map<String, Object?>) {
-        if (root[key] is! Map<String, Object?>) {
-          root[key] = <String, Object?>{};
+        var node = root[key];
+        if (node is! Map<String, Object?>) {
+          root[key] = node = <String, Object?>{};
         }
-        _applyUpdates(
-            root: (root[key] ??= <String, Object?>{}) as Map<String, Object?>,
-            updates: value);
+        _applyUpdates(root: node, updates: value);
       } else {
         root[key] = value;
       }
@@ -184,6 +175,8 @@ final class JsonData {
 }
 
 /// An immutable `Map` view onto part of [JsonData].
+// TODO(davidmorgan): check whether having a custom map implementation
+// here causes any performance regression.
 final class JsonMap
     with MapMixin<String, Object?>
     implements Map<String, Object?> {
