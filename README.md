@@ -8,6 +8,7 @@ This repository is home to various macro related Dart packages.
 
 | Package | Description | Version |
 |---|---|---|
+| `dart_model` | Serializable data model for Dart code. | 0.0.1-wip |
 
 ## Publishing automation
 
