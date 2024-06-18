@@ -10,7 +10,7 @@ void main() {
     test('is immutable', () {
       final map = JsonData.deepCopyAndCheck({}).asMap;
       expect(() => map['a'] = 'b', throwsUnsupportedError);
-      expect(() => map.clear(), throwsUnsupportedError);
+      expect(map.clear, throwsUnsupportedError);
       expect(() => map.remove('a'), throwsUnsupportedError);
     });
 
