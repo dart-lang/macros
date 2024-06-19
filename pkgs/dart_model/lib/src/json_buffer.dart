@@ -1,3 +1,7 @@
+// Copyright (c) 2024, the Dart project authors. Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -7,15 +11,21 @@ import 'dart:typed_data';
 /// This is the efficient way to accumulate data into a [JsonBuffer]. Nested
 /// maps should also be `LazyMap`.
 class LazyMap with MapMixin<String, Object?> implements Map<String, Object?> {
-  @override
-  final List<String> keys;
+  final List<String> _keys;
   final Object? Function(String) lookup;
 
-  LazyMap(Iterable<String> keys, this.lookup)
-      : keys = UnmodifiableListView(keys.toList());
+  LazyMap(Iterable<String> keys, this.lookup) : _keys = keys.toList();
 
   @override
-  Object? operator [](Object? key) => key is String ? lookup(key) : null;
+  Iterable<String> get keys => _keys;
+
+  @override
+  Object? operator [](Object? key) {
+    if (key is! String) {
+      throw ArgumentError('Only String keys are allowed, got: $key');
+    }
+    return lookup(key);
+  }
 
   @override
   void operator []=(String key, Object? value) =>
@@ -54,6 +64,7 @@ class JsonBuffer {
 
   /// The JSON data.
   // TODO(davidmorgan): what's a good initial size?
+  // TODO(davidmorgan): maybe use `BytesBuilder`?
   Uint8List _buffer = Uint8List(32);
 
   /// The next free location to write to in the buffer.
@@ -65,7 +76,7 @@ class JsonBuffer {
   }
 
   /// Immutable `Map` view of the JSON data.
-  late final Map<String, Object?> asMap = JsonBufferMap._(this, 0);
+  late final Map<String, Object?> asMap = _JsonBufferMap._(this, 0);
 
   /// Instantiates using previously-serialized data.
   ///
@@ -74,18 +85,21 @@ class JsonBuffer {
   JsonBuffer.deserialize(this._buffer) : _nextFree = _buffer.length;
 
   /// The JSON data.
-  Uint8List serialize() => _buffer.sublist(0, _nextFree);
+  ///
+  /// The buffer is _not_ copied, unpredictable behavior will result if it is
+  /// mutated.
+  Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
 
   /// Adds a `Map` to the buffer.
   void _addMap(Map<String, Object?> map) {
     List<String> keys;
     Object? Function(String) lookup;
     if (map is LazyMap) {
-      keys = map.keys;
+      keys = map._keys;
       lookup = map.lookup;
     } else {
       keys = map.keys.toList();
-      lookup = (key) => map[key];
+      lookup = map.lookup;
     }
     _evaluateAndAddMap(keys, lookup);
   }
@@ -97,7 +111,8 @@ class JsonBuffer {
   void _evaluateAndAddMap(List<String> keys, Object? Function(String) lookup) {
     // Maps are stored as:
     //
-    // [size, pointer to key 1, pointer to value 1, pointer to key 2, pointer to value 2, ...]
+    // [size, pointer to key 1, pointer to value 1, pointer to key 2,
+    // pointer to value 2, ...]
     //
     // The size is immediately known, so reserve space for the map, allowing
     // full keys and values to be appended afterwards in any order.
@@ -123,6 +138,7 @@ class JsonBuffer {
   void _reserve(int bytes) {
     _nextFree += bytes;
     while (_nextFree > _buffer.length) {
+      // TODO(davidmorgan): pass desired size to avoid multiple copies.
       _expand();
     }
   }
@@ -241,7 +257,7 @@ class JsonBuffer {
       case Type.bool:
         return _readBool(pointer + _typeSize);
       case Type.map:
-        return JsonBufferMap._(this, pointer + _typeSize);
+        return _JsonBufferMap._(this, pointer + _typeSize);
     }
   }
 
@@ -272,17 +288,17 @@ class JsonBuffer {
 }
 
 /// Immutable `Map` view into a [JsonBuffer].
-class JsonBufferMap
+class _JsonBufferMap
     with MapMixin<String, Object?>
     implements Map<String, Object?> {
   final JsonBuffer _buffer;
   final _Pointer _pointer;
 
-  JsonBufferMap._(this._buffer, this._pointer);
+  _JsonBufferMap._(this._buffer, this._pointer);
 
   @override
   Object? operator [](Object? key) {
-    final iterator = entries.iterator as JsonBufferMapEntryIterator;
+    final iterator = entries.iterator as _JsonBufferMapEntryIterator;
     // TODO(davidmorgan): for small maps this is probably already efficient
     // enough. Do something better for large maps, for example sorting keys
     // and binary search?
@@ -294,17 +310,17 @@ class JsonBufferMap
 
   @override
   late Iterable<String> keys =
-      JsonBufferMapEntryIterable(_buffer, _pointer, readValues: false)
+      _JsonBufferMapEntryIterable(_buffer, _pointer, readValues: false)
           .map((e) => e.key);
 
   @override
   late Iterable<Object?> values =
-      JsonBufferMapEntryIterable(_buffer, _pointer, readKeys: false)
+      _JsonBufferMapEntryIterable(_buffer, _pointer, readKeys: false)
           .map((e) => e.value);
 
   @override
   late Iterable<MapEntry<String, Object?>> entries =
-      JsonBufferMapEntryIterable(_buffer, _pointer);
+      _JsonBufferMapEntryIterable(_buffer, _pointer);
 
   @override
   void operator []=(String key, Object? value) {
@@ -323,7 +339,7 @@ class JsonBufferMap
 }
 
 /// `Iterable` that reads a `Map` in a [JsonBuffer].
-class JsonBufferMapEntryIterable
+class _JsonBufferMapEntryIterable
     with IterableMixin<MapEntry<String, Object?>>
     implements Iterable<MapEntry<String, Object?>> {
   final JsonBuffer _buffer;
@@ -331,18 +347,19 @@ class JsonBufferMapEntryIterable
   final bool readKeys;
   final bool readValues;
 
-  JsonBufferMapEntryIterable(this._buffer, this._pointer,
+  _JsonBufferMapEntryIterable(this._buffer, this._pointer,
       {this.readKeys = true, this.readValues = true});
 
   @override
   Iterator<MapEntry<String, Object?>> get iterator =>
-      JsonBufferMapEntryIterator(_buffer, _pointer);
+      _JsonBufferMapEntryIterator(_buffer, _pointer,
+          readKeys: readKeys, readValues: readValues);
 }
 
 /// `Iterator` that reads a `Map` in a [JsonBuffer].
 ///
 /// TODO(davidmorgan): refactor away from the awkward `readKeys`/`readValues`.
-class JsonBufferMapEntryIterator
+class _JsonBufferMapEntryIterator
     implements Iterator<MapEntry<String, Object?>> {
   final JsonBuffer _buffer;
   _Pointer _pointer;
@@ -350,7 +367,7 @@ class JsonBufferMapEntryIterator
   final bool readKeys;
   final bool readValues;
 
-  JsonBufferMapEntryIterator(this._buffer, _Pointer pointer,
+  _JsonBufferMapEntryIterator(this._buffer, _Pointer pointer,
       {this.readKeys = true, this.readValues = true})
       : _last = pointer +
             _intSize +
@@ -388,3 +405,7 @@ final _typeSize = 1;
 
 /// Bytes for each int.
 final _intSize = 4;
+
+extension _MapExtensions<K, V> on Map<K, V> {
+  V? lookup(Object? key) => this[key];
+}
