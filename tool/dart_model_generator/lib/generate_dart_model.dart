@@ -138,7 +138,7 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
 
 /// Reads the type name of a `$ref` to a `$def`.
 String _readRefName(JsonSchema schema, String key) {
-  final ref = schema.schemaMap![key]![r'$ref'];
+  final ref = (schema.schemaMap![key] as Map)[r'$ref'] as String;
   return ref.substring(r'#/$defs/'.length);
 }
 

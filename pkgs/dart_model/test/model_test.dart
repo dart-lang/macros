@@ -51,8 +51,8 @@ void main() {
     });
 
     test('maps to JSON after deserialization', () {
-      final deserializedModel =
-          Model.fromJson(json.decode(json.encode(model as Map)));
+      final deserializedModel = Model.fromJson(
+          json.decode(json.encode(model as Map)) as Map<String, Object?>);
       expect(deserializedModel as Map, expected);
     });
 
@@ -71,8 +71,8 @@ void main() {
     });
 
     test('maps can be accessed as fields after deserialization', () {
-      final deserializedModel =
-          Model.fromJson(json.decode(json.encode(model as Map)));
+      final deserializedModel = Model.fromJson(
+          json.decode(json.encode(model as Map)) as Map<String, Object?>);
 
       expect(
           deserializedModel.uris['package:dart_model/dart_model.dart']!
@@ -90,8 +90,8 @@ void main() {
     });
 
     test('lists can be accessed as fields after deserialization', () {
-      final deserializedModel =
-          Model.fromJson(json.decode(json.encode(model as Map)));
+      final deserializedModel = Model.fromJson(
+          json.decode(json.encode(model as Map)) as Map<String, Object?>);
 
       expect(
           deserializedModel.uris['package:dart_model/dart_model.dart']!
