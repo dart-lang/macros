@@ -5,9 +5,9 @@
     {"$ref": "#/$defs/Model"}
   ],
   "$defs": {
-    "Annotation": {
+    "MetadataAnnotation": {
       "type": "object",
-      "description": "An annotation.",
+      "description": "A metadata annotation.",
       "properties": {
         "type": {"$ref": "#/$defs/QualifiedName"}
       }
@@ -16,9 +16,9 @@
       "type": "object",
       "description": "An interface.",
       "properties": {
-        "annotations": {
+        "metadataAnnotations": {
           "type": "array",
-          "items": {"$ref": "#/$defs/Annotation"}
+          "items": {"$ref": "#/$defs/MetadataAnnotation"}
         },
         "members": {
           "type": "object",
@@ -37,6 +37,7 @@
     },
     "Model": {
       "type": "object",
+      "description": "Partial model of a corpus of Dart source code.",
       "properties": {
         "uris": {
           "type": "object",
