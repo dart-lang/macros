@@ -14,6 +14,12 @@ import 'package:json_schema/json_schema.dart';
 /// They have a `fromJson` constructor that takes that JSON, and a no-name
 /// constructor that builds it.
 void run() {
+  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
+      generate(File('schemas/dart_model.schema.json').readAsStringSync()));
+}
+
+/// Generates and returns code for [schemaJson].
+String generate(String schemaJson) {
   final result = <String>[
     '// This file is generated. To make changes, '
         'edit schemas/dart_model.schema.json',
@@ -21,14 +27,11 @@ void run() {
         'dart tool/model_generator/bin/main.dart',
     '',
   ];
-  final schema = JsonSchema.create(
-      File('schemas/dart_model.schema.json').readAsStringSync());
+  final schema = JsonSchema.create(schemaJson);
   for (final def in schema.defs.entries) {
     result.add(_generateExtensionType(def.key, def.value));
   }
-
-  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
-      DartFormatter().formatSource(SourceCode(result.join('\n'))).text);
+  return DartFormatter().formatSource(SourceCode(result.join('\n'))).text;
 }
 
 String _generateExtensionType(String name, JsonSchema definition) {
