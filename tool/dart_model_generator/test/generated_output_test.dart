@@ -14,14 +14,12 @@ void main() {
         File('../../schemas/dart_model.schema.json').readAsStringSync());
     final actual = File('../../pkgs/dart_model/lib/src/dart_model.g.dart')
         .readAsStringSync();
-    if (actual != expected) {
-      fail('''
+    expect(actual, expected, reason: '''
 Output is not up to date. Please run
 
   dart tool/dart_model_generator/bin/main.dart
 
 in repo root.
 ''');
-    }
   });
 }
