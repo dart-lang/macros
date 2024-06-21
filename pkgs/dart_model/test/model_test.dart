@@ -46,6 +46,10 @@ void main() {
       }
     };
 
+    test('has extension methods', () {
+      expect(model.exampleGetter, 'exampleValue');
+    });
+
     test('maps to JSON', () {
       expect(model as Map, expected);
     });

@@ -14,6 +14,12 @@ import 'package:json_schema/json_schema.dart';
 /// They have a `fromJson` constructor that takes that JSON, and a no-name
 /// constructor that builds it.
 void run() {
+  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
+      generate(File('schemas/dart_model.schema.json').readAsStringSync()));
+}
+
+/// Generates and returns code for [schemaJson].
+String generate(String schemaJson) {
   final result = <String>[
     '// This file is generated. To make changes, '
         'edit schemas/dart_model.schema.json',
@@ -21,14 +27,11 @@ void run() {
         'dart tool/model_generator/bin/main.dart',
     '',
   ];
-  final schema = JsonSchema.create(
-      File('schemas/dart_model.schema.json').readAsStringSync());
+  final schema = JsonSchema.create(schemaJson);
   for (final def in schema.defs.entries) {
     result.add(_generateExtensionType(def.key, def.value));
   }
-
-  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
-      DartFormatter().formatSource(SourceCode(result.join('\n'))).text);
+  return DartFormatter().formatSource(SourceCode(result.join('\n'))).text;
 }
 
 String _generateExtensionType(String name, JsonSchema definition) {
@@ -41,6 +44,9 @@ String _generateExtensionType(String name, JsonSchema definition) {
     SchemaType.string => 'String string',
     _ => throw UnsupportedError('Schema type ${definition.type}.'),
   };
+  if (definition.description != null) {
+    result.writeln('/// ${definition.description}');
+  }
   result.writeln('extension type $name.fromJson($jsonType) {');
 
   // Generate the non-JSON constructor, which accepts an optional value for
@@ -80,6 +86,8 @@ String _generateExtensionType(String name, JsonSchema definition) {
   // extension types or casts collections as needed. The getters assume the
   // data is present and will throw if it's not.
   for (final property in propertyMetadatas) {
+    if (property.description != null)
+      result.writeln('/// ${property.description}');
     result.writeln(switch (property.type) {
       PropertyType.object =>
         // TODO(davidmorgan): use the extension type constructor instead of
@@ -111,7 +119,15 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
     if (ref.startsWith(r'#/$defs/')) {
       final schemaName = ref.substring(r'#/$defs/'.length);
       return PropertyMetadata(
-          name: name, type: PropertyType.object, elementTypeName: schemaName);
+          // The "description" comes from the ref'd schema. But, we want to
+          // describe the property, not the type of the property. It's possible
+          // to use `allOf` to specify a second schema with a second
+          // `description`, but for simplicity use `$comment` which is just
+          // ignored by standard tooling.
+          description: schema.schemaMap![r'$comment'] as String?,
+          name: name,
+          type: PropertyType.object,
+          elementTypeName: schemaName);
     } else {
       throw UnsupportedError('Unsupported: $name $schema');
     }
@@ -119,15 +135,18 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
 
   // Otherwise, it's a schema with a type.
   return switch (schema.type) {
-    SchemaType.boolean => PropertyMetadata(name: name, type: PropertyType.bool),
-    SchemaType.string =>
-      PropertyMetadata(name: name, type: PropertyType.string),
+    SchemaType.boolean => PropertyMetadata(
+        description: schema.description, name: name, type: PropertyType.bool),
+    SchemaType.string => PropertyMetadata(
+        description: schema.description, name: name, type: PropertyType.string),
     SchemaType.array => PropertyMetadata(
+        description: schema.description,
         name: name,
         type: PropertyType.list,
         // `items` should be a type specified with a `$ref`.
         elementTypeName: _readRefName(schema, 'items')),
     SchemaType.object => PropertyMetadata(
+        description: schema.description,
         name: name,
         type: PropertyType.map,
         // `additionalProperties` should be a type specified with a `$ref`.
@@ -153,10 +172,14 @@ enum PropertyType {
 
 /// Metadata about a property in an extension type.
 class PropertyMetadata {
+  String? description;
   String name;
   PropertyType type;
   String? elementTypeName;
 
   PropertyMetadata(
-      {required this.name, required this.type, this.elementTypeName});
+      {this.description,
+      required this.name,
+      required this.type,
+      this.elementTypeName});
 }
