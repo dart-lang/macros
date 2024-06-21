@@ -1,0 +1,9 @@
+# See https://github.com/google/mono_repo.dart for details on this file
+
+# The stage to put the "mono_repo validate" check in.
+self_validate: analyze_and_format
+
+# These stages are fast, and we don't need parallelism of jobs, so we run them
+# all in the same job.
+merge_stages:
+- analyze_and_format

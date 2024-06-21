@@ -6,3 +6,4 @@ dev_dependencies:
 publish_to: none
 workspace:
   - pkgs/dart_model
+  - tool/dart_model_generator
