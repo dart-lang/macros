@@ -14,14 +14,14 @@ void main() {
         File('../../schemas/dart_model.schema.json').readAsStringSync());
     final actual = File('../../pkgs/dart_model/lib/src/dart_model.g.dart')
         .readAsStringSync();
-    if (actual != expected) {
-      fail('''
+    // TODO: On windows we get carraige returns, which makes this fail
+    // without ignoring white space. In theory this shouldn't happen.
+    expect(actual, equalsIgnoringWhitespace(expected), reason: '''
 Output is not up to date. Please run
 
   dart tool/dart_model_generator/bin/main.dart
 
 in repo root.
 ''');
-    }
   });
 }
