@@ -1,0 +1,8 @@
+name: macros_workspace
+environment:
+  sdk: ^3.5.0-259.0.dev   # Must be ^3.5.0 or later for workspace to be allowed
+dev_dependencies:
+  dart_flutter_team_lints: ^3.1.0
+publish_to: none
+workspace:
+  - pkgs/dart_model
