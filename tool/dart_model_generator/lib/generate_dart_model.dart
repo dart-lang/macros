@@ -86,8 +86,9 @@ String _generateExtensionType(String name, JsonSchema definition) {
   // extension types or casts collections as needed. The getters assume the
   // data is present and will throw if it's not.
   for (final property in propertyMetadatas) {
-    if (property.description != null)
+    if (property.description != null) {
       result.writeln('/// ${property.description}');
+    }
     result.writeln(switch (property.type) {
       PropertyType.object =>
         // TODO(davidmorgan): use the extension type constructor instead of
