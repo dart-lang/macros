@@ -1,0 +1,5 @@
+analyzer:
+  errors:
+    undefined_getter: ignore
+  enable-experiment:
+    - macros

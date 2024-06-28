@@ -1,0 +1,9 @@
+#!/bin/bash --
+#
+# Updates ref to SDK packages across pubspects. Usage:
+#
+#   tool/set_sdk_version <git ref>
+
+REF=$1
+find pkgs -name pubspec.yaml \
+    | xargs sed -i -e "s#^      ref: .*#      ref: $REF#"
