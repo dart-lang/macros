@@ -1,0 +1,24 @@
+name: _analyzer_macros
+publish-to: none
+description: Macro support for the analyzer.
+resolution: workspace
+
+environment:
+  sdk: ^3.5.0-259.0.dev
+
+# TODO(davidmorgan): land analyzer changes and remove these before merging.
+dependency_overrides:
+  _fe_analyzer_shared:
+    path: ../../../dart-sdk/sdk/pkg/_fe_analyzer_shared
+  analyzer:
+    path: ../../../dart-sdk/sdk/pkg/analyzer
+  analyzer_utilities:
+    path: ../../../dart-sdk/sdk/pkg/analyzer_utilities
+  heap_snapshot:
+    path: ../../../dart-sdk/sdk/pkg/heap_snapshot
+  linter:
+    path: ../../../dart-sdk/sdk/pkg/linter
+  _macros:
+    path: ../../../dart-sdk/sdk/pkg/_macros
+  vm_service:
+    path: ../../../dart-sdk/sdk/pkg/vm_service
