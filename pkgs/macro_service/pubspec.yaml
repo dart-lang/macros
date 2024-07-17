@@ -1,0 +1,12 @@
+name: macro_service
+version: 0.0.1-wip
+description: >-
+  Macro communication with the macro host.
+repository: https://github.com/dart-lang/macros/tree/master/pkgs/macro_service
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0-48.0.dev
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.0.0

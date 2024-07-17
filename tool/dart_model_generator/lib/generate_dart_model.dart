@@ -8,7 +8,7 @@ import 'package:dart_style/dart_style.dart';
 import 'package:json_schema/json_schema.dart';
 
 /// Generates `pkgs/dart_model/lib/src/dart_model.g.dart` from
-/// `schemas/dart_model.schema.json`.
+/// `schemas/dart_model.schema.json`, and similarly for `macro_service`.
 ///
 /// Generated types are extension types with JSON maps as the underlying data.
 /// They have a `fromJson` constructor that takes that JSON, and a no-name
@@ -16,13 +16,14 @@ import 'package:json_schema/json_schema.dart';
 void run() {
   File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
       generate(File('schemas/dart_model.schema.json').readAsStringSync()));
+  File('pkgs/macro_service/lib/src/macro_service.g.dart').writeAsStringSync(
+      generate(File('schemas/macro_service.schema.json').readAsStringSync()));
 }
 
 /// Generates and returns code for [schemaJson].
 String generate(String schemaJson) {
   final result = <String>[
-    '// This file is generated. To make changes, '
-        'edit schemas/dart_model.schema.json',
+    '// This file is generated. To make changes edit schemas/*.schema.json',
     '// then run from the repo root: '
         'dart tool/model_generator/bin/main.dart',
     '',
@@ -57,25 +58,30 @@ String _generateExtensionType(String name, JsonSchema definition) {
   ];
   switch (definition.type) {
     case SchemaType.object:
-      result.writeln('  $name({');
-      for (final property in propertyMetadatas) {
-        result.writeln(switch (property.type) {
-          PropertyType.object =>
-            '${property.elementTypeName}? ${property.name},',
-          PropertyType.bool => 'bool? ${property.name},',
-          PropertyType.string => 'String? ${property.name},',
-          PropertyType.list =>
-            'List<${property.elementTypeName}>? ${property.name},',
-          PropertyType.map =>
-            'Map<String, ${property.elementTypeName}>? ${property.name},',
-        });
+      if (propertyMetadatas.isEmpty) {
+        result.writeln('  $name() : this.fromJson({});');
+      } else {
+        result.writeln('  $name({');
+        for (final property in propertyMetadatas) {
+          result.writeln(switch (property.type) {
+            PropertyType.object =>
+              '${property.elementTypeName}? ${property.name},',
+            PropertyType.bool => 'bool? ${property.name},',
+            PropertyType.string => 'String? ${property.name},',
+            PropertyType.integer => 'int? ${property.name},',
+            PropertyType.list =>
+              'List<${property.elementTypeName}>? ${property.name},',
+            PropertyType.map =>
+              'Map<String, ${property.elementTypeName}>? ${property.name},',
+          });
+        }
+        result.writeln('}) : this.fromJson({');
+        for (final property in propertyMetadatas) {
+          result.writeln('if (${property.name} != null) '
+              "'${property.name}': ${property.name},");
+        }
+        result.writeln('});');
       }
-      result.writeln('}) : this.fromJson({');
-      for (final property in propertyMetadatas) {
-        result.writeln('if (${property.name} != null) '
-            "'${property.name}': ${property.name},");
-      }
-      result.writeln('});');
     case SchemaType.string:
       result.writeln('$name(String string) : this.fromJson(string);');
     default:
@@ -100,6 +106,8 @@ String _generateExtensionType(String name, JsonSchema definition) {
           'node[\'${property.name}\'] as bool;',
       PropertyType.string => 'String get ${property.name} => '
           'node[\'${property.name}\'] as String;',
+      PropertyType.integer => 'int get ${property.name} => '
+          'node[\'${property.name}\'] as int;',
       PropertyType.list =>
         'List<${property.elementTypeName}> get ${property.name} => '
             '(node[\'${property.name}\'] as List).cast();',
@@ -140,6 +148,10 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
         description: schema.description, name: name, type: PropertyType.bool),
     SchemaType.string => PropertyMetadata(
         description: schema.description, name: name, type: PropertyType.string),
+    SchemaType.integer => PropertyMetadata(
+        description: schema.description,
+        name: name,
+        type: PropertyType.integer),
     SchemaType.array => PropertyMetadata(
         description: schema.description,
         name: name,
@@ -167,6 +179,7 @@ enum PropertyType {
   object,
   bool,
   string,
+  integer,
   list,
   map,
 }

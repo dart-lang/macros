@@ -1,8 +1,8 @@
-name: _test_macros
+name: _macro_builder
 publish-to: none
 description: >-
-  Some test macros.
-repository: https://github.com/dart-lang/macros/tree/master/pkgs/_test_macros
+  Builds macros.
+repository: https://github.com/dart-lang/macros/tree/master/pkgs/_macro_builder
 resolution: workspace
 
 environment:
@@ -10,9 +10,6 @@ environment:
 
 dependencies:
   dart_model: any
-  macro: any
-  macro_service: any
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
-  test: ^1.25.0

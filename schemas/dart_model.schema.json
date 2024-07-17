@@ -5,6 +5,12 @@
     {"$ref": "#/$defs/Model"}
   ],
   "$defs": {
+    "Augmentation": {
+      "description": "An augmentation to Dart code. TODO(davidmorgan): this is a placeholder, add some data.",
+      "type": "object",
+      "properties": {
+      }
+    },
     "MetadataAnnotation": {
       "type": "object",
       "description": "A metadata annotation.",

@@ -1,5 +1,10 @@
-// This file is generated. To make changes, edit schemas/dart_model.schema.json
+// This file is generated. To make changes edit schemas/*.schema.json
 // then run from the repo root: dart tool/model_generator/bin/main.dart
+
+/// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder, add some data.
+extension type Augmentation.fromJson(Map<String, Object?> node) {
+  Augmentation() : this.fromJson({});
+}
 
 /// A metadata annotation.
 extension type MetadataAnnotation.fromJson(Map<String, Object?> node) {
