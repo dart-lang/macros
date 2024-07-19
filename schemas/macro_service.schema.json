@@ -1,5 +1,4 @@
 {
-  "$id": "https://github.com/dart-lang/macros/blob/main/schemas/macro_service.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "oneOf": [
     {"$ref": "#/$defs/AugmentRequest"},
@@ -18,7 +17,14 @@
     },
     "AugmentResponse": {
       "type": "object",
-      "description": "Macro's response to an [AugmentRequest]: the resulting augmentations."
+      "description": "Macro's response to an [AugmentRequest]: the resulting augmentations.",
+      "properties": {
+        "augmentations": {
+          "description": "The augmentations.",
+          "type": "array",
+          "items": {"$ref": "file:dart_model.schema.json#/$defs/Augmentation"}
+        }
+      }
     },
     "HostEndpoint": {
       "type": "object",

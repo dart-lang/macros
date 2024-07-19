@@ -12,7 +12,10 @@ void main() {
   for (final package in ['dart_model', 'macro_service']) {
     test('$package output is up to date', () {
       final expected = dart_model_generator.generate(
-          File('../../schemas/$package.schema.json').readAsStringSync());
+          File('../../schemas/$package.schema.json').readAsStringSync(),
+          importDartModel: package == 'macro_service',
+          dartModelJson:
+              File('../../schemas/dart_model.schema.json').readAsStringSync());
       final actual = File('../../pkgs/$package/lib/src/$package.g.dart')
           .readAsStringSync();
       // TODO: On windows we get carriage returns, which makes this fail

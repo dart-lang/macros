@@ -8,5 +8,8 @@ resolution: workspace
 environment:
   sdk: ^3.6.0-48.0.dev
 
+dependencies:
+  dart_model: any
+
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
