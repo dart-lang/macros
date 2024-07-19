@@ -21,6 +21,11 @@ void main() {
 
       expect(host.isMacro(packageConfig, macroName), true);
       expect(await host.queryMacroPhases(packageConfig, macroName), {2});
+
+      expect(
+          await host.augment(macroName, AugmentRequest(phase: 2)),
+          AugmentResponse(
+              augmentations: [Augmentation(code: 'int get x => 3;')]));
     });
   });
 }

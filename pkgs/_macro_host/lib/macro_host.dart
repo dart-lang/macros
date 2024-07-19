@@ -24,6 +24,10 @@ class MacroHost implements MacroService {
   // lifecycle state.
   Completer<Set<int>>? _macroPhases;
 
+  // TODO(davidmorgan): actually match up requests and responses instead of
+  // this hack.
+  Completer<AugmentResponse>? _responseCompleter;
+
   MacroHost._(this.macroServer, this.services) {
     services.services.insert(0, this);
   }
@@ -61,9 +65,31 @@ class MacroHost implements MacroService {
     return _macroPhases!.future;
   }
 
+  /// Sends [request] to the macro with [name].
+  Future<AugmentResponse> augment(
+      QualifiedName name, AugmentRequest request) async {
+    // TODO(davidmorgan): this just assumes the macro is running, actually
+    // track macro lifecycle.
+    macroServer.sendToMacro(name, request);
+    if (_responseCompleter != null) {
+      throw StateError('request is already pending');
+    }
+    _responseCompleter = Completer<AugmentResponse>();
+    return await _responseCompleter!.future;
+  }
+
   /// Handle requests that are for the host.
   @override
   Future<Object?> handle(Object request) async {
+    // TODO(davidmorgan): differentiate requests and responses, rather than
+    // handling as requests.
+    if (_responseCompleter != null) {
+      final augmentResponse =
+          AugmentResponse.fromJson(request as Map<String, Object?>);
+      _responseCompleter!.complete(augmentResponse);
+      _responseCompleter = null;
+      return Object();
+    }
     // TODO(davidmorgan): don't assume the type. Return `null` for types
     // that should be passed through to the service that was passed in.
     final macroStartedRequest =
@@ -72,8 +98,6 @@ class MacroHost implements MacroService {
         .complete(macroStartedRequest.macroDescription.runsInPhases.toSet());
     return MacroStartedResponse();
   }
-
-  // TODO(davidmorgan): add method here for running macro phases.
 }
 
 // TODO(davidmorgan): this is used to handle some requests in the host while

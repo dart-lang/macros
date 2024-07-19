@@ -2,10 +2,13 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
 import 'package:json_schema/json_schema.dart';
+// ignore: implementation_imports
+import 'package:json_schema/src/json_schema/models/ref_provider.dart';
 
 /// Generates `pkgs/dart_model/lib/src/dart_model.g.dart` from
 /// `schemas/dart_model.schema.json`, and similarly for `macro_service`.
@@ -17,18 +20,23 @@ void run() {
   File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
       generate(File('schemas/dart_model.schema.json').readAsStringSync()));
   File('pkgs/macro_service/lib/src/macro_service.g.dart').writeAsStringSync(
-      generate(File('schemas/macro_service.schema.json').readAsStringSync()));
+      generate(File('schemas/macro_service.schema.json').readAsStringSync(),
+          importDartModel: true));
 }
 
 /// Generates and returns code for [schemaJson].
-String generate(String schemaJson) {
+String generate(String schemaJson,
+    {bool importDartModel = false, String? dartModelJson}) {
   final result = <String>[
     '// This file is generated. To make changes edit schemas/*.schema.json',
     '// then run from the repo root: '
         'dart tool/model_generator/bin/main.dart',
     '',
+    if (importDartModel) "import 'package:dart_model/dart_model.dart';",
   ];
-  final schema = JsonSchema.create(schemaJson);
+  final schema = JsonSchema.create(schemaJson,
+      refProvider: LocalRefProvider(dartModelJson ??
+          File('schemas/dart_model.schema.json').readAsStringSync()));
   for (final def in schema.defs.entries) {
     result.add(_generateExtensionType(def.key, def.value));
   }
@@ -174,7 +182,7 @@ String _readRefNameOrType(JsonSchema schema, String key) {
   final typeSchema = schema.schemaMap![key] as Map;
   final ref = typeSchema[r'$ref'] as String?;
   if (ref != null) {
-    return ref.substring(r'#/$defs/'.length);
+    return ref.substring(ref.indexOf(r'#/$defs/') + r'#/$defs/'.length);
   } else {
     final type = typeSchema['type'] as String;
     switch (type) {
@@ -208,4 +216,27 @@ class PropertyMetadata {
       required this.name,
       required this.type,
       this.elementTypeName});
+}
+
+/// Loads referenced schemas.
+///
+/// No need to connect to servers like the default implementation, just return
+/// the one file we know we need.
+class LocalRefProvider implements RefProvider<SyncJsonProvider> {
+  final String dartModelJson;
+
+  LocalRefProvider(this.dartModelJson);
+
+  @override
+  bool get isSync => true;
+
+  @override
+  SyncJsonProvider get provide => (String path) {
+        if (path != 'file:///dart_model.schema.json') {
+          throw UnsupportedError(
+              'This provider only loads file:///dart_model.schema.json!'
+              ' Got: $path');
+        }
+        return json.decode(dartModelJson) as Map<String, Object?>;
+      };
 }
