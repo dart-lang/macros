@@ -2,14 +2,11 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'macro_service.g.dart';
-
-/// Macro->host RPCs as methods.
-// TODO(davidmorgan): generate this.
-abstract interface class MacroHostService {}
-
-/// Host->macro RPCs as methods.
-// TODO(davidmorgan): generate this.
-abstract interface class MacroClientService {
-  Future<AugmentResponse> augment(AugmentRequest request);
+/// Service interface.
+abstract interface class MacroService {
+  /// Handles [request].
+  ///
+  /// Returns `null` if the request is of a type not handled by this service
+  /// instance.
+  Future<Object?> handle(Object request);
 }

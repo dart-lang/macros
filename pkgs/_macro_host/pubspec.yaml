@@ -12,7 +12,10 @@ dependencies:
   _macro_builder: any
   _macro_runner: any
   _macro_server: any
+  dart_model: any
   macro_service: any
 
 dev_dependencies:
+  _test_macros: any
   dart_flutter_team_lints: ^3.0.0
+  test: ^1.25.0

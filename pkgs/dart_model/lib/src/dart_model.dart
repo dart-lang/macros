@@ -6,7 +6,7 @@ import 'dart_model.g.dart';
 
 export 'dart_model.g.dart';
 
-// TODO(davidmorgan): remove example when we have an actual extension method.
-extension ModelExtension on Model {
-  String get exampleGetter => 'exampleValue';
+extension QualifiedNameExtension on QualifiedName {
+  String get uri => string.substring(0, string.indexOf('#'));
+  String get name => string.substring(string.indexOf('#') + 1);
 }

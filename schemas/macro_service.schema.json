@@ -42,6 +42,17 @@
           }
         }
       }
+    },
+    "MacroStartedRequest": {
+      "type": "object",
+      "description": "Informs the host that a macro has started.",
+      "properties": {
+        "macroDescription": {"$ref": "#/$defs/MacroDescription"}
+      }
+    },
+    "MacroStartedResponse": {
+      "type": "object",
+      "description": "Host's response to a [MacroStartedRequest]."
     }
   }
 }
