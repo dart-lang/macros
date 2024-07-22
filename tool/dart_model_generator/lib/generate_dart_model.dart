@@ -156,22 +156,34 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
         description: schema.description,
         name: name,
         type: PropertyType.list,
-        // `items` should be a type specified with a `$ref`.
-        elementTypeName: _readRefName(schema, 'items')),
+        elementTypeName: _readRefNameOrType(schema, 'items')),
     SchemaType.object => PropertyMetadata(
         description: schema.description,
         name: name,
         type: PropertyType.map,
         // `additionalProperties` should be a type specified with a `$ref`.
-        elementTypeName: _readRefName(schema, 'additionalProperties')),
+        elementTypeName: _readRefNameOrType(schema, 'additionalProperties')),
     _ => throw UnsupportedError('Unsupported schema type: ${schema.type}'),
   };
 }
 
 /// Reads the type name of a `$ref` to a `$def`.
-String _readRefName(JsonSchema schema, String key) {
-  final ref = (schema.schemaMap![key] as Map)[r'$ref'] as String;
-  return ref.substring(r'#/$defs/'.length);
+///
+/// If it's not there, falls back to `type` mapped to a Dart type name.
+String _readRefNameOrType(JsonSchema schema, String key) {
+  final typeSchema = schema.schemaMap![key] as Map;
+  final ref = typeSchema[r'$ref'] as String?;
+  if (ref != null) {
+    return ref.substring(r'#/$defs/'.length);
+  } else {
+    final type = typeSchema['type'] as String;
+    switch (type) {
+      case 'integer':
+        return 'int';
+      default:
+        throw UnsupportedError(type);
+    }
+  }
 }
 
 /// The Dart types used in extension types to model JSON types.

@@ -34,17 +34,12 @@
       "type": "object",
       "description": "Information about a macro that the macro provides to the host.",
       "properties": {
-        "runsInPhaseOne": {
-          "description": "Whether the macro runs in phase one to produce types.",
-          "type": "boolean"
-        },
-        "runsInPhaseTwo": {
-          "description": "Whether the macro runs in phase two to produce declarations.",
-          "type": "boolean"
-        },
-        "runsInPhaseThree": {
-          "description": "Whether the macro runs in phase three to produce definitions.",
-          "type": "boolean"
+        "runsInPhases": {
+          "description": "Phases that the macro runs in: 1, 2 and/or 3.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     }

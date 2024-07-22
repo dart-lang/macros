@@ -33,21 +33,11 @@ extension type HostEndpoint.fromJson(Map<String, Object?> node) {
 /// Information about a macro that the macro provides to the host.
 extension type MacroDescription.fromJson(Map<String, Object?> node) {
   MacroDescription({
-    bool? runsInPhaseOne,
-    bool? runsInPhaseTwo,
-    bool? runsInPhaseThree,
+    List<int>? runsInPhases,
   }) : this.fromJson({
-          if (runsInPhaseOne != null) 'runsInPhaseOne': runsInPhaseOne,
-          if (runsInPhaseTwo != null) 'runsInPhaseTwo': runsInPhaseTwo,
-          if (runsInPhaseThree != null) 'runsInPhaseThree': runsInPhaseThree,
+          if (runsInPhases != null) 'runsInPhases': runsInPhases,
         });
 
-  /// Whether the macro runs in phase one to produce types.
-  bool get runsInPhaseOne => node['runsInPhaseOne'] as bool;
-
-  /// Whether the macro runs in phase two to produce declarations.
-  bool get runsInPhaseTwo => node['runsInPhaseTwo'] as bool;
-
-  /// Whether the macro runs in phase three to produce definitions.
-  bool get runsInPhaseThree => node['runsInPhaseThree'] as bool;
+  /// Phases that the macro runs in: 1, 2 and/or 3.
+  List<int> get runsInPhases => (node['runsInPhases'] as List).cast();
 }

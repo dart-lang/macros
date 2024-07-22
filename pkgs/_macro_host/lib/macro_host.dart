@@ -13,11 +13,12 @@ class MacroHost {
   final MacroRunner macroRunner = MacroRunner();
   late final HostEndpoint hostEndpoint;
 
-  MacroHost({required MacroHostService service})
-      : macroServer = MacroServer(service: service);
+  MacroHost._(this.macroServer, this.hostEndpoint);
 
-  Future<void> serve() async {
-    hostEndpoint = await macroServer.serve();
+  static Future<MacroHost> serve({required MacroHostService service}) async {
+    final server = MacroServer(service: service);
+    final endpoint = await server.serve();
+    return MacroHost._(server, endpoint);
   }
 
   // TODO(davidmorgan): methods for integration with analyzer+CFE go here:

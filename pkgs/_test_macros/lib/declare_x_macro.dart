@@ -12,9 +12,7 @@ class DeclareX {
 // TODO(davidmorgan): this is a placeholder; make it do something, test it.
 class DeclareXImplementation implements Macro {
   @override
-  MacroDescription get description => MacroDescription(
-        runsInPhaseThree: true,
-      );
+  MacroDescription get description => MacroDescription(runsInPhases: [3]);
 
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
