@@ -1,0 +1,47 @@
+{
+  "$id": "https://github.com/dart-lang/macros/blob/main/schemas/macro_service.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {"$ref": "#/$defs/AugmentRequest"},
+    {"$ref": "#/$defs/AugmentResponse"}
+  ],
+  "$defs": {
+    "AugmentRequest": {
+      "type": "object",
+      "description": "A request to a macro to augment some code.",
+      "properties": {
+        "phase": {
+          "description": "Which phase to run: 1, 2 or 3.",
+          "type": "integer"
+        }
+      }
+    },
+    "AugmentResponse": {
+      "type": "object",
+      "description": "Macro's response to an [AugmentRequest]: the resulting augmentations."
+    },
+    "HostEndpoint": {
+      "type": "object",
+      "description": "A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?",
+      "properties": {
+        "port": {
+          "description": "TCP port to connect to.",
+          "type": "integer"
+        }
+      }
+    },
+    "MacroDescription": {
+      "type": "object",
+      "description": "Information about a macro that the macro provides to the host.",
+      "properties": {
+        "runsInPhases": {
+          "description": "Phases that the macro runs in: 1, 2 and/or 3.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

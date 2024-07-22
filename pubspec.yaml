@@ -9,8 +9,15 @@ workspace:
   - pkgs/_analyzer_macros/test/package_under_test
   - pkgs/_cfe_macros
   - pkgs/_cfe_macros/test/package_under_test
+  - pkgs/_macro_builder
+  - pkgs/_macro_client
+  - pkgs/_macro_host
+  - pkgs/_macro_runner
+  - pkgs/_macro_server
   - pkgs/_test_macros
   - pkgs/dart_model
+  - pkgs/macro
+  - pkgs/macro_service
   - tool/dart_model_generator
 
 # Update by running: tool/set_sdk_version <git ref>

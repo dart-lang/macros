@@ -9,19 +9,21 @@ import 'package:generate_dart_model/generate_dart_model.dart'
 import 'package:test/test.dart';
 
 void main() {
-  test('output is up to date', () {
-    final expected = dart_model_generator.generate(
-        File('../../schemas/dart_model.schema.json').readAsStringSync());
-    final actual = File('../../pkgs/dart_model/lib/src/dart_model.g.dart')
-        .readAsStringSync();
-    // TODO: On windows we get carraige returns, which makes this fail
-    // without ignoring white space. In theory this shouldn't happen.
-    expect(actual, equalsIgnoringWhitespace(expected), reason: '''
+  for (final package in ['dart_model', 'macro_service']) {
+    test('$package output is up to date', () {
+      final expected = dart_model_generator.generate(
+          File('../../schemas/$package.schema.json').readAsStringSync());
+      final actual = File('../../pkgs/$package/lib/src/$package.g.dart')
+          .readAsStringSync();
+      // TODO: On windows we get carriage returns, which makes this fail
+      // without ignoring white space. In theory this shouldn't happen.
+      expect(actual, equalsIgnoringWhitespace(expected), reason: '''
 Output is not up to date. Please run
 
   dart tool/dart_model_generator/bin/main.dart
 
 in repo root.
 ''');
-  });
+    });
+  }
 }
