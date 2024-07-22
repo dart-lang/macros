@@ -1,14 +1,13 @@
-name: generate_dart_model
+name: _analyzer_macros
 publish-to: none
+description: Macro support for the analyzer.
 resolution: workspace
+
 environment:
   sdk: ^3.6.0-48.0.dev
 
-dependencies:
-  dart_model: any
-  dart_style: ^2.3.6
-  json_schema: ^5.1.7
-
 dev_dependencies:
+  analyzer: any
   dart_flutter_team_lints: ^3.0.0
-  test: ^1.25.7
+  macros: any
+  test: ^1.25.0
