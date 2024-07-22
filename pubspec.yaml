@@ -12,3 +12,116 @@ workspace:
   - pkgs/_test_macros
   - pkgs/dart_model
   - tool/dart_model_generator
+
+# Update by running: tool/set_sdk_version <git ref>
+dependency_overrides:
+  _fe_analyzer_shared:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/_fe_analyzer_shared
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  _js_interop_checks:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/_js_interop_checks
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  _macros:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/_macros
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  analyzer:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/analyzer
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  analyzer_utilities:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/analyzer_utilities
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  build_integration:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/build_integration
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  compiler:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/compiler
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  dart2js_info:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/dart2js_info
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  dart2wasm:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/dart2wasm
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  dev_compiler:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/dev_compiler
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  front_end:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/front_end
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  frontend_server:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/frontend_server
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  heap_snapshot:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/heap_snapshot
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  js_ast:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/js_ast
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  js_runtime:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/js_runtime
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  js_shared:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/js_shared
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  kernel:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/kernel
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  linter:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/linter
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  mmap:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/mmap
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  vm:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/vm
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  vm_service:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/vm_service
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92
+  wasm_builder:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      path: pkg/wasm_builder
+      ref: 9664f0da3547ccd92cf56d2bf362e333edfefd92

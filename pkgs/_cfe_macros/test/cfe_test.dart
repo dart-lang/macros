@@ -3,8 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:front_end/src/macros/macro_injected_impl.dart';
+import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
 import 'package:frontend_server/compute_kernel.dart';
 import 'package:macros/macros.dart';
 import 'package:macros/src/executor.dart';
@@ -33,14 +34,14 @@ void main() {
       // Inject test macro implementation.
       packageConfigs = TestMacroPackageConfigs();
       runner = TestMacroRunner();
-      macroImplementation = MacroImplementation(
+      injected.macroImplementation = injected.MacroImplementation(
         packageConfigs: packageConfigs,
         macroRunner: runner,
       );
     });
 
     test('discovers macros, runs them, applies augmentations', () async {
-      final packagesPath = File('../../.dart_tool/package_config.json');
+      final packagesUri = Isolate.packageConfigSync;
       final sourceFile =
           File('test/package_under_test/lib/apply_declare_x.dart');
       final outputFile = File('${tempDir.path}/out.dill');
@@ -53,7 +54,8 @@ void main() {
         '--dart-sdk-summary=${productPlatformDill.uri}',
         '--output=${outputFile.path}',
         '--source=${sourceFile.uri}',
-        '--packages-file=${packagesPath.uri}',
+        '--packages-file=$packagesUri',
+        // For augmentations.
         '--enable-experiment=macros',
       ]);
 
@@ -67,7 +69,7 @@ void main() {
   });
 }
 
-class TestMacroPackageConfigs implements MacroPackageConfigs {
+class TestMacroPackageConfigs implements injected.MacroPackageConfigs {
   bool macroWasFound = false;
 
   @override
@@ -82,17 +84,17 @@ class TestMacroPackageConfigs implements MacroPackageConfigs {
   }
 }
 
-class TestMacroRunner implements MacroRunner {
+class TestMacroRunner implements injected.MacroRunner {
   bool macroWasRun = false;
 
   @override
-  RunningMacro run(Uri uri, String name) {
+  injected.RunningMacro run(Uri uri, String name) {
     macroWasRun = true;
     return TestRunningMacro();
   }
 }
 
-class TestRunningMacro implements RunningMacro {
+class TestRunningMacro implements injected.RunningMacro {
   @override
   Future<MacroExecutionResult> executeDeclarationsPhase(MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
@@ -143,7 +145,7 @@ class TestMacroExecutionResult implements MacroExecutionResult {
   Iterable<String> get newTypeNames => [];
 
   @override
-  void serialize(Object serializer) {}
+  void serialize(Object serializer) => throw UnimplementedError();
 
   @override
   Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;

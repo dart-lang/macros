@@ -4,12 +4,10 @@
 
 import 'dart:io';
 
-import 'package:_macros/src/executor.dart';
-import 'package:_macros/src/executor/serialization.dart';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/src/summary2/macro_injected_impl.dart';
+import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
 import 'package:macros/macros.dart';
 import 'package:macros/src/executor.dart';
 import 'package:test/test.dart';
@@ -31,8 +29,8 @@ void main() {
       // Inject test macro implementation.
       packageConfigs = TestMacroPackageConfigs();
       runner = TestMacroRunner();
-      macroImplementation =
-          MacroImplementation(packageConfigs: packageConfigs, runner: runner);
+      injected.macroImplementation = injected.MacroImplementation(
+          packageConfigs: packageConfigs, runner: runner);
     });
 
     test('discovers macros, runs them, applies augmentations', () async {
@@ -61,7 +59,7 @@ void main() {
   });
 }
 
-class TestMacroPackageConfigs implements MacroPackageConfigs {
+class TestMacroPackageConfigs implements injected.MacroPackageConfigs {
   bool macroWasFound = false;
 
   @override
@@ -76,17 +74,17 @@ class TestMacroPackageConfigs implements MacroPackageConfigs {
   }
 }
 
-class TestMacroRunner implements MacroRunner {
+class TestMacroRunner implements injected.MacroRunner {
   bool macroWasRun = false;
 
   @override
-  RunningMacro run(Uri uri, String name) {
+  injected.RunningMacro run(Uri uri, String name) {
     macroWasRun = true;
     return TestRunningMacro();
   }
 }
 
-class TestRunningMacro implements RunningMacro {
+class TestRunningMacro implements injected.RunningMacro {
   @override
   Future<MacroExecutionResult> executeDeclarationsPhase(MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
@@ -137,7 +135,7 @@ class TestMacroExecutionResult implements MacroExecutionResult {
   Iterable<String> get newTypeNames => [];
 
   @override
-  void serialize(Serializer serializer) {}
+  void serialize(Object serializer) => throw UnimplementedError();
 
   @override
   Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;
