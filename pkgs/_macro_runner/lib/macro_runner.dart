@@ -15,6 +15,11 @@ class MacroRunner {
   /// Starts [macroBundle] connected to [endpoint].
   void start(
       {required BuiltMacroBundle macroBundle, required HostEndpoint endpoint}) {
-    Process.run(macroBundle.executablePath, [json.encode(endpoint)]);
+    Process.run(macroBundle.executablePath, [json.encode(endpoint)])
+        .then((result) {
+      if (result.exitCode != 0) {
+        print('Macro process exited with error: ${result.stderr}');
+      }
+    });
   }
 }

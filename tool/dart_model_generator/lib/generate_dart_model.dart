@@ -38,7 +38,11 @@ String generate(String schemaJson,
       refProvider: LocalRefProvider(dartModelJson ??
           File('schemas/dart_model.schema.json').readAsStringSync()));
   for (final def in schema.defs.entries) {
-    result.add(_generateExtensionType(def.key, def.value));
+    if (def.value.oneOf.isNotEmpty) {
+      result.add(_generateUnion(def.key, def.value.oneOf));
+    } else {
+      result.add(_generateExtensionType(def.key, def.value));
+    }
   }
   return DartFormatter().formatSource(SourceCode(result.join('\n'))).text;
 }
@@ -128,13 +132,70 @@ String _generateExtensionType(String name, JsonSchema definition) {
   return result.toString();
 }
 
+/// Generates a type called [name] that is a union of the specified [oneOf]
+/// types, which must all be `$ref`s to class definitions.
+///
+/// An enum is generated next to it called `${name}Type` with one value for
+/// each possible class, plus `unknown`.
+///
+/// The union type has a `type` getter that returns an instance of this enum,
+/// and `asFoo` getters that "cast" to each type.
+///
+/// On the wire the union type is: `{"type": <name>, "value": <value>}`
+String _generateUnion(String name, List<JsonSchema> oneOf) {
+  final result = StringBuffer();
+  final types =
+      oneOf.map((s) => _refName(s.schemaMap![r'$ref'] as String)).toList();
+
+  // TODO(davidmorgan): add description(s).
+  result.writeln('enum ${name}Type {');
+  result
+      .writeln(['unknown'].followedBy(types.map(_firstToLowerCase)).join(', '));
+  result.writeln(';}');
+
+  // TODO(davidmorgan): add description.
+  result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
+  for (final type in types) {
+    final lowerType = _firstToLowerCase(type);
+    result.writeln('static $name $lowerType($type $lowerType) =>');
+    result.writeln('$name.fromJson({');
+    result.writeln("'type': '$type',");
+    result.writeln("'value': $lowerType.node});");
+  }
+
+  result.writeln('${name}Type get type {');
+  result.writeln("switch(node['type'] as String) {");
+  for (final type in types) {
+    final lowerType = _firstToLowerCase(type);
+    result.writeln("case '$type': return ${name}Type.$lowerType;");
+  }
+  result.writeln('default: return ${name}Type.unknown;');
+  result.writeln('}');
+  result.writeln('}');
+
+  for (final type in types) {
+    result.writeln('$type get as$type {');
+    result.writeln("if (node['type'] != '$type') "
+        "{ throw StateError('Not a $type.'); }");
+    result.writeln(
+        "return $type.fromJson(node['value'] as Map<String, Object?>);");
+    result.writeln('}');
+  }
+  result.writeln('}');
+
+  return result.toString();
+}
+
+String _firstToLowerCase(String string) =>
+    string.substring(0, 1).toLowerCase() + string.substring(1);
+
 /// Gets information about an extension type property from [schema].
 PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
   // Check for a `$ref` to another extension type defined under `$defs`.
   if (schema.schemaMap!.containsKey(r'$ref')) {
     final ref = schema.schemaMap![r'$ref'] as String;
-    if (ref.startsWith(r'#/$defs/')) {
-      final schemaName = ref.substring(r'#/$defs/'.length);
+    if (ref.contains(r'#/$defs/')) {
+      final schemaName = _refName(ref);
       return PropertyMetadata(
           // The "description" comes from the ref'd schema. But, we want to
           // describe the property, not the type of the property. It's possible
@@ -182,7 +243,7 @@ String _readRefNameOrType(JsonSchema schema, String key) {
   final typeSchema = schema.schemaMap![key] as Map;
   final ref = typeSchema[r'$ref'] as String?;
   if (ref != null) {
-    return ref.substring(ref.indexOf(r'#/$defs/') + r'#/$defs/'.length);
+    return _refName(ref);
   } else {
     final type = typeSchema['type'] as String;
     switch (type) {
@@ -193,6 +254,10 @@ String _readRefNameOrType(JsonSchema schema, String key) {
     }
   }
 }
+
+/// Returns the type name from a reference to a type under `$defs`.
+String _refName(String ref) =>
+    ref.substring(ref.indexOf(r'#/$defs/') + r'#/$defs/'.length);
 
 /// The Dart types used in extension types to model JSON types.
 enum PropertyType {

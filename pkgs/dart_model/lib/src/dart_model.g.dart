@@ -49,6 +49,18 @@ extension type Interface.fromJson(Map<String, Object?> node) {
   Properties get properties => node['properties'] as Properties;
 }
 
+/// Library.
+extension type Library.fromJson(Map<String, Object?> node) {
+  Library({
+    Map<String, Interface>? scopes,
+  }) : this.fromJson({
+          if (scopes != null) 'scopes': scopes,
+        });
+
+  /// Scopes by name.
+  Map<String, Interface> get scopes => (node['scopes'] as Map).cast();
+}
+
 /// Member of a scope.
 extension type Member.fromJson(Map<String, Object?> node) {
   Member({
@@ -110,19 +122,12 @@ extension type Properties.fromJson(Map<String, Object?> node) {
   bool get isStatic => node['isStatic'] as bool;
 }
 
-/// Library.
-extension type Library.fromJson(Map<String, Object?> node) {
-  Library({
-    Map<String, Interface>? scopes,
-  }) : this.fromJson({
-          if (scopes != null) 'scopes': scopes,
-        });
-
-  /// Scopes by name.
-  Map<String, Interface> get scopes => (node['scopes'] as Map).cast();
-}
-
 /// A URI combined with a name.
 extension type QualifiedName.fromJson(String string) {
   QualifiedName(String string) : this.fromJson(string);
+}
+
+/// Query about a corpus of Dart source code. TODO(davidmorgan): this is a placeholder.
+extension type Query.fromJson(Map<String, Object?> node) {
+  Query() : this.fromJson({});
 }

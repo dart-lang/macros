@@ -11,12 +11,15 @@ import 'package:macro_service/macro_service.dart';
 
 /// Serves a [MacroService].
 class MacroServer {
-  final MacroService service;
+  final HostService service;
   final HostEndpoint endpoint;
   final ServerSocket serverSocket;
 
   // TODO(davidmorgan): track which socket corresponds to which macro(s).
   Socket? _lastSocket;
+
+  // TODO(davidmorgan): properly track requests and responses.
+  Completer<Response>? _responseCompleter;
 
   MacroServer._(this.service, this.endpoint, this.serverSocket) {
     serverSocket.forEach(_handleConnection);
@@ -25,14 +28,16 @@ class MacroServer {
   /// Serves [service].
   ///
   /// TODO(davidmorgan): other transports besides TCP/IP.
-  static Future<MacroServer> serve({required MacroService service}) async {
+  static Future<MacroServer> serve({required HostService service}) async {
     final serverSocket = await ServerSocket.bind('localhost', 0);
     return MacroServer._(
         service, HostEndpoint(port: serverSocket.port), serverSocket);
   }
-
-  void sendToMacro(QualifiedName name, AugmentRequest request) async {
+  
+  Future<Response> sendToMacro(QualifiedName name, HostRequest request) async {
+    _responseCompleter = Completer<Response>();
     _lastSocket!.writeln(json.encode(request.node));
+    return _responseCompleter!.future;
   }
 
   void _handleConnection(Socket socket) {
@@ -44,11 +49,18 @@ class MacroServer {
         .transform(const Utf8Decoder())
         .transform(const LineSplitter())
         .forEach((line) {
-      // TODO(davidmorgan): this only works because there is just one request
-      // type! Add the request type on the wire to differentiate.
-      final message = MacroStartedRequest.fromJson(
-          json.decode(line) as Map<String, Object?>);
-      service.handle(message as Object);
+      final jsonData = json.decode(line) as Map<String, Object?>;
+      final request = MacroRequest.fromJson(jsonData);
+      if (request.type != MacroRequestType.unknown) {
+        service
+            .handle(request)
+            .then((response) => socket.writeln(json.encode(response!.node)));
+      }
+      final response = Response.fromJson(jsonData);
+      if (response.type != ResponseType.unknown) {
+        _responseCompleter!.complete(response);
+        _responseCompleter = null;
+      }
     });
   }
 }

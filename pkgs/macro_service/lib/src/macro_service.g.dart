@@ -40,6 +40,32 @@ extension type HostEndpoint.fromJson(Map<String, Object?> node) {
   int get port => node['port'] as int;
 }
 
+enum HostRequestType {
+  unknown,
+  augmentRequest;
+}
+
+extension type HostRequest.fromJson(Map<String, Object?> node) {
+  static HostRequest augmentRequest(AugmentRequest augmentRequest) =>
+      HostRequest.fromJson(
+          {'type': 'AugmentRequest', 'value': augmentRequest.node});
+  HostRequestType get type {
+    switch (node['type'] as String) {
+      case 'AugmentRequest':
+        return HostRequestType.augmentRequest;
+      default:
+        return HostRequestType.unknown;
+    }
+  }
+
+  AugmentRequest get asAugmentRequest {
+    if (node['type'] != 'AugmentRequest') {
+      throw StateError('Not a AugmentRequest.');
+    }
+    return AugmentRequest.fromJson(node['value'] as Map<String, Object?>);
+  }
+}
+
 /// Information about a macro that the macro provides to the host.
 extension type MacroDescription.fromJson(Map<String, Object?> node) {
   MacroDescription({
@@ -66,4 +92,116 @@ extension type MacroStartedRequest.fromJson(Map<String, Object?> node) {
 /// Host's response to a [MacroStartedRequest].
 extension type MacroStartedResponse.fromJson(Map<String, Object?> node) {
   MacroStartedResponse() : this.fromJson({});
+}
+
+enum MacroRequestType {
+  unknown,
+  macroStartedRequest,
+  queryRequest;
+}
+
+extension type MacroRequest.fromJson(Map<String, Object?> node) {
+  static MacroRequest macroStartedRequest(
+          MacroStartedRequest macroStartedRequest) =>
+      MacroRequest.fromJson(
+          {'type': 'MacroStartedRequest', 'value': macroStartedRequest.node});
+  static MacroRequest queryRequest(QueryRequest queryRequest) =>
+      MacroRequest.fromJson(
+          {'type': 'QueryRequest', 'value': queryRequest.node});
+  MacroRequestType get type {
+    switch (node['type'] as String) {
+      case 'MacroStartedRequest':
+        return MacroRequestType.macroStartedRequest;
+      case 'QueryRequest':
+        return MacroRequestType.queryRequest;
+      default:
+        return MacroRequestType.unknown;
+    }
+  }
+
+  MacroStartedRequest get asMacroStartedRequest {
+    if (node['type'] != 'MacroStartedRequest') {
+      throw StateError('Not a MacroStartedRequest.');
+    }
+    return MacroStartedRequest.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  QueryRequest get asQueryRequest {
+    if (node['type'] != 'QueryRequest') {
+      throw StateError('Not a QueryRequest.');
+    }
+    return QueryRequest.fromJson(node['value'] as Map<String, Object?>);
+  }
+}
+
+/// Macro's query about the code it should augment.
+extension type QueryRequest.fromJson(Map<String, Object?> node) {
+  QueryRequest({
+    Query? query,
+  }) : this.fromJson({
+          if (query != null) 'query': query,
+        });
+  Query get query => node['query'] as Query;
+}
+
+/// Host's response to a [QueryRequest].
+extension type QueryResponse.fromJson(Map<String, Object?> node) {
+  QueryResponse({
+    Model? model,
+  }) : this.fromJson({
+          if (model != null) 'model': model,
+        });
+  Model get model => node['model'] as Model;
+}
+
+enum ResponseType {
+  unknown,
+  augmentResponse,
+  macroStartedResponse,
+  queryResponse;
+}
+
+extension type Response.fromJson(Map<String, Object?> node) {
+  static Response augmentResponse(AugmentResponse augmentResponse) =>
+      Response.fromJson(
+          {'type': 'AugmentResponse', 'value': augmentResponse.node});
+  static Response macroStartedResponse(
+          MacroStartedResponse macroStartedResponse) =>
+      Response.fromJson(
+          {'type': 'MacroStartedResponse', 'value': macroStartedResponse.node});
+  static Response queryResponse(QueryResponse queryResponse) =>
+      Response.fromJson({'type': 'QueryResponse', 'value': queryResponse.node});
+  ResponseType get type {
+    switch (node['type'] as String) {
+      case 'AugmentResponse':
+        return ResponseType.augmentResponse;
+      case 'MacroStartedResponse':
+        return ResponseType.macroStartedResponse;
+      case 'QueryResponse':
+        return ResponseType.queryResponse;
+      default:
+        return ResponseType.unknown;
+    }
+  }
+
+  AugmentResponse get asAugmentResponse {
+    if (node['type'] != 'AugmentResponse') {
+      throw StateError('Not a AugmentResponse.');
+    }
+    return AugmentResponse.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  MacroStartedResponse get asMacroStartedResponse {
+    if (node['type'] != 'MacroStartedResponse') {
+      throw StateError('Not a MacroStartedResponse.');
+    }
+    return MacroStartedResponse.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  QueryResponse get asQueryResponse {
+    if (node['type'] != 'QueryResponse') {
+      throw StateError('Not a QueryResponse.');
+    }
+    return QueryResponse.fromJson(node['value'] as Map<String, Object?>);
+  }
 }

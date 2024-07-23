@@ -9,6 +9,7 @@ environment:
   sdk: ^3.6.0-48.0.dev
 
 dependencies:
+  dart_model: any
   macro: any
   macro_service: any
 
