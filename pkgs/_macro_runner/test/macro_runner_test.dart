@@ -15,16 +15,16 @@ void main() {
   group(MacroRunner, () {
     test('runs macros', () async {
       final builder = MacroBuilder();
-      final bundle =
-          await builder.build(File.fromUri(Isolate.packageConfigSync!), [
+      final bundle = await builder.build(Isolate.packageConfigSync!, [
         QualifiedName(
             'package:_test_macros/declare_x_macro.dart#DeclareXImplementation')
       ]);
 
       final serverSocket = await ServerSocket.bind('localhost', 0);
+      addTearDown(serverSocket.close);
 
       final runner = MacroRunner();
-      runner.run(
+      runner.start(
           macroBundle: bundle, endpoint: HostEndpoint(port: serverSocket.port));
 
       expect(

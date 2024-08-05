@@ -9,16 +9,20 @@ import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
 /// Runs macros, connecting them to a macro host.
+///
+/// TODO(davidmorgan): handle shutdown and dispose.
+/// TODO(davidmorgan): split to multpile implementations depending on
+/// transport used to connect to host.
 class MacroClient {
-  final Iterable<Macro> macros;
-  final Socket socket;
-
-  MacroClient._(this.macros, this.socket) {
+  MacroClient._(Iterable<Macro> macros, Socket socket) {
     // TODO(davidmorgan): negotiation about protocol version goes here.
 
     // Tell the host which macros are in this bundle.
     for (final macro in macros) {
-      _send(MacroStartedRequest(macroDescription: macro.description).node);
+      final request = MacroStartedRequest(macroDescription: macro.description);
+      // TODO(davidmorgan): currently this is JSON with one request per line,
+      // switch to binary.
+      socket.writeln(json.encode(request.node));
     }
   }
 
@@ -27,11 +31,5 @@ class MacroClient {
       {required HostEndpoint endpoint, required Iterable<Macro> macros}) async {
     final socket = await Socket.connect('localhost', endpoint.port);
     return MacroClient._(macros, socket);
-  }
-
-  void _send(Map<String, Object?> node) {
-    // TODO(davidmorgan): currently this is JSON with one request per line,
-    // switch to binary.
-    socket.writeln(json.encode(node));
   }
 }

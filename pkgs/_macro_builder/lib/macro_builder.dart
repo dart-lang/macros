@@ -6,6 +6,8 @@ import 'dart:io';
 
 import 'package:dart_model/dart_model.dart';
 
+import 'src/bootstrap.dart';
+
 /// Builds macros.
 ///
 /// TODO(davidmorgan): add a way to clean up generated files and built output.
@@ -16,39 +18,19 @@ class MacroBuilder {
   /// implements `Macro` from `package:macro`.
   ///
   /// The [packageConfig] must include the macros and all their deps.
+  ///
+  /// TODO(davidmorgan): figure out builder lifecycle: is it one builder per
+  /// host, one per workspace, one per build?
+  /// TODO(davidmorgan): replace `File` packageConfig with a concept of version
+  /// solve and workspace.
+  /// TODO(davidmorgan): support for multi-root workspaces.
+  /// TODO(davidmorgan): support (or decide not to support) in-memory overlay
+  /// filesystems.
   Future<BuiltMacroBundle> build(
-      File packageConfig, Iterable<QualifiedName> macroImplementations) async {
+      Uri packageConfig, Iterable<QualifiedName> macroImplementations) async {
     final script = createBootstrap(macroImplementations.toList());
 
     return await MacroBuild(packageConfig, script).build();
-  }
-
-  /// Creates the entrypoint script for [macros].
-  static String createBootstrap(List<QualifiedName> macros) {
-    final script = StringBuffer();
-    for (var i = 0; i != macros.length; ++i) {
-      final macro = macros[i];
-      // TODO(davidmorgan): pick non-clashing prefixes.
-      script.writeln("import '${macro.uri}' as m$i;");
-    }
-    script.write('''
-import 'dart:convert';
-
-import 'package:_macro_client/macro_client.dart';
-import 'package:macro_service/macro_service.dart';
-
-void main(List<String> arguments) {
-   MacroClient.run(
-      endpoint: HostEndpoint.fromJson(json.decode(arguments[0])),
-      macros: [''');
-    for (var i = 0; i != macros.length; ++i) {
-      final macro = macros[i];
-      script.write('m$i.${macro.name}()');
-      if (i != macros.length - 1) script.write(', ');
-    }
-    script.writeln(']);');
-    script.writeln('}');
-    return script.toString();
   }
 }
 
@@ -61,8 +43,11 @@ class BuiltMacroBundle {
 }
 
 /// A single build.
+///
+/// TODO(davidmorgan): split to interface+implementations as we add different
+/// ways to build.
 class MacroBuild {
-  final File packageConfig;
+  final Uri packageConfig;
   final String script;
   final Directory workspace =
       Directory.systemTemp.createTempSync('macro_builder');
@@ -76,8 +61,8 @@ class MacroBuild {
   /// Throws on failure to build.
   Future<BuiltMacroBundle> build() async {
     final scriptFile = File.fromUri(workspace.uri.resolve('bin/main.dart'));
-    scriptFile.parent.createSync(recursive: true);
-    scriptFile.writeAsStringSync(script.toString());
+    await scriptFile.create(recursive: true);
+    await scriptFile.writeAsString(script.toString());
 
     final targetPackageConfig =
         File.fromUri(workspace.uri.resolve('.dart_tool/package_config.json'));
@@ -90,7 +75,11 @@ class MacroBuild {
     //
     // For now just use the command line.
 
-    final result = Process.runSync('dart', ['compile', 'exe', 'bin/main.dart'],
+    final result = Process.runSync(
+        // TODO(davidmorgan): this is wrong if run from an AOT-compiled
+        // executable.
+        Platform.resolvedExecutable,
+        ['compile', 'exe', 'bin/main.dart', '--output=bin/main.exe'],
         workingDirectory: workspace.path);
     if (result.exitCode != 0) {
       throw StateError('Compile failed: ${result.stderr}');
@@ -100,11 +89,12 @@ class MacroBuild {
         File.fromUri(scriptFile.parent.uri.resolve('main.exe')).path);
   }
 
-  /// Returns the contents of [pubspec] with relative paths replaced to
+  /// Returns the contents of [packageConfig] with relative paths replaced to
   /// absolute paths, so the pubspec will work from any location.
-  String _makePackageConfigAbsolute(File pubspec) {
-    final root = pubspec.parent.parent.absolute.uri;
-    return pubspec
+  String _makePackageConfigAbsolute(Uri packageConfig) {
+    final file = File.fromUri(packageConfig);
+    final root = file.parent.parent.absolute.uri;
+    return file
         .readAsStringSync()
         .replaceAll('"rootUri": "../', '"rootUri": "$root');
   }

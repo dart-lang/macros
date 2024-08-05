@@ -14,7 +14,7 @@ class MacroServer {
   final ServerSocket serverSocket;
 
   MacroServer._(this.service, this.endpoint, this.serverSocket) {
-    _handleConnections();
+    serverSocket.forEach(_handleConnection);
   }
 
   /// Serves [service].
@@ -24,10 +24,6 @@ class MacroServer {
     final serverSocket = await ServerSocket.bind('localhost', 0);
     return MacroServer._(
         service, HostEndpoint(port: serverSocket.port), serverSocket);
-  }
-
-  void _handleConnections() {
-    serverSocket.forEach(_handleConnection);
   }
 
   void _handleConnection(Socket socket) {

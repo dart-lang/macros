@@ -12,8 +12,8 @@ import 'package:macro_service/macro_service.dart';
 ///
 /// TODO(davidmorgan): support shutdown/cleanup.
 class MacroRunner {
-  /// Runs [macroBundle] connected to [endpoint].
-  void run(
+  /// Starts [macroBundle] connected to [endpoint].
+  void start(
       {required BuiltMacroBundle macroBundle, required HostEndpoint endpoint}) {
     Process.run(macroBundle.executablePath, [json.encode(endpoint)]);
   }

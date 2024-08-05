@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:async';
 
 import 'package:_macro_builder/macro_builder.dart';
 import 'package:_macro_runner/macro_runner.dart';
@@ -22,7 +22,7 @@ class MacroHost implements MacroService {
 
   // TODO(davidmorgan): this should be per macro, as part of tracking per-macro
   // lifecycle state.
-  Set<int>? _macroPhases;
+  Completer<Set<int>>? _macroPhases;
 
   MacroHost._(this.macroServer, this.services) {
     services.services.insert(0, this);
@@ -43,7 +43,7 @@ class MacroHost implements MacroService {
   }
 
   /// Whether [name] is a macro according to that package's `pubspec.yaml`.
-  bool isMacro(File packageConfig, QualifiedName name) {
+  bool isMacro(Uri packageConfig, QualifiedName name) {
     // TODO(language/3728): this is a placeholder, use package config when
     // available.
     return true;
@@ -51,14 +51,14 @@ class MacroHost implements MacroService {
 
   /// Determines which phases the macro implemented at [name] runs in.
   Future<Set<int>> queryMacroPhases(
-      File packageConfig, QualifiedName name) async {
-    if (_macroPhases != null) return _macroPhases!;
+      Uri packageConfig, QualifiedName name) async {
+    // TODO(davidmorgan): track macro lifecycle, correctly run once per macro
+    // code change including if queried multiple times before response returns.
+    if (_macroPhases != null) return _macroPhases!.future;
+    _macroPhases = Completer();
     final macroBundle = await macroBuilder.build(packageConfig, [name]);
-    macroRunner.run(macroBundle: macroBundle, endpoint: macroServer.endpoint);
-    // TODO(davidmorgan): wait explicitly for the MacroStartedRequest to
-    // arrive, remove this hard-coded wait.
-    await Future<void>.delayed(const Duration(seconds: 2));
-    return _macroPhases!;
+    macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
+    return _macroPhases!.future;
   }
 
   /// Handle requests that are for the host.
@@ -68,7 +68,8 @@ class MacroHost implements MacroService {
     // that should be passed through to the service that was passed in.
     final macroStartedRequest =
         MacroStartedRequest.fromJson(request as Map<String, Object?>);
-    _macroPhases = macroStartedRequest.macroDescription.runsInPhases.toSet();
+    _macroPhases!
+        .complete(macroStartedRequest.macroDescription.runsInPhases.toSet());
     return MacroStartedResponse();
   }
 

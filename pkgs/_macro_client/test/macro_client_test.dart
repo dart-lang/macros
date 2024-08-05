@@ -14,6 +14,7 @@ void main() {
   group(MacroClient, () {
     test('connects to service', () async {
       final serverSocket = await ServerSocket.bind('localhost', 0);
+      addTearDown(serverSocket.close);
 
       unawaited(MacroClient.run(
           endpoint: HostEndpoint(port: serverSocket.port),

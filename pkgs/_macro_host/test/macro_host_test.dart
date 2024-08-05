@@ -2,7 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:isolate';
 
 import 'package:_macro_host/macro_host.dart';
@@ -18,7 +17,7 @@ void main() {
 
       final macroName = QualifiedName(
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
-      final packageConfig = File.fromUri(Isolate.packageConfigSync!);
+      final packageConfig = Isolate.packageConfigSync!;
 
       expect(host.isMacro(packageConfig, macroName), true);
       expect(await host.queryMacroPhases(packageConfig, macroName), {2});
