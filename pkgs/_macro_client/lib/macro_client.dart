@@ -21,10 +21,13 @@ class MacroClient {
   final Socket socket;
 
   MacroClient._(this.macros, this.socket) {
+
+  MacroClient._(this.macros, this.socket) {
     // TODO(davidmorgan): negotiation about protocol version goes here.
 
     // Tell the host which macros are in this bundle.
     for (final macro in macros) {
+      _responseCompleter = Completer();
       _sendRequest(MacroRequest.macroStartedRequest(
           MacroStartedRequest(macroDescription: macro.description)));
     }
@@ -88,8 +91,20 @@ class RemoteMacroHost implements Host {
   @override
   Future<Model> query(Query query) async {
     _client._sendRequest(MacroRequest.queryRequest(QueryRequest(query: query)));
-    _client._responseCompleter = Completer();
-    final response = await _client._responseCompleter!.future;
-    return response.asQueryResponse.model;
+    // TODO(davidmorgan): this is needed because the constructor doesn't wait
+    // for responses to `MacroStartedRequest`, so we need to discard the
+    // responses. Properly track requests and responses.
+    while (true) {
+      final nextResponse = await _nextResponse();
+      if (nextResponse.type == ResponseType.macroStartedResponse) {
+        continue;
+      }
+      return nextResponse.asQueryResponse.model;
+    }
+  }
+
+  Future<Response> _nextResponse() async {
+    _client._responseCompleter = Completer<Response>();
+    return await _client._responseCompleter!.future;
   }
 }

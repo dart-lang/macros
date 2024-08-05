@@ -24,9 +24,6 @@ class MacroHost implements HostService {
   // lifecycle state.
   Completer<Set<int>>? _macroPhases;
 
-  // TODO(davidmorgan): actually match up requests and responses instead of
-  // this hack.
-  Completer<AugmentResponse>? _responseCompleter;
   MacroHost._(this.macroServer, this.services) {
     services.services.insert(0, this);
   }
@@ -63,8 +60,7 @@ class MacroHost implements HostService {
     macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
     return _macroPhases!.future;
   }
-
-  /// Sends it [request] to the macro with [name].
+  /// Sends [request] to the macro with [name].
   Future<AugmentResponse> augment(
       QualifiedName name, AugmentRequest request) async {
     // TODO(davidmorgan): this just assumes the macro is running, actually
@@ -79,8 +75,9 @@ class MacroHost implements HostService {
   Future<Response?> handle(MacroRequest request) async {
     switch (request.type) {
       case MacroRequestType.macroStartedRequest:
-        _macroPhases =
-            request.asMacroStartedRequest.macroDescription.runsInPhases.toSet();
+        _macroPhases!.complete(request
+            .asMacroStartedRequest.macroDescription.runsInPhases
+            .toSet());
         return Response.macroStartedResponse(MacroStartedResponse());
       default:
         return null;

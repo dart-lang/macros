@@ -33,7 +33,7 @@ class MacroServer {
     return MacroServer._(
         service, HostEndpoint(port: serverSocket.port), serverSocket);
   }
-  
+
   Future<Response> sendToMacro(QualifiedName name, HostRequest request) async {
     _responseCompleter = Completer<Response>();
     _lastSocket!.writeln(json.encode(request.node));
