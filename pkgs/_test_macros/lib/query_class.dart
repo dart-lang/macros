@@ -6,8 +6,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
-/// Sends an empty query, outputs an augmentation that is the query result as
-/// a comment.
+/// Applies a macro which sends an empty query, and outputs an augmentation
+/// that is the query result as a comment.
 class QueryClass {
   const QueryClass();
 }

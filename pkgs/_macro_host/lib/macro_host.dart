@@ -60,6 +60,7 @@ class MacroHost implements HostService {
     macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
     return _macroPhases!.future;
   }
+
   /// Sends [request] to the macro with [name].
   Future<AugmentResponse> augment(
       QualifiedName name, AugmentRequest request) async {

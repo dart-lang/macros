@@ -148,38 +148,41 @@ String _generateUnion(String name, List<JsonSchema> oneOf) {
       oneOf.map((s) => _refName(s.schemaMap![r'$ref'] as String)).toList();
 
   // TODO(davidmorgan): add description(s).
-  result.writeln('enum ${name}Type {');
   result
-      .writeln(['unknown'].followedBy(types.map(_firstToLowerCase)).join(', '));
-  result.writeln(';}');
+    ..writeln('enum ${name}Type {')
+    ..writeln(['unknown'].followedBy(types.map(_firstToLowerCase)).join(', '))
+    ..writeln(';}');
 
   // TODO(davidmorgan): add description.
   result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
   for (final type in types) {
     final lowerType = _firstToLowerCase(type);
-    result.writeln('static $name $lowerType($type $lowerType) =>');
-    result.writeln('$name.fromJson({');
-    result.writeln("'type': '$type',");
-    result.writeln("'value': $lowerType.node});");
+    result
+      ..writeln('static $name $lowerType($type $lowerType) =>')
+      ..writeln('$name.fromJson({')
+      ..writeln("'type': '$type',")
+      ..writeln("'value': $lowerType.node});");
   }
 
-  result.writeln('${name}Type get type {');
-  result.writeln("switch(node['type'] as String) {");
+  result
+    ..writeln('${name}Type get type {')
+    ..writeln("switch(node['type'] as String) {");
   for (final type in types) {
     final lowerType = _firstToLowerCase(type);
     result.writeln("case '$type': return ${name}Type.$lowerType;");
   }
-  result.writeln('default: return ${name}Type.unknown;');
-  result.writeln('}');
-  result.writeln('}');
+  result
+    ..writeln('default: return ${name}Type.unknown;')
+    ..writeln('}')
+    ..writeln('}');
 
   for (final type in types) {
-    result.writeln('$type get as$type {');
-    result.writeln("if (node['type'] != '$type') "
-        "{ throw StateError('Not a $type.'); }");
-    result.writeln(
-        "return $type.fromJson(node['value'] as Map<String, Object?>);");
-    result.writeln('}');
+    result
+      ..writeln('$type get as$type {')
+      ..writeln("if (node['type'] != '$type') "
+          "{ throw StateError('Not a $type.'); }")
+      ..writeln("return $type.fromJson(node['value'] as Map<String, Object?>);")
+      ..writeln('}');
   }
   result.writeln('}');
 

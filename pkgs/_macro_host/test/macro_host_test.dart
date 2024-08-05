@@ -34,7 +34,7 @@ void main() {
 
       final macroName = QualifiedName(
           'package:_test_macros/query_class.dart#QueryClassImplementation');
-      final packageConfig = File.fromUri(Isolate.packageConfigSync!);
+      final packageConfig = Isolate.packageConfigSync!;
 
       expect(host.isMacro(packageConfig, macroName), true);
       expect(await host.queryMacroPhases(packageConfig, macroName), {3});

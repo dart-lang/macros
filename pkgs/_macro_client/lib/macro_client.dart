@@ -10,24 +10,25 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
-/// Runs macros, connecting them to a macro host.
+/// Local macro client which runs macros as directed by requests from a remote
+/// macro host.
 ///
 /// TODO(davidmorgan): handle shutdown and dispose.
 /// TODO(davidmorgan): split to multpile implementations depending on
 /// transport used to connect to host.
 class MacroClient {
-  late final RemoteMacroHost host;
   final Iterable<Macro> macros;
   final Socket socket;
+  late final RemoteMacroHost _host;
+  Completer<Response>? _responseCompleter;
 
   MacroClient._(this.macros, this.socket) {
+    _host = RemoteMacroHost(this);
 
-  MacroClient._(this.macros, this.socket) {
     // TODO(davidmorgan): negotiation about protocol version goes here.
 
     // Tell the host which macros are in this bundle.
     for (final macro in macros) {
-      _responseCompleter = Completer();
       _sendRequest(MacroRequest.macroStartedRequest(
           MacroStartedRequest(macroDescription: macro.description)));
     }
@@ -63,9 +64,11 @@ class MacroClient {
     switch (hostRequest.type) {
       case HostRequestType.augmentRequest:
         _sendResponse(Response.augmentResponse(
-            await macros.single.augment(host, hostRequest.asAugmentRequest)));
+            await macros.single.augment(_host, hostRequest.asAugmentRequest)));
       default:
       // Ignore unknown request.
+      // TODO(davidmorgan): make handling of unknown request types a designed
+      // part of the protocol+code, update implementation here and below.
     }
     final response = Response.fromJson(jsonData);
     switch (response.type) {
@@ -83,6 +86,15 @@ class MacroClient {
 }
 
 /// [Host] that is connected to a remote macro host.
+///
+/// Wraps `MacroClient` exposing just what should be available to the macro.
+///
+/// This gets passed into user-written macro code, so fields and methods here
+/// can be accessed by the macro code if they are public, even if they are not
+/// on `Host`, via dynamic dispatch.
+///
+/// TODO(language/issues/3951): follow up on security implications.
+///
 class RemoteMacroHost implements Host {
   final MacroClient _client;
 
