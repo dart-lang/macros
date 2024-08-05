@@ -1,6 +1,7 @@
 sdk:
+# Only "pubspec" because the test uses the platform dill from the SDK, and it
+# needs to be the same version.
 - pubspec
-- dev
 
 stages:
 - analyze_and_format:

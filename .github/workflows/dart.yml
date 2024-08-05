@@ -167,16 +167,16 @@ jobs:
         if: "always() && steps.tool_dart_model_generator_pub_upgrade.conclusion == 'success'"
         working-directory: tool/dart_model_generator
   job_003:
-    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
+    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
@@ -196,15 +196,6 @@ jobs:
         run: dart analyze --fatal-infos .
         if: "always() && steps.pkgs__analyzer_macros_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/_analyzer_macros
-      - id: pkgs__cfe_macros_pub_upgrade
-        name: pkgs/_cfe_macros; dart pub upgrade
-        run: dart pub upgrade
-        if: "always() && steps.checkout.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
-      - name: "pkgs/_cfe_macros; dart analyze --fatal-infos ."
-        run: dart analyze --fatal-infos .
-        if: "always() && steps.pkgs__cfe_macros_pub_upgrade.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
       - id: pkgs__macro_builder_pub_upgrade
         name: pkgs/_macro_builder; dart pub upgrade
         run: dart pub upgrade
@@ -600,41 +591,6 @@ jobs:
       - job_003
       - job_004
   job_010:
-    name: "unit_test; linux; Dart dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache Pub hosted dependencies
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
-        with:
-          path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_cfe_macros;commands:test"
-          restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_cfe_macros
-            os:ubuntu-latest;pub-cache-hosted;sdk:dev
-            os:ubuntu-latest;pub-cache-hosted
-            os:ubuntu-latest
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
-        with:
-          sdk: dev
-      - id: checkout
-        name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
-      - id: pkgs__cfe_macros_pub_upgrade
-        name: pkgs/_cfe_macros; dart pub upgrade
-        run: dart pub upgrade
-        if: "always() && steps.checkout.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
-      - name: "pkgs/_cfe_macros; dart test --test-randomize-ordering-seed=random"
-        run: "dart test --test-randomize-ordering-seed=random"
-        if: "always() && steps.pkgs__cfe_macros_pub_upgrade.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
-    needs:
-      - job_001
-      - job_002
-      - job_003
-      - job_004
-  job_011:
     name: "unit_test; linux; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -669,7 +625,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_012:
+  job_011:
     name: "unit_test; linux; Dart dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -704,7 +660,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_013:
+  job_012:
     name: "unit_test; windows; Dart 3.6.0-48.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -729,7 +685,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_014:
+  job_013:
     name: "unit_test; windows; Dart 3.6.0-48.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -754,7 +710,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_015:
+  job_014:
     name: "unit_test; windows; Dart 3.6.0-48.0.dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -779,7 +735,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_016:
+  job_015:
     name: "unit_test; windows; Dart 3.6.0-48.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -804,7 +760,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_017:
+  job_016:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -829,32 +785,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_018:
-    name: "unit_test; windows; Dart dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
-    runs-on: windows-latest
-    steps:
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
-        with:
-          sdk: dev
-      - id: checkout
-        name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
-      - id: pkgs__cfe_macros_pub_upgrade
-        name: pkgs/_cfe_macros; dart pub upgrade
-        run: dart pub upgrade
-        if: "always() && steps.checkout.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
-      - name: "pkgs/_cfe_macros; dart test --test-randomize-ordering-seed=random"
-        run: "dart test --test-randomize-ordering-seed=random"
-        if: "always() && steps.pkgs__cfe_macros_pub_upgrade.conclusion == 'success'"
-        working-directory: pkgs/_cfe_macros
-    needs:
-      - job_001
-      - job_002
-      - job_003
-      - job_004
-  job_019:
+  job_017:
     name: "unit_test; windows; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -879,7 +810,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_020:
+  job_018:
     name: "unit_test; windows; Dart dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
