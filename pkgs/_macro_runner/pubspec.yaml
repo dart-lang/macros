@@ -14,3 +14,5 @@ dependencies:
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
+  dart_model: any
+  test: ^1.25.0

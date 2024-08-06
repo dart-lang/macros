@@ -8,3 +8,8 @@ stages:
   - format:
     sdk:
     - dev
+- unit_test:
+  - test: --test-randomize-ordering-seed=random
+    os:
+    - linux
+    - windows

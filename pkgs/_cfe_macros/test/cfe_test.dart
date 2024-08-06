@@ -80,7 +80,7 @@ class TestMacroPackageConfigs implements injected.MacroPackageConfigs {
     if (result == true) {
       macroWasFound = true;
     }
-    return macroWasFound;
+    return result;
   }
 }
 

@@ -8,6 +8,11 @@ import 'package:macro_service/macro_service.dart';
 /// code.
 abstract interface class Macro {
   /// Description of the macro.
+  ///
+  /// TODO(davidmorgan): where possible the macro information should be
+  /// determined by `macro_builder` and injected in the bootstrap script rather
+  /// than relying on the user-written macro code to return it.
+  ///
   MacroDescription get description;
 
   /// Generate augmentatations and diagnostics for [request].

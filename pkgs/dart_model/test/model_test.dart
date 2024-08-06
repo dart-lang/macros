@@ -46,10 +46,6 @@ void main() {
       }
     };
 
-    test('has extension methods', () {
-      expect(model.exampleGetter, 'exampleValue');
-    });
-
     test('maps to JSON', () {
       expect(model as Map, expected);
     });
@@ -102,6 +98,17 @@ void main() {
               .scopes['JsonData']!.members,
           expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
               'JsonData']!['members']);
+    });
+  });
+
+  group(QualifiedName, () {
+    test('has uri', () {
+      expect(QualifiedName('package:foo/foo.dart#Foo').uri,
+          'package:foo/foo.dart');
+    });
+
+    test('has name', () {
+      expect(QualifiedName('package:foo/foo.dart#Foo').name, 'Foo');
     });
   });
 }

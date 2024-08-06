@@ -41,3 +41,19 @@ extension type MacroDescription.fromJson(Map<String, Object?> node) {
   /// Phases that the macro runs in: 1, 2 and/or 3.
   List<int> get runsInPhases => (node['runsInPhases'] as List).cast();
 }
+
+/// Informs the host that a macro has started.
+extension type MacroStartedRequest.fromJson(Map<String, Object?> node) {
+  MacroStartedRequest({
+    MacroDescription? macroDescription,
+  }) : this.fromJson({
+          if (macroDescription != null) 'macroDescription': macroDescription,
+        });
+  MacroDescription get macroDescription =>
+      node['macroDescription'] as MacroDescription;
+}
+
+/// Host's response to a [MacroStartedRequest].
+extension type MacroStartedResponse.fromJson(Map<String, Object?> node) {
+  MacroStartedResponse() : this.fromJson({});
+}
