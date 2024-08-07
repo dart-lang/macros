@@ -26,15 +26,18 @@ void main() {
   });
 }
 
-class TestMacroHostService implements MacroService {
+class TestMacroHostService implements HostService {
   final StreamController<MacroStartedRequest> _macroStartedRequestsController =
       StreamController();
   Stream<MacroStartedRequest> get macroStartedRequests =>
       _macroStartedRequestsController.stream;
 
   @override
-  Future<Object> handle(Object request) async {
-    _macroStartedRequestsController.add(request as MacroStartedRequest);
-    return MacroStartedResponse() as Object;
+  Future<Response?> handle(MacroRequest request) async {
+    if (request.type == MacroRequestType.macroStartedRequest) {
+      _macroStartedRequestsController.add(request.asMacroStartedRequest);
+      return Response.macroStartedResponse(MacroStartedResponse());
+    }
+    return null;
   }
 }

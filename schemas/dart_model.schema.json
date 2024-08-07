@@ -44,6 +44,17 @@
         }
       }
     },
+    "Library": {
+      "description": "Library.",
+      "type": "object",
+      "properties": {
+        "scopes": {
+          "type": "object",
+          "description": "Scopes by name.",
+          "additionalProperties": {"$ref": "#/$defs/Interface"}
+        }
+      }
+    },
     "Member": {
       "type": "object",
       "description": "Member of a scope.",
@@ -95,20 +106,13 @@
         }
       }
     },
-    "Library": {
-      "description": "Library.",
-      "type": "object",
-      "properties": {
-        "scopes": {
-          "type": "object",
-          "description": "Scopes by name.",
-          "additionalProperties": {"$ref": "#/$defs/Interface"}
-        }
-      }
-    },
     "QualifiedName": {
       "description": "A URI combined with a name.",
       "type": "string"
+    },
+    "Query": {
+      "type": "object",
+      "description": "Query about a corpus of Dart source code. TODO(davidmorgan): this is a placeholder."
     }
   }
 }

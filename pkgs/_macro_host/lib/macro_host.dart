@@ -13,8 +13,8 @@ import 'package:macro_service/macro_service.dart';
 /// Hosts macros: builds them, runs them, serves the macro service.
 ///
 /// Tools that want to support macros, such as the Analyzer and the CFE, can
-/// do so by running a `MacroHost` and providing their own `MacroService`.
-class MacroHost implements MacroService {
+/// do so by running a `MacroHost` and providing their own `HostService`.
+class MacroHost implements HostService {
   final MacroServer macroServer;
   final ListOfServices services;
   final MacroBuilder macroBuilder = MacroBuilder();
@@ -23,10 +23,6 @@ class MacroHost implements MacroService {
   // TODO(davidmorgan): this should be per macro, as part of tracking per-macro
   // lifecycle state.
   Completer<Set<int>>? _macroPhases;
-
-  // TODO(davidmorgan): actually match up requests and responses instead of
-  // this hack.
-  Completer<AugmentResponse>? _responseCompleter;
 
   MacroHost._(this.macroServer, this.services) {
     services.services.insert(0, this);
@@ -39,7 +35,7 @@ class MacroHost implements MacroService {
   ///
   /// TODO(davidmorgan): make this split clearer, it should be in the protocol
   /// definition somewhere which requests the host handles.
-  static Future<MacroHost> serve({required MacroService service}) async {
+  static Future<MacroHost> serve({required HostService service}) async {
     final listOfServices = ListOfServices();
     listOfServices.services.add(service);
     final server = await MacroServer.serve(service: listOfServices);
@@ -70,44 +66,34 @@ class MacroHost implements MacroService {
       QualifiedName name, AugmentRequest request) async {
     // TODO(davidmorgan): this just assumes the macro is running, actually
     // track macro lifecycle.
-    macroServer.sendToMacro(name, request);
-    if (_responseCompleter != null) {
-      throw StateError('request is already pending');
-    }
-    _responseCompleter = Completer<AugmentResponse>();
-    return await _responseCompleter!.future;
+    final response = await macroServer.sendToMacro(
+        name, HostRequest.augmentRequest(request));
+    return response.asAugmentResponse;
   }
 
   /// Handle requests that are for the host.
   @override
-  Future<Object?> handle(Object request) async {
-    // TODO(davidmorgan): differentiate requests and responses, rather than
-    // handling as requests.
-    if (_responseCompleter != null) {
-      final augmentResponse =
-          AugmentResponse.fromJson(request as Map<String, Object?>);
-      _responseCompleter!.complete(augmentResponse);
-      _responseCompleter = null;
-      return Object();
+  Future<Response?> handle(MacroRequest request) async {
+    switch (request.type) {
+      case MacroRequestType.macroStartedRequest:
+        _macroPhases!.complete(request
+            .asMacroStartedRequest.macroDescription.runsInPhases
+            .toSet());
+        return Response.macroStartedResponse(MacroStartedResponse());
+      default:
+        return null;
     }
-    // TODO(davidmorgan): don't assume the type. Return `null` for types
-    // that should be passed through to the service that was passed in.
-    final macroStartedRequest =
-        MacroStartedRequest.fromJson(request as Map<String, Object?>);
-    _macroPhases!
-        .complete(macroStartedRequest.macroDescription.runsInPhases.toSet());
-    return MacroStartedResponse();
   }
 }
 
 // TODO(davidmorgan): this is used to handle some requests in the host while
 // letting some fall through to the passed in service. Differentiate in a
 // better way.
-class ListOfServices implements MacroService {
-  List<MacroService> services = [];
+class ListOfServices implements HostService {
+  List<HostService> services = [];
 
   @override
-  Future<Object> handle(Object request) async {
+  Future<Response> handle(MacroRequest request) async {
     for (final service in services) {
       final result = await service.handle(request);
       if (result != null) return result;

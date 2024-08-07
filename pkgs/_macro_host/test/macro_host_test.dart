@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 
 void main() {
   group(MacroHost, () {
-    test('hosts a macro', () async {
+    test('hosts a macro, receives augmentations', () async {
       final service = TestMacroHostService();
       final host = await MacroHost.serve(service: service);
 
@@ -27,12 +27,34 @@ void main() {
           AugmentResponse(
               augmentations: [Augmentation(code: 'int get x => 3;')]));
     });
+
+    test('hosts a macro, responds to queries', () async {
+      final service = TestMacroHostService();
+      final host = await MacroHost.serve(service: service);
+
+      final macroName = QualifiedName(
+          'package:_test_macros/query_class.dart#QueryClassImplementation');
+      final packageConfig = Isolate.packageConfigSync!;
+
+      expect(host.isMacro(packageConfig, macroName), true);
+      expect(await host.queryMacroPhases(packageConfig, macroName), {3});
+
+      expect(
+          await host.augment(macroName, AugmentRequest(phase: 2)),
+          AugmentResponse(augmentations: [
+            Augmentation(code: '// {uris: {package:foo/foo.dart: {}}}')
+          ]));
+    });
   });
 }
 
-class TestMacroHostService implements MacroService {
+class TestMacroHostService implements HostService {
   @override
-  Future<Object> handle(Object request) async {
-    return Object();
+  Future<Response?> handle(MacroRequest request) async {
+    if (request.type == MacroRequestType.queryRequest) {
+      return Response.queryResponse(QueryResponse(
+          model: Model(uris: {'package:foo/foo.dart': Library()})));
+    }
+    return null;
   }
 }

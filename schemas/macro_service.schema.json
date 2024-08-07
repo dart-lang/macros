@@ -36,6 +36,12 @@
         }
       }
     },
+    "HostRequest": {
+      "$description": "A request sent from host to macro.",
+      "oneOf": [
+        {"$ref": "#/$defs/AugmentRequest"}
+      ]
+    },
     "MacroDescription": {
       "type": "object",
       "description": "Information about a macro that the macro provides to the host.",
@@ -59,6 +65,35 @@
     "MacroStartedResponse": {
       "type": "object",
       "description": "Host's response to a [MacroStartedRequest]."
+    },
+    "MacroRequest": {
+      "$description": "A request sent from macro to host.",
+      "oneOf": [
+        {"$ref": "#/$defs/MacroStartedRequest"},
+        {"$ref": "#/$defs/QueryRequest"}
+      ]
+    },
+    "QueryRequest": {
+      "type": "object",
+      "description": "Macro's query about the code it should augment.",
+      "properties": {
+        "query": {"$ref": "file:dart_model.schema.json#/$defs/Query"}
+      }
+    },
+    "QueryResponse": {
+      "type": "object",
+      "description": "Host's response to a [QueryRequest].",
+      "properties": {
+        "model": {"$ref": "file:dart_model.schema.json#/$defs/Model"}
+      }
+    },
+    "Response": {
+      "$description": "A response to a [MacroRequest] or [HostRequest].",
+      "oneOf": [
+        {"$ref": "#/$defs/AugmentResponse"},
+        {"$ref": "#/$defs/MacroStartedResponse"},
+        {"$ref": "#/$defs/QueryResponse"}
+      ]
     }
   }
 }
