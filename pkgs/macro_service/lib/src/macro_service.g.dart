@@ -28,6 +28,18 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node) {
       (node['augmentations'] as List).cast();
 }
 
+/// Request could not be handled.
+extension type ErrorResponse.fromJson(Map<String, Object?> node) {
+  ErrorResponse({
+    String? error,
+  }) : this.fromJson({
+          if (error != null) 'error': error,
+        });
+
+  /// The error.
+  String get error => node['error'] as String;
+}
+
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?
 extension type HostEndpoint.fromJson(Map<String, Object?> node) {
   HostEndpoint({
@@ -157,6 +169,7 @@ extension type QueryResponse.fromJson(Map<String, Object?> node) {
 enum ResponseType {
   unknown,
   augmentResponse,
+  errorResponse,
   macroStartedResponse,
   queryResponse;
 }
@@ -165,6 +178,8 @@ extension type Response.fromJson(Map<String, Object?> node) {
   static Response augmentResponse(AugmentResponse augmentResponse) =>
       Response.fromJson(
           {'type': 'AugmentResponse', 'value': augmentResponse.node});
+  static Response errorResponse(ErrorResponse errorResponse) =>
+      Response.fromJson({'type': 'ErrorResponse', 'value': errorResponse.node});
   static Response macroStartedResponse(
           MacroStartedResponse macroStartedResponse) =>
       Response.fromJson(
@@ -175,6 +190,8 @@ extension type Response.fromJson(Map<String, Object?> node) {
     switch (node['type'] as String) {
       case 'AugmentResponse':
         return ResponseType.augmentResponse;
+      case 'ErrorResponse':
+        return ResponseType.errorResponse;
       case 'MacroStartedResponse':
         return ResponseType.macroStartedResponse;
       case 'QueryResponse':
@@ -189,6 +206,13 @@ extension type Response.fromJson(Map<String, Object?> node) {
       throw StateError('Not a AugmentResponse.');
     }
     return AugmentResponse.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  ErrorResponse get asErrorResponse {
+    if (node['type'] != 'ErrorResponse') {
+      throw StateError('Not a ErrorResponse.');
+    }
+    return ErrorResponse.fromJson(node['value'] as Map<String, Object?>);
   }
 
   MacroStartedResponse get asMacroStartedResponse {

@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 void main() {
   group(MacroServer, () {
     test('serves a macro service', () async {
-      final service = TestMacroHostService();
+      final service = TestHostService();
       final server = await MacroServer.serve(service: service);
 
       await MacroClient.run(
@@ -26,18 +26,18 @@ void main() {
   });
 }
 
-class TestMacroHostService implements HostService {
+class TestHostService implements HostService {
   final StreamController<MacroStartedRequest> _macroStartedRequestsController =
       StreamController();
   Stream<MacroStartedRequest> get macroStartedRequests =>
       _macroStartedRequestsController.stream;
 
   @override
-  Future<Response?> handle(MacroRequest request) async {
+  Future<Response> handle(MacroRequest request) async {
     if (request.type == MacroRequestType.macroStartedRequest) {
       _macroStartedRequestsController.add(request.asMacroStartedRequest);
       return Response.macroStartedResponse(MacroStartedResponse());
     }
-    return null;
+    return Response.errorResponse(ErrorResponse(error: 'unimplemented'));
   }
 }

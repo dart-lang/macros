@@ -14,32 +14,19 @@ import 'package:macro_service/macro_service.dart';
 ///
 /// Tools that want to support macros, such as the Analyzer and the CFE, can
 /// do so by running a `MacroHost` and providing their own `HostService`.
-class MacroHost implements HostService {
+class MacroHost {
+  final _HostService _hostService;
   final MacroServer macroServer;
-  final ListOfServices services;
   final MacroBuilder macroBuilder = MacroBuilder();
   final MacroRunner macroRunner = MacroRunner();
 
-  // TODO(davidmorgan): this should be per macro, as part of tracking per-macro
-  // lifecycle state.
-  Completer<Set<int>>? _macroPhases;
+  MacroHost._(this.macroServer, this._hostService);
 
-  MacroHost._(this.macroServer, this.services) {
-    services.services.insert(0, this);
-  }
-
-  /// Starts a macro host serving the provided [service].
-  ///
-  /// The service passed in should handle introspection RPCs, it does not need
-  /// to handle others.
-  ///
-  /// TODO(davidmorgan): make this split clearer, it should be in the protocol
-  /// definition somewhere which requests the host handles.
-  static Future<MacroHost> serve({required HostService service}) async {
-    final listOfServices = ListOfServices();
-    listOfServices.services.add(service);
-    final server = await MacroServer.serve(service: listOfServices);
-    return MacroHost._(server, listOfServices);
+  /// Starts a macro host with introspection queries handled by [queryService].
+  static Future<MacroHost> serve({required QueryService queryService}) async {
+    final hostService = _HostService(queryService);
+    final server = await MacroServer.serve(service: hostService);
+    return MacroHost._(server, hostService);
   }
 
   /// Whether [name] is a macro according to that package's `pubspec.yaml`.
@@ -54,11 +41,13 @@ class MacroHost implements HostService {
       Uri packageConfig, QualifiedName name) async {
     // TODO(davidmorgan): track macro lifecycle, correctly run once per macro
     // code change including if queried multiple times before response returns.
-    if (_macroPhases != null) return _macroPhases!.future;
-    _macroPhases = Completer();
+    if (_hostService._macroPhases != null) {
+      return _hostService._macroPhases!.future;
+    }
+    _hostService._macroPhases = Completer();
     final macroBundle = await macroBuilder.build(packageConfig, [name]);
     macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
-    return _macroPhases!.future;
+    return _hostService._macroPhases!.future;
   }
 
   /// Sends [request] to the macro with [name].
@@ -70,34 +59,35 @@ class MacroHost implements HostService {
         name, HostRequest.augmentRequest(request));
     return response.asAugmentResponse;
   }
+}
+
+class _HostService implements HostService {
+  final QueryService queryService;
+  // TODO(davidmorgan): this should be per macro, as part of tracking per-macro
+  // lifecycle state.
+  Completer<Set<int>>? _macroPhases;
+
+  _HostService(this.queryService);
 
   /// Handle requests that are for the host.
   @override
-  Future<Response?> handle(MacroRequest request) async {
+  Future<Response> handle(MacroRequest request) async {
     switch (request.type) {
       case MacroRequestType.macroStartedRequest:
         _macroPhases!.complete(request
             .asMacroStartedRequest.macroDescription.runsInPhases
             .toSet());
         return Response.macroStartedResponse(MacroStartedResponse());
+      case MacroRequestType.queryRequest:
+        return Response.queryResponse(
+            await queryService.handle(request.asQueryRequest));
       default:
-        return null;
+        return Response.errorResponse(ErrorResponse(error: 'unsupported'));
     }
   }
 }
 
-// TODO(davidmorgan): this is used to handle some requests in the host while
-// letting some fall through to the passed in service. Differentiate in a
-// better way.
-class ListOfServices implements HostService {
-  List<HostService> services = [];
-
-  @override
-  Future<Response> handle(MacroRequest request) async {
-    for (final service in services) {
-      final result = await service.handle(request);
-      if (result != null) return result;
-    }
-    throw StateError('No service handled: $request');
-  }
+/// Service provided by the frontend the host integrates with.
+abstract interface class QueryService {
+  Future<QueryResponse> handle(QueryRequest request);
 }
