@@ -1,6 +1,8 @@
 // This file is generated. To make changes edit schemas/*.schema.json
 // then run from the repo root: dart tool/model_generator/bin/main.dart
 
+import 'package:dart_model/dart_model.dart';
+
 /// A request to a macro to augment some code.
 extension type AugmentRequest.fromJson(Map<String, Object?> node) {
   AugmentRequest({
@@ -15,7 +17,15 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node) {
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
 extension type AugmentResponse.fromJson(Map<String, Object?> node) {
-  AugmentResponse() : this.fromJson({});
+  AugmentResponse({
+    List<Augmentation>? augmentations,
+  }) : this.fromJson({
+          if (augmentations != null) 'augmentations': augmentations,
+        });
+
+  /// The augmentations.
+  List<Augmentation> get augmentations =>
+      (node['augmentations'] as List).cast();
 }
 
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?

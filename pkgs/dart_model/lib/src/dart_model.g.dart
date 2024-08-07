@@ -1,9 +1,16 @@
 // This file is generated. To make changes edit schemas/*.schema.json
 // then run from the repo root: dart tool/model_generator/bin/main.dart
 
-/// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder, add some data.
+/// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
 extension type Augmentation.fromJson(Map<String, Object?> node) {
-  Augmentation() : this.fromJson({});
+  Augmentation({
+    String? code,
+  }) : this.fromJson({
+          if (code != null) 'code': code,
+        });
+
+  /// Augmentation code.
+  String get code => node['code'] as String;
 }
 
 /// A metadata annotation.
