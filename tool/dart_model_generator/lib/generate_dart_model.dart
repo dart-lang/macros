@@ -37,14 +37,46 @@ String generate(String schemaJson,
   final schema = JsonSchema.create(schemaJson,
       refProvider: LocalRefProvider(dartModelJson ??
           File('schemas/dart_model.schema.json').readAsStringSync()));
-  for (final def in schema.defs.entries) {
-    if (_isUnion(def.value)) {
-      result.add(_generateUnion(def.key, def.value.properties['value']!.oneOf));
+  final allDefinitions = <String, JsonSchema>{
+    for (final def in schema.defs.entries) def.key: def.value,
+  };
+
+  for (final MapEntry(:key, :value) in allDefinitions.entries) {
+    if (_isUnion(value)) {
+      result.add(_generateUnion(
+        key,
+        value.properties['value']!.oneOf,
+        allDefinitions: allDefinitions,
+      ));
     } else {
-      result.add(_generateExtensionType(def.key, def.value));
+      result.add(_generateExtensionType(key, value));
     }
   }
   return DartFormatter().formatSource(SourceCode(result.join('\n'))).text;
+}
+
+/// The Dart type used to represent the JSON value for [definition].
+///
+/// This is most commonly a `Map<String, Object?>, but can also be a JSON
+/// primitive type for simpler definitions.
+String _dartJsonType(JsonSchema definition) {
+  return switch (definition.type) {
+    SchemaType.object => 'Map<String, Object?>',
+    SchemaType.string => 'String',
+    SchemaType.nullValue => 'Null',
+    _ => throw UnsupportedError('Unsupported type: ${definition.type}'),
+  };
+}
+
+/// Expands a [wrapper] expression evaluating to a generated extension type
+/// instance to obtain the underlying JSON representation.
+String _dartWrapperToJson(String wrapper, JsonSchema definition) {
+  return switch (definition.type) {
+    SchemaType.object => '$wrapper.node',
+    SchemaType.string => '$wrapper.string',
+    SchemaType.nullValue => 'null',
+    _ => throw UnsupportedError('Unsupported type: ${definition.type}'),
+  };
 }
 
 String _generateExtensionType(String name, JsonSchema definition) {
@@ -55,6 +87,7 @@ String _generateExtensionType(String name, JsonSchema definition) {
   final jsonType = switch (definition.type) {
     SchemaType.object => 'Map<String, Object?> node',
     SchemaType.string => 'String string',
+    SchemaType.nullValue => 'Null _',
     _ => throw UnsupportedError('Schema type ${definition.type}.'),
   };
   if (definition.description != null) {
@@ -96,6 +129,8 @@ String _generateExtensionType(String name, JsonSchema definition) {
       }
     case SchemaType.string:
       result.writeln('$name(String string) : this.fromJson(string);');
+    case SchemaType.nullValue:
+      result.writeln('$name(): this.fromJson(null);');
     default:
       throw UnsupportedError('Unsupported type: ${definition.type}');
   }
@@ -150,32 +185,39 @@ bool _isUnion(JsonSchema schema) =>
 /// and `asFoo` getters that "cast" to each type.
 ///
 /// On the wire the union type is: `{"type": <name>, "value": <value>}`
-String _generateUnion(String name, List<JsonSchema> oneOf) {
+String _generateUnion(
+  String name,
+  List<JsonSchema> oneOf, {
+  required Map<String, JsonSchema> allDefinitions,
+}) {
   final result = StringBuffer();
-  final types =
-      oneOf.map((s) => _refName(s.schemaMap![r'$ref'] as String)).toList();
+  final unionEntries = oneOf
+      .map((s) => _refName(s.schemaMap![r'$ref'] as String))
+      .map((name) => (name, allDefinitions[name]!));
 
   // TODO(davidmorgan): add description(s).
   result
     ..writeln('enum ${name}Type {')
-    ..writeln(['unknown'].followedBy(types.map(_firstToLowerCase)).join(', '))
+    ..writeln(['unknown']
+        .followedBy(unionEntries.map((e) => _firstToLowerCase(e.$1)))
+        .join(', '))
     ..writeln(';}');
 
   // TODO(davidmorgan): add description.
   result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
-  for (final type in types) {
+  for (final (type, def) in unionEntries) {
     final lowerType = _firstToLowerCase(type);
     result
       ..writeln('static $name $lowerType($type $lowerType) =>')
       ..writeln('$name.fromJson({')
       ..writeln("'type': '$type',")
-      ..writeln("'value': $lowerType.node});");
+      ..writeln("'value': ${_dartWrapperToJson(lowerType, def)}});");
   }
 
   result
     ..writeln('${name}Type get type {')
     ..writeln("switch(node['type'] as String) {");
-  for (final type in types) {
+  for (final (type, _) in unionEntries) {
     final lowerType = _firstToLowerCase(type);
     result.writeln("case '$type': return ${name}Type.$lowerType;");
   }
@@ -184,12 +226,13 @@ String _generateUnion(String name, List<JsonSchema> oneOf) {
     ..writeln('}')
     ..writeln('}');
 
-  for (final type in types) {
+  for (final (type, schema) in unionEntries) {
     result
       ..writeln('$type get as$type {')
       ..writeln("if (node['type'] != '$type') "
           "{ throw StateError('Not a $type.'); }")
-      ..writeln("return $type.fromJson(node['value'] as Map<String, Object?>);")
+      ..writeln(
+          "return $type.fromJson(node['value'] as ${_dartJsonType(schema)});")
       ..writeln('}');
   }
   result.writeln('}');
