@@ -4,7 +4,7 @@ description: Macro support for the CFE.
 resolution: workspace
 
 environment:
-  sdk: ^3.6.0-48.0.dev
+  sdk: ^3.6.0-114.0.dev
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0

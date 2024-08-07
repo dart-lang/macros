@@ -4,7 +4,7 @@ description: Macro support for the analyzer.
 resolution: workspace
 
 environment:
-  sdk: ^3.6.0-48.0.dev
+  sdk: ^3.6.0-114.0.dev
 
 dev_dependencies:
   analyzer: any

@@ -1,13 +1,21 @@
 #!/bin/bash --
 #
 # Updates ref to SDK packages in pubspec.yaml.
+#
+# If it's a dev tag, also updates SDK version.
 
 REF=$1
 
-if echo $REF | grep -Eqv '^[a-z0-9][a-z0-9-]*$'; then
-  echo "Doesn't look like a git ref? $REF"
-  echo "Usage: tool/set_sdk_version <git ref>"
-  exit 1
+if echo $REF | grep -Eq 'dev$'; then
+  sed -i -e "s#^  sdk: .*#  sdk: ^$REF#" $(find . -name pubspec.yaml)
+else
+  if echo $REF | grep -Eqv '^[a-z0-9][a-z0-9-]*$'; then
+    echo "Doesn't look like a git ref? $REF"
+    echo "Usage: tool/set_sdk_version <git ref>"
+    exit 1
+  fi
+
+  echo "Got a ref, not a dev tag: updating deps but not SDK version."
 fi
 
 sed -i -e "s#^      ref: .*#      ref: $REF#" pubspec.yaml
