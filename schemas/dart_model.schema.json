@@ -1,7 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "oneOf": [
-    {"$ref": "#/$defs/Model"}
+    {
+      "$ref": "#/$defs/Model"
+    }
   ],
   "$defs": {
     "Augmentation": {
@@ -31,12 +33,16 @@
         "metadataAnnotations": {
           "description": "The metadata annotations attached to this iterface.",
           "type": "array",
-          "items": {"$ref": "#/$defs/MetadataAnnotation"}
+          "items": {
+            "$ref": "#/$defs/MetadataAnnotation"
+          }
         },
         "members": {
           "type": "object",
           "description": "Map of members by name.",
-          "additionalProperties": {"$ref": "#/$defs/Member"}
+          "additionalProperties": {
+            "$ref": "#/$defs/Member"
+          }
         },
         "properties": {
           "$comment": "The properties of this interface.",
@@ -51,7 +57,9 @@
         "scopes": {
           "type": "object",
           "description": "Scopes by name.",
-          "additionalProperties": {"$ref": "#/$defs/Interface"}
+          "additionalProperties": {
+            "$ref": "#/$defs/Interface"
+          }
         }
       }
     },
@@ -72,7 +80,9 @@
         "uris": {
           "type": "object",
           "description": "Libraries by URI.",
-          "additionalProperties": {"$ref": "#/$defs/Library"}
+          "additionalProperties": {
+            "$ref": "#/$defs/Library"
+          }
         }
       }
     },

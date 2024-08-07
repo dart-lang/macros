@@ -38,8 +38,8 @@ String generate(String schemaJson,
       refProvider: LocalRefProvider(dartModelJson ??
           File('schemas/dart_model.schema.json').readAsStringSync()));
   for (final def in schema.defs.entries) {
-    if (def.value.oneOf.isNotEmpty) {
-      result.add(_generateUnion(def.key, def.value.oneOf));
+    if (_isUnion(def.value)) {
+      result.add(_generateUnion(def.key, def.value.properties['value']!.oneOf));
     } else {
       result.add(_generateExtensionType(def.key, def.value));
     }
@@ -131,6 +131,14 @@ String _generateExtensionType(String name, JsonSchema definition) {
   result.writeln('}');
   return result.toString();
 }
+
+/// Whether [schema] represents a union type.
+///
+/// To be a union type it must have exactly two properties, "type" and "value",
+/// where "type" is a "string" and "value" is a "oneOf".
+bool _isUnion(JsonSchema schema) =>
+    schema.properties['type']?.schemaMap!['type'] == 'string' &&
+    schema.properties['value']?.oneOf != null;
 
 /// Generates a type called [name] that is a union of the specified [oneOf]
 /// types, which must all be `$ref`s to class definitions.
