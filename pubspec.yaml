@@ -76,7 +76,7 @@ dependency_overrides:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/front_end
-      ref: 3.6.0-114.0.dev
+      ref: f55692ab753621eb355f380e83f37e63c4a1c8e0
   frontend_server:
     git:
       url: https://github.com/dart-lang/sdk.git
