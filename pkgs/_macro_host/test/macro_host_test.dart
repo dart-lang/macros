@@ -52,9 +52,12 @@ void main() {
           await host.queryMacroPhases(packageConfig, macroImplementation), {3});
 
       expect(
-          await host.augment(macroName, AugmentRequest(phase: 2)),
+          await host.augment(
+              macroName,
+              AugmentRequest(
+                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo'))),
           AugmentResponse(augmentations: [
-            Augmentation(code: '// {uris: {package:foo/foo.dart: {}}}')
+            Augmentation(code: '// {"uris":{"package:foo/foo.dart":{}}}')
           ]));
     });
   });

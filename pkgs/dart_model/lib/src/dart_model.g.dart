@@ -142,9 +142,16 @@ extension type QualifiedName.fromJson(String string) {
   QualifiedName(String string) : this.fromJson(string);
 }
 
-/// Query about a corpus of Dart source code. TODO(davidmorgan): this is a placeholder.
+/// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
 extension type Query.fromJson(Map<String, Object?> node) {
-  Query() : this.fromJson({});
+  Query({
+    QualifiedName? target,
+  }) : this.fromJson({
+          if (target != null) 'target': target,
+        });
+
+  /// The class to query about.
+  QualifiedName get target => node['target'] as QualifiedName;
 }
 
 enum StaticTypeType {
