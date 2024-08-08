@@ -7,12 +7,17 @@ import 'package:dart_model/dart_model.dart';
 extension type AugmentRequest.fromJson(Map<String, Object?> node) {
   AugmentRequest({
     int? phase,
+    QualifiedName? target,
   }) : this.fromJson({
           if (phase != null) 'phase': phase,
+          if (target != null) 'target': target,
         });
 
   /// Which phase to run: 1, 2 or 3.
   int get phase => node['phase'] as int;
+
+  /// The class to augment. TODO(davidmorgan): expand to more types of target
+  QualifiedName get target => node['target'] as QualifiedName;
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
