@@ -1,8 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "oneOf": [
-    {"$ref": "#/$defs/AugmentRequest"},
-    {"$ref": "#/$defs/AugmentResponse"}
+  "anyOf": [
+    {
+      "$ref": "#/$defs/HostRequest"
+    },
+    {
+      "$ref": "#/$defs/MacroRequest"
+    },
+    {
+      "$ref": "#/$defs/Response"
+    }
   ],
   "$defs": {
     "AugmentRequest": {
@@ -22,7 +29,9 @@
         "augmentations": {
           "description": "The augmentations.",
           "type": "array",
-          "items": {"$ref": "file:dart_model.schema.json#/$defs/Augmentation"}
+          "items": {
+            "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+          }
         }
       }
     },
@@ -38,9 +47,18 @@
     },
     "HostRequest": {
       "$description": "A request sent from host to macro.",
-      "oneOf": [
-        {"$ref": "#/$defs/AugmentRequest"}
-      ]
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AugmentRequest"
+            }
+          ]
+        }
+      }
     },
     "MacroDescription": {
       "type": "object",
@@ -59,7 +77,9 @@
       "type": "object",
       "description": "Informs the host that a macro has started.",
       "properties": {
-        "macroDescription": {"$ref": "#/$defs/MacroDescription"}
+        "macroDescription": {
+          "$ref": "#/$defs/MacroDescription"
+        }
       }
     },
     "MacroStartedResponse": {
@@ -68,32 +88,60 @@
     },
     "MacroRequest": {
       "$description": "A request sent from macro to host.",
-      "oneOf": [
-        {"$ref": "#/$defs/MacroStartedRequest"},
-        {"$ref": "#/$defs/QueryRequest"}
-      ]
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/MacroStartedRequest"
+            },
+            {
+              "$ref": "#/$defs/QueryRequest"
+            }
+          ]
+        }
+      }
     },
     "QueryRequest": {
       "type": "object",
       "description": "Macro's query about the code it should augment.",
       "properties": {
-        "query": {"$ref": "file:dart_model.schema.json#/$defs/Query"}
+        "query": {
+          "$ref": "file:dart_model.schema.json#/$defs/Query"
+        }
       }
     },
     "QueryResponse": {
       "type": "object",
       "description": "Host's response to a [QueryRequest].",
       "properties": {
-        "model": {"$ref": "file:dart_model.schema.json#/$defs/Model"}
+        "model": {
+          "$ref": "file:dart_model.schema.json#/$defs/Model"
+        }
       }
     },
     "Response": {
       "$description": "A response to a [MacroRequest] or [HostRequest].",
-      "oneOf": [
-        {"$ref": "#/$defs/AugmentResponse"},
-        {"$ref": "#/$defs/MacroStartedResponse"},
-        {"$ref": "#/$defs/QueryResponse"}
-      ]
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AugmentResponse"
+            },
+            {
+              "$ref": "#/$defs/MacroStartedResponse"
+            },
+            {
+              "$ref": "#/$defs/QueryResponse"
+            }
+          ]
+        }
+      }
     }
   }
 }
