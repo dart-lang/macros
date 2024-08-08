@@ -10,7 +10,7 @@ abstract interface class HostService {
   ///
   /// Returns `null` if the request is of a type not handled by this service
   /// instance.
-  Future<Response?> handle(MacroRequest request);
+  Future<Response> handle(MacroRequest request);
 }
 
 /// Service provided by the macro to the host.

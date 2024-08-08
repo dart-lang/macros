@@ -12,8 +12,8 @@ import 'package:test/test.dart';
 void main() {
   group(MacroHost, () {
     test('hosts a macro, receives augmentations', () async {
-      final service = TestMacroHostService();
-      final host = await MacroHost.serve(service: service);
+      final service = TestQueryService();
+      final host = await MacroHost.serve(queryService: service);
 
       final macroName = QualifiedName(
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
@@ -29,8 +29,8 @@ void main() {
     });
 
     test('hosts a macro, responds to queries', () async {
-      final service = TestMacroHostService();
-      final host = await MacroHost.serve(service: service);
+      final service = TestQueryService();
+      final host = await MacroHost.serve(queryService: service);
 
       final macroName = QualifiedName(
           'package:_test_macros/query_class.dart#QueryClassImplementation');
@@ -48,13 +48,10 @@ void main() {
   });
 }
 
-class TestMacroHostService implements HostService {
+class TestQueryService implements QueryService {
   @override
-  Future<Response?> handle(MacroRequest request) async {
-    if (request.type == MacroRequestType.queryRequest) {
-      return Response.queryResponse(QueryResponse(
-          model: Model(uris: {'package:foo/foo.dart': Library()})));
-    }
-    return null;
+  Future<QueryResponse> handle(QueryRequest request) async {
+    return QueryResponse(
+        model: Model(uris: {'package:foo/foo.dart': Library()}));
   }
 }
