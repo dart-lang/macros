@@ -139,11 +139,18 @@
     },
     "StaticType": {
       "description": "A resolved type as it appears in Dart's type hierarchy.",
-      "oneOf": [
-        {"$ref": "#/$defs/NeverType"},
-        {"$ref": "#/$defs/NullableType"},
-        {"$ref": "#/$defs/VoidType"}
-      ]
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {"$ref": "#/$defs/NeverType"},
+            {"$ref": "#/$defs/NullableType"},
+            {"$ref": "#/$defs/VoidType"}
+          ]
+        }
+      }
     },
     "VoidType": {
       "description": "The type-hierarchy representation of the type `void`.",
