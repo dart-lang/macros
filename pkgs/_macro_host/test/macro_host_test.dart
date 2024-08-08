@@ -12,15 +12,21 @@ import 'package:test/test.dart';
 void main() {
   group(MacroHost, () {
     test('hosts a macro, receives augmentations', () async {
-      final service = TestQueryService();
-      final host = await MacroHost.serve(queryService: service);
-
-      final macroName = QualifiedName(
+      final macroName =
+          QualifiedName('package:_test_macros/declare_x_macro.dart#DeclareX');
+      final macroImplementation = QualifiedName(
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
+
+      final queryService = TestQueryService();
+      final host = await MacroHost.serve(
+          macroImplByName: {macroName.string: macroImplementation.string},
+          queryService: queryService);
+
       final packageConfig = Isolate.packageConfigSync!;
 
       expect(host.isMacro(packageConfig, macroName), true);
-      expect(await host.queryMacroPhases(packageConfig, macroName), {2});
+      expect(
+          await host.queryMacroPhases(packageConfig, macroImplementation), {2});
 
       expect(
           await host.augment(macroName, AugmentRequest(phase: 2)),
@@ -29,15 +35,21 @@ void main() {
     });
 
     test('hosts a macro, responds to queries', () async {
-      final service = TestQueryService();
-      final host = await MacroHost.serve(queryService: service);
-
-      final macroName = QualifiedName(
+      final macroName =
+          QualifiedName('package:_test_macros/query_class.dart#QueryClass');
+      final macroImplementation = QualifiedName(
           'package:_test_macros/query_class.dart#QueryClassImplementation');
+
+      final queryService = TestQueryService();
+      final host = await MacroHost.serve(
+          macroImplByName: {macroName.string: macroImplementation.string},
+          queryService: queryService);
+
       final packageConfig = Isolate.packageConfigSync!;
 
       expect(host.isMacro(packageConfig, macroName), true);
-      expect(await host.queryMacroPhases(packageConfig, macroName), {3});
+      expect(
+          await host.queryMacroPhases(packageConfig, macroImplementation), {3});
 
       expect(
           await host.augment(macroName, AugmentRequest(phase: 2)),

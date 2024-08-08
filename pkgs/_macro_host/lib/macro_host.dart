@@ -15,25 +15,33 @@ import 'package:macro_service/macro_service.dart';
 /// Tools that want to support macros, such as the Analyzer and the CFE, can
 /// do so by running a `MacroHost` and providing their own `HostService`.
 class MacroHost {
+  final Map<String, String> macroImplByName;
   final _HostService _hostService;
   final MacroServer macroServer;
   final MacroBuilder macroBuilder = MacroBuilder();
   final MacroRunner macroRunner = MacroRunner();
 
-  MacroHost._(this.macroServer, this._hostService);
+  MacroHost._(this.macroImplByName, this.macroServer, this._hostService);
 
   /// Starts a macro host with introspection queries handled by [queryService].
-  static Future<MacroHost> serve({required QueryService queryService}) async {
+  ///
+  /// [macroImplByName] is a map from macro annotation qualified name to macro
+  /// implementation qualified name, it's needed until this information is
+  /// available in package configs.
+  static Future<MacroHost> serve({
+    required Map<String, String> macroImplByName,
+    required QueryService queryService,
+  }) async {
     final hostService = _HostService(queryService);
     final server = await MacroServer.serve(service: hostService);
-    return MacroHost._(server, hostService);
+    return MacroHost._(macroImplByName, server, hostService);
   }
 
   /// Whether [name] is a macro according to that package's `pubspec.yaml`.
   bool isMacro(Uri packageConfig, QualifiedName name) {
     // TODO(language/3728): this is a placeholder, use package config when
     // available.
-    return true;
+    return macroImplByName.keys.contains(name.string);
   }
 
   /// Determines which phases the macro implemented at [name] runs in.
