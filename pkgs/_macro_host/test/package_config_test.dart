@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:_macro_host/src/package_config.dart';
@@ -10,14 +11,29 @@ import 'package:test/test.dart';
 
 void main() {
   group(MacroPackageConfig, () {
-    test('can look up macro implementations', () async {
+    test('can look up macro implementations from package URIs', () async {
       final packageConfig =
-          MacroPackageConfig.readUri(Isolate.packageConfigSync!);
+          MacroPackageConfig.readFromUri(Isolate.packageConfigSync!);
 
       expect(
           packageConfig
               .lookupMacroImplementation(QualifiedName(
                   'package:_test_macros/declare_x_macro.dart#DeclareX'))!
+              .string,
+          'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
+    });
+
+    test('can look up macro implementations from file URIs', () async {
+      final packageConfig =
+          MacroPackageConfig.readFromUri(Isolate.packageConfigSync!);
+
+      final sourceFileUri = Directory.current.uri
+          .resolve('../_test_macros/lib/declare_x_macro.dart');
+
+      expect(
+          packageConfig
+              .lookupMacroImplementation(
+                  QualifiedName('$sourceFileUri#DeclareX'))!
               .string,
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
     });

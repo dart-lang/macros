@@ -13,7 +13,7 @@ class MacroPackageConfig {
 
   MacroPackageConfig({required this.packageConfig});
 
-  factory MacroPackageConfig.readUri(Uri uri) => MacroPackageConfig(
+  factory MacroPackageConfig.readFromUri(Uri uri) => MacroPackageConfig(
       packageConfig:
           PackageConfig.parseBytes(File.fromUri(uri).readAsBytesSync(), uri));
 
@@ -38,6 +38,17 @@ class MacroPackageConfig {
   /// ```
   QualifiedName? lookupMacroImplementation(QualifiedName name) {
     var packageName = name.uri;
+    if (packageName.startsWith('dart:') ||
+        packageName.startsWith('org-dartlang-sdk:')) {
+      return null;
+    }
+    // TODO(davidmorgan): error handling when lookup fails.
+    if (packageName.startsWith('file:')) {
+      packageName =
+          packageConfig.toPackageUri(Uri.parse(packageName)).toString();
+    }
+    final libraryPathAndName =
+        'lib/${packageName.substring(packageName.indexOf('/') + 1)}#${name.name}';
     if (packageName.startsWith('package:') && packageName.contains('/')) {
       packageName = packageName.substring('package:'.length);
       packageName = packageName.substring(0, packageName.indexOf('/'));
@@ -45,14 +56,8 @@ class MacroPackageConfig {
       // TODO(davidmorgan): support macros outside lib dirs.
       throw ArgumentError('Name must start "package:" and have a path: $name');
     }
-    final libraryPath =
-        'lib/${name.string.substring(name.uri.indexOf('/') + 1)}';
 
-    final matchingPackage = packageConfig.packages
-        .where((p) => p.name == packageName)
-        .toList()
-        .singleOrNull;
-
+    final matchingPackage = packageConfig[packageName];
     if (matchingPackage == null) {
       throw StateError('Package "$packageName" not found in package config.');
     }
@@ -73,7 +78,7 @@ class MacroPackageConfig {
       implsByLibraryQualifiedName[items[2]] = items[3];
     }
 
-    final result = implsByLibraryQualifiedName[libraryPath];
+    final result = implsByLibraryQualifiedName[libraryPathAndName];
     return result == null ? null : QualifiedName(result);
   }
 }
