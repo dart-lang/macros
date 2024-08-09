@@ -53,8 +53,11 @@ extension type HostEndpoint.fromJson(Map<String, Object?> node) {
 }
 
 enum HostRequestType {
-  unknown,
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
   augmentRequest;
+
+  bool get isKnown => this != _unknown;
 }
 
 extension type HostRequest.fromJson(Map<String, Object?> node) {
@@ -66,7 +69,7 @@ extension type HostRequest.fromJson(Map<String, Object?> node) {
       case 'AugmentRequest':
         return HostRequestType.augmentRequest;
       default:
-        return HostRequestType.unknown;
+        return HostRequestType._unknown;
     }
   }
 
@@ -107,9 +110,12 @@ extension type MacroStartedResponse.fromJson(Map<String, Object?> node) {
 }
 
 enum MacroRequestType {
-  unknown,
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
   macroStartedRequest,
   queryRequest;
+
+  bool get isKnown => this != _unknown;
 }
 
 extension type MacroRequest.fromJson(Map<String, Object?> node) {
@@ -127,7 +133,7 @@ extension type MacroRequest.fromJson(Map<String, Object?> node) {
       case 'QueryRequest':
         return MacroRequestType.queryRequest;
       default:
-        return MacroRequestType.unknown;
+        return MacroRequestType._unknown;
     }
   }
 
@@ -167,11 +173,14 @@ extension type QueryResponse.fromJson(Map<String, Object?> node) {
 }
 
 enum ResponseType {
-  unknown,
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
   augmentResponse,
   errorResponse,
   macroStartedResponse,
   queryResponse;
+
+  bool get isKnown => this != _unknown;
 }
 
 extension type Response.fromJson(Map<String, Object?> node) {
@@ -197,7 +206,7 @@ extension type Response.fromJson(Map<String, Object?> node) {
       case 'QueryResponse':
         return ResponseType.queryResponse;
       default:
-        return ResponseType.unknown;
+        return ResponseType._unknown;
     }
   }
 

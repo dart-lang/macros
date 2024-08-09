@@ -198,10 +198,12 @@ String _generateUnion(
   // TODO(davidmorgan): add description(s).
   result
     ..writeln('enum ${name}Type {')
-    ..writeln(['unknown']
-        .followedBy(unionEntries.map((e) => _firstToLowerCase(e.$1)))
-        .join(', '))
-    ..writeln(';}');
+    ..writeln('  // Private so switches must have a default. See `isKnown`.')
+    ..writeln('_unknown,')
+    ..write(unionEntries.map((e) => _firstToLowerCase(e.$1)).join(', '))
+    ..writeln(';')
+    ..writeln('bool get isKnown => this != _unknown;')
+    ..writeln('}');
 
   // TODO(davidmorgan): add description.
   result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
@@ -222,7 +224,7 @@ String _generateUnion(
     result.writeln("case '$type': return ${name}Type.$lowerType;");
   }
   result
-    ..writeln('default: return ${name}Type.unknown;')
+    ..writeln('default: return ${name}Type._unknown;')
     ..writeln('}')
     ..writeln('}');
 
