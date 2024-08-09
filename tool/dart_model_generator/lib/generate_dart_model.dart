@@ -158,8 +158,12 @@ String _generateUnion(String name, List<JsonSchema> oneOf) {
   // TODO(davidmorgan): add description(s).
   result
     ..writeln('enum ${name}Type {')
-    ..writeln(['unknown'].followedBy(types.map(_firstToLowerCase)).join(', '))
-    ..writeln(';}');
+    ..writeln('  // Private so switches must have a default. See `isKnown`.')
+    ..writeln('_unknown,')
+    ..write(types.map(_firstToLowerCase).join(', '))
+    ..writeln(';')
+    ..writeln('bool get isKnown => this != _unknown;')
+    ..writeln('}');
 
   // TODO(davidmorgan): add description.
   result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
@@ -180,7 +184,7 @@ String _generateUnion(String name, List<JsonSchema> oneOf) {
     result.writeln("case '$type': return ${name}Type.$lowerType;");
   }
   result
-    ..writeln('default: return ${name}Type.unknown;')
+    ..writeln('default: return ${name}Type._unknown;')
     ..writeln('}')
     ..writeln('}');
 
