@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
@@ -18,7 +20,14 @@ class QueryClassImplementation implements Macro {
 
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
-    final model = await host.query(Query());
-    return AugmentResponse(augmentations: [Augmentation(code: '// $model')]);
+    // TODO(davidmorgan): make the host only run in the phases requested so
+    // that this is not needed.
+    if (request.phase != 3) return AugmentResponse(augmentations: []);
+
+    final model = await host.query(Query(
+      target: request.target,
+    ));
+    return AugmentResponse(
+        augmentations: [Augmentation(code: '// ${json.encode(model)}')]);
   }
 }
