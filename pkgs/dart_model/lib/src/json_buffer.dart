@@ -63,12 +63,7 @@ class JsonBuffer {
   final Map<_Pointer, String> _decodedStrings = {};
 
   /// The JSON data.
-  // TODO(davidmorgan): what's a good initial size?
-  // TODO(davidmorgan): maybe use `BytesBuilder`?
-  Uint8List _buffer = Uint8List(32);
-
-  /// The next free location to write to in the buffer.
-  int _nextFree = 0;
+  final _buffer = BytesBuilder(copy: false);
 
   /// Instantiates a buffer holding [map].
   JsonBuffer(Map<String, Object?> map) {
@@ -82,13 +77,25 @@ class JsonBuffer {
   ///
   /// The buffer is _not_ copied, unpredictable behavior will result if it is
   /// mutated.
-  JsonBuffer.deserialize(this._buffer) : _nextFree = _buffer.length;
+  JsonBuffer.deserialize(Uint8List bytes) {
+    _buffer.add(bytes);
+  }
 
   /// The JSON data.
   ///
   /// The buffer is _not_ copied, unpredictable behavior will result if it is
   /// mutated.
-  Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
+  Uint8List serialize() {
+    // BytesBuilder doesn't provide a way to access just the bytes without also
+    // clearing the builder, so we take the bytes and then just add them back.
+    //
+    // If there is more than one chunk currently in the buffer, this will end up
+    // creating a copy of all the bytes, into a single buffer. Subsequent calls
+    // however will always just have the one chunk, and will not copy.
+    var bytes = _buffer.takeBytes();
+    _buffer.add(bytes);
+    return bytes;
+  }
 
   /// Adds a `Map` to the buffer.
   void _addMap(Map<String, Object?> map) {
@@ -117,64 +124,47 @@ class JsonBuffer {
     // The size is immediately known, so reserve space for the map, allowing
     // full keys and values to be appended afterwards in any order.
     final length = keys.length;
-    final start = _nextFree;
-    _reserve(length * _intSize * 2 + _intSize);
-    _writeInt(start, _intSize, length);
+    _addInt(_intSize, length);
+    var mapBytes = _reserve(length * _intSize * 2);
 
     // Now iterate computing values. The keys and values are appended to the
     // buffer, and pointers to them written into the space that was reserved.
+    var offset = 0;
     for (var i = 0; i != length; ++i) {
       final key = keys[i];
-      _writeInt(start + _intSize + i * _intSize * 2, _intSize, _addString(key));
+      _writeInt(_intSize, _addString(key), mapBytes, offset: offset);
+      offset += _intSize;
       final value = lookup(key);
-      _writeInt(start + _intSize + i * _intSize * 2 + _intSize, _intSize,
-          _addValue(value));
+      _writeInt(_intSize, _addValue(value), mapBytes, offset: offset);
+      offset += _intSize;
     }
-  }
-
-  /// Reserves [bytes] number of bytes.
-  ///
-  /// Increases `_nextFree` accordingly. Expands the buffer if necessary.
-  void _reserve(int bytes) {
-    _nextFree += bytes;
-    while (_nextFree > _buffer.length) {
-      // TODO(davidmorgan): pass desired size to avoid multiple copies.
-      _expand();
-    }
-  }
-
-  /// Copies into a new buffer that's twice as big.
-  void _expand() {
-    final oldBuffer = _buffer;
-    _buffer = Uint8List(_buffer.length * 2);
-    _buffer.setRange(0, oldBuffer.length, oldBuffer);
   }
 
   /// Adds a value of unknown type.
   ///
   /// So, writes the type then the value.
+  ///
+  /// Returns a pointer to the front of the value;
   _Pointer _addValue(Object? value) {
-    final start = _nextFree;
-    if (value is String) {
-      _reserve(_typeSize);
-      _buffer[start] = Type.string.index;
-      // Strings are stored with an extra indirection to allow deduping.
-      _reserve(_intSize);
-      _writeInt(start + 1, _intSize, _addString(value));
-      return start;
+    var pointer = _buffer.length;
+    if (value is int) {
+      _buffer.addByte(Type.int.index);
+      _addInt(_intSize, value);
+    } else if (value is String) {
+      _buffer.addByte(Type.string.index);
+      // Must reserve space for the pointer first, before calling `_addString`.
+      var pointerBytes = _reserve(_intSize);
+      _writeInt(_intSize, _addString(value), pointerBytes);
     } else if (value is bool) {
-      _reserve(_typeSize);
-      _buffer[start] = Type.bool.index;
+      _buffer.addByte(Type.bool.index);
       _addBool(value);
-      return start;
     } else if (value is Map<String, Object?>) {
-      _reserve(_typeSize);
-      _buffer[start] = Type.map.index;
+      _buffer.addByte(Type.map.index);
       _addMap(value);
-      return start;
     } else {
       throw UnsupportedError('Unsupported value type: ${value.runtimeType}');
     }
+    return pointer;
   }
 
   /// Adds a `String`, returns a [_Pointer] to it.
@@ -184,74 +174,67 @@ class JsonBuffer {
   _Pointer _addString(String value) {
     final maybeResult = _seenStrings[value];
     if (maybeResult != null) return maybeResult;
-    final start = _nextFree;
+    final pointer = _buffer.length;
     // TODO(davidmorgan): it might be faster to write directly into the buffer.
     final bytes = utf8.encode(value);
     final length = bytes.length;
-    _reserve(_intSize + length);
-    _writeInt(start, _intSize, length);
-    _buffer.setRange(start + _intSize, start + _intSize + length, bytes);
-    _seenStrings[value] = start;
-    return start;
+    _addInt(_intSize, length);
+    _buffer.add(bytes);
+    _seenStrings[value] = pointer;
+    return pointer;
   }
 
   /// Adds a `bool`.
   _Pointer _addBool(bool value) {
-    final start = _nextFree;
-    _reserve(1);
-    _buffer[start] = value ? 1 : 0;
-    return start;
+    final pointer = _buffer.length;
+    _buffer.addByte(value ? 1 : 0);
+    return pointer;
   }
 
-  /// Adds an integer.
+  /// Adds an integer to [_buffer].
   ///
   /// TODO(davidomorgan): variable size ints don't easily work with the need to
   /// know map sizes in advance. Picking a fixed max size seems like an
   /// unwanted limitation. Do better!
-  void _writeInt(_Pointer pointer, int intSize, int value) {
-    if (intSize == 1) {
-      _buffer[pointer] = value;
-    } else if (intSize == 2) {
-      _buffer[pointer] = value & 0xff;
-      _buffer[pointer + 1] = (value >> 8) & 0xff;
-    } else if (intSize == 3) {
-      _buffer[pointer] = value & 0xff;
-      _buffer[pointer + 1] = (value >> 8) & 0xff;
-      _buffer[pointer + 2] = (value >> 16) & 0xff;
-    } else if (intSize == 4) {
-      _buffer[pointer] = value & 0xff;
-      _buffer[pointer + 1] = (value >> 8) & 0xff;
-      _buffer[pointer + 2] = (value >> 16) & 0xff;
-      _buffer[pointer + 3] = (value >> 24) & 0xff;
-    } else {
-      throw UnsupportedError('Integer size: $intSize');
+  void _addInt(int intSize, int value) {
+    var bytes = _reserve(intSize);
+    _writeInt(intSize, value, bytes);
+  }
+
+  /// Writes [value] to [bytes], using all the space in [bytes].
+  void _writeInt(int intSize, int value, Uint8List bytes, {int offset = 0}) {
+    for (var i = 0; i < intSize; i++) {
+      bytes[i + offset] = value >> 8 * i;
     }
+  }
+
+  /// Adds a new [Uint8List] of [size] to [_buffer] and returns it.
+  ///
+  /// This list can be filled in later, but must be filled in before any call
+  /// to [serialize]. Manipulations after [serialize] have undefined behavior.
+  Uint8List _reserve(int size) {
+    var bytes = Uint8List(size);
+    _buffer.add(bytes);
+    return bytes;
   }
 
   /// Reads the integer at [_Pointer].
   int _readInt(_Pointer pointer, int intSize) {
-    if (intSize == 1) {
-      return _buffer[pointer];
-    } else if (intSize == 2) {
-      return _buffer[pointer] + (_buffer[pointer + 1] << 8);
-    } else if (intSize == 3) {
-      return _buffer[pointer] +
-          (_buffer[pointer + 1] << 8) +
-          (_buffer[pointer + 2] << 16);
-    } else if (intSize == 4) {
-      return _buffer[pointer] +
-          (_buffer[pointer + 1] << 8) +
-          (_buffer[pointer + 2] << 16) +
-          (_buffer[pointer + 3] << 24);
-    } else {
-      throw UnsupportedError('Integer size: $intSize');
+    var bytes = serialize();
+    var value = 0;
+    for (var i = 0; i < intSize; i++) {
+      value ^= bytes[pointer + i] << (8 * i);
     }
+    return value;
   }
 
   /// Reads the value of unknown type at [_Pointer].
   Object? _readValue(_Pointer pointer) {
-    final type = Type.values[_buffer[pointer]];
+    var bytes = serialize();
+    final type = Type.values[bytes[pointer]];
     switch (type) {
+      case Type.int:
+        return _readInt(pointer + _typeSize, _intSize);
       case Type.string:
         return _readString(_readPointer(pointer + _typeSize));
       case Type.bool:
@@ -272,12 +255,12 @@ class JsonBuffer {
     if (maybeResult != null) return maybeResult;
     final length = _readInt(pointer, _intSize);
     return _decodedStrings[pointer] ??= utf8.decode(
-        _buffer.sublist(pointer + _intSize, pointer + _intSize + length));
+        serialize().sublist(pointer + _intSize, pointer + _intSize + length));
   }
 
   /// Reads the `bool` at [_Pointer].
   bool _readBool(_Pointer pointer) {
-    final value = _buffer[pointer];
+    final value = serialize()[pointer];
     if (value == 1) return true;
     if (value == 0) return false;
     throw StateError('Unexpected bool value: $value');
@@ -398,6 +381,7 @@ enum Type {
   string,
   bool,
   map,
+  int,
 }
 
 /// Bytes needed by [Type].

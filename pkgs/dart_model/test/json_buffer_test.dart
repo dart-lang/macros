@@ -7,6 +7,14 @@ import 'package:test/test.dart';
 
 void main() {
   group(JsonBuffer, () {
+    test('map with integer values', () {
+      final buffer =
+          JsonBuffer(LazyMap(['a', 'aa', 'bbb'], (key) => key.length));
+
+      expect(buffer.asMap.keys, ['a', 'aa', 'bbb']);
+      expect(buffer.asMap, {'a': 1, 'aa': 2, 'bbb': 3});
+    });
+
     test('map with string values', () {
       final buffer = JsonBuffer(
           LazyMap(['a', 'aa', 'bbb'], (key) => key.length.toString()));
