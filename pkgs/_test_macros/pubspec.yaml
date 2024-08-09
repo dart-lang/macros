@@ -16,3 +16,7 @@ dependencies:
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
   test: ^1.25.0
+
+# TODO(language/3728): use the real feature when there is one.
+# macro lib/declare_x_macro.dart#DeclareX package:_test_macros/declare_x_macro.dart#DeclareXImplementation
+# macro lib/query_class.dart#QueryClass package:_test_macros/query_class.dart#QueryClassImplementation

@@ -10,39 +10,42 @@ import 'package:_macro_server/macro_server.dart';
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'src/package_config.dart';
+
 /// Hosts macros: builds them, runs them, serves the macro service.
 ///
 /// Tools that want to support macros, such as the Analyzer and the CFE, can
 /// do so by running a `MacroHost` and providing their own `HostService`.
 class MacroHost {
-  final Map<String, String> macroImplByName;
+  final MacroPackageConfig macroPackageConfig;
   final _HostService _hostService;
   final MacroServer macroServer;
   final MacroBuilder macroBuilder = MacroBuilder();
   final MacroRunner macroRunner = MacroRunner();
 
-  MacroHost._(this.macroImplByName, this.macroServer, this._hostService);
+  MacroHost._(this.macroPackageConfig, this.macroServer, this._hostService);
 
   /// Starts a macro host with introspection queries handled by [queryService].
-  ///
-  /// [macroImplByName] is a map from macro annotation qualified name to macro
-  /// implementation qualified name, it's needed until this information is
-  /// available in package configs.
   static Future<MacroHost> serve({
-    required Map<String, String> macroImplByName,
+    required Uri packageConfig,
     required QueryService queryService,
   }) async {
+    final macroPackageConfig = MacroPackageConfig.readFromUri(packageConfig);
     final hostService = _HostService(queryService);
     final server = await MacroServer.serve(service: hostService);
-    return MacroHost._(macroImplByName, server, hostService);
+    return MacroHost._(macroPackageConfig, server, hostService);
   }
 
   /// Whether [name] is a macro according to that package's `pubspec.yaml`.
-  bool isMacro(Uri packageConfig, QualifiedName name) {
-    // TODO(language/3728): this is a placeholder, use package config when
-    // available.
-    return macroImplByName.keys.contains(name.string);
-  }
+  bool isMacro(QualifiedName name) => lookupMacroImplementation(name) != null;
+
+  /// Checks whether [name] is a macro annotation.
+  ///
+  /// If so, returns the qualified name of the macro implementation.
+  ///
+  /// If not, returns `null`.
+  QualifiedName? lookupMacroImplementation(QualifiedName name) =>
+      macroPackageConfig.lookupMacroImplementation(name);
 
   /// Determines which phases the macro implemented at [name] runs in.
   Future<Set<int>> queryMacroPhases(

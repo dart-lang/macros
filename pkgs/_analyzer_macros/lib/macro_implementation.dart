@@ -14,29 +14,21 @@ import 'package:macros/src/executor.dart' as injected;
 /// Injected macro implementation for the analyzer.
 class AnalyzerMacroImplementation implements injected.MacroImplementation {
   final Uri packageConfig;
-  final Map<String, String> macroImplByName;
   final MacroHost _host;
 
-  AnalyzerMacroImplementation._(
-      this.packageConfig, this.macroImplByName, this._host);
+  AnalyzerMacroImplementation._(this.packageConfig, this._host);
 
   /// Starts the macro host.
   ///
   /// [packageConfig] is the package config of the workspace of the code being
   /// edited.
-  ///
-  /// [macroImplByName] identifies macros, it's a placeholder until we identify
-  /// macros using package config. Keys are macro annotation qualified names
-  /// (`uri#name`) and values are macro implementation qualified names.
   static Future<AnalyzerMacroImplementation> start({
     required Uri packageConfig,
-    required Map<String, String> macroImplByName,
   }) async =>
       AnalyzerMacroImplementation._(
           packageConfig,
-          macroImplByName,
           await MacroHost.serve(
-              macroImplByName: macroImplByName,
+              packageConfig: packageConfig,
               queryService: AnalyzerQueryService()));
 
   @override
@@ -61,7 +53,7 @@ class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(_impl.packageConfig, QualifiedName('$uri#$name'));
+      _impl._host.isMacro(QualifiedName('$uri#$name'));
 }
 
 class AnalyzerMacroRunner implements injected.MacroRunner {
@@ -73,8 +65,7 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
   injected.RunningMacro run(Uri uri, String name) => AnalyzerRunningMacro.run(
       _impl,
       QualifiedName('$uri#$name'),
-      // Look up from the macro name to its implementation.
-      QualifiedName(_impl.macroImplByName['$uri#$name']!));
+      _impl._host.lookupMacroImplementation(QualifiedName('$uri#$name'))!);
 }
 
 class AnalyzerRunningMacro implements injected.RunningMacro {

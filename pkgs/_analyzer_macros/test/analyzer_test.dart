@@ -24,12 +24,7 @@ void main() {
           AnalysisContextCollection(includedPaths: [directory.path]);
       analysisContext = contextCollection.contexts.first;
       injected.macroImplementation = await AnalyzerMacroImplementation.start(
-          packageConfig: Isolate.packageConfigSync!,
-          macroImplByName: {
-            'package:_test_macros/declare_x_macro.dart#DeclareX':
-                'package:_test_macros/declare_x_macro.dart'
-                    '#DeclareXImplementation'
-          });
+          packageConfig: Isolate.packageConfigSync!);
     });
 
     test('discovers macros, runs them, applies augmentations', () async {
