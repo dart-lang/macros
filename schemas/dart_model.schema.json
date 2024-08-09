@@ -16,6 +16,45 @@
         }
       }
     },
+    "DynamicTypeDesc": {
+      "description": "The type-hierarchy representation of the type `dynamic`.",
+      "type": "null"
+    },
+    "FunctionTypeDesc": {
+      "description": "A static type representation for function types.",
+      "type": "object",
+      "properties": {
+        "returnType": {
+          "$ref": "#/$defs/StaticTypeDesc",
+          "description": "The return type of this function type."
+        },
+        "typeParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeParameterDesc"
+          },
+          "description": "Static type parameters introduced by this function type."
+        },
+        "requiredPositionalParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "optionalPositionalParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "namedParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NamedFunctionTypeParameter"
+          }
+        }
+      }
+    },
     "MetadataAnnotation": {
       "type": "object",
       "description": "A metadata annotation.",
@@ -86,16 +125,58 @@
         }
       }
     },
-    "NeverType": {
+    "NamedFunctionTypeParameter": {
+      "type": "object",
+      "description": "A resolved named parameter as part of a [FunctionType].",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/StaticTypeDesc"
+        }
+      }
+    },
+    "NamedRecordField": {
+      "type": "object",
+      "description": "A named field in a [RecordType] definition, consisting of the field name and the associated type.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/StaticTypeDesc"
+        }
+      }
+    },
+    "NamedStaticTypeDesc": {
+      "type": "object",
+      "description": "A resolved static type",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/QualifiedName"
+        },
+        "instantiation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        }
+      }
+    },
+    "NeverTypeDesc": {
       "type": "null",
       "description": "Representation of the bottom type [Never]."
     },
-    "NullableType": {
+    "NullableTypeDesc": {
       "type": "object",
       "description": "A Dart type of the form `T?` for an inner type `T`.",
       "properties": {
         "inner": {
-          "$ref": "#/$defs/StaticType"
+          "$ref": "#/$defs/StaticTypeDesc"
         }
       }
     },
@@ -143,24 +224,68 @@
         }
       }
     },
-    "StaticType": {
-      "description": "A resolved type as it appears in Dart's type hierarchy.",
+    "RecordTypeDesc": {
+      "type": "object",
+      "description": "A resolved record type in the type hierarchy.",
+      "properties": {
+        "positional": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "named": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NamedRecordField"
+          }
+        }
+      }
+    },
+    "StaticTypeDesc": {
+      "description": "A partially-resolved description of a type as it appears in Dart's type hierarchy.",
       "properties": {
         "type": {
           "type": "string"
         },
         "value": {
           "oneOf": [
-            {"$ref": "#/$defs/NeverType"},
-            {"$ref": "#/$defs/NullableType"},
-            {"$ref": "#/$defs/VoidType"}
+            {"$ref": "#/$defs/DynamicTypeDesc"},
+            {"$ref": "#/$defs/FunctionTypeDesc"},
+            {"$ref": "#/$defs/NeverTypeDesc"},
+            {"$ref": "#/$defs/NullableTypeDesc"},
+            {"$ref": "#/$defs/NamedStaticTypeDesc"},
+            {"$ref": "#/$defs/RecordTypeDesc"},
+            {"$ref": "#/$defs/TypeParameterTypeDesc"},
+            {"$ref": "#/$defs/VoidTypeDesc"}
           ]
         }
       }
     },
-    "VoidType": {
+    "StaticTypeParameterDesc": {
+      "description": "A resolved type parameter introduced by a [FunctionType].",
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "integer"
+        },
+        "bound": {
+          "$ref": "#/$defs/StaticTypeDesc"
+        }
+      }
+    },
+    "TypeParameterTypeDesc": {
+      "description": "A type formed by a reference to a type parameter.",
+      "type": "object",
+      "properties": {
+        "parameterId": {
+          "type": "integer"
+        }
+      }
+    },
+    "VoidTypeDesc": {
       "description": "The type-hierarchy representation of the type `void`.",
-      "type": "string"
+      "type": "null"
     }
   }
 }
