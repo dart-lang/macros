@@ -6,9 +6,14 @@ resolution: workspace
 environment:
   sdk: ^3.6.0-114.0.dev
 
+dependencies:
+  _macro_host: any
+  dart_model: any
+  front_end: any
+  macro_service: any
+  macros: any
+
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
-  front_end: any
   frontend_server: any
-  macros: ^0.1.2-main.4
   test: ^1.25.0

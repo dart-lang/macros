@@ -23,7 +23,7 @@ void main() {
       final contextCollection =
           AnalysisContextCollection(includedPaths: [directory.path]);
       analysisContext = contextCollection.contexts.first;
-      injected.macroImplementation = await MacroImplementation.start(
+      injected.macroImplementation = await AnalyzerMacroImplementation.start(
           packageConfig: Isolate.packageConfigSync!,
           macroImplByName: {
             'package:_test_macros/declare_x_macro.dart#DeclareX':
