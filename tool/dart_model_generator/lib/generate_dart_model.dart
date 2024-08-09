@@ -57,7 +57,7 @@ String generate(String schemaJson,
 
 /// The Dart type used to represent the JSON value for [definition].
 ///
-/// This is most commonly a `Map<String, Object?>, but can also be a JSON
+/// This is most commonly a `Map<String, Object?>`, but can also be a JSON
 /// primitive type for simpler definitions.
 String _dartJsonType(JsonSchema definition) {
   return switch (definition.type) {

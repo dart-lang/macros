@@ -92,7 +92,7 @@
     },
     "NullableType": {
       "type": "object",
-      "description": "A Dart type of the form `T?` for an inner type `T`",
+      "description": "A Dart type of the form `T?` for an inner type `T`.",
       "properties": {
         "inner": {
           "$ref": "#/$defs/StaticType"

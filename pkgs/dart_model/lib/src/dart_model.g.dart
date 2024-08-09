@@ -90,7 +90,7 @@ extension type NeverType.fromJson(Null _) {
   NeverType() : this.fromJson(null);
 }
 
-/// A Dart type of the form `T?` for an inner type `T`
+/// A Dart type of the form `T?` for an inner type `T`.
 extension type NullableType.fromJson(Map<String, Object?> node) {
   NullableType({
     StaticType? inner,
