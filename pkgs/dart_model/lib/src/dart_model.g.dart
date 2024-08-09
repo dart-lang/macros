@@ -85,6 +85,21 @@ extension type Model.fromJson(Map<String, Object?> node) {
   Map<String, Library> get uris => (node['uris'] as Map).cast();
 }
 
+/// Representation of the bottom type [Never].
+extension type NeverType.fromJson(Null _) {
+  NeverType() : this.fromJson(null);
+}
+
+/// A Dart type of the form `T?` for an inner type `T`.
+extension type NullableType.fromJson(Map<String, Object?> node) {
+  NullableType({
+    StaticType? inner,
+  }) : this.fromJson({
+          if (inner != null) 'inner': inner,
+        });
+  StaticType get inner => node['inner'] as StaticType;
+}
+
 /// Set of boolean properties.
 extension type Properties.fromJson(Map<String, Object?> node) {
   Properties({
@@ -130,4 +145,58 @@ extension type QualifiedName.fromJson(String string) {
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this is a placeholder.
 extension type Query.fromJson(Map<String, Object?> node) {
   Query() : this.fromJson({});
+}
+
+enum StaticTypeType {
+  unknown,
+  neverType,
+  nullableType,
+  voidType;
+}
+
+extension type StaticType.fromJson(Map<String, Object?> node) {
+  static StaticType neverType(NeverType neverType) =>
+      StaticType.fromJson({'type': 'NeverType', 'value': null});
+  static StaticType nullableType(NullableType nullableType) =>
+      StaticType.fromJson({'type': 'NullableType', 'value': nullableType.node});
+  static StaticType voidType(VoidType voidType) =>
+      StaticType.fromJson({'type': 'VoidType', 'value': voidType.string});
+  StaticTypeType get type {
+    switch (node['type'] as String) {
+      case 'NeverType':
+        return StaticTypeType.neverType;
+      case 'NullableType':
+        return StaticTypeType.nullableType;
+      case 'VoidType':
+        return StaticTypeType.voidType;
+      default:
+        return StaticTypeType.unknown;
+    }
+  }
+
+  NeverType get asNeverType {
+    if (node['type'] != 'NeverType') {
+      throw StateError('Not a NeverType.');
+    }
+    return NeverType.fromJson(node['value'] as Null);
+  }
+
+  NullableType get asNullableType {
+    if (node['type'] != 'NullableType') {
+      throw StateError('Not a NullableType.');
+    }
+    return NullableType.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  VoidType get asVoidType {
+    if (node['type'] != 'VoidType') {
+      throw StateError('Not a VoidType.');
+    }
+    return VoidType.fromJson(node['value'] as String);
+  }
+}
+
+/// The type-hierarchy representation of the type `void`.
+extension type VoidType.fromJson(String string) {
+  VoidType(String string) : this.fromJson(string);
 }
