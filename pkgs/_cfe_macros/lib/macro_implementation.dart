@@ -14,30 +14,21 @@ import 'package:macros/src/executor.dart' as injected;
 /// Injected macro implementation for the analyzer.
 class CfeMacroImplementation implements injected.MacroImplementation {
   final Uri packageConfig;
-  final Map<String, String> macroImplByName;
   final MacroHost _host;
 
-  CfeMacroImplementation._(
-      this.packageConfig, this.macroImplByName, this._host);
+  CfeMacroImplementation._(this.packageConfig, this._host);
 
   /// Starts the macro host.
   ///
   /// [packageConfig] is the package config of the workspace of the code being
   /// edited.
-  ///
-  /// [macroImplByName] identifies macros, it's a placeholder until we identify
-  /// macros using package config. Keys are macro annotation qualified names
-  /// (`uri#name`) and values are macro implementation qualified names.
   static Future<CfeMacroImplementation> start({
     required Uri packageConfig,
-    required Map<String, String> macroImplByName,
   }) async =>
       CfeMacroImplementation._(
           packageConfig,
-          macroImplByName,
           await MacroHost.serve(
-              macroImplByName: macroImplByName,
-              queryService: CfeQueryService()));
+              packageConfig: packageConfig, queryService: CfeQueryService()));
 
   @override
   injected.MacroPackageConfigs get packageConfigs =>
@@ -61,7 +52,7 @@ class CfeMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(_impl.packageConfig, QualifiedName('$uri#$name'));
+      _impl._host.isMacro(QualifiedName('$uri#$name'));
 }
 
 class CfeMacroRunner implements injected.MacroRunner {
@@ -73,8 +64,7 @@ class CfeMacroRunner implements injected.MacroRunner {
   injected.RunningMacro run(Uri uri, String name) => CfeRunningMacro.run(
       _impl,
       QualifiedName('$uri#$name'),
-      // Look up from the macro name to its implementation.
-      QualifiedName(_impl.macroImplByName['$uri#$name']!));
+      _impl._host.lookupMacroImplementation(QualifiedName('$uri#$name'))!);
 }
 
 class CfeRunningMacro implements injected.RunningMacro {

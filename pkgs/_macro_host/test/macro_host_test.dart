@@ -19,12 +19,12 @@ void main() {
 
       final queryService = TestQueryService();
       final host = await MacroHost.serve(
-          macroImplByName: {macroName.string: macroImplementation.string},
+          packageConfig: Isolate.packageConfigSync!,
           queryService: queryService);
 
       final packageConfig = Isolate.packageConfigSync!;
 
-      expect(host.isMacro(packageConfig, macroName), true);
+      expect(host.isMacro(macroName), true);
       expect(
           await host.queryMacroPhases(packageConfig, macroImplementation), {2});
 
@@ -42,12 +42,12 @@ void main() {
 
       final queryService = TestQueryService();
       final host = await MacroHost.serve(
-          macroImplByName: {macroName.string: macroImplementation.string},
+          packageConfig: Isolate.packageConfigSync!,
           queryService: queryService);
 
       final packageConfig = Isolate.packageConfigSync!;
 
-      expect(host.isMacro(packageConfig, macroName), true);
+      expect(host.isMacro(macroName), true);
       expect(
           await host.queryMacroPhases(packageConfig, macroImplementation), {3});
 
