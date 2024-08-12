@@ -148,10 +148,13 @@ extension type Query.fromJson(Map<String, Object?> node) {
 }
 
 enum StaticTypeType {
-  unknown,
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
   neverType,
   nullableType,
   voidType;
+
+  bool get isKnown => this != _unknown;
 }
 
 extension type StaticType.fromJson(Map<String, Object?> node) {
@@ -170,7 +173,7 @@ extension type StaticType.fromJson(Map<String, Object?> node) {
       case 'VoidType':
         return StaticTypeType.voidType;
       default:
-        return StaticTypeType.unknown;
+        return StaticTypeType._unknown;
     }
   }
 
