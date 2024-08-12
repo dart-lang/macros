@@ -5,10 +5,8 @@
 import 'package:_macro_host/macro_host.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/summary2/linked_element_factory.dart' as analyzer;
-// ignore: implementation_imports
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
-// ignore: implementation_imports
 
 // Hack to access analyzer internals via the introspector that's available.
 // TODO(davidmorgan): handle lifecycle, are these equivalent, do they need
