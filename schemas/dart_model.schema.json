@@ -135,7 +135,13 @@
     },
     "Query": {
       "type": "object",
-      "description": "Query about a corpus of Dart source code. TODO(davidmorgan): this is a placeholder."
+      "description": "Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.",
+      "properties": {
+        "target": {
+          "$comment": "The class to query about.",
+          "$ref": "#/$defs/QualifiedName"
+        }
+      }
     },
     "StaticType": {
       "description": "A resolved type as it appears in Dart's type hierarchy.",

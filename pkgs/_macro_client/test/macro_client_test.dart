@@ -73,12 +73,13 @@ void main() {
           '{"type":"MacroStartedRequest","value":'
           '{"macroDescription":{"runsInPhases":[3]}}}');
 
-      socket.writeln(
-          json.encode(HostRequest.augmentRequest(AugmentRequest(phase: 3))));
+      socket.writeln(json.encode(HostRequest.augmentRequest(AugmentRequest(
+          phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')))));
       final queryRequest = await responses.next;
       expect(
         queryRequest,
-        '{"type":"QueryRequest","value":{"query":{}}}',
+        '{"type":"QueryRequest","value":'
+        '{"query":{"target":"package:foo/foo.dart#Foo"}}}',
       );
 
       socket.writeln(json.encode(Response.queryResponse(QueryResponse(
@@ -88,7 +89,7 @@ void main() {
       expect(
         augmentRequest,
         '{"type":"AugmentResponse","value":'
-        '{"augmentations":[{"code":"// {uris: {package:foo/foo.dart: {}}}"}]}}',
+        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]}}',
       );
     });
   });

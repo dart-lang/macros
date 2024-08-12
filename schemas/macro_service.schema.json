@@ -19,6 +19,10 @@
         "phase": {
           "description": "Which phase to run: 1, 2 or 3.",
           "type": "integer"
+        },
+        "target": {
+          "$comment": "The class to augment. TODO(davidmorgan): expand to more types of target",
+          "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
         }
       }
     },
