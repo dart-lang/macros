@@ -124,18 +124,18 @@ class JsonBuffer {
     // The size is immediately known, so reserve space for the map, allowing
     // full keys and values to be appended afterwards in any order.
     final length = keys.length;
-    _addInt(_intSize, length);
-    var mapBytes = _reserve(length * _intSize * 2);
+    var bytes = _reserve(length * _intSize * 2 + _intSize);
+    _writeInt(_intSize, length, bytes);
 
     // Now iterate computing values. The keys and values are appended to the
     // buffer, and pointers to them written into the space that was reserved.
-    var offset = 0;
+    var offset = _intSize;
     for (var i = 0; i != length; ++i) {
       final key = keys[i];
-      _writeInt(_intSize, _addString(key), mapBytes, offset: offset);
+      _writeInt(_intSize, _addString(key), bytes, offset: offset);
       offset += _intSize;
       final value = lookup(key);
-      _writeInt(_intSize, _addValue(value), mapBytes, offset: offset);
+      _writeInt(_intSize, _addValue(value), bytes, offset: offset);
       offset += _intSize;
     }
   }
@@ -148,17 +148,20 @@ class JsonBuffer {
   _Pointer _addValue(Object? value) {
     var pointer = _buffer.length;
     if (value is int) {
-      _buffer.addByte(Type.int.index);
-      _addInt(_intSize, value);
+      var bytes = _reserve(_intSize + _typeSize);
+      _writeInt(_typeSize, Type.int.index, bytes);
+      _writeInt(_intSize, value, bytes, offset: 1);
     } else if (value is String) {
-      _buffer.addByte(Type.string.index);
       // Must reserve space for the pointer first, before calling `_addString`.
-      var pointerBytes = _reserve(_intSize);
-      _writeInt(_intSize, _addString(value), pointerBytes);
+      var bytes = _reserve(_typeSize + _intSize);
+      _writeInt(_typeSize, Type.string.index, bytes);
+      _writeInt(_intSize, _addString(value), bytes, offset: 1);
     } else if (value is bool) {
-      _buffer.addByte(Type.bool.index);
-      _addBool(value);
+      var bytes = _reserve(1 + _typeSize);
+      _writeInt(_typeSize, Type.bool.index, bytes);
+      _writeInt(1, value ? 1 : 0, bytes, offset: 1);
     } else if (value is Map<String, Object?>) {
+      // TODO: This allocates a single byte Uint8List which is pretty wasteful.
       _buffer.addByte(Type.map.index);
       _addMap(value);
     } else {
@@ -181,13 +184,6 @@ class JsonBuffer {
     _addInt(_intSize, length);
     _buffer.add(bytes);
     _seenStrings[value] = pointer;
-    return pointer;
-  }
-
-  /// Adds a `bool`.
-  _Pointer _addBool(bool value) {
-    final pointer = _buffer.length;
-    _buffer.addByte(value ? 1 : 0);
     return pointer;
   }
 
