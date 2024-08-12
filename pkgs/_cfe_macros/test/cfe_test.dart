@@ -29,20 +29,8 @@ void main() {
       tempDir = Directory.systemTemp.createTempSync('cfe_test');
 
       // Inject test macro implementation.
-      // TODO(davidmorgan): the CFE passes us a mix of absolute file paths and
-      // package URIs, fix this properly.
-      final macroFileUri = Directory.current.uri
-          .resolve('../_test_macros/lib/declare_x_macro.dart');
       injected.macroImplementation = await CfeMacroImplementation.start(
-          packageConfig: Isolate.packageConfigSync!,
-          macroImplByName: {
-            '$macroFileUri#DeclareX':
-                'package:_test_macros/declare_x_macro.dart'
-                    '#DeclareXImplementation',
-            'package:_test_macros/declare_x_macro.dart#DeclareX':
-                'package:_test_macros/declare_x_macro.dart'
-                    '#DeclareXImplementation'
-          });
+          packageConfig: Isolate.packageConfigSync!);
     });
 
     test('discovers macros, runs them, applies augmentations', () async {

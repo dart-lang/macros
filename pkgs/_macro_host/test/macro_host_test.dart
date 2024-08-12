@@ -19,12 +19,12 @@ void main() {
 
       final queryService = TestQueryService();
       final host = await MacroHost.serve(
-          macroImplByName: {macroName.string: macroImplementation.string},
+          packageConfig: Isolate.packageConfigSync!,
           queryService: queryService);
 
       final packageConfig = Isolate.packageConfigSync!;
 
-      expect(host.isMacro(packageConfig, macroName), true);
+      expect(host.isMacro(macroName), true);
       expect(
           await host.queryMacroPhases(packageConfig, macroImplementation), {2});
 
@@ -42,19 +42,22 @@ void main() {
 
       final queryService = TestQueryService();
       final host = await MacroHost.serve(
-          macroImplByName: {macroName.string: macroImplementation.string},
+          packageConfig: Isolate.packageConfigSync!,
           queryService: queryService);
 
       final packageConfig = Isolate.packageConfigSync!;
 
-      expect(host.isMacro(packageConfig, macroName), true);
+      expect(host.isMacro(macroName), true);
       expect(
           await host.queryMacroPhases(packageConfig, macroImplementation), {3});
 
       expect(
-          await host.augment(macroName, AugmentRequest(phase: 2)),
+          await host.augment(
+              macroName,
+              AugmentRequest(
+                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo'))),
           AugmentResponse(augmentations: [
-            Augmentation(code: '// {uris: {package:foo/foo.dart: {}}}')
+            Augmentation(code: '// {"uris":{"package:foo/foo.dart":{}}}')
           ]));
     });
   });

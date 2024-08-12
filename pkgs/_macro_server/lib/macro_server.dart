@@ -51,13 +51,13 @@ class MacroServer {
         .forEach((line) {
       final jsonData = json.decode(line) as Map<String, Object?>;
       final request = MacroRequest.fromJson(jsonData);
-      if (request.type != MacroRequestType.unknown) {
+      if (request.type.isKnown) {
         service
             .handle(request)
             .then((response) => socket.writeln(json.encode(response!.node)));
       }
       final response = Response.fromJson(jsonData);
-      if (response.type != ResponseType.unknown) {
+      if (response.type.isKnown) {
         _responseCompleter!.complete(response);
         _responseCompleter = null;
       }

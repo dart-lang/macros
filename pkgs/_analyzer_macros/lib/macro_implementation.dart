@@ -4,6 +4,8 @@
 
 import 'package:_macro_host/macro_host.dart';
 // ignore: implementation_imports
+import 'package:analyzer/src/summary2/macro_declarations.dart' as analyzer;
+// ignore: implementation_imports
 import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
@@ -11,32 +13,26 @@ import 'package:macros/macros.dart';
 // ignore: implementation_imports
 import 'package:macros/src/executor.dart' as injected;
 
+import 'query_service.dart';
+
 /// Injected macro implementation for the analyzer.
 class AnalyzerMacroImplementation implements injected.MacroImplementation {
   final Uri packageConfig;
-  final Map<String, String> macroImplByName;
   final MacroHost _host;
 
-  AnalyzerMacroImplementation._(
-      this.packageConfig, this.macroImplByName, this._host);
+  AnalyzerMacroImplementation._(this.packageConfig, this._host);
 
   /// Starts the macro host.
   ///
   /// [packageConfig] is the package config of the workspace of the code being
   /// edited.
-  ///
-  /// [macroImplByName] identifies macros, it's a placeholder until we identify
-  /// macros using package config. Keys are macro annotation qualified names
-  /// (`uri#name`) and values are macro implementation qualified names.
   static Future<AnalyzerMacroImplementation> start({
     required Uri packageConfig,
-    required Map<String, String> macroImplByName,
   }) async =>
       AnalyzerMacroImplementation._(
           packageConfig,
-          macroImplByName,
           await MacroHost.serve(
-              macroImplByName: macroImplByName,
+              packageConfig: packageConfig,
               queryService: AnalyzerQueryService()));
 
   @override
@@ -47,13 +43,6 @@ class AnalyzerMacroImplementation implements injected.MacroImplementation {
   injected.MacroRunner get runner => AnalyzerMacroRunner(this);
 }
 
-class AnalyzerQueryService implements QueryService {
-  @override
-  Future<QueryResponse> handle(QueryRequest request) async {
-    return QueryResponse();
-  }
-}
-
 class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
   final AnalyzerMacroImplementation _impl;
 
@@ -61,7 +50,7 @@ class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(_impl.packageConfig, QualifiedName('$uri#$name'));
+      _impl._host.isMacro(QualifiedName('$uri#$name'));
 }
 
 class AnalyzerMacroRunner implements injected.MacroRunner {
@@ -73,8 +62,7 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
   injected.RunningMacro run(Uri uri, String name) => AnalyzerRunningMacro.run(
       _impl,
       QualifiedName('$uri#$name'),
-      // Look up from the macro name to its implementation.
-      QualifiedName(_impl.macroImplByName['$uri#$name']!));
+      _impl._host.lookupMacroImplementation(QualifiedName('$uri#$name'))!);
 }
 
 class AnalyzerRunningMacro implements injected.RunningMacro {
@@ -102,8 +90,12 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+    introspector = declarationsPhaseIntrospector;
     return AnalyzerMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 2)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
   }
 
   @override
@@ -111,16 +103,24 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       MacroTarget target,
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+    introspector = definitionPhaseIntrospector;
     return AnalyzerMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 3)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
   }
 
   @override
   Future<AnalyzerMacroExecutionResult> executeTypesPhase(
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+    introspector = typePhaseIntrospector;
     return AnalyzerMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 1)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
   }
 }
 
@@ -171,4 +171,14 @@ class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
             .map((a) => DeclarationCode.fromParts([a.code]))
             .toList(),
       };
+}
+
+extension MacroTargetExtension on MacroTarget {
+  QualifiedName get qualifiedName {
+    final element =
+        ((this as Declaration).identifier as analyzer.IdentifierImpl).element!;
+    return QualifiedName(
+        '${element.library!.definingCompilationUnit.source.uri}#'
+        '${element.displayName}');
+  }
 }

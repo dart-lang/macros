@@ -71,16 +71,10 @@ class MacroClient {
       // part of the protocol+code, update implementation here and below.
     }
     final response = Response.fromJson(jsonData);
-    switch (response.type) {
-      case ResponseType.unknown:
-        // Ignore unknown response.
-        break;
-      default:
-        // TODO(davidmorgan): track requests and responses properly.
-        if (_responseCompleter != null) {
-          _responseCompleter!.complete(response);
-          _responseCompleter = null;
-        }
+    // TODO(davidmorgan): track requests and responses properly.
+    if (_responseCompleter != null) {
+      _responseCompleter!.complete(response);
+      _responseCompleter = null;
     }
   }
 }

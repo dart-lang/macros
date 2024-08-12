@@ -14,6 +14,7 @@ dependencies:
   _macro_server: any
   dart_model: any
   macro_service: any
+  package_config: ^2.1.0
 
 dev_dependencies:
   _test_macros: any
