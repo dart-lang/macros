@@ -5,11 +5,15 @@
 import 'package:_macro_host/macro_host.dart';
 import 'package:dart_model/dart_model.dart';
 // ignore: implementation_imports
+import 'package:front_end/src/kernel/macro/identifiers.dart' as cfe;
+// ignore: implementation_imports
 import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
 import 'package:macro_service/macro_service.dart';
 import 'package:macros/macros.dart';
 // ignore: implementation_imports
 import 'package:macros/src/executor.dart' as injected;
+
+import 'query_service.dart';
 
 /// Injected macro implementation for the analyzer.
 class CfeMacroImplementation implements injected.MacroImplementation {
@@ -36,13 +40,6 @@ class CfeMacroImplementation implements injected.MacroImplementation {
 
   @override
   injected.MacroRunner get macroRunner => CfeMacroRunner(this);
-}
-
-class CfeQueryService implements QueryService {
-  @override
-  Future<QueryResponse> handle(QueryRequest request) async {
-    return QueryResponse();
-  }
 }
 
 class CfeMacroPackageConfigs implements injected.MacroPackageConfigs {
@@ -91,24 +88,37 @@ class CfeRunningMacro implements injected.RunningMacro {
   Future<CfeMacroExecutionResult> executeDeclarationsPhase(MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): this is a hack to access CFE internals; remove.
+    introspector = declarationsPhaseIntrospector;
     return CfeMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 2)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
   }
 
   @override
   Future<CfeMacroExecutionResult> executeDefinitionsPhase(MacroTarget target,
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): this is a hack to access CFE internals; remove.
+    introspector = definitionPhaseIntrospector;
     return CfeMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 3)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
   }
 
   @override
   Future<CfeMacroExecutionResult> executeTypesPhase(
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
     await _started;
+    // TODO(davidmorgan): support the limited introspection that should be
+    // available in the types phase.
+    introspector = null;
     return CfeMacroExecutionResult(
-        target, await _impl._host.augment(name, AugmentRequest(phase: 1)));
+        target,
+        await _impl._host.augment(
+            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
   }
 }
 
@@ -162,4 +172,13 @@ class CfeMacroExecutionResult implements injected.MacroExecutionResult {
               .map((a) => DeclarationCode.fromParts([a.code]))
               .toList(),
       };
+}
+
+extension MacroTargetExtension on MacroTarget {
+  QualifiedName get qualifiedName {
+    final identifier = ((this as Declaration).identifier as cfe.IdentifierImpl)
+        .resolveIdentifier();
+    return QualifiedName('${identifier.uri}#'
+        '${identifier.name}');
+  }
 }
