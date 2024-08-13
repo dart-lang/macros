@@ -45,13 +45,15 @@ void main() {
           '{"type":"MacroStartedRequest","value":'
           '{"macroDescription":{"runsInPhases":[2]}}}');
 
-      socket.writeln(
-          json.encode(HostRequest.augmentRequest(AugmentRequest(phase: 2))));
+      var requestId = nextRequestId;
+      socket.writeln(json.encode(
+          HostRequest.augmentRequest(AugmentRequest(phase: 2), id: requestId)));
       final augmentResponse = await responses.next;
       expect(
           augmentResponse,
           '{"type":"AugmentResponse","value":'
-          '{"augmentations":[{"code":"int get x => 3;"}]}}');
+          '{"augmentations":[{"code":"int get x => 3;"}]},'
+          '"requestId":$requestId}');
     });
 
     test('sends query requests to host, sends reponse', () async {
@@ -73,23 +75,30 @@ void main() {
           '{"type":"MacroStartedRequest","value":'
           '{"macroDescription":{"runsInPhases":[3]}}}');
 
-      socket.writeln(json.encode(HostRequest.augmentRequest(AugmentRequest(
-          phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')))));
+      var requestId = nextRequestId;
+      socket.writeln(json.encode(HostRequest.augmentRequest(
+          AugmentRequest(
+              phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')),
+          id: nextRequestId)));
       final queryRequest = await responses.next;
       expect(
         queryRequest,
         '{"type":"QueryRequest","value":'
-        '{"query":{"target":"package:foo/foo.dart#Foo"}}}',
+        '{"query":{"target":"package:foo/foo.dart#Foo"}},'
+        '"id":$requestId}',
       );
 
-      socket.writeln(json.encode(Response.queryResponse(QueryResponse(
-          model: Model(uris: {'package:foo/foo.dart': Library()})))));
+      socket.writeln(json.encode(Response.queryResponse(
+          QueryResponse(
+              model: Model(uris: {'package:foo/foo.dart': Library()})),
+          requestId: requestId)));
 
       final augmentRequest = await responses.next;
       expect(
         augmentRequest,
         '{"type":"AugmentResponse","value":'
-        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]}}',
+        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]},'
+        '"requestId":$requestId}',
       );
     });
   });

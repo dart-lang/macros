@@ -26,11 +26,13 @@ void run() {
 
 /// Generates and returns code for [schemaJson].
 String generate(String schemaJson,
-    {bool importDartModel = false, String? dartModelJson}) {
+    {bool importDartModel = false,
+    bool importMacroService = false,
+    String? dartModelJson}) {
   final result = <String>[
     '// This file is generated. To make changes edit schemas/*.schema.json',
     '// then run from the repo root: '
-        'dart tool/model_generator/bin/main.dart',
+        'dart tool/dart_model_generator/bin/main.dart',
     '',
     if (importDartModel) "import 'package:dart_model/dart_model.dart';",
   ];
@@ -45,7 +47,7 @@ String generate(String schemaJson,
     if (_isUnion(value)) {
       result.add(_generateUnion(
         key,
-        value.properties['value']!.oneOf,
+        value,
         allDefinitions: allDefinitions,
       ));
     } else {
@@ -64,17 +66,6 @@ String _dartJsonType(JsonSchema definition) {
     SchemaType.object => 'Map<String, Object?>',
     SchemaType.string => 'String',
     SchemaType.nullValue => 'Null',
-    _ => throw UnsupportedError('Unsupported type: ${definition.type}'),
-  };
-}
-
-/// Expands a [wrapper] expression evaluating to a generated extension type
-/// instance to obtain the underlying JSON representation.
-String _dartWrapperToJson(String wrapper, JsonSchema definition) {
-  return switch (definition.type) {
-    SchemaType.object => '$wrapper.node',
-    SchemaType.string => '$wrapper.string',
-    SchemaType.nullValue => 'null',
     _ => throw UnsupportedError('Unsupported type: ${definition.type}'),
   };
 }
@@ -108,22 +99,11 @@ String _generateExtensionType(String name, JsonSchema definition) {
       } else {
         result.writeln('  $name({');
         for (final property in propertyMetadatas) {
-          result.writeln(switch (property.type) {
-            PropertyType.object =>
-              '${property.elementTypeName}? ${property.name},',
-            PropertyType.bool => 'bool? ${property.name},',
-            PropertyType.string => 'String? ${property.name},',
-            PropertyType.integer => 'int? ${property.name},',
-            PropertyType.list =>
-              'List<${property.elementTypeName}>? ${property.name},',
-            PropertyType.map =>
-              'Map<String, ${property.elementTypeName}>? ${property.name},',
-          });
+          result.writeParameter(property, definition);
         }
         result.writeln('}) : this.fromJson({');
         for (final property in propertyMetadatas) {
-          result.writeln('if (${property.name} != null) '
-              "'${property.name}': ${property.name},");
+          result.writeMapElement(property, definition);
         }
         result.writeln('});');
       }
@@ -135,33 +115,8 @@ String _generateExtensionType(String name, JsonSchema definition) {
       throw UnsupportedError('Unsupported type: ${definition.type}');
   }
 
-  // Generate a getter for every field that looks up in the JSON and "creates"
-  // extension types or casts collections as needed. The getters assume the
-  // data is present and will throw if it's not.
   for (final property in propertyMetadatas) {
-    if (property.description != null) {
-      result.writeln('/// ${property.description}');
-    }
-    result.writeln(switch (property.type) {
-      PropertyType.object =>
-        // TODO(davidmorgan): use the extension type constructor instead of
-        // casting.
-        '${property.elementTypeName} get ${property.name} => '
-            'node[\'${property.name}\'] '
-            'as ${property.elementTypeName};',
-      PropertyType.bool => 'bool get ${property.name} => '
-          'node[\'${property.name}\'] as bool;',
-      PropertyType.string => 'String get ${property.name} => '
-          'node[\'${property.name}\'] as String;',
-      PropertyType.integer => 'int get ${property.name} => '
-          'node[\'${property.name}\'] as int;',
-      PropertyType.list =>
-        'List<${property.elementTypeName}> get ${property.name} => '
-            '(node[\'${property.name}\'] as List).cast();',
-      PropertyType.map =>
-        'Map<String, ${property.elementTypeName}> get ${property.name} => '
-            '(node[\'${property.name}\'] as Map).cast();',
-    });
+    result.writePropertyGetter(property);
   }
   result.writeln('}');
   return result.toString();
@@ -175,7 +130,7 @@ bool _isUnion(JsonSchema schema) =>
     schema.properties['type']?.schemaMap!['type'] == 'string' &&
     schema.properties['value']?.oneOf != null;
 
-/// Generates a type called [name] that is a union of the specified [oneOf]
+/// Generates a type called [name] that is a union of the specified `oneOf`
 /// types, which must all be `$ref`s to class definitions.
 ///
 /// An enum is generated next to it called `${name}Type` with one value for
@@ -184,12 +139,14 @@ bool _isUnion(JsonSchema schema) =>
 /// The union type has a `type` getter that returns an instance of this enum,
 /// and `asFoo` getters that "cast" to each type.
 ///
-/// On the wire the union type is: `{"type": <name>, "value": <value>}`
+/// On the wire the union type is: `{"type": <name>, "value": <value>}` and
+/// may have additional properties as well.
 String _generateUnion(
   String name,
-  List<JsonSchema> oneOf, {
+  JsonSchema definition, {
   required Map<String, JsonSchema> allDefinitions,
 }) {
+  final oneOf = definition.properties['value']!.oneOf;
   final result = StringBuffer();
   final unionEntries = oneOf
       .map((s) => _refName(s.schemaMap![r'$ref'] as String))
@@ -205,15 +162,33 @@ String _generateUnion(
     ..writeln('bool get isKnown => this != _unknown;')
     ..writeln('}');
 
+  final extraPropertyMetadatas = [
+    for (var MapEntry(:key, :value) in definition.properties.entries)
+      // These are handled specially for union types.
+      if (key != 'type' && key != 'value') _readPropertyMetadata(key, value)
+  ];
+
   // TODO(davidmorgan): add description.
   result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
-  for (final (type, def) in unionEntries) {
+  for (final (type, _) in unionEntries) {
     final lowerType = _firstToLowerCase(type);
+    result.writeln('static $name $lowerType($type $lowerType');
+    if (extraPropertyMetadatas.isNotEmpty) {
+      result.writeln(', {');
+      for (final property in extraPropertyMetadatas) {
+        result.writeParameter(property, definition);
+      }
+      result.write('}');
+    }
     result
-      ..writeln('static $name $lowerType($type $lowerType) =>')
+      ..writeln(') =>')
       ..writeln('$name.fromJson({')
       ..writeln("'type': '$type',")
-      ..writeln("'value': ${_dartWrapperToJson(lowerType, def)}});");
+      ..writeln("'value': $lowerType,");
+    for (final property in extraPropertyMetadatas) {
+      result.writeMapElement(property, definition);
+    }
+    result.writeln('});');
   }
 
   result
@@ -237,6 +212,11 @@ String _generateUnion(
           "return $type.fromJson(node['value'] as ${_dartJsonType(schema)});")
       ..writeln('}');
   }
+
+  for (final property in extraPropertyMetadatas) {
+    result.writePropertyGetter(property);
+  }
+
   result.writeln('}');
 
   return result.toString();
@@ -360,4 +340,66 @@ class LocalRefProvider implements RefProvider<SyncJsonProvider> {
         }
         return json.decode(dartModelJson) as Map<String, Object?>;
       };
+}
+
+extension on StringBuffer {
+  void writeType(PropertyMetadata property, {bool nullable = false}) {
+    write(switch (property.type) {
+      PropertyType.object => property.elementTypeName,
+      PropertyType.bool => 'bool',
+      PropertyType.string => 'String',
+      PropertyType.integer => 'int',
+      PropertyType.list => 'List<${property.elementTypeName}>',
+      PropertyType.map => 'Map<String, ${property.elementTypeName}>',
+    });
+    if (nullable) write('?');
+  }
+
+  /// Writes a map element for [property], assuming there is a variable in
+  /// scope with the same name (usually, a function parameter).
+  ///
+  /// If the property is not required, the element will be omitted if the
+  /// variable is null.
+  void writeMapElement(PropertyMetadata property, JsonSchema schema) {
+    if (!schema.propertyRequired(property.name)) {
+      write('if (${property.name} != null) ');
+    }
+    writeln("'${property.name}': ${property.name},");
+  }
+
+  /// Writes a named function parameter for [property].
+  ///
+  /// If the property is required, it will be non-nullable and marked as
+  /// `required`, otherwise it will be nullable and optional.
+  void writeParameter(PropertyMetadata property, JsonSchema schema) {
+    var required = schema.propertyRequired(property.name);
+    if (required) write('required ');
+    writeType(property, nullable: !required);
+    writeln(' ${property.name},');
+  }
+
+  /// Writes a getter for [property] that looks up in the JSON and "creates"
+  /// extension types or casts collections as needed. The getters assume the
+  /// data is present and will throw if it's not, and return types are always
+  /// non-nullable.
+  void writePropertyGetter(PropertyMetadata property) {
+    if (property.description != null) {
+      writeln('/// ${property.description}');
+    }
+    writeType(property);
+    write(' get ${property.name} => ');
+    switch (property.type) {
+      case PropertyType.object ||
+            PropertyType.bool ||
+            PropertyType.string ||
+            PropertyType.integer:
+        write("node['${property.name}'] as ");
+        writeType(property);
+      case PropertyType.list:
+        write("(node['${property.name}'] as List).cast()");
+      case PropertyType.map:
+        write("(node['${property.name}'] as Map).cast()");
+    }
+    writeln(';');
+  }
 }

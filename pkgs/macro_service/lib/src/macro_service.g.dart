@@ -1,5 +1,5 @@
 // This file is generated. To make changes edit schemas/*.schema.json
-// then run from the repo root: dart tool/model_generator/bin/main.dart
+// then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 import 'package:dart_model/dart_model.dart';
 
@@ -66,9 +66,15 @@ enum HostRequestType {
 }
 
 extension type HostRequest.fromJson(Map<String, Object?> node) {
-  static HostRequest augmentRequest(AugmentRequest augmentRequest) =>
-      HostRequest.fromJson(
-          {'type': 'AugmentRequest', 'value': augmentRequest.node});
+  static HostRequest augmentRequest(
+    AugmentRequest augmentRequest, {
+    required int id,
+  }) =>
+      HostRequest.fromJson({
+        'type': 'AugmentRequest',
+        'value': augmentRequest,
+        'id': id,
+      });
   HostRequestType get type {
     switch (node['type'] as String) {
       case 'AugmentRequest':
@@ -84,6 +90,9 @@ extension type HostRequest.fromJson(Map<String, Object?> node) {
     }
     return AugmentRequest.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  /// The id of this request, must be returned in responses.
+  int get id => node['id'] as int;
 }
 
 /// Information about a macro that the macro provides to the host.
@@ -125,12 +134,23 @@ enum MacroRequestType {
 
 extension type MacroRequest.fromJson(Map<String, Object?> node) {
   static MacroRequest macroStartedRequest(
-          MacroStartedRequest macroStartedRequest) =>
-      MacroRequest.fromJson(
-          {'type': 'MacroStartedRequest', 'value': macroStartedRequest.node});
-  static MacroRequest queryRequest(QueryRequest queryRequest) =>
-      MacroRequest.fromJson(
-          {'type': 'QueryRequest', 'value': queryRequest.node});
+    MacroStartedRequest macroStartedRequest, {
+    required int id,
+  }) =>
+      MacroRequest.fromJson({
+        'type': 'MacroStartedRequest',
+        'value': macroStartedRequest,
+        'id': id,
+      });
+  static MacroRequest queryRequest(
+    QueryRequest queryRequest, {
+    required int id,
+  }) =>
+      MacroRequest.fromJson({
+        'type': 'QueryRequest',
+        'value': queryRequest,
+        'id': id,
+      });
   MacroRequestType get type {
     switch (node['type'] as String) {
       case 'MacroStartedRequest':
@@ -155,6 +175,9 @@ extension type MacroRequest.fromJson(Map<String, Object?> node) {
     }
     return QueryRequest.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  /// The id of this request, must be returned in responses.
+  int get id => node['id'] as int;
 }
 
 /// Macro's query about the code it should augment.
@@ -189,17 +212,42 @@ enum ResponseType {
 }
 
 extension type Response.fromJson(Map<String, Object?> node) {
-  static Response augmentResponse(AugmentResponse augmentResponse) =>
-      Response.fromJson(
-          {'type': 'AugmentResponse', 'value': augmentResponse.node});
-  static Response errorResponse(ErrorResponse errorResponse) =>
-      Response.fromJson({'type': 'ErrorResponse', 'value': errorResponse.node});
+  static Response augmentResponse(
+    AugmentResponse augmentResponse, {
+    required int requestId,
+  }) =>
+      Response.fromJson({
+        'type': 'AugmentResponse',
+        'value': augmentResponse,
+        'requestId': requestId,
+      });
+  static Response errorResponse(
+    ErrorResponse errorResponse, {
+    required int requestId,
+  }) =>
+      Response.fromJson({
+        'type': 'ErrorResponse',
+        'value': errorResponse,
+        'requestId': requestId,
+      });
   static Response macroStartedResponse(
-          MacroStartedResponse macroStartedResponse) =>
-      Response.fromJson(
-          {'type': 'MacroStartedResponse', 'value': macroStartedResponse.node});
-  static Response queryResponse(QueryResponse queryResponse) =>
-      Response.fromJson({'type': 'QueryResponse', 'value': queryResponse.node});
+    MacroStartedResponse macroStartedResponse, {
+    required int requestId,
+  }) =>
+      Response.fromJson({
+        'type': 'MacroStartedResponse',
+        'value': macroStartedResponse,
+        'requestId': requestId,
+      });
+  static Response queryResponse(
+    QueryResponse queryResponse, {
+    required int requestId,
+  }) =>
+      Response.fromJson({
+        'type': 'QueryResponse',
+        'value': queryResponse,
+        'requestId': requestId,
+      });
   ResponseType get type {
     switch (node['type'] as String) {
       case 'AugmentResponse':
@@ -242,4 +290,7 @@ extension type Response.fromJson(Map<String, Object?> node) {
     }
     return QueryResponse.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  /// The id of the [AugmentRequest] this is responding to.
+  int get requestId => node['requestId'] as int;
 }
