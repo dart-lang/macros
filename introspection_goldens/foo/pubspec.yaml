@@ -1,0 +1,9 @@
+name: foo
+publish-to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0-114.0.dev
+
+dependencies:
+  _test_macros: any

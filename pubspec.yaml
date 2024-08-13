@@ -5,6 +5,7 @@ dev_dependencies:
   dart_flutter_team_lints: ^3.1.0
 publish_to: none
 workspace:
+  - introspection_goldens/foo
   - pkgs/_analyzer_macros
   - pkgs/_analyzer_macros/test/package_under_test
   - pkgs/_cfe_macros

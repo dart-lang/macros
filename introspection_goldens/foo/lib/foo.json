@@ -1,0 +1,34 @@
+{
+  "uris": {
+    "package:foo/foo.dart": {
+      "scopes": {
+        "Foo": {
+          "members": {
+            "bar": {
+              "properties": {
+                "isAbstract": false,
+                "isGetter": false,
+                "isField": true,
+                "isMethod": false,
+                "isStatic": false
+              }
+            }
+          }
+        },
+        "Bar": {
+          "members": {
+            "bar": {
+              "properties": {
+                "isAbstract": false,
+                "isGetter": false,
+                "isField": true,
+                "isMethod": false,
+                "isStatic": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
