@@ -112,9 +112,8 @@ class CfeRunningMacro implements injected.RunningMacro {
   Future<CfeMacroExecutionResult> executeTypesPhase(
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
     await _started;
-    // TODO(davidmorgan): support the limited introspection that should be
-    // available in the types phase.
-    introspector = null;
+    // TODO(davidmorgan): this is a hack to access CFE internals; remove.
+    introspector = typePhaseIntrospector;
     return CfeMacroExecutionResult(
         target,
         await _impl._host.augment(
