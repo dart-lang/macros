@@ -8,6 +8,7 @@ import 'dart:isolate';
 import 'package:_cfe_macros/macro_implementation.dart';
 import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
 import 'package:frontend_server/compute_kernel.dart';
+import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -30,6 +31,7 @@ void main() {
 
       // Inject test macro implementation.
       injected.macroImplementation = await CfeMacroImplementation.start(
+          protocol: Protocol(encoding: 'json'),
           packageConfig: Isolate.packageConfigSync!);
     });
 

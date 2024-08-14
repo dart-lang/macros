@@ -23,6 +23,15 @@ void main() {
       expect(buffer.asMap, {'a': false, 'aa': true, 'bbb': false});
     });
 
+    test('map with int values', () {
+      final buffer = JsonBuffer(
+          LazyMap(['1', '1000', '1000000', '1000000000'], int.parse));
+
+      expect(buffer.asMap.keys, ['1', '1000', '1000000', '1000000000']);
+      expect(buffer.asMap,
+          {'1': 1, '1000': 1000, '1000000': 1000000, '1000000000': 1000000000});
+    });
+
     test('map with map values', () {
       final buffer = JsonBuffer(LazyMap(
           ['a', 'aa', 'bbb'],
@@ -34,6 +43,18 @@ void main() {
         'a': {'a1': '1', 'a2': '2'},
         'aa': {'aa1': '1', 'aa2': '2'},
         'bbb': {'bbb1': '1', 'bbb2': '2'},
+      });
+    });
+
+    test('map with list values', () {
+      final buffer = JsonBuffer(
+          LazyMap(['a', 'aa', 'bbb'], (key) => ['${key}1', '${key}2']));
+
+      expect(buffer.asMap.keys, ['a', 'aa', 'bbb']);
+      expect(buffer.asMap, {
+        'a': ['a1', 'a2'],
+        'aa': ['aa1', 'aa2'],
+        'bbb': ['bbb1', 'bbb2'],
       });
     });
 

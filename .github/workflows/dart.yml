@@ -1,4 +1,4 @@
-# Created with package:mono_repo v6.6.1
+# Created with package:mono_repo v6.6.2
 name: Dart CI
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
         name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
       - name: mono_repo self validate
-        run: dart pub global activate mono_repo 6.6.1
+        run: dart pub global activate mono_repo 6.6.2
       - name: mono_repo self validate
         run: dart pub global run mono_repo generate --validate
   job_002:
@@ -696,6 +696,41 @@ jobs:
       - job_003
       - job_004
   job_013:
+    name: "unit_test; linux; Dart 3.6.0-114.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Pub hosted dependencies
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: "~/.pub-cache/hosted"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-114.0.dev;packages:pkgs/macro_service;commands:test"
+          restore-keys: |
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-114.0.dev;packages:pkgs/macro_service
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-114.0.dev
+            os:ubuntu-latest;pub-cache-hosted
+            os:ubuntu-latest
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+        with:
+          sdk: "3.6.0-114.0.dev"
+      - id: checkout
+        name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - id: pkgs_macro_service_pub_upgrade
+        name: pkgs/macro_service; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+      - name: "pkgs/macro_service; dart test --test-randomize-ordering-seed=random"
+        run: "dart test --test-randomize-ordering-seed=random"
+        if: "always() && steps.pkgs_macro_service_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+    needs:
+      - job_001
+      - job_002
+      - job_003
+      - job_004
+  job_014:
     name: "unit_test; linux; Dart 3.6.0-114.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -730,7 +765,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_014:
+  job_015:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -765,7 +800,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_015:
+  job_016:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -800,7 +835,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_016:
+  job_017:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -835,7 +870,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_017:
+  job_018:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -870,7 +905,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_018:
+  job_019:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -905,7 +940,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_019:
+  job_020:
     name: "unit_test; linux; Dart dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -940,7 +975,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_020:
+  job_021:
     name: "unit_test; linux; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -975,7 +1010,42 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_021:
+  job_022:
+    name: "unit_test; linux; Dart dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Pub hosted dependencies
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: "~/.pub-cache/hosted"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/macro_service;commands:test"
+          restore-keys: |
+            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/macro_service
+            os:ubuntu-latest;pub-cache-hosted;sdk:dev
+            os:ubuntu-latest;pub-cache-hosted
+            os:ubuntu-latest
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+        with:
+          sdk: dev
+      - id: checkout
+        name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - id: pkgs_macro_service_pub_upgrade
+        name: pkgs/macro_service; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+      - name: "pkgs/macro_service; dart test --test-randomize-ordering-seed=random"
+        run: "dart test --test-randomize-ordering-seed=random"
+        if: "always() && steps.pkgs_macro_service_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+    needs:
+      - job_001
+      - job_002
+      - job_003
+      - job_004
+  job_023:
     name: "unit_test; linux; Dart dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
@@ -1010,7 +1080,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_022:
+  job_024:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1035,7 +1105,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_023:
+  job_025:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1060,7 +1130,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_024:
+  job_026:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1085,7 +1155,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_025:
+  job_027:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1110,7 +1180,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_026:
+  job_028:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1135,7 +1205,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_027:
+  job_029:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1160,7 +1230,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_028:
+  job_030:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1185,7 +1255,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_029:
+  job_031:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1210,7 +1280,32 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_030:
+  job_032:
+    name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    runs-on: windows-latest
+    steps:
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+        with:
+          sdk: "3.6.0-114.0.dev"
+      - id: checkout
+        name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - id: pkgs_macro_service_pub_upgrade
+        name: pkgs/macro_service; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+      - name: "pkgs/macro_service; dart test --test-randomize-ordering-seed=random"
+        run: "dart test --test-randomize-ordering-seed=random"
+        if: "always() && steps.pkgs_macro_service_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+    needs:
+      - job_001
+      - job_002
+      - job_003
+      - job_004
+  job_033:
     name: "unit_test; windows; Dart 3.6.0-114.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1235,7 +1330,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_031:
+  job_034:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1260,7 +1355,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_032:
+  job_035:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1285,7 +1380,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_033:
+  job_036:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1310,7 +1405,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_034:
+  job_037:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1335,7 +1430,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_035:
+  job_038:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1360,7 +1455,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_036:
+  job_039:
     name: "unit_test; windows; Dart dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1385,7 +1480,7 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_037:
+  job_040:
     name: "unit_test; windows; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
@@ -1410,7 +1505,32 @@ jobs:
       - job_002
       - job_003
       - job_004
-  job_038:
+  job_041:
+    name: "unit_test; windows; Dart dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    runs-on: windows-latest
+    steps:
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+        with:
+          sdk: dev
+      - id: checkout
+        name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - id: pkgs_macro_service_pub_upgrade
+        name: pkgs/macro_service; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+      - name: "pkgs/macro_service; dart test --test-randomize-ordering-seed=random"
+        run: "dart test --test-randomize-ordering-seed=random"
+        if: "always() && steps.pkgs_macro_service_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/macro_service
+    needs:
+      - job_001
+      - job_002
+      - job_003
+      - job_004
+  job_042:
     name: "unit_test; windows; Dart dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:

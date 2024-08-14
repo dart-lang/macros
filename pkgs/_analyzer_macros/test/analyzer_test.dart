@@ -10,6 +10,7 @@ import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
+import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -24,6 +25,7 @@ void main() {
           AnalysisContextCollection(includedPaths: [directory.path]);
       analysisContext = contextCollection.contexts.first;
       injected.macroImplementation = await AnalyzerMacroImplementation.start(
+          protocol: Protocol(encoding: 'binary'),
           packageConfig: Isolate.packageConfigSync!);
     });
 

@@ -9,7 +9,9 @@ environment:
   sdk: ^3.6.0-114.0.dev
 
 dependencies:
+  async: ^2.11.0
   dart_model: any
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0
+  test: ^1.25.0

@@ -27,11 +27,15 @@ class AnalyzerMacroImplementation implements injected.MacroImplementation {
   /// [packageConfig] is the package config of the workspace of the code being
   /// edited.
   static Future<AnalyzerMacroImplementation> start({
+    required Protocol protocol,
     required Uri packageConfig,
   }) async =>
       AnalyzerMacroImplementation._(
           packageConfig,
           await MacroHost.serve(
+              // TODO(davidmorgan): this should be negotiated per client, not
+              // set here.
+              protocol: protocol,
               packageConfig: packageConfig,
               queryService: AnalyzerQueryService()));
 

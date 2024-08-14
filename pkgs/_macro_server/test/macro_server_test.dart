@@ -11,19 +11,28 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(MacroServer, () {
-    test('serves a macro service', () async {
-      final service = TestHostService();
-      final server = await MacroServer.serve(service: service);
+  for (final protocol in [
+    Protocol(encoding: 'json'),
+    Protocol(encoding: 'binary')
+  ]) {
+    group('MacroServer using ${protocol.encoding}', () {
+      test('serves a macro service', () async {
+        final service = TestHostService();
+        final server =
+            await MacroServer.serve(protocol: protocol, service: service);
 
-      await MacroClient.run(
-          endpoint: server.endpoint, macros: [DeclareXImplementation()]);
+        await MacroClient.run(
+            // TODO(davidmorgan): this should be negotiated, not set here.
+            protocol: protocol,
+            endpoint: server.endpoint,
+            macros: [DeclareXImplementation()]);
 
-      // Check that the macro sent its description to the host on startup.
-      expect((await service.macroStartedRequests.first).macroDescription,
-          DeclareXImplementation().description);
+        // Check that the macro sent its description to the host on startup.
+        expect((await service.macroStartedRequests.first).macroDescription,
+            DeclareXImplementation().description);
+      });
     });
-  });
+  }
 }
 
 class TestHostService implements HostService {
