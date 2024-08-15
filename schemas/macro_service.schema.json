@@ -155,10 +155,10 @@
       }
     },
     "Response": {
-      "$description": "A response to a [MacroRequest] or [HostRequest].",
+      "$description": "A response to a request.",
       "properties": {
         "requestId": {
-          "description": "The id of the [AugmentRequest] this is responding to.",
+          "description": "The id of the request this is responding to.",
           "type": "integer"
         },
         "type": {

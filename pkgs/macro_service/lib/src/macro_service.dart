@@ -28,7 +28,7 @@ abstract interface class MacroService {
 /// and that is allowed.
 int get nextRequestId {
   final next = _nextRequestId++;
-  if (_nextRequestId > 2 ^ 32) {
+  if (_nextRequestId > 0x7fffffff) {
     _nextRequestId = 0;
   }
   return next;
