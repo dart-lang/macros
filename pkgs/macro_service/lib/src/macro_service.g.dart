@@ -291,6 +291,6 @@ extension type Response.fromJson(Map<String, Object?> node) {
     return QueryResponse.fromJson(node['value'] as Map<String, Object?>);
   }
 
-  /// The id of the [AugmentRequest] this is responding to.
+  /// The id of the request this is responding to.
   int get requestId => node['requestId'] as int;
 }
