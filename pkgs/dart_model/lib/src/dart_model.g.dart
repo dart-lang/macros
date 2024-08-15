@@ -1,5 +1,5 @@
 // This file is generated. To make changes edit schemas/*.schema.json
-// then run from the repo root: dart tool/model_generator/bin/main.dart
+// then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 /// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
 extension type Augmentation.fromJson(Map<String, Object?> node) {
@@ -165,12 +165,19 @@ enum StaticTypeType {
 }
 
 extension type StaticType.fromJson(Map<String, Object?> node) {
-  static StaticType neverType(NeverType neverType) =>
-      StaticType.fromJson({'type': 'NeverType', 'value': null});
+  static StaticType neverType(NeverType neverType) => StaticType.fromJson({
+        'type': 'NeverType',
+        'value': neverType,
+      });
   static StaticType nullableType(NullableType nullableType) =>
-      StaticType.fromJson({'type': 'NullableType', 'value': nullableType.node});
-  static StaticType voidType(VoidType voidType) =>
-      StaticType.fromJson({'type': 'VoidType', 'value': voidType.string});
+      StaticType.fromJson({
+        'type': 'NullableType',
+        'value': nullableType,
+      });
+  static StaticType voidType(VoidType voidType) => StaticType.fromJson({
+        'type': 'VoidType',
+        'value': voidType,
+      });
   StaticTypeType get type {
     switch (node['type'] as String) {
       case 'NeverType':

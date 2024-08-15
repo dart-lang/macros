@@ -67,7 +67,7 @@ class MacroHost {
     // TODO(davidmorgan): this just assumes the macro is running, actually
     // track macro lifecycle.
     final response = await macroServer.sendToMacro(
-        name, HostRequest.augmentRequest(request));
+        name, HostRequest.augmentRequest(request, id: nextRequestId));
     return response.asAugmentResponse;
   }
 }
@@ -88,12 +88,15 @@ class _HostService implements HostService {
         _macroPhases!.complete(request
             .asMacroStartedRequest.macroDescription.runsInPhases
             .toSet());
-        return Response.macroStartedResponse(MacroStartedResponse());
+        return Response.macroStartedResponse(MacroStartedResponse(),
+            requestId: request.id);
       case MacroRequestType.queryRequest:
         return Response.queryResponse(
-            await queryService.handle(request.asQueryRequest));
+            await queryService.handle(request.asQueryRequest),
+            requestId: request.id);
       default:
-        return Response.errorResponse(ErrorResponse(error: 'unsupported'));
+        return Response.errorResponse(ErrorResponse(error: 'unsupported'),
+            requestId: request.id);
     }
   }
 }

@@ -36,8 +36,10 @@ class TestHostService implements HostService {
   Future<Response> handle(MacroRequest request) async {
     if (request.type == MacroRequestType.macroStartedRequest) {
       _macroStartedRequestsController.add(request.asMacroStartedRequest);
-      return Response.macroStartedResponse(MacroStartedResponse());
+      return Response.macroStartedResponse(MacroStartedResponse(),
+          requestId: request.id);
     }
-    return Response.errorResponse(ErrorResponse(error: 'unimplemented'));
+    return Response.errorResponse(ErrorResponse(error: 'unimplemented'),
+        requestId: request.id);
   }
 }

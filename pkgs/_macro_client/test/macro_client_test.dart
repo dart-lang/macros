@@ -40,18 +40,23 @@ void main() {
       final responses = StreamQueue(
           const Utf8Decoder().bind(socket).transform(const LineSplitter()));
       final descriptionResponse = await responses.next;
+      final macroRequest = MacroRequest.fromJson(
+          jsonDecode(descriptionResponse) as Map<String, Object?>);
       expect(
           descriptionResponse,
           '{"type":"MacroStartedRequest","value":'
-          '{"macroDescription":{"runsInPhases":[2]}}}');
+          '{"macroDescription":{"runsInPhases":[2]}},'
+          '"id":${macroRequest.id}}');
 
-      socket.writeln(
-          json.encode(HostRequest.augmentRequest(AugmentRequest(phase: 2))));
+      var requestId = nextRequestId;
+      socket.writeln(json.encode(
+          HostRequest.augmentRequest(AugmentRequest(phase: 2), id: requestId)));
       final augmentResponse = await responses.next;
       expect(
           augmentResponse,
           '{"type":"AugmentResponse","value":'
-          '{"augmentations":[{"code":"int get x => 3;"}]}}');
+          '{"augmentations":[{"code":"int get x => 3;"}]},'
+          '"requestId":$requestId}');
     });
 
     test('sends query requests to host, sends reponse', () async {
@@ -68,28 +73,40 @@ void main() {
           .transform(const Utf8Decoder())
           .transform(const LineSplitter()));
       final descriptionResponse = await responses.next;
+      final macroStartedRequest = MacroRequest.fromJson(
+          jsonDecode(descriptionResponse) as Map<String, Object?>);
       expect(
           descriptionResponse,
           '{"type":"MacroStartedRequest","value":'
-          '{"macroDescription":{"runsInPhases":[3]}}}');
+          '{"macroDescription":{"runsInPhases":[3]}},'
+          '"id":${macroStartedRequest.id}}');
 
-      socket.writeln(json.encode(HostRequest.augmentRequest(AugmentRequest(
-          phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')))));
+      final augmentRequestId = nextRequestId;
+      socket.writeln(json.encode(HostRequest.augmentRequest(
+          AugmentRequest(
+              phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')),
+          id: augmentRequestId)));
       final queryRequest = await responses.next;
+      final macroQueryRequest = MacroRequest.fromJson(
+          jsonDecode(queryRequest) as Map<String, Object?>);
       expect(
         queryRequest,
         '{"type":"QueryRequest","value":'
-        '{"query":{"target":"package:foo/foo.dart#Foo"}}}',
+        '{"query":{"target":"package:foo/foo.dart#Foo"}},'
+        '"id":${macroQueryRequest.id}}',
       );
 
-      socket.writeln(json.encode(Response.queryResponse(QueryResponse(
-          model: Model(uris: {'package:foo/foo.dart': Library()})))));
+      socket.writeln(json.encode(Response.queryResponse(
+          QueryResponse(
+              model: Model(uris: {'package:foo/foo.dart': Library()})),
+          requestId: macroQueryRequest.id)));
 
       final augmentRequest = await responses.next;
       expect(
         augmentRequest,
         '{"type":"AugmentResponse","value":'
-        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]}}',
+        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]},'
+        '"requestId":$augmentRequestId}',
       );
     });
   });

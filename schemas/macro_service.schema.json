@@ -62,6 +62,10 @@
     "HostRequest": {
       "$description": "A request sent from host to macro.",
       "properties": {
+        "id": {
+          "description": "The id of this request, must be returned in responses.",
+          "type": "integer"
+        },
         "type": {
           "type": "string"
         },
@@ -72,7 +76,12 @@
             }
           ]
         }
-      }
+      },
+      "required": [
+        "id",
+        "type",
+        "value"
+      ]
     },
     "MacroDescription": {
       "type": "object",
@@ -103,6 +112,10 @@
     "MacroRequest": {
       "$description": "A request sent from macro to host.",
       "properties": {
+        "id": {
+          "description": "The id of this request, must be returned in responses.",
+          "type": "integer"
+        },
         "type": {
           "type": "string"
         },
@@ -116,7 +129,12 @@
             }
           ]
         }
-      }
+      },
+      "required": [
+        "id",
+        "type",
+        "value"
+      ]
     },
     "QueryRequest": {
       "type": "object",
@@ -137,8 +155,12 @@
       }
     },
     "Response": {
-      "$description": "A response to a [MacroRequest] or [HostRequest].",
+      "$description": "A response to a request.",
       "properties": {
+        "requestId": {
+          "description": "The id of the request this is responding to.",
+          "type": "integer"
+        },
         "type": {
           "type": "string"
         },
@@ -158,7 +180,12 @@
             }
           ]
         }
-      }
+      },
+      "required": [
+        "requestId",
+        "type",
+        "value"
+      ]
     }
   }
 }
