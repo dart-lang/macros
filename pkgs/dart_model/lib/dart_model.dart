@@ -4,4 +4,5 @@
 
 export 'src/dart_model.dart';
 export 'src/json.dart';
+export 'src/json_buffer.dart' show LazyMap;
 export 'src/json_changes.dart';

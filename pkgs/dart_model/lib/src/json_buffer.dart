@@ -16,6 +16,13 @@ class LazyMap with MapMixin<String, Object?> implements Map<String, Object?> {
 
   LazyMap(Iterable<String> keys, this.lookup) : _keys = keys.toList();
 
+  const LazyMap.empty()
+      : _keys = const [],
+        lookup = _emptyLookup;
+
+  /// So we can create a const empty map.
+  static Object? _emptyLookup(_) => null;
+
   @override
   Iterable<String> get keys => _keys;
 

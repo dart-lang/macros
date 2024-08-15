@@ -13,7 +13,13 @@ void main() {
     test('$package output is up to date', () {
       final expected = dart_model_generator.generate(
           File('../../schemas/$package.schema.json').readAsStringSync(),
-          importDartModel: package == 'macro_service',
+          directives: switch (package) {
+            'dart_model' => const ["import 'json_buffer.dart' show LazyMap;"],
+            'macro_service' => const [
+                "import 'package:dart_model/dart_model.dart';"
+              ],
+            _ => const [],
+          },
           dartModelJson:
               File('../../schemas/dart_model.schema.json').readAsStringSync());
       final actual = File('../../pkgs/$package/lib/src/$package.g.dart')

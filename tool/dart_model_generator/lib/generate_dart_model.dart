@@ -17,24 +17,23 @@ import 'package:json_schema/src/json_schema/models/ref_provider.dart';
 /// They have a `fromJson` constructor that takes that JSON, and a no-name
 /// constructor that builds it.
 void run() {
-  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(
-      generate(File('schemas/dart_model.schema.json').readAsStringSync()));
+  File('pkgs/dart_model/lib/src/dart_model.g.dart').writeAsStringSync(generate(
+      File('schemas/dart_model.schema.json').readAsStringSync(),
+      directives: const ["import 'json_buffer.dart' show LazyMap;"]));
   File('pkgs/macro_service/lib/src/macro_service.g.dart').writeAsStringSync(
       generate(File('schemas/macro_service.schema.json').readAsStringSync(),
-          importDartModel: true));
+          directives: const ["import 'package:dart_model/dart_model.dart';"]));
 }
 
 /// Generates and returns code for [schemaJson].
 String generate(String schemaJson,
-    {bool importDartModel = false,
-    bool importMacroService = false,
-    String? dartModelJson}) {
+    {List<String> directives = const [], String? dartModelJson}) {
   final result = <String>[
     '// This file is generated. To make changes edit schemas/*.schema.json',
     '// then run from the repo root: '
         'dart tool/dart_model_generator/bin/main.dart',
     '',
-    if (importDartModel) "import 'package:dart_model/dart_model.dart';",
+    ...directives,
   ];
   final schema = JsonSchema.create(schemaJson,
       refProvider: LocalRefProvider(dartModelJson ??
@@ -95,17 +94,20 @@ String _generateExtensionType(String name, JsonSchema definition) {
   switch (definition.type) {
     case SchemaType.object:
       if (propertyMetadatas.isEmpty) {
-        result.writeln('  $name() : this.fromJson({});');
+        result.writeln('  $name() : this.fromJson(const LazyMap.empty());');
       } else {
         result.writeln('  $name({');
         for (final property in propertyMetadatas) {
-          result.writeParameter(property, definition);
+          result.writeParameter(property);
         }
-        result.writeln('}) : this.fromJson({');
+        result.writeln('}) : this.fromJson(LazyMap([');
         for (final property in propertyMetadatas) {
-          result.writeMapElement(property, definition);
+          result.writeKeyElement(property);
         }
-        result.writeln('});');
+        result.writeln('], (key) => switch (key) {');
+        propertyMetadatas.forEach(result.writeSwitchCase);
+        result.writeln('_ => null,'); // Default case
+        result.writeln('}));');
       }
     case SchemaType.string:
       result.writeln('$name(String string) : this.fromJson(string);');
@@ -176,7 +178,7 @@ String _generateUnion(
     if (extraPropertyMetadatas.isNotEmpty) {
       result.writeln(', {');
       for (final property in extraPropertyMetadatas) {
-        result.writeParameter(property, definition);
+        result.writeParameter(property);
       }
       result.write('}');
     }
@@ -186,7 +188,7 @@ String _generateUnion(
       ..writeln("'type': '$type',")
       ..writeln("'value': $lowerType,");
     for (final property in extraPropertyMetadatas) {
-      result.writeMapElement(property, definition);
+      result.writeMapElement(property);
     }
     result.writeln('});');
   }
@@ -241,7 +243,8 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
           description: schema.schemaMap![r'$comment'] as String?,
           name: name,
           type: PropertyType.object,
-          elementTypeName: schemaName);
+          elementTypeName: schemaName,
+          isRequired: schema.propertyRequired(name));
     } else {
       throw UnsupportedError('Unsupported: $name $schema');
     }
@@ -250,24 +253,33 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
   // Otherwise, it's a schema with a type.
   return switch (schema.type) {
     SchemaType.boolean => PropertyMetadata(
-        description: schema.description, name: name, type: PropertyType.bool),
+        description: schema.description,
+        name: name,
+        type: PropertyType.bool,
+        isRequired: schema.propertyRequired(name)),
     SchemaType.string => PropertyMetadata(
-        description: schema.description, name: name, type: PropertyType.string),
+        description: schema.description,
+        name: name,
+        type: PropertyType.string,
+        isRequired: schema.propertyRequired(name)),
     SchemaType.integer => PropertyMetadata(
         description: schema.description,
         name: name,
-        type: PropertyType.integer),
+        type: PropertyType.integer,
+        isRequired: schema.propertyRequired(name)),
     SchemaType.array => PropertyMetadata(
         description: schema.description,
         name: name,
         type: PropertyType.list,
-        elementTypeName: _readRefNameOrType(schema, 'items')),
+        elementTypeName: _readRefNameOrType(schema, 'items'),
+        isRequired: schema.propertyRequired(name)),
     SchemaType.object => PropertyMetadata(
         description: schema.description,
         name: name,
         type: PropertyType.map,
         // `additionalProperties` should be a type specified with a `$ref`.
-        elementTypeName: _readRefNameOrType(schema, 'additionalProperties')),
+        elementTypeName: _readRefNameOrType(schema, 'additionalProperties'),
+        isRequired: schema.propertyRequired(name)),
     _ => throw UnsupportedError('Unsupported schema type: ${schema.type}'),
   };
 }
@@ -311,12 +323,15 @@ class PropertyMetadata {
   String name;
   PropertyType type;
   String? elementTypeName;
+  bool isRequired;
 
-  PropertyMetadata(
-      {this.description,
-      required this.name,
-      required this.type,
-      this.elementTypeName});
+  PropertyMetadata({
+    this.description,
+    required this.name,
+    required this.type,
+    this.elementTypeName,
+    required this.isRequired,
+  });
 }
 
 /// Loads referenced schemas.
@@ -355,13 +370,26 @@ extension on StringBuffer {
     if (nullable) write('?');
   }
 
+  /// Writes an element in a `keys` list for a map containing [property],
+  /// assuming there is a variable in scope with the same name (usually, a
+  /// function parameter).
+  ///
+  /// If the property is not required, the element will be omitted if the
+  /// variable is null.
+  void writeKeyElement(PropertyMetadata property) {
+    if (!property.isRequired) {
+      write('if (${property.name} != null) ');
+    }
+    writeln("'${property.name}',");
+  }
+
   /// Writes a map element for [property], assuming there is a variable in
   /// scope with the same name (usually, a function parameter).
   ///
   /// If the property is not required, the element will be omitted if the
   /// variable is null.
-  void writeMapElement(PropertyMetadata property, JsonSchema schema) {
-    if (!schema.propertyRequired(property.name)) {
+  void writeMapElement(PropertyMetadata property) {
+    if (!property.isRequired) {
       write('if (${property.name} != null) ');
     }
     writeln("'${property.name}': ${property.name},");
@@ -371,10 +399,9 @@ extension on StringBuffer {
   ///
   /// If the property is required, it will be non-nullable and marked as
   /// `required`, otherwise it will be nullable and optional.
-  void writeParameter(PropertyMetadata property, JsonSchema schema) {
-    var required = schema.propertyRequired(property.name);
-    if (required) write('required ');
-    writeType(property, nullable: !required);
+  void writeParameter(PropertyMetadata property) {
+    if (property.isRequired) write('required ');
+    writeType(property, nullable: !property.isRequired);
     writeln(' ${property.name},');
   }
 
@@ -401,5 +428,12 @@ extension on StringBuffer {
         write("(node['${property.name}'] as Map).cast()");
     }
     writeln(';');
+  }
+
+  /// Writes a switch case statement to read [property] by its name, assuming
+  /// there is a variable in scope with the same name (usually, a function
+  /// parameter).
+  void writeSwitchCase(PropertyMetadata property) {
+    writeln("'${property.name}' => ${property.name},");
   }
 }

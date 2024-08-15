@@ -8,10 +8,16 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node) {
   AugmentRequest({
     int? phase,
     QualifiedName? target,
-  }) : this.fromJson({
-          if (phase != null) 'phase': phase,
-          if (target != null) 'target': target,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (phase != null) 'phase',
+              if (target != null) 'target',
+            ],
+            (key) => switch (key) {
+                  'phase' => phase,
+                  'target' => target,
+                  _ => null,
+                }));
 
   /// Which phase to run: 1, 2 or 3.
   int get phase => node['phase'] as int;
@@ -24,9 +30,14 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node) {
 extension type AugmentResponse.fromJson(Map<String, Object?> node) {
   AugmentResponse({
     List<Augmentation>? augmentations,
-  }) : this.fromJson({
-          if (augmentations != null) 'augmentations': augmentations,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (augmentations != null) 'augmentations',
+            ],
+            (key) => switch (key) {
+                  'augmentations' => augmentations,
+                  _ => null,
+                }));
 
   /// The augmentations.
   List<Augmentation> get augmentations =>
@@ -37,9 +48,14 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node) {
 extension type ErrorResponse.fromJson(Map<String, Object?> node) {
   ErrorResponse({
     String? error,
-  }) : this.fromJson({
-          if (error != null) 'error': error,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (error != null) 'error',
+            ],
+            (key) => switch (key) {
+                  'error' => error,
+                  _ => null,
+                }));
 
   /// The error.
   String get error => node['error'] as String;
@@ -49,9 +65,14 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node) {
 extension type HostEndpoint.fromJson(Map<String, Object?> node) {
   HostEndpoint({
     int? port,
-  }) : this.fromJson({
-          if (port != null) 'port': port,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (port != null) 'port',
+            ],
+            (key) => switch (key) {
+                  'port' => port,
+                  _ => null,
+                }));
 
   /// TCP port to connect to.
   int get port => node['port'] as int;
@@ -68,12 +89,12 @@ enum HostRequestType {
 extension type HostRequest.fromJson(Map<String, Object?> node) {
   static HostRequest augmentRequest(
     AugmentRequest augmentRequest, {
-    required int id,
+    int? id,
   }) =>
       HostRequest.fromJson({
         'type': 'AugmentRequest',
         'value': augmentRequest,
-        'id': id,
+        if (id != null) 'id': id,
       });
   HostRequestType get type {
     switch (node['type'] as String) {
@@ -99,9 +120,14 @@ extension type HostRequest.fromJson(Map<String, Object?> node) {
 extension type MacroDescription.fromJson(Map<String, Object?> node) {
   MacroDescription({
     List<int>? runsInPhases,
-  }) : this.fromJson({
-          if (runsInPhases != null) 'runsInPhases': runsInPhases,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (runsInPhases != null) 'runsInPhases',
+            ],
+            (key) => switch (key) {
+                  'runsInPhases' => runsInPhases,
+                  _ => null,
+                }));
 
   /// Phases that the macro runs in: 1, 2 and/or 3.
   List<int> get runsInPhases => (node['runsInPhases'] as List).cast();
@@ -111,16 +137,21 @@ extension type MacroDescription.fromJson(Map<String, Object?> node) {
 extension type MacroStartedRequest.fromJson(Map<String, Object?> node) {
   MacroStartedRequest({
     MacroDescription? macroDescription,
-  }) : this.fromJson({
-          if (macroDescription != null) 'macroDescription': macroDescription,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (macroDescription != null) 'macroDescription',
+            ],
+            (key) => switch (key) {
+                  'macroDescription' => macroDescription,
+                  _ => null,
+                }));
   MacroDescription get macroDescription =>
       node['macroDescription'] as MacroDescription;
 }
 
 /// Host's response to a [MacroStartedRequest].
 extension type MacroStartedResponse.fromJson(Map<String, Object?> node) {
-  MacroStartedResponse() : this.fromJson({});
+  MacroStartedResponse() : this.fromJson(const LazyMap.empty());
 }
 
 enum MacroRequestType {
@@ -135,21 +166,21 @@ enum MacroRequestType {
 extension type MacroRequest.fromJson(Map<String, Object?> node) {
   static MacroRequest macroStartedRequest(
     MacroStartedRequest macroStartedRequest, {
-    required int id,
+    int? id,
   }) =>
       MacroRequest.fromJson({
         'type': 'MacroStartedRequest',
         'value': macroStartedRequest,
-        'id': id,
+        if (id != null) 'id': id,
       });
   static MacroRequest queryRequest(
     QueryRequest queryRequest, {
-    required int id,
+    int? id,
   }) =>
       MacroRequest.fromJson({
         'type': 'QueryRequest',
         'value': queryRequest,
-        'id': id,
+        if (id != null) 'id': id,
       });
   MacroRequestType get type {
     switch (node['type'] as String) {
@@ -184,9 +215,14 @@ extension type MacroRequest.fromJson(Map<String, Object?> node) {
 extension type QueryRequest.fromJson(Map<String, Object?> node) {
   QueryRequest({
     Query? query,
-  }) : this.fromJson({
-          if (query != null) 'query': query,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (query != null) 'query',
+            ],
+            (key) => switch (key) {
+                  'query' => query,
+                  _ => null,
+                }));
   Query get query => node['query'] as Query;
 }
 
@@ -194,9 +230,14 @@ extension type QueryRequest.fromJson(Map<String, Object?> node) {
 extension type QueryResponse.fromJson(Map<String, Object?> node) {
   QueryResponse({
     Model? model,
-  }) : this.fromJson({
-          if (model != null) 'model': model,
-        });
+  }) : this.fromJson(LazyMap(
+            [
+              if (model != null) 'model',
+            ],
+            (key) => switch (key) {
+                  'model' => model,
+                  _ => null,
+                }));
   Model get model => node['model'] as Model;
 }
 
@@ -214,39 +255,39 @@ enum ResponseType {
 extension type Response.fromJson(Map<String, Object?> node) {
   static Response augmentResponse(
     AugmentResponse augmentResponse, {
-    required int requestId,
+    int? requestId,
   }) =>
       Response.fromJson({
         'type': 'AugmentResponse',
         'value': augmentResponse,
-        'requestId': requestId,
+        if (requestId != null) 'requestId': requestId,
       });
   static Response errorResponse(
     ErrorResponse errorResponse, {
-    required int requestId,
+    int? requestId,
   }) =>
       Response.fromJson({
         'type': 'ErrorResponse',
         'value': errorResponse,
-        'requestId': requestId,
+        if (requestId != null) 'requestId': requestId,
       });
   static Response macroStartedResponse(
     MacroStartedResponse macroStartedResponse, {
-    required int requestId,
+    int? requestId,
   }) =>
       Response.fromJson({
         'type': 'MacroStartedResponse',
         'value': macroStartedResponse,
-        'requestId': requestId,
+        if (requestId != null) 'requestId': requestId,
       });
   static Response queryResponse(
     QueryResponse queryResponse, {
-    required int requestId,
+    int? requestId,
   }) =>
       Response.fromJson({
         'type': 'QueryResponse',
         'value': queryResponse,
-        'requestId': requestId,
+        if (requestId != null) 'requestId': requestId,
       });
   ResponseType get type {
     switch (node['type'] as String) {
