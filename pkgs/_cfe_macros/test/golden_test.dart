@@ -6,29 +6,37 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:_analyzer_macros/macro_implementation.dart';
-import 'package:analyzer/dart/analysis/analysis_context.dart';
-import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
-import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
+import 'package:_cfe_macros/macro_implementation.dart';
+import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
+import 'package:frontend_server/compute_kernel.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
-  late AnalysisContext analysisContext;
+  group('CFE with injected macro impl query result matches golden', () {
+    late File productPlatformDill;
+    late Directory tempDir;
 
-  group('analyzer with injected macro impl query result matches golden', () {
     final directory = Directory(
         Isolate.resolvePackageUriSync(Uri.parse('package:foo/foo.dart'))!
             .resolve('../../../introspection_goldens')
             .toFilePath());
 
     setUp(() async {
-      // Set up analyzer.
-      final contextCollection =
-          AnalysisContextCollection(includedPaths: [directory.path]);
-      analysisContext = contextCollection.contexts.first;
-      injected.macroImplementation = await AnalyzerMacroImplementation.start(
+      // Set up CFE.
+
+      // TODO(davidmorgan): this dill comes from the Dart SDK running the test,
+      // but `package:frontend_server` and `package:front_end` are used as a
+      // library, so we will see version skew breakage. Find a better way.
+      productPlatformDill = File('${Platform.resolvedExecutable}/../../'
+          'lib/_internal/vm_platform_strong_product.dill');
+      if (!File.fromUri(productPlatformDill.uri).existsSync()) {
+        throw StateError('Failed to find platform dill: $productPlatformDill');
+      }
+      tempDir = Directory.systemTemp.createTempSync('cfe_test');
+
+      // Inject test macro implementation.
+      injected.macroImplementation = await CfeMacroImplementation.start(
           packageConfig: Isolate.packageConfigSync!);
     });
 
@@ -62,15 +70,37 @@ void main() {
       }
 
       test(relativePath, () async {
-        final resolvedLibrary = (await analysisContext.currentSession
-            .getResolvedLibrary(path)) as ResolvedLibraryResult;
-        final augmentationUnit =
-            resolvedLibrary.units.singleWhere((u) => u.isMacroAugmentation);
+        final packagesUri = Isolate.packageConfigSync;
+        final outputFile = File('${tempDir.path}/$relativePath.dill');
+
+        final computeKernelResult = await computeKernel([
+          '--enable-experiment=macros',
+          '--no-summary',
+          '--no-summary-only',
+          '--target=vm',
+          '--dart-sdk-summary=${productPlatformDill.uri}',
+          '--output=${outputFile.path}',
+          '--source=${file.uri}',
+          '--packages-file=$packagesUri',
+          // TODO(davidmorgan): this is so we can pull the generated
+          // augmentation source out of incremental compiler state; find a less
+          // hacky way.
+          '--use-incremental-compiler',
+          // For augmentations.
+          '--enable-experiment=macros',
+        ]);
+
+        final sources = computeKernelResult
+            .previousState!.incrementalCompiler!.context.uriToSource;
+        final macroSource = sources.entries
+            .singleWhere((e) => e.key.scheme == 'dart-macro+file')
+            .value
+            .text;
 
         // Each `QueryClass` outputs its query result as a comment in an
         // augmentation. Collect them and merge them to compare with the
         // golden.
-        final macroOutputs = augmentationUnit.content
+        final macroOutputs = macroSource
             .split('\n')
             .where((l) => l.startsWith('// '))
             .map((l) =>
