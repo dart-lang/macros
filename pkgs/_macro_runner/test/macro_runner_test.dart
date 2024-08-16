@@ -12,23 +12,30 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(MacroRunner, () {
-    test('runs macros', () async {
-      final builder = MacroBuilder();
-      final bundle = await builder.build(Isolate.packageConfigSync!, [
-        QualifiedName(
-            'package:_test_macros/declare_x_macro.dart#DeclareXImplementation')
-      ]);
+  for (final protocol in [
+    Protocol(encoding: 'json'),
+    Protocol(encoding: 'binary')
+  ]) {
+    group('MacroRunner with ${protocol.encoding}', () {
+      test('runs macros', () async {
+        final builder = MacroBuilder();
+        final bundle = await builder.build(Isolate.packageConfigSync!, [
+          QualifiedName(
+              'package:_test_macros/declare_x_macro.dart#DeclareXImplementation')
+        ]);
 
-      final serverSocket = await ServerSocket.bind('localhost', 0);
-      addTearDown(serverSocket.close);
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+        addTearDown(serverSocket.close);
 
-      final runner = MacroRunner();
-      runner.start(
-          macroBundle: bundle, endpoint: HostEndpoint(port: serverSocket.port));
+        final runner = MacroRunner();
+        runner.start(
+            macroBundle: bundle,
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port));
 
-      expect(
-          serverSocket.first.timeout(const Duration(seconds: 10)), completes);
+        expect(
+            serverSocket.first.timeout(const Duration(seconds: 10)), completes);
+      });
     });
-  });
+  }
 }

@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_model/dart_model.dart';
@@ -17,12 +16,13 @@ import 'package:macro_service/macro_service.dart';
 /// TODO(davidmorgan): split to multpile implementations depending on
 /// transport used to connect to host.
 class MacroClient {
+  final Protocol protocol;
   final Iterable<Macro> macros;
   final Socket socket;
   late final RemoteMacroHost _host;
   Completer<Response>? _responseCompleter;
 
-  MacroClient._(this.macros, this.socket) {
+  MacroClient._(this.protocol, this.macros, this.socket) {
     _host = RemoteMacroHost(this);
 
     // TODO(davidmorgan): negotiation about protocol version goes here.
@@ -34,33 +34,29 @@ class MacroClient {
           id: nextRequestId));
     }
 
-    const Utf8Decoder()
-        .bind(socket)
-        .transform(const LineSplitter())
-        .listen(_handleRequest);
+    protocol.decode(socket).listen(_handleRequest);
   }
 
   /// Runs [macros] for the host at [endpoint].
-  static Future<MacroClient> run(
-      {required HostEndpoint endpoint, required Iterable<Macro> macros}) async {
+  static Future<MacroClient> run({
+    // TODO(davidmorgan): this should be negotiated, not just passed in.
+    required Protocol protocol,
+    required HostEndpoint endpoint,
+    required Iterable<Macro> macros,
+  }) async {
     final socket = await Socket.connect('localhost', endpoint.port);
-    return MacroClient._(macros, socket);
+    return MacroClient._(protocol, macros, socket);
   }
 
   void _sendRequest(MacroRequest request) {
-    // TODO(davidmorgan): currently this is JSON with one request per line,
-    // switch to binary.
-    socket.writeln(json.encode(request.node));
+    protocol.send(socket.add, request.node);
   }
 
   void _sendResponse(Response response) {
-    // TODO(davidmorgan): currently this is JSON with one request per line,
-    // switch to binary.
-    socket.writeln(json.encode(response.node));
+    protocol.send(socket.add, response.node);
   }
 
-  void _handleRequest(String request) async {
-    final jsonData = json.decode(request) as Map<String, Object?>;
+  void _handleRequest(Map<String, Object?> jsonData) async {
     final hostRequest = HostRequest.fromJson(jsonData);
     switch (hostRequest.type) {
       case HostRequestType.augmentRequest:

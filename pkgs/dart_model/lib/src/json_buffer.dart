@@ -90,6 +90,14 @@ class JsonBuffer {
   /// mutated.
   Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
 
+  static Uint8List serializeToBinary(Map<String, Object?> map) {
+    if (map is _JsonBufferMap) {
+      return map._buffer.serialize();
+    } else {
+      return JsonBuffer(map).serialize();
+    }
+  }
+
   /// Adds a `Map` to the buffer.
   void _addMap(Map<String, Object?> map) {
     List<String> keys;
@@ -129,6 +137,26 @@ class JsonBuffer {
       final value = lookup(key);
       _writeInt(start + _intSize + i * _intSize * 2 + _intSize, _intSize,
           _addValue(value));
+    }
+  }
+
+  /// Adds a `List` to the buffer.
+  void _addList(List<Object?> list) {
+    // Lists are stored as:
+    //
+    // [size, pointer to value 1, pointer to value 2, ...]
+    //
+    // The size is immediately known, so reserve space for the list, allowing
+    // full values to be appended afterwards in any order.
+    final length = list.length;
+    final start = _nextFree;
+    _reserve(length * _intSize + _intSize);
+    _writeInt(start, _intSize, length);
+
+    // Now iterate appending values and writing pointers to them into the space
+    // that was reserved.
+    for (var i = 0; i != length; ++i) {
+      _writeInt(start + _intSize + i * _intSize, _intSize, _addValue(list[i]));
     }
   }
 
@@ -172,6 +200,16 @@ class JsonBuffer {
       _buffer[start] = Type.map.index;
       _addMap(value);
       return start;
+    } else if (value is List) {
+      _reserve(_typeSize);
+      _buffer[start] = Type.list.index;
+      _addList(value);
+      return start;
+    } else if (value is int) {
+      _reserve(_typeSize);
+      _buffer[start] = Type.int.index;
+      _addInt(value);
+      return start;
     } else {
       throw UnsupportedError('Unsupported value type: ${value.runtimeType}');
     }
@@ -200,6 +238,16 @@ class JsonBuffer {
     final start = _nextFree;
     _reserve(1);
     _buffer[start] = value ? 1 : 0;
+    return start;
+  }
+
+  /// Adds an `int`.
+  _Pointer _addInt(int value) {
+    final start = _nextFree;
+    // TODO(davidmorgan): consider adding more int types so we can efficiently
+    // support both small and large ints.
+    _reserve(_intSize);
+    _writeInt(start, _intSize, value);
     return start;
   }
 
@@ -256,8 +304,12 @@ class JsonBuffer {
         return _readString(_readPointer(pointer + _typeSize));
       case Type.bool:
         return _readBool(pointer + _typeSize);
+      case Type.int:
+        return _readInt(pointer + _typeSize, _intSize);
       case Type.map:
         return _JsonBufferMap._(this, pointer + _typeSize);
+      case Type.list:
+        return _JsonBufferList._(this, pointer + _typeSize);
     }
   }
 
@@ -390,14 +442,47 @@ class _JsonBufferMapEntryIterator
   }
 }
 
+/// Immutable `List` view into a [JsonBuffer].
+class _JsonBufferList with ListMixin<Object?> implements List<Object?> {
+  final JsonBuffer _buffer;
+  final _Pointer _pointer;
+
+  _JsonBufferList._(this._buffer, this._pointer);
+
+  @override
+  int get length => _buffer._readInt(_pointer, _intSize);
+  @override
+  set length(int length) =>
+      throw UnsupportedError('JsonBufferList is readonly.');
+
+  @override
+  Object? operator [](int index) => _buffer
+      ._readValue(_buffer._readPointer(_pointer + _intSize + index * _intSize));
+
+  @override
+  void operator []=(int index, Object? value) {
+    throw UnsupportedError('JsonBufferList is readonly.');
+  }
+
+  @override
+  void clear() {
+    throw UnsupportedError('JsonBufferList is readonly.');
+  }
+}
+
 /// Pointer into a [JsonBuffer].
 typedef _Pointer = int;
 
 /// Type of a value in a [JsonBuffer].
+///
+/// TODO(davidmorgan): we can get more use out of "type" bytes, for example
+/// encoding bools directly in the type byte.
 enum Type {
   string,
   bool,
   map,
+  list,
+  int,
 }
 
 /// Bytes needed by [Type].

@@ -136,6 +136,16 @@
         "value"
       ]
     },
+    "Protocol": {
+      "type": "object",
+      "description": "The macro to host protocol version and encoding. TODO(davidmorgan): add the version.",
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "description": "The wire format: json or binary. TODO(davidmorgan): use an enum?"
+        }
+      }
+    },
     "QueryRequest": {
       "type": "object",
       "description": "Macro's query about the code it should augment.",

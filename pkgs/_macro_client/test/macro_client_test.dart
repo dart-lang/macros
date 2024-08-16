@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:_macro_client/macro_client.dart';
@@ -15,99 +14,131 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(MacroClient, () {
-    test('connects to service', () async {
-      final serverSocket = await ServerSocket.bind('localhost', 0);
-      addTearDown(serverSocket.close);
+  for (final protocol in [
+    Protocol(encoding: 'json'),
+    Protocol(encoding: 'binary')
+  ]) {
+    group('MacroClient using ${protocol.encoding}', () {
+      test('connects to service', () async {
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+        addTearDown(serverSocket.close);
 
-      unawaited(MacroClient.run(
-          endpoint: HostEndpoint(port: serverSocket.port),
-          macros: [DeclareXImplementation()]));
+        unawaited(MacroClient.run(
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port),
+            macros: [DeclareXImplementation()]));
 
-      expect(
-          serverSocket.first.timeout(const Duration(seconds: 10)), completes);
+        await serverSocket.first.timeout(const Duration(seconds: 10));
+      });
+
+      test('sends augmentation requests to macros, sends reponse', () async {
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+
+        unawaited(MacroClient.run(
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port),
+            macros: [DeclareXImplementation()]));
+
+        final socket = await serverSocket.first;
+
+        final responses = StreamQueue(protocol.decode(socket));
+        final descriptionResponse = await responses.next;
+        expect(descriptionResponse, {
+          'id': descriptionResponse['id'],
+          'type': 'MacroStartedRequest',
+          'value': {
+            'macroDescription': {
+              'runsInPhases': [2]
+            }
+          }
+        });
+
+        final requestId = nextRequestId;
+        protocol.send(
+            socket.add,
+            HostRequest.augmentRequest(AugmentRequest(phase: 2), id: requestId)
+                .node);
+        final augmentResponse = await responses.next;
+        expect(augmentResponse, {
+          'requestId': requestId,
+          'type': 'AugmentResponse',
+          'value': {
+            'augmentations': [
+              {'code': 'int get x => 3;'}
+            ]
+          }
+        });
+      });
+
+      test('sends query requests to host, sends reponse', () async {
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+
+        unawaited(MacroClient.run(
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port),
+            macros: [QueryClassImplementation()]));
+
+        final socket = await serverSocket.first;
+
+        final responses = StreamQueue(protocol.decode(socket));
+        final descriptionResponse = await responses.next;
+        expect(descriptionResponse, {
+          'id': descriptionResponse['id'],
+          'type': 'MacroStartedRequest',
+          'value': {
+            'macroDescription': {
+              'runsInPhases': [3]
+            }
+          },
+        });
+
+        final requestId = nextRequestId;
+        protocol.send(
+            socket.add,
+            HostRequest.augmentRequest(
+                    AugmentRequest(
+                        phase: 3,
+                        target: QualifiedName('package:foo/foo.dart#Foo')),
+                    id: requestId)
+                .node);
+        final queryRequest = await responses.next;
+        final queryRequestId = MacroRequest.fromJson(queryRequest).id;
+        expect(
+          queryRequest,
+          {
+            'id': queryRequestId,
+            'type': 'QueryRequest',
+            'value': {
+              'query': {'target': 'package:foo/foo.dart#Foo'}
+            },
+          },
+        );
+
+        protocol.send(
+            socket.add,
+            Response.queryResponse(
+                    QueryResponse(
+                        model:
+                            Model(uris: {'package:foo/foo.dart': Library()})),
+                    requestId: queryRequestId)
+                .node);
+
+        final augmentRequest = await responses.next;
+        expect(
+          augmentRequest,
+          {
+            'requestId': requestId,
+            'type': 'AugmentResponse',
+            'value': {
+              'augmentations': [
+                {
+                  'code': '// {"uris":{"package:foo/foo.dart":{}}}',
+                }
+              ]
+            }
+          },
+        );
+      });
     });
-
-    test('sends augmentation requests to macros, sends reponse', () async {
-      final serverSocket = await ServerSocket.bind('localhost', 0);
-
-      unawaited(MacroClient.run(
-          endpoint: HostEndpoint(port: serverSocket.port),
-          macros: [DeclareXImplementation()]));
-
-      final socket = await serverSocket.first;
-
-      final responses = StreamQueue(
-          const Utf8Decoder().bind(socket).transform(const LineSplitter()));
-      final descriptionResponse = await responses.next;
-      final macroRequest = MacroRequest.fromJson(
-          jsonDecode(descriptionResponse) as Map<String, Object?>);
-      expect(
-          descriptionResponse,
-          '{"type":"MacroStartedRequest","value":'
-          '{"macroDescription":{"runsInPhases":[2]}},'
-          '"id":${macroRequest.id}}');
-
-      var requestId = nextRequestId;
-      socket.writeln(json.encode(
-          HostRequest.augmentRequest(AugmentRequest(phase: 2), id: requestId)));
-      final augmentResponse = await responses.next;
-      expect(
-          augmentResponse,
-          '{"type":"AugmentResponse","value":'
-          '{"augmentations":[{"code":"int get x => 3;"}]},'
-          '"requestId":$requestId}');
-    });
-
-    test('sends query requests to host, sends reponse', () async {
-      final serverSocket = await ServerSocket.bind('localhost', 0);
-
-      unawaited(MacroClient.run(
-          endpoint: HostEndpoint(port: serverSocket.port),
-          macros: [QueryClassImplementation()]));
-
-      final socket = await serverSocket.first;
-
-      final responses = StreamQueue(socket
-          .cast<List<int>>()
-          .transform(const Utf8Decoder())
-          .transform(const LineSplitter()));
-      final descriptionResponse = await responses.next;
-      final macroStartedRequest = MacroRequest.fromJson(
-          jsonDecode(descriptionResponse) as Map<String, Object?>);
-      expect(
-          descriptionResponse,
-          '{"type":"MacroStartedRequest","value":'
-          '{"macroDescription":{"runsInPhases":[3]}},'
-          '"id":${macroStartedRequest.id}}');
-
-      final augmentRequestId = nextRequestId;
-      socket.writeln(json.encode(HostRequest.augmentRequest(
-          AugmentRequest(
-              phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')),
-          id: augmentRequestId)));
-      final queryRequest = await responses.next;
-      final macroQueryRequest = MacroRequest.fromJson(
-          jsonDecode(queryRequest) as Map<String, Object?>);
-      expect(
-        queryRequest,
-        '{"type":"QueryRequest","value":'
-        '{"query":{"target":"package:foo/foo.dart#Foo"}},'
-        '"id":${macroQueryRequest.id}}',
-      );
-
-      socket.writeln(json.encode(Response.queryResponse(
-          QueryResponse(
-              model: Model(uris: {'package:foo/foo.dart': Library()})),
-          requestId: macroQueryRequest.id)));
-
-      final augmentRequest = await responses.next;
-      expect(
-        augmentRequest,
-        '{"type":"AugmentResponse","value":'
-        '{"augmentations":[{"code":"// {\\"uris\\":{\\"package:foo/foo.dart\\":{}}}"}]},'
-        '"requestId":$augmentRequestId}',
-      );
-    });
-  });
+  }
 }

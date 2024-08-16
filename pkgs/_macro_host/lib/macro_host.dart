@@ -27,12 +27,15 @@ class MacroHost {
 
   /// Starts a macro host with introspection queries handled by [queryService].
   static Future<MacroHost> serve({
+    // TODO(davidmorgan): this should be negotiated per client, not set here.
+    required Protocol protocol,
     required Uri packageConfig,
     required QueryService queryService,
   }) async {
     final macroPackageConfig = MacroPackageConfig.readFromUri(packageConfig);
     final hostService = _HostService(queryService);
-    final server = await MacroServer.serve(service: hostService);
+    final server =
+        await MacroServer.serve(protocol: protocol, service: hostService);
     return MacroHost._(macroPackageConfig, server, hostService);
   }
 
@@ -57,7 +60,10 @@ class MacroHost {
     }
     _hostService._macroPhases = Completer();
     final macroBundle = await macroBuilder.build(packageConfig, [name]);
-    macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
+    macroRunner.start(
+        macroBundle: macroBundle,
+        protocol: macroServer.protocol,
+        endpoint: macroServer.endpoint);
     return _hostService._macroPhases!.future;
   }
 
