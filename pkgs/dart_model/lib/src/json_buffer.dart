@@ -39,6 +39,8 @@ class LazyMap with MapMixin<String, Object?> implements Map<String, Object?> {
       throw UnsupportedError('LazyMap is immutable.');
 }
 
+JsonBuffer? runningBuffer;
+
 /// Bytebuffer-backed JSON data.
 ///
 /// Data can be accumulated directly into the buffer which is then immediately
@@ -109,6 +111,8 @@ class JsonBuffer {
   /// The `Map` is represented as a `List` of keys and a lookup function, to
   /// allow values to be written directly rather than copied.
   void _evaluateAndAddMap(List<String> keys, Object? Function(String) lookup) {
+    runningBuffer = this;
+
     // Maps are stored as:
     //
     // [size, pointer to key 1, pointer to value 1, pointer to key 2,
@@ -127,9 +131,37 @@ class JsonBuffer {
       final key = keys[i];
       _writeInt(start + _intSize + i * _intSize * 2, _intSize, _addString(key));
       final value = lookup(key);
+      runningBuffer = this;
       _writeInt(start + _intSize + i * _intSize * 2 + _intSize, _intSize,
           _addValue(value));
     }
+  }
+
+  List<int> mapStart = [];
+  List<int> i = [];
+  void startMap(int length) {
+    mapStart.add(_nextFree);
+    i.add(0);
+    _reserve(_typeSize + length * _intSize * 2 + _intSize);
+    _writeInt(mapStart.last, _typeSize, Type.map.index);
+    _writeInt(mapStart.last + _typeSize, _intSize, length);
+  }
+
+  void addToMap(String key, Object? value) {
+    _writeInt(mapStart.last + _typeSize + _intSize + i.last * _intSize * 2,
+        _intSize, _addString(key));
+    _writeInt(
+        mapStart.last + _typeSize + _intSize + i.last * _intSize * 2 + _intSize,
+        _intSize,
+        _addValue(value));
+    ++i.last;
+  }
+
+  Map<String, Object?> endMap() {
+    final result = _JsonBufferMap._(this, mapStart.last + _typeSize);
+    mapStart.removeLast();
+    i.removeLast();
+    return result;
   }
 
   /// Reserves [bytes] number of bytes.
@@ -168,10 +200,14 @@ class JsonBuffer {
       _addBool(value);
       return start;
     } else if (value is Map<String, Object?>) {
-      _reserve(_typeSize);
-      _buffer[start] = Type.map.index;
-      _addMap(value);
-      return start;
+      if (value is _JsonBufferMap && value._buffer == this) {
+        return value._pointer - _typeSize;
+      } else {
+        _reserve(_typeSize);
+        _buffer[start] = Type.map.index;
+        _addMap(value);
+        return start;
+      }
     } else {
       throw UnsupportedError('Unsupported value type: ${value.runtimeType}');
     }
