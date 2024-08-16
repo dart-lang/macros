@@ -4,7 +4,8 @@
 import 'package:dart_model/dart_model.dart';
 
 /// A request to a macro to augment some code.
-extension type AugmentRequest.fromJson(Map<String, Object?> node) {
+extension type AugmentRequest.fromJson(Map<String, Object?> node)
+    implements Object {
   AugmentRequest({
     int? phase,
     QualifiedName? target,
@@ -21,7 +22,8 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node) {
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
-extension type AugmentResponse.fromJson(Map<String, Object?> node) {
+extension type AugmentResponse.fromJson(Map<String, Object?> node)
+    implements Object {
   AugmentResponse({
     List<Augmentation>? augmentations,
   }) : this.fromJson({
@@ -34,7 +36,8 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node) {
 }
 
 /// Request could not be handled.
-extension type ErrorResponse.fromJson(Map<String, Object?> node) {
+extension type ErrorResponse.fromJson(Map<String, Object?> node)
+    implements Object {
   ErrorResponse({
     String? error,
   }) : this.fromJson({
@@ -46,7 +49,8 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node) {
 }
 
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?
-extension type HostEndpoint.fromJson(Map<String, Object?> node) {
+extension type HostEndpoint.fromJson(Map<String, Object?> node)
+    implements Object {
   HostEndpoint({
     int? port,
   }) : this.fromJson({
@@ -65,7 +69,8 @@ enum HostRequestType {
   bool get isKnown => this != _unknown;
 }
 
-extension type HostRequest.fromJson(Map<String, Object?> node) {
+extension type HostRequest.fromJson(Map<String, Object?> node)
+    implements Object {
   static HostRequest augmentRequest(
     AugmentRequest augmentRequest, {
     required int id,
@@ -96,7 +101,8 @@ extension type HostRequest.fromJson(Map<String, Object?> node) {
 }
 
 /// Information about a macro that the macro provides to the host.
-extension type MacroDescription.fromJson(Map<String, Object?> node) {
+extension type MacroDescription.fromJson(Map<String, Object?> node)
+    implements Object {
   MacroDescription({
     List<int>? runsInPhases,
   }) : this.fromJson({
@@ -108,7 +114,8 @@ extension type MacroDescription.fromJson(Map<String, Object?> node) {
 }
 
 /// Informs the host that a macro has started.
-extension type MacroStartedRequest.fromJson(Map<String, Object?> node) {
+extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
+    implements Object {
   MacroStartedRequest({
     MacroDescription? macroDescription,
   }) : this.fromJson({
@@ -119,7 +126,8 @@ extension type MacroStartedRequest.fromJson(Map<String, Object?> node) {
 }
 
 /// Host's response to a [MacroStartedRequest].
-extension type MacroStartedResponse.fromJson(Map<String, Object?> node) {
+extension type MacroStartedResponse.fromJson(Map<String, Object?> node)
+    implements Object {
   MacroStartedResponse() : this.fromJson({});
 }
 
@@ -132,7 +140,8 @@ enum MacroRequestType {
   bool get isKnown => this != _unknown;
 }
 
-extension type MacroRequest.fromJson(Map<String, Object?> node) {
+extension type MacroRequest.fromJson(Map<String, Object?> node)
+    implements Object {
   static MacroRequest macroStartedRequest(
     MacroStartedRequest macroStartedRequest, {
     required int id,
@@ -181,7 +190,7 @@ extension type MacroRequest.fromJson(Map<String, Object?> node) {
 }
 
 /// The macro to host protocol version and encoding. TODO(davidmorgan): add the version.
-extension type Protocol.fromJson(Map<String, Object?> node) {
+extension type Protocol.fromJson(Map<String, Object?> node) implements Object {
   Protocol({
     String? encoding,
   }) : this.fromJson({
@@ -193,7 +202,8 @@ extension type Protocol.fromJson(Map<String, Object?> node) {
 }
 
 /// Macro's query about the code it should augment.
-extension type QueryRequest.fromJson(Map<String, Object?> node) {
+extension type QueryRequest.fromJson(Map<String, Object?> node)
+    implements Object {
   QueryRequest({
     Query? query,
   }) : this.fromJson({
@@ -203,7 +213,8 @@ extension type QueryRequest.fromJson(Map<String, Object?> node) {
 }
 
 /// Host's response to a [QueryRequest].
-extension type QueryResponse.fromJson(Map<String, Object?> node) {
+extension type QueryResponse.fromJson(Map<String, Object?> node)
+    implements Object {
   QueryResponse({
     Model? model,
   }) : this.fromJson({
@@ -223,7 +234,7 @@ enum ResponseType {
   bool get isKnown => this != _unknown;
 }
 
-extension type Response.fromJson(Map<String, Object?> node) {
+extension type Response.fromJson(Map<String, Object?> node) implements Object {
   static Response augmentResponse(
     AugmentResponse augmentResponse, {
     required int requestId,
