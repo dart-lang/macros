@@ -52,7 +52,7 @@ class MacroServer {
       if (request.type.isKnown) {
         service
             .handle(request)
-            .then((response) => protocol.send(socket.add, response!.node));
+            .then((response) => protocol.send(socket.add, response.node));
       }
       final response = Response.fromJson(jsonData);
       if (response.type.isKnown) {

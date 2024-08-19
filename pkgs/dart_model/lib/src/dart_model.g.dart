@@ -2,7 +2,8 @@
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 /// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
-extension type Augmentation.fromJson(Map<String, Object?> node) {
+extension type Augmentation.fromJson(Map<String, Object?> node)
+    implements Object {
   Augmentation({
     String? code,
   }) : this.fromJson({
@@ -14,7 +15,8 @@ extension type Augmentation.fromJson(Map<String, Object?> node) {
 }
 
 /// A metadata annotation.
-extension type MetadataAnnotation.fromJson(Map<String, Object?> node) {
+extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
+    implements Object {
   MetadataAnnotation({
     QualifiedName? type,
   }) : this.fromJson({
@@ -26,7 +28,7 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node) {
 }
 
 /// An interface.
-extension type Interface.fromJson(Map<String, Object?> node) {
+extension type Interface.fromJson(Map<String, Object?> node) implements Object {
   Interface({
     List<MetadataAnnotation>? metadataAnnotations,
     Map<String, Member>? members,
@@ -50,7 +52,7 @@ extension type Interface.fromJson(Map<String, Object?> node) {
 }
 
 /// Library.
-extension type Library.fromJson(Map<String, Object?> node) {
+extension type Library.fromJson(Map<String, Object?> node) implements Object {
   Library({
     Map<String, Interface>? scopes,
   }) : this.fromJson({
@@ -62,7 +64,7 @@ extension type Library.fromJson(Map<String, Object?> node) {
 }
 
 /// Member of a scope.
-extension type Member.fromJson(Map<String, Object?> node) {
+extension type Member.fromJson(Map<String, Object?> node) implements Object {
   Member({
     Properties? properties,
   }) : this.fromJson({
@@ -74,7 +76,7 @@ extension type Member.fromJson(Map<String, Object?> node) {
 }
 
 /// Partial model of a corpus of Dart source code.
-extension type Model.fromJson(Map<String, Object?> node) {
+extension type Model.fromJson(Map<String, Object?> node) implements Object {
   Model({
     Map<String, Library>? uris,
   }) : this.fromJson({
@@ -91,7 +93,8 @@ extension type NeverType.fromJson(Null _) {
 }
 
 /// A Dart type of the form `T?` for an inner type `T`.
-extension type NullableType.fromJson(Map<String, Object?> node) {
+extension type NullableType.fromJson(Map<String, Object?> node)
+    implements Object {
   NullableType({
     StaticType? inner,
   }) : this.fromJson({
@@ -101,7 +104,8 @@ extension type NullableType.fromJson(Map<String, Object?> node) {
 }
 
 /// Set of boolean properties.
-extension type Properties.fromJson(Map<String, Object?> node) {
+extension type Properties.fromJson(Map<String, Object?> node)
+    implements Object {
   Properties({
     bool? isAbstract,
     bool? isClass,
@@ -138,12 +142,12 @@ extension type Properties.fromJson(Map<String, Object?> node) {
 }
 
 /// A URI combined with a name.
-extension type QualifiedName.fromJson(String string) {
+extension type QualifiedName.fromJson(String string) implements Object {
   QualifiedName(String string) : this.fromJson(string);
 }
 
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
-extension type Query.fromJson(Map<String, Object?> node) {
+extension type Query.fromJson(Map<String, Object?> node) implements Object {
   Query({
     QualifiedName? target,
   }) : this.fromJson({
@@ -164,7 +168,8 @@ enum StaticTypeType {
   bool get isKnown => this != _unknown;
 }
 
-extension type StaticType.fromJson(Map<String, Object?> node) {
+extension type StaticType.fromJson(Map<String, Object?> node)
+    implements Object {
   static StaticType neverType(NeverType neverType) => StaticType.fromJson({
         'type': 'NeverType',
         'value': neverType,
@@ -214,6 +219,6 @@ extension type StaticType.fromJson(Map<String, Object?> node) {
 }
 
 /// The type-hierarchy representation of the type `void`.
-extension type VoidType.fromJson(String string) {
+extension type VoidType.fromJson(String string) implements Object {
   VoidType(String string) : this.fromJson(string);
 }

@@ -84,7 +84,11 @@ String _generateExtensionType(String name, JsonSchema definition) {
   if (definition.description != null) {
     result.writeln('/// ${definition.description}');
   }
-  result.writeln('extension type $name.fromJson($jsonType) {');
+  result.write('extension type $name.fromJson($jsonType)');
+  if (definition.type != SchemaType.nullValue) {
+    result.write(' implements Object');
+  }
+  result.writeln(' {');
 
   // Generate the non-JSON constructor, which accepts an optional value for
   // every field and constructs JSON from it.
@@ -169,7 +173,9 @@ String _generateUnion(
   ];
 
   // TODO(davidmorgan): add description.
-  result.writeln('extension type $name.fromJson(Map<String, Object?> node) {');
+  result.writeln(
+      'extension type $name.fromJson(Map<String, Object?> node)  implements '
+      'Object {');
   for (final (type, _) in unionEntries) {
     final lowerType = _firstToLowerCase(type);
     result.writeln('static $name $lowerType($type $lowerType');
