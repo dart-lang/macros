@@ -83,6 +83,10 @@
             "$ref": "#/$defs/Member"
           }
         },
+        "thisType": {
+          "description": "The type of the expression `this` when used in this interface.",
+          "$ref": "#/$defs/NamedTypeDesc"
+        },
         "properties": {
           "$comment": "The properties of this interface.",
           "$ref": "#/$defs/Properties"
@@ -122,6 +126,10 @@
           "additionalProperties": {
             "$ref": "#/$defs/Library"
           }
+        },
+        "types": {
+          "description": "The resolved static type hierarchy.",
+          "$ref": "#/$defs/TypeHierarchy"
         }
       }
     },
@@ -152,12 +160,18 @@
         }
       }
     },
-    "NamedStaticTypeDesc": {
+    "NamedTypeDesc": {
       "type": "object",
       "description": "A resolved static type",
       "properties": {
         "name": {
           "$ref": "#/$defs/QualifiedName"
+        },
+        "typeParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeParameterDesc"
+          }
         },
         "instantiation": {
           "type": "array",
@@ -254,7 +268,7 @@
             {"$ref": "#/$defs/FunctionTypeDesc"},
             {"$ref": "#/$defs/NeverTypeDesc"},
             {"$ref": "#/$defs/NullableTypeDesc"},
-            {"$ref": "#/$defs/NamedStaticTypeDesc"},
+            {"$ref": "#/$defs/NamedTypeDesc"},
             {"$ref": "#/$defs/RecordTypeDesc"},
             {"$ref": "#/$defs/TypeParameterTypeDesc"},
             {"$ref": "#/$defs/VoidTypeDesc"}
@@ -271,6 +285,43 @@
         },
         "bound": {
           "$ref": "#/$defs/StaticTypeDesc"
+        }
+      }
+    },
+    "TypeHierarchy": {
+      "description": "View of a subset of a Dart program's type hierarchy as part of a queried model.",
+      "type": "object",
+      "properties": {
+        "named": {
+          "description": "Map of qualified interface names to their resolved named type.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/TypeHierarchyEntry"
+          }
+        }
+      }
+    },
+    "TypeHierarchyEntry": {
+      "description": "Entry of an interface in Dart's type hierarchy, along with supertypes.",
+      "type": "object",
+      "properties": {
+        "typeParameters": {
+          "description": "Type parameters defined on this interface-defining element..",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StaticTypeParameterDesc"
+          }
+        },
+        "self": {
+          "description": "The named static type represented by this entry.",
+          "$ref": "#/$defs/NamedTypeDesc"
+        },
+        "supertypes": {
+          "description": "All direct supertypes of this type.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NamedTypeDesc"
+          }
         }
       }
     },

@@ -68,11 +68,13 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
   Interface({
     List<MetadataAnnotation>? metadataAnnotations,
     Map<String, Member>? members,
+    NamedTypeDesc? thisType,
     Properties? properties,
   }) : this.fromJson({
           if (metadataAnnotations != null)
             'metadataAnnotations': metadataAnnotations,
           if (members != null) 'members': members,
+          if (thisType != null) 'thisType': thisType,
           if (properties != null) 'properties': properties,
         });
 
@@ -82,6 +84,7 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
 
   /// Map of members by name.
   Map<String, Member> get members => (node['members'] as Map).cast();
+  NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
 
   /// The properties of this interface.
   Properties get properties => node['properties'] as Properties;
@@ -115,12 +118,15 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
 extension type Model.fromJson(Map<String, Object?> node) implements Object {
   Model({
     Map<String, Library>? uris,
+    TypeHierarchy? types,
   }) : this.fromJson({
           if (uris != null) 'uris': uris,
+          if (types != null) 'types': types,
         });
 
   /// Libraries by URI.
   Map<String, Library> get uris => (node['uris'] as Map).cast();
+  TypeHierarchy get types => node['types'] as TypeHierarchy;
 }
 
 /// A resolved named parameter as part of a [FunctionType].
@@ -155,16 +161,20 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
 }
 
 /// A resolved static type
-extension type NamedStaticTypeDesc.fromJson(Map<String, Object?> node)
+extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
     implements Object {
-  NamedStaticTypeDesc({
+  NamedTypeDesc({
     QualifiedName? name,
+    List<StaticTypeParameterDesc>? typeParameters,
     List<StaticTypeDesc>? instantiation,
   }) : this.fromJson({
           if (name != null) 'name': name,
+          if (typeParameters != null) 'typeParameters': typeParameters,
           if (instantiation != null) 'instantiation': instantiation,
         });
   QualifiedName get name => node['name'] as QualifiedName;
+  List<StaticTypeParameterDesc> get typeParameters =>
+      (node['typeParameters'] as List).cast();
   List<StaticTypeDesc> get instantiation =>
       (node['instantiation'] as List).cast();
 }
@@ -261,7 +271,7 @@ enum StaticTypeDescType {
   functionTypeDesc,
   neverTypeDesc,
   nullableTypeDesc,
-  namedStaticTypeDesc,
+  namedTypeDesc,
   recordTypeDesc,
   typeParameterTypeDesc,
   voidTypeDesc;
@@ -291,11 +301,10 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
         'type': 'NullableTypeDesc',
         'value': nullableTypeDesc,
       });
-  static StaticTypeDesc namedStaticTypeDesc(
-          NamedStaticTypeDesc namedStaticTypeDesc) =>
+  static StaticTypeDesc namedTypeDesc(NamedTypeDesc namedTypeDesc) =>
       StaticTypeDesc.fromJson({
-        'type': 'NamedStaticTypeDesc',
-        'value': namedStaticTypeDesc,
+        'type': 'NamedTypeDesc',
+        'value': namedTypeDesc,
       });
   static StaticTypeDesc recordTypeDesc(RecordTypeDesc recordTypeDesc) =>
       StaticTypeDesc.fromJson({
@@ -323,8 +332,8 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
         return StaticTypeDescType.neverTypeDesc;
       case 'NullableTypeDesc':
         return StaticTypeDescType.nullableTypeDesc;
-      case 'NamedStaticTypeDesc':
-        return StaticTypeDescType.namedStaticTypeDesc;
+      case 'NamedTypeDesc':
+        return StaticTypeDescType.namedTypeDesc;
       case 'RecordTypeDesc':
         return StaticTypeDescType.recordTypeDesc;
       case 'TypeParameterTypeDesc':
@@ -364,11 +373,11 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
     return NullableTypeDesc.fromJson(node['value'] as Map<String, Object?>);
   }
 
-  NamedStaticTypeDesc get asNamedStaticTypeDesc {
-    if (node['type'] != 'NamedStaticTypeDesc') {
-      throw StateError('Not a NamedStaticTypeDesc.');
+  NamedTypeDesc get asNamedTypeDesc {
+    if (node['type'] != 'NamedTypeDesc') {
+      throw StateError('Not a NamedTypeDesc.');
     }
-    return NamedStaticTypeDesc.fromJson(node['value'] as Map<String, Object?>);
+    return NamedTypeDesc.fromJson(node['value'] as Map<String, Object?>);
   }
 
   RecordTypeDesc get asRecordTypeDesc {
@@ -406,6 +415,41 @@ extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
         });
   int get identifier => node['identifier'] as int;
   StaticTypeDesc get bound => node['bound'] as StaticTypeDesc;
+}
+
+/// View of a subset of a Dart program's type hierarchy as part of a queried model.
+extension type TypeHierarchy.fromJson(Map<String, Object?> node)
+    implements Object {
+  TypeHierarchy({
+    Map<String, TypeHierarchyEntry>? named,
+  }) : this.fromJson({
+          if (named != null) 'named': named,
+        });
+
+  /// Map of qualified interface names to their resolved named type.
+  Map<String, TypeHierarchyEntry> get named => (node['named'] as Map).cast();
+}
+
+/// Entry of an interface in Dart's type hierarchy, along with supertypes.
+extension type TypeHierarchyEntry.fromJson(Map<String, Object?> node)
+    implements Object {
+  TypeHierarchyEntry({
+    List<StaticTypeParameterDesc>? typeParameters,
+    NamedTypeDesc? self,
+    List<NamedTypeDesc>? supertypes,
+  }) : this.fromJson({
+          if (typeParameters != null) 'typeParameters': typeParameters,
+          if (self != null) 'self': self,
+          if (supertypes != null) 'supertypes': supertypes,
+        });
+
+  /// Type parameters defined on this interface-defining element..
+  List<StaticTypeParameterDesc> get typeParameters =>
+      (node['typeParameters'] as List).cast();
+  NamedTypeDesc get self => node['self'] as NamedTypeDesc;
+
+  /// All direct supertypes of this type.
+  List<NamedTypeDesc> get supertypes => (node['supertypes'] as List).cast();
 }
 
 /// A type formed by a reference to a type parameter.

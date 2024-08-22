@@ -5,9 +5,6 @@
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
 
-export 'src/type_system.dart';
-export 'src/types.dart';
-
 /// A macro: transforms Dart code into Dart code augmentations to apply to the
 /// code.
 abstract interface class Macro {

@@ -1,37 +1,43 @@
-// ignore_for_file: non_constant_identifier_names,constant_identifier_names
-import 'types.dart';
+// ignore_for_file: non_constant_identifier_names, constant_identifier_names
+
+import 'dart_model.dart';
+import 'type.dart';
 
 final class StaticTypeSystem {
-  final NamedType _object;
-  final ResolvedType _objectQuestion;
-  final NamedType _null;
-  final NamedType _futureVoid;
+  final TypeHierarchy _hierarchy;
 
-  StaticTypeSystem(
-      {required NamedType object,
-      required ResolvedType objectQuestion,
-      required NamedType nullType,
-      required NamedType futureVoid})
-      : _object = object,
-        _objectQuestion = objectQuestion,
-        _null = nullType,
-        _futureVoid = futureVoid;
+  late final InterfaceType _object = _lookupNamed('dart:core#Object');
+  late final StaticType _objectQuestion = NullableType(_object);
+  late final StaticType _null = _lookupNamed('dart:core#Null');
+  late final InterfaceType _futureVoid =
+      _lookupEntry('dart:async#Future').instantiate([const VoidType()]);
+
+  StaticTypeSystem(this._hierarchy);
+
+  TypeHierarchyEntry _lookupEntry(String qualifiedName) {
+    return _hierarchy.named[qualifiedName]!;
+  }
+
+  InterfaceType _lookupNamed(String qualifiedName) {
+    return StaticType(
+            StaticTypeDesc.namedTypeDesc(_lookupEntry(qualifiedName).self))
+        as InterfaceType;
+  }
 
   /// Returns the resolved type `Future<[inner]>`.
-  ResolvedType _future(ResolvedType inner) {
-    return NamedType(
+  StaticType _future(StaticType inner) {
+    return InterfaceType(
       name: _futureVoid.name,
-      typeParameters: _futureVoid.typeParameters,
-      typeArguments: [inner],
-      namedSuperTypes: _futureVoid.namedSuperTypes,
+      parameters: _futureVoid.parameters,
+      instantiation: [inner],
     );
   }
 
   /// Returns whether [type] is a top type (i.e. `dynamic`, `void` or
   /// `Object?`).
-  bool _isTopType(ResolvedType type) {
+  bool _isTopType(StaticType type) {
     return switch (type) {
-      NullableType(:final NamedType inner) => inner.name == _object.name,
+      NullableType(:final InterfaceType inner) => inner.name == _object.name,
       VoidType() => true,
       DynamicType() => true,
       _ => false,
@@ -43,11 +49,11 @@ final class StaticTypeSystem {
   /// As per the Dart language specification, this is the case iff the types are
   /// subtypes of each other.
   /// For instance, `Never?` and `Null` are equal types.
-  bool areEqual(ResolvedType a, ResolvedType b) {
+  bool areEqual(StaticType a, StaticType b) {
     return isSubtype(a, b) && isSubtype(b, a);
   }
 
-  bool isSubtype(ResolvedType a, ResolvedType b) {
+  bool isSubtype(StaticType a, StaticType b) {
     // This is using `T0` and `T1` names to make the implementation easier to
     // compare with the specification at
     // https://github.com/dart-lang/language/blob/main/resources/type-system/subtyping.md#rules
@@ -55,7 +61,7 @@ final class StaticTypeSystem {
     final T1 = b;
 
     // Reflexivity
-    if (identical(T0, T1)) {
+    if (identical(a, b) || a == b) {
       return true;
     }
 
@@ -77,7 +83,7 @@ final class StaticTypeSystem {
     }
 
     // Right Object: If `T1` is `Object`, then
-    if (T1 case NamedType(isDartCoreObject: true)) {
+    if (T1 case InterfaceType(isDartCoreObject: true)) {
       // If `T0` is an unpromoted type variable with bound `B` then `T0 <: T1`
       // iff `B <: Object`.
       if (T0 case TypeParameterType(:final parameter)) {
@@ -90,7 +96,10 @@ final class StaticTypeSystem {
       // If `T0` is `FutureOr<S>` for some `S`, then `T0 <: T1` iff
       // `S <: Object`
       if (T1
-          case NamedType(isDartAsyncFutureOr: true, typeArguments: [final S])) {
+          case InterfaceType(
+            isDartAsyncFutureOr: true,
+            instantiation: [final S]
+          )) {
         return isSubtype(S, _object);
       }
 
@@ -99,7 +108,7 @@ final class StaticTypeSystem {
       // If `T0` is `Null`, `dynamic`, `void`, or `S?` for any `S`, then the
       // subtyping does not hold.
       return switch (T0) {
-        NamedType(isDartCoreNull: true) ||
+        InterfaceType(isDartCoreNull: true) ||
         DynamicType() ||
         VoidType() ||
         NullableType() =>
@@ -110,19 +119,19 @@ final class StaticTypeSystem {
     }
 
     // Left Null: If `T0` is `Null` then:
-    if (T0 case NamedType(isDartCoreNull: true)) {
+    if (T0 case InterfaceType(isDartCoreNull: true)) {
       return switch (T1) {
         // If `T1` is a type variable (promoted or not) the query is false
         TypeParameterType() => false,
         // If `T1` is `FutureOr<S>` for some `S`, then the query is true iff
         // `Null <: S`.
-        NamedType(
+        InterfaceType(
           isDartAsyncFutureOr: true,
-          typeArguments: [final S],
+          instantiation: [final S],
         ) =>
           isSubtype(_null, S),
         // If `T1` is `Null`, `S?` or `S*` for some `S` then the query is true.
-        NamedType(isDartCoreNull: true) || NullableType() => true,
+        InterfaceType(isDartCoreNull: true) || NullableType() => true,
         // Otherwise, the query is false
         _ => false,
       };
@@ -134,7 +143,10 @@ final class StaticTypeSystem {
     // Left FutureOr: If `T0` is `FutureOr<S0>` then: `T0 <: T1` iff
     // `Future<S0> <: T1` and `S0 <: T1`.
     if (T0
-        case NamedType(isDartAsyncFutureOr: true, typeArguments: [final S0])) {
+        case InterfaceType(
+          isDartAsyncFutureOr: true,
+          instantiation: [final S0]
+        )) {
       return isSubtype(S0, T1) && isSubtype(_future(S0), T1);
     }
 
@@ -157,7 +169,10 @@ final class StaticTypeSystem {
     // Right FutureOr: If `T1` is `FutureOr<S1>` then `T0 <: T1` iff any of the
     // following hold:
     if (T1
-        case NamedType(isDartAsyncFutureOr: true, typeArguments: [final S1])) {
+        case InterfaceType(
+          isDartAsyncFutureOr: true,
+          instantiation: [final S1]
+        )) {
       if (isSubtype(T0, _future(S1))) {
         // `T0 <: Future<S1>`
         return true;
@@ -215,20 +230,20 @@ final class StaticTypeSystem {
 
     // Function Type/Function: `T0` is a function type and `T1` is `Function`
     if (T0 is FunctionType) {
-      if (T1 case NamedType(isDartCoreFunction: true)) {
+      if (T1 case InterfaceType(isDartCoreFunction: true)) {
         return true;
       }
     }
 
     // Record Type/Record: `T0` is a function type and `T1` is `Record`
     if (T0 is RecordType) {
-      if (T1 case NamedType(isDartCoreRecord: true)) {
+      if (T1 case InterfaceType(isDartCoreRecord: true)) {
         return true;
       }
     }
 
     // Interface Compositionality and Super-Interface
-    if (T0 is NamedType && T1 is NamedType) {
+    if (T0 is InterfaceType && T1 is InterfaceType) {
       return _namedTypeSubtypes(T0, T1);
     }
 
@@ -264,27 +279,26 @@ final class StaticTypeSystem {
   /// Checks whether [subType] is a subtype of [superType] under the "Interface
   /// Compositionality" and "Super-Interface" rules after previous rules have
   /// already been checked.
-  bool _namedTypeSubtypes(NamedType subType, NamedType superType) {
+  bool _namedTypeSubtypes(InterfaceType subType, InterfaceType superType) {
     // <: Object queries are handled by other rules.
     assert(!superType.isDartCoreObject);
 
     if (subType.name == subType.name) {
-      return _haveMatchingInterfaceArguments(
-          subType.typeArguments, superType.typeArguments);
+      return _matchingInstantiation(
+          subType.instantiation, superType.instantiation);
     }
 
-    for (final actualSuperType in subType.superTypes) {
+    for (final actualSuperType in _constructSuperTypes(subType, [])) {
       if (actualSuperType.name == superType.name) {
-        return _haveMatchingInterfaceArguments(
-            actualSuperType.typeArguments, superType.typeArguments);
+        return _matchingInstantiation(
+            actualSuperType.instantiation, superType.instantiation);
       }
     }
 
     return false;
   }
 
-  bool _haveMatchingInterfaceArguments(
-      List<ResolvedType> left, List<ResolvedType> right) {
+  bool _matchingInstantiation(List<StaticType> left, List<StaticType> right) {
     assert(left.length == right.length);
 
     for (var i = 0; i < left.length; i++) {
@@ -294,6 +308,48 @@ final class StaticTypeSystem {
     }
 
     return true;
+  }
+
+  /// Walks the type hierarchy upwards from [type], yielding instantiated
+  /// supertypes of that type.
+  Iterable<InterfaceType> _constructSuperTypes(
+      InterfaceType type, List<QualifiedName> coveredClasses) sync* {
+    // Consider e.g. a class `List<T> extends Iterable<T>` for which we have an
+    // instantiation `List<int>` and now want to find supertypes.
+    // First, create a mapping `T -> int`:
+    final substitution = TypeSubstitution(substitution: {
+      for (var i = 0; i < type.parameters.length; i++)
+        type.parameters[i]: type.instantiation[i]
+    });
+
+    final hierarchyEntry = _hierarchy.named[type.name.string]!;
+    for (final superType in hierarchyEntry.supertypes) {
+      if (coveredClasses.contains(superType.name)) {
+        continue;
+      }
+
+      coveredClasses.add(superType.name);
+
+      // The serialized `superType` format may reference type parameters from
+      // the [hierarchyEntry] to describe how type parameters are passed towards
+      // the supertypes. We first create the supertype from the perspective of
+      // the class definition of the [type] by using the type parameters we
+      // already have.
+      final superTypeUsingThisTypesTypeParameters = StaticType(
+        StaticTypeDesc.namedTypeDesc(superType),
+        translatedParameters: {
+          for (final (i, param) in hierarchyEntry.typeParameters.indexed)
+            param.identifier: type.parameters[i],
+        },
+      );
+
+      // Which then allows instantiating the supertype based on the
+      // instantiation of the subtype.
+      final instantiatedSuperType = substitution
+          .applyTo(superTypeUsingThisTypesTypeParameters) as InterfaceType;
+      yield instantiatedSuperType;
+      yield* _constructSuperTypes(instantiatedSuperType, coveredClasses);
+    }
   }
 
   bool _checkFunctionSubtype(FunctionType left, FunctionType right) {
@@ -411,12 +467,12 @@ final class StaticTypeSystem {
     final freshTypes = List.generate(
         a.length, (i) => TypeParameterType(parameter: freshParameters[i]));
 
-    final substitutionA = {
+    final substitutionA = TypeSubstitution(substitution: {
       for (final (i, parameter) in a.indexed) parameter: freshTypes[i]
-    };
-    final substitutionB = {
+    });
+    final substitutionB = TypeSubstitution(substitution: {
       for (final (i, parameter) in b.indexed) parameter: freshTypes[i]
-    };
+    });
 
     for (var i = 0; i < a.length; i++) {
       var boundA = a[i].bound;
@@ -426,8 +482,8 @@ final class StaticTypeSystem {
         continue;
       }
 
-      boundA ??= (boundA ?? const DynamicType()).substitute(substitutionA);
-      boundB ??= (boundB ?? const DynamicType()).substitute(substitutionB);
+      boundA ??= substitutionA.applyTo(boundA ?? const DynamicType());
+      boundB ??= substitutionB.applyTo(boundB ?? const DynamicType());
 
       if (!areEqual(boundA, boundB)) {
         return null;
@@ -439,5 +495,17 @@ final class StaticTypeSystem {
     }
 
     return freshParameters;
+  }
+}
+
+extension on TypeHierarchyEntry {
+  InterfaceType instantiate(List<StaticType> typeArguments) {
+    final raw = StaticType(StaticTypeDesc.namedTypeDesc(self)) as InterfaceType;
+
+    final substitution = TypeSubstitution(substitution: {
+      for (final (i, param) in raw.parameters.indexed) param: typeArguments[i],
+    });
+
+    return substitution.applyTo(raw) as InterfaceType;
   }
 }
