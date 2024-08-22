@@ -32,7 +32,8 @@ sealed class StaticType {
       StaticTypeDescType.nullableTypeDesc => NullableType(
           _translateFromDescription(
               description.asNullableTypeDesc.inner, knownTypeParameters)),
-      StaticTypeDescType.namedTypeDesc => throw UnimplementedError(),
+      StaticTypeDescType.namedTypeDesc => InterfaceType._translateFrom(
+          description.asNamedTypeDesc, knownTypeParameters),
       StaticTypeDescType.recordTypeDesc => RecordType(
           positional: [
             for (final positional in description.asRecordTypeDesc.positional)
