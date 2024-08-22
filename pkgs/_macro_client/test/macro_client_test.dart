@@ -118,8 +118,9 @@ void main() {
             socket.add,
             Response.queryResponse(
                     QueryResponse(
-                        model:
-                            Model(uris: {'package:foo/foo.dart': Library()})),
+                        model: Model(uris: {
+                      'package:foo/foo.dart': Library(scopes: const {})
+                    })),
                     requestId: queryRequestId)
                 .node);
 

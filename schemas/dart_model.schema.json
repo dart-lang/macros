@@ -14,7 +14,8 @@
           "type": "string",
           "description": "Augmentation code."
         }
-      }
+      },
+      "required": ["code"]
     },
     "MetadataAnnotation": {
       "type": "object",
@@ -24,7 +25,8 @@
           "$comment": "The type of the annotation.",
           "$ref": "#/$defs/QualifiedName"
         }
-      }
+      },
+      "required": ["type"]
     },
     "Interface": {
       "type": "object",
@@ -48,7 +50,8 @@
           "$comment": "The properties of this interface.",
           "$ref": "#/$defs/Properties"
         }
-      }
+      },
+      "required": ["metadataAnnotations", "members", "properties"]
     },
     "Library": {
       "description": "Library.",
@@ -61,7 +64,8 @@
             "$ref": "#/$defs/Interface"
           }
         }
-      }
+      },
+      "required": ["scopes"]
     },
     "Member": {
       "type": "object",
@@ -71,7 +75,8 @@
           "$comment": "The properties of this member.",
           "$ref": "#/$defs/Properties"
         }
-      }
+      },
+      "required": ["properties"]
     },
     "Model": {
       "type": "object",
@@ -84,7 +89,8 @@
             "$ref": "#/$defs/Library"
           }
         }
-      }
+      },
+      "required": ["uris"]
     },
     "NeverType": {
       "type": "null",
@@ -97,7 +103,8 @@
         "inner": {
           "$ref": "#/$defs/StaticType"
         }
-      }
+      },
+      "required": ["inner"]
     },
     "Properties": {
       "type": "object",
@@ -105,27 +112,33 @@
       "properties": {
         "isAbstract": {
           "description": "Whether the entity is abstract, meaning it has no definition.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "isClass": {
           "description": "Whether the entity is a class.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "isGetter": {
           "description": "Whether the entity is a getter.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "isField": {
           "description": "Whether the entity is a field.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "isMethod": {
           "description": "Whether the entity is a method.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "isStatic": {
           "description": "Whether the entity is static.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -141,7 +154,8 @@
           "$comment": "The class to query about.",
           "$ref": "#/$defs/QualifiedName"
         }
-      }
+      },
+      "required": ["target"]
     },
     "StaticType": {
       "description": "A resolved type as it appears in Dart's type hierarchy.",

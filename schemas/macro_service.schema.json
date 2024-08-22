@@ -24,7 +24,8 @@
           "$comment": "The class to augment. TODO(davidmorgan): expand to more types of target",
           "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
         }
-      }
+      },
+      "required": ["phase"]
     },
     "AugmentResponse": {
       "type": "object",
@@ -37,7 +38,8 @@
             "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
           }
         }
-      }
+      },
+      "required": ["augmentations"]
     },
     "ErrorResponse": {
       "type": "object",
@@ -47,7 +49,8 @@
           "description": "The error.",
           "type": "string"
         }
-      }
+      },
+      "required": ["error"]
     },
     "HostEndpoint": {
       "type": "object",
@@ -57,7 +60,8 @@
           "description": "TCP port to connect to.",
           "type": "integer"
         }
-      }
+      },
+      "required": ["port"]
     },
     "HostRequest": {
       "$description": "A request sent from host to macro.",
@@ -94,7 +98,8 @@
             "type": "integer"
           }
         }
-      }
+      },
+      "required": ["runsInPhases"]
     },
     "MacroStartedRequest": {
       "type": "object",
@@ -103,7 +108,8 @@
         "macroDescription": {
           "$ref": "#/$defs/MacroDescription"
         }
-      }
+      },
+      "required": ["macroDescription"]
     },
     "MacroStartedResponse": {
       "type": "object",
@@ -144,7 +150,8 @@
           "type": "string",
           "description": "The wire format: json or binary. TODO(davidmorgan): use an enum?"
         }
-      }
+      },
+      "required": ["encoding"]
     },
     "QueryRequest": {
       "type": "object",
@@ -153,7 +160,8 @@
         "query": {
           "$ref": "file:dart_model.schema.json#/$defs/Query"
         }
-      }
+      },
+      "required": ["query"]
     },
     "QueryResponse": {
       "type": "object",
@@ -162,7 +170,8 @@
         "model": {
           "$ref": "file:dart_model.schema.json#/$defs/Model"
         }
-      }
+      },
+      "required": ["model"]
     },
     "Response": {
       "$description": "A response to a request.",

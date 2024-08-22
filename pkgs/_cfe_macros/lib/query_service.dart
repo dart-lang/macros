@@ -61,7 +61,10 @@ class CfeQueryService implements QueryService {
           scopes: {
             // TODO(davidmorgan): return more than just fields.
             // TODO(davidmorgan): specify in the query what to return.
-            target.name: Interface(members: fields)
+            target.name: Interface(
+                members: fields,
+                metadataAnnotations: const [],
+                properties: Properties())
           },
         ),
       },

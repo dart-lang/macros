@@ -7,10 +7,10 @@ import 'package:dart_model/dart_model.dart';
 extension type AugmentRequest.fromJson(Map<String, Object?> node)
     implements Object {
   AugmentRequest({
-    int? phase,
+    required int phase,
     QualifiedName? target,
   }) : this.fromJson({
-          if (phase != null) 'phase': phase,
+          'phase': phase,
           if (target != null) 'target': target,
         });
 
@@ -18,16 +18,17 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
   int get phase => node['phase'] as int;
 
   /// The class to augment. TODO(davidmorgan): expand to more types of target
-  QualifiedName get target => node['target'] as QualifiedName;
+  QualifiedName? get target =>
+      node['target'] == null ? null : node['target'] as QualifiedName?;
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
 extension type AugmentResponse.fromJson(Map<String, Object?> node)
     implements Object {
   AugmentResponse({
-    List<Augmentation>? augmentations,
+    required List<Augmentation> augmentations,
   }) : this.fromJson({
-          if (augmentations != null) 'augmentations': augmentations,
+          'augmentations': augmentations,
         });
 
   /// The augmentations.
@@ -39,9 +40,9 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node)
 extension type ErrorResponse.fromJson(Map<String, Object?> node)
     implements Object {
   ErrorResponse({
-    String? error,
+    required String error,
   }) : this.fromJson({
-          if (error != null) 'error': error,
+          'error': error,
         });
 
   /// The error.
@@ -52,9 +53,9 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node)
 extension type HostEndpoint.fromJson(Map<String, Object?> node)
     implements Object {
   HostEndpoint({
-    int? port,
+    required int port,
   }) : this.fromJson({
-          if (port != null) 'port': port,
+          'port': port,
         });
 
   /// TCP port to connect to.
@@ -104,9 +105,9 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
 extension type MacroDescription.fromJson(Map<String, Object?> node)
     implements Object {
   MacroDescription({
-    List<int>? runsInPhases,
+    required List<int> runsInPhases,
   }) : this.fromJson({
-          if (runsInPhases != null) 'runsInPhases': runsInPhases,
+          'runsInPhases': runsInPhases,
         });
 
   /// Phases that the macro runs in: 1, 2 and/or 3.
@@ -117,9 +118,9 @@ extension type MacroDescription.fromJson(Map<String, Object?> node)
 extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
     implements Object {
   MacroStartedRequest({
-    MacroDescription? macroDescription,
+    required MacroDescription macroDescription,
   }) : this.fromJson({
-          if (macroDescription != null) 'macroDescription': macroDescription,
+          'macroDescription': macroDescription,
         });
   MacroDescription get macroDescription =>
       node['macroDescription'] as MacroDescription;
@@ -192,9 +193,9 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 /// The macro to host protocol version and encoding. TODO(davidmorgan): add the version.
 extension type Protocol.fromJson(Map<String, Object?> node) implements Object {
   Protocol({
-    String? encoding,
+    required String encoding,
   }) : this.fromJson({
-          if (encoding != null) 'encoding': encoding,
+          'encoding': encoding,
         });
 
   /// The wire format: json or binary. TODO(davidmorgan): use an enum?
@@ -205,9 +206,9 @@ extension type Protocol.fromJson(Map<String, Object?> node) implements Object {
 extension type QueryRequest.fromJson(Map<String, Object?> node)
     implements Object {
   QueryRequest({
-    Query? query,
+    required Query query,
   }) : this.fromJson({
-          if (query != null) 'query': query,
+          'query': query,
         });
   Query get query => node['query'] as Query;
 }
@@ -216,9 +217,9 @@ extension type QueryRequest.fromJson(Map<String, Object?> node)
 extension type QueryResponse.fromJson(Map<String, Object?> node)
     implements Object {
   QueryResponse({
-    Model? model,
+    required Model model,
   }) : this.fromJson({
-          if (model != null) 'model': model,
+          'model': model,
         });
   Model get model => node['model'] as Model;
 }

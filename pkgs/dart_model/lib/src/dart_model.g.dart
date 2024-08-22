@@ -5,9 +5,9 @@
 extension type Augmentation.fromJson(Map<String, Object?> node)
     implements Object {
   Augmentation({
-    String? code,
+    required String code,
   }) : this.fromJson({
-          if (code != null) 'code': code,
+          'code': code,
         });
 
   /// Augmentation code.
@@ -18,9 +18,9 @@ extension type Augmentation.fromJson(Map<String, Object?> node)
 extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
     implements Object {
   MetadataAnnotation({
-    QualifiedName? type,
+    required QualifiedName type,
   }) : this.fromJson({
-          if (type != null) 'type': type,
+          'type': type,
         });
 
   /// The type of the annotation.
@@ -30,14 +30,13 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
 /// An interface.
 extension type Interface.fromJson(Map<String, Object?> node) implements Object {
   Interface({
-    List<MetadataAnnotation>? metadataAnnotations,
-    Map<String, Member>? members,
-    Properties? properties,
+    required List<MetadataAnnotation> metadataAnnotations,
+    required Map<String, Member> members,
+    required Properties properties,
   }) : this.fromJson({
-          if (metadataAnnotations != null)
-            'metadataAnnotations': metadataAnnotations,
-          if (members != null) 'members': members,
-          if (properties != null) 'properties': properties,
+          'metadataAnnotations': metadataAnnotations,
+          'members': members,
+          'properties': properties,
         });
 
   /// The metadata annotations attached to this iterface.
@@ -54,9 +53,9 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
 /// Library.
 extension type Library.fromJson(Map<String, Object?> node) implements Object {
   Library({
-    Map<String, Interface>? scopes,
+    required Map<String, Interface> scopes,
   }) : this.fromJson({
-          if (scopes != null) 'scopes': scopes,
+          'scopes': scopes,
         });
 
   /// Scopes by name.
@@ -66,9 +65,9 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
 /// Member of a scope.
 extension type Member.fromJson(Map<String, Object?> node) implements Object {
   Member({
-    Properties? properties,
+    required Properties properties,
   }) : this.fromJson({
-          if (properties != null) 'properties': properties,
+          'properties': properties,
         });
 
   /// The properties of this member.
@@ -78,9 +77,9 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
 /// Partial model of a corpus of Dart source code.
 extension type Model.fromJson(Map<String, Object?> node) implements Object {
   Model({
-    Map<String, Library>? uris,
+    required Map<String, Library> uris,
   }) : this.fromJson({
-          if (uris != null) 'uris': uris,
+          'uris': uris,
         });
 
   /// Libraries by URI.
@@ -96,9 +95,9 @@ extension type NeverType.fromJson(Null _) {
 extension type NullableType.fromJson(Map<String, Object?> node)
     implements Object {
   NullableType({
-    StaticType? inner,
+    required StaticType inner,
   }) : this.fromJson({
-          if (inner != null) 'inner': inner,
+          'inner': inner,
         });
   StaticType get inner => node['inner'] as StaticType;
 }
@@ -123,22 +122,26 @@ extension type Properties.fromJson(Map<String, Object?> node)
         });
 
   /// Whether the entity is abstract, meaning it has no definition.
-  bool get isAbstract => node['isAbstract'] as bool;
+  bool get isAbstract =>
+      node['isAbstract'] == null ? false : node['isAbstract'] as bool;
 
   /// Whether the entity is a class.
-  bool get isClass => node['isClass'] as bool;
+  bool get isClass => node['isClass'] == null ? false : node['isClass'] as bool;
 
   /// Whether the entity is a getter.
-  bool get isGetter => node['isGetter'] as bool;
+  bool get isGetter =>
+      node['isGetter'] == null ? false : node['isGetter'] as bool;
 
   /// Whether the entity is a field.
-  bool get isField => node['isField'] as bool;
+  bool get isField => node['isField'] == null ? false : node['isField'] as bool;
 
   /// Whether the entity is a method.
-  bool get isMethod => node['isMethod'] as bool;
+  bool get isMethod =>
+      node['isMethod'] == null ? false : node['isMethod'] as bool;
 
   /// Whether the entity is static.
-  bool get isStatic => node['isStatic'] as bool;
+  bool get isStatic =>
+      node['isStatic'] == null ? false : node['isStatic'] as bool;
 }
 
 /// A URI combined with a name.
@@ -149,9 +152,9 @@ extension type QualifiedName.fromJson(String string) implements Object {
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
 extension type Query.fromJson(Map<String, Object?> node) implements Object {
   Query({
-    QualifiedName? target,
+    required QualifiedName target,
   }) : this.fromJson({
-          if (target != null) 'target': target,
+          'target': target,
         });
 
   /// The class to query about.

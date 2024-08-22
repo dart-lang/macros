@@ -75,6 +75,7 @@ class TestQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(
-        model: Model(uris: {'package:foo/foo.dart': Library()}));
+        model:
+            Model(uris: {'package:foo/foo.dart': Library(scopes: const {})}));
   }
 }

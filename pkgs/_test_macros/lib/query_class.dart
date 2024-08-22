@@ -25,7 +25,7 @@ class QueryClassImplementation implements Macro {
     if (request.phase != 3) return AugmentResponse(augmentations: []);
 
     final model = await host.query(Query(
-      target: request.target,
+      target: request.target!,
     ));
     return AugmentResponse(
         augmentations: [Augmentation(code: '// ${json.encode(model)}')]);

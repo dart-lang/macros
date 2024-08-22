@@ -103,7 +103,7 @@ String _generateExtensionType(String name, JsonSchema definition) {
       } else {
         result.writeln('  $name({');
         for (final property in propertyMetadatas) {
-          result.writeParameter(property, definition);
+          result.writeParameter(property);
         }
         result.writeln('}) : this.fromJson({');
         for (final property in propertyMetadatas) {
@@ -182,7 +182,7 @@ String _generateUnion(
     if (extraPropertyMetadatas.isNotEmpty) {
       result.writeln(', {');
       for (final property in extraPropertyMetadatas) {
-        result.writeParameter(property, definition);
+        result.writeParameter(property);
       }
       result.write('}');
     }
@@ -233,21 +233,31 @@ String _firstToLowerCase(String string) =>
 
 /// Gets information about an extension type property from [schema].
 PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
+  var required = schema.requiredOnParent;
+  var defaultValue = switch (schema.defaultValue) {
+    String x => "'$x'",
+    null => null,
+    var other => other.toString(),
+  };
+
   // Check for a `$ref` to another extension type defined under `$defs`.
   if (schema.schemaMap!.containsKey(r'$ref')) {
     final ref = schema.schemaMap![r'$ref'] as String;
     if (ref.contains(r'#/$defs/')) {
       final schemaName = _refName(ref);
       return PropertyMetadata(
-          // The "description" comes from the ref'd schema. But, we want to
-          // describe the property, not the type of the property. It's possible
-          // to use `allOf` to specify a second schema with a second
-          // `description`, but for simplicity use `$comment` which is just
-          // ignored by standard tooling.
-          description: schema.schemaMap![r'$comment'] as String?,
-          name: name,
-          type: PropertyType.object,
-          elementTypeName: schemaName);
+        // The "description" comes from the ref'd schema. But, we want to
+        // describe the property, not the type of the property. It's possible
+        // to use `allOf` to specify a second schema with a second
+        // `description`, but for simplicity use `$comment` which is just
+        // ignored by standard tooling.
+        description: schema.schemaMap![r'$comment'] as String?,
+        name: name,
+        type: PropertyType.object,
+        required: required,
+        elementTypeName: schemaName,
+        defaultValue: defaultValue,
+      );
     } else {
       throw UnsupportedError('Unsupported: $name $schema');
     }
@@ -256,24 +266,42 @@ PropertyMetadata _readPropertyMetadata(String name, JsonSchema schema) {
   // Otherwise, it's a schema with a type.
   return switch (schema.type) {
     SchemaType.boolean => PropertyMetadata(
-        description: schema.description, name: name, type: PropertyType.bool),
+        description: schema.description,
+        name: name,
+        type: PropertyType.bool,
+        required: required,
+        defaultValue: defaultValue,
+      ),
     SchemaType.string => PropertyMetadata(
-        description: schema.description, name: name, type: PropertyType.string),
+        description: schema.description,
+        name: name,
+        type: PropertyType.string,
+        required: required,
+        defaultValue: defaultValue,
+      ),
     SchemaType.integer => PropertyMetadata(
         description: schema.description,
         name: name,
-        type: PropertyType.integer),
+        type: PropertyType.integer,
+        required: required,
+        defaultValue: defaultValue,
+      ),
     SchemaType.array => PropertyMetadata(
         description: schema.description,
         name: name,
         type: PropertyType.list,
-        elementTypeName: _readRefNameOrType(schema, 'items')),
+        elementTypeName: _readRefNameOrType(schema, 'items'),
+        required: required,
+        defaultValue: defaultValue,
+      ),
     SchemaType.object => PropertyMetadata(
         description: schema.description,
         name: name,
         type: PropertyType.map,
         // `additionalProperties` should be a type specified with a `$ref`.
-        elementTypeName: _readRefNameOrType(schema, 'additionalProperties')),
+        elementTypeName: _readRefNameOrType(schema, 'additionalProperties'),
+        required: required, defaultValue: defaultValue,
+      ),
     _ => throw UnsupportedError('Unsupported schema type: ${schema.type}'),
   };
 }
@@ -317,12 +345,17 @@ class PropertyMetadata {
   String name;
   PropertyType type;
   String? elementTypeName;
+  bool required;
+  String? defaultValue;
 
-  PropertyMetadata(
-      {this.description,
-      required this.name,
-      required this.type,
-      this.elementTypeName});
+  PropertyMetadata({
+    this.description,
+    required this.name,
+    required this.type,
+    this.required = false,
+    this.elementTypeName,
+    this.defaultValue,
+  });
 }
 
 /// Loads referenced schemas.
@@ -349,7 +382,7 @@ class LocalRefProvider implements RefProvider<SyncJsonProvider> {
 }
 
 extension on StringBuffer {
-  void writeType(PropertyMetadata property, {bool nullable = false}) {
+  void writeType(PropertyMetadata property, {bool? nullable}) {
     write(switch (property.type) {
       PropertyType.object => property.elementTypeName,
       PropertyType.bool => 'bool',
@@ -358,7 +391,7 @@ extension on StringBuffer {
       PropertyType.list => 'List<${property.elementTypeName}>',
       PropertyType.map => 'Map<String, ${property.elementTypeName}>',
     });
-    if (nullable) write('?');
+    if (nullable ?? !property.required) write('?');
   }
 
   /// Writes a map element for [property], assuming there is a variable in
@@ -377,10 +410,10 @@ extension on StringBuffer {
   ///
   /// If the property is required, it will be non-nullable and marked as
   /// `required`, otherwise it will be nullable and optional.
-  void writeParameter(PropertyMetadata property, JsonSchema schema) {
-    var required = schema.propertyRequired(property.name);
+  void writeParameter(PropertyMetadata property) {
+    var required = property.required;
     if (required) write('required ');
-    writeType(property, nullable: !required);
+    writeType(property);
     writeln(' ${property.name},');
   }
 
@@ -392,15 +425,21 @@ extension on StringBuffer {
     if (property.description != null) {
       writeln('/// ${property.description}');
     }
-    writeType(property);
+    writeType(property, nullable: property.defaultValue != null ? false : null);
     write(' get ${property.name} => ');
+
+    if (!property.required) {
+      write("node['${property.name}'] == null ? ${property.defaultValue} : ");
+    }
+
     switch (property.type) {
       case PropertyType.object ||
             PropertyType.bool ||
             PropertyType.string ||
             PropertyType.integer:
         write("node['${property.name}'] as ");
-        writeType(property);
+        writeType(property,
+            nullable: property.defaultValue != null ? false : null);
       case PropertyType.list:
         write("(node['${property.name}'] as List).cast()");
       case PropertyType.map:

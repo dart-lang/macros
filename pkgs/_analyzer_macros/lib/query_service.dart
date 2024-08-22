@@ -31,19 +31,23 @@ class AnalyzerQueryService implements QueryService {
       uris: {
         uri: Library(
           scopes: {
-            clazz.name: Interface(members: {
-              // TODO(davidmorgan): return more than just fields.
-              // TODO(davidmorgan): specify in the query what to return.
-              for (final field in clazz.fields)
-                field.name: Member(
-                    properties: Properties(
-                  isAbstract: field.isAbstract,
-                  isGetter: false,
-                  isField: true,
-                  isMethod: false,
-                  isStatic: field.isStatic,
-                )),
-            })
+            clazz.name: Interface(
+              metadataAnnotations: const [],
+              properties: Properties(),
+              members: {
+                // TODO(davidmorgan): return more than just fields.
+                // TODO(davidmorgan): specify in the query what to return.
+                for (final field in clazz.fields)
+                  field.name: Member(
+                      properties: Properties(
+                    isAbstract: field.isAbstract,
+                    isGetter: false,
+                    isField: true,
+                    isMethod: false,
+                    isStatic: field.isStatic,
+                  )),
+              },
+            )
           },
         ),
       },
