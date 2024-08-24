@@ -279,7 +279,7 @@ final class StaticTypeSystem {
     // <: Object queries are handled by other rules.
     assert(!superType.isDartCoreObject);
 
-    if (subType.name == subType.name) {
+    if (subType.name == superType.name) {
       return _matchingInstantiation(
           subType.instantiation, superType.instantiation);
     }

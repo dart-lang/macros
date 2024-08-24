@@ -97,7 +97,7 @@ final class InterfaceType extends StaticType {
   final QualifiedName name;
   final List<StaticType> instantiation;
 
-  InterfaceType({
+  const InterfaceType({
     required this.name,
     required this.instantiation,
   }) : super._();
