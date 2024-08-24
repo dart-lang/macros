@@ -30,5 +30,80 @@
         }
       }
     }
+  },
+  "types": {
+    "named": {
+      "package:foo/foo.dart#Foo": {
+        "typeParameters": [],
+        "self": {
+          "name": "package:foo/foo.dart#Foo",
+          "instantiation": []
+        },
+        "supertypes": [
+          {
+            "name": "dart:core#Object",
+            "instantiation": []
+          }
+        ]
+      },
+      "dart:core#Object": {
+        "typeParameters": [],
+        "self": {
+          "name": "dart:core#Object",
+          "instantiation": []
+        },
+        "supertypes": []
+      },
+      "dart:core#Null": {
+        "typeParameters": [],
+        "self": {
+          "name": "dart:core#Null",
+          "instantiation": []
+        },
+        "supertypes": [
+          {
+            "name": "dart:core#Object",
+            "instantiation": []
+          }
+        ]
+      },
+      "dart:async#Future": {
+        "typeParameters": [
+          {
+            "identifier": 0
+          }
+        ],
+        "self": {
+          "name": "dart:async#Future",
+          "instantiation": [
+            {
+              "type": "TypeParameterTypeDesc",
+              "value": {
+                "parameterId": 0
+              }
+            }
+          ]
+        },
+        "supertypes": [
+          {
+            "name": "dart:core#Object",
+            "instantiation": []
+          }
+        ]
+      },
+      "package:foo/foo.dart#Bar": {
+        "typeParameters": [],
+        "self": {
+          "name": "package:foo/foo.dart#Bar",
+          "instantiation": []
+        },
+        "supertypes": [
+          {
+            "name": "dart:core#Object",
+            "instantiation": []
+          }
+        ]
+      }
+    }
   }
 }

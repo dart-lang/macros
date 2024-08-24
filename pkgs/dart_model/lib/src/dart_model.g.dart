@@ -165,16 +165,12 @@ extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
     implements Object {
   NamedTypeDesc({
     QualifiedName? name,
-    List<StaticTypeParameterDesc>? typeParameters,
     List<StaticTypeDesc>? instantiation,
   }) : this.fromJson({
           if (name != null) 'name': name,
-          if (typeParameters != null) 'typeParameters': typeParameters,
           if (instantiation != null) 'instantiation': instantiation,
         });
   QualifiedName get name => node['name'] as QualifiedName;
-  List<StaticTypeParameterDesc> get typeParameters =>
-      (node['typeParameters'] as List).cast();
   List<StaticTypeDesc> get instantiation =>
       (node['instantiation'] as List).cast();
 }

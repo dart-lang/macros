@@ -95,50 +95,21 @@ final class _StaticTypeToDescription {
 
 final class InterfaceType extends StaticType {
   final QualifiedName name;
-  final List<StaticTypeParameter> parameters;
   final List<StaticType> instantiation;
 
   InterfaceType({
     required this.name,
-    required this.parameters,
     required this.instantiation,
   }) : super._();
 
   static InterfaceType _translateFrom(
       NamedTypeDesc desc, Map<int, StaticTypeParameter> parameters) {
-    var typeParameters = const <StaticTypeParameter>[];
-
-    if (desc.typeParameters.isNotEmpty) {
-      // We can't define the bound right away because that might also depend on
-      // type parameters (e.g. `<T extends Comparable<T>>`). So we create these
-      // half-baked type parameters and then patch things up later to create the
-      // final representation.
-      typeParameters = List.generate(
-          desc.typeParameters.length, (_) => StaticTypeParameter());
-
-      parameters = {
-        ...parameters,
-        for (final (i, desc) in desc.typeParameters.indexed)
-          desc.identifier: typeParameters[i],
-      };
-
-      // Now that the mapping from id -> type parameters ready, we translate
-      // bounds.
-      for (final (i, desc) in desc.typeParameters.indexed) {
-        if (desc.bound case final bound?) {
-          typeParameters[i].bound =
-              StaticType._translateFromDescription(bound, parameters);
-        }
-      }
-    }
-
     return InterfaceType(
       name: desc.name,
       instantiation: [
         for (final type in desc.instantiation)
           StaticType._translateFromDescription(type, parameters)
       ],
-      parameters: typeParameters,
     );
   }
 
@@ -541,7 +512,6 @@ final class _ApplyTypeSubstitution
   StaticType visitInterfaceType(InterfaceType type, TypeSubstitution arg) {
     return InterfaceType(
       name: type.name,
-      parameters: type.parameters,
       instantiation: [
         for (final type in type.instantiation) type.accept(this, arg),
       ],

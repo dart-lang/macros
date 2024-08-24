@@ -26,11 +26,7 @@ final class StaticTypeSystem {
 
   /// Returns the resolved type `Future<[inner]>`.
   StaticType _future(StaticType inner) {
-    return InterfaceType(
-      name: _futureVoid.name,
-      parameters: _futureVoid.parameters,
-      instantiation: [inner],
-    );
+    return InterfaceType(name: _futureVoid.name, instantiation: [inner]);
   }
 
   /// Returns whether [type] is a top type (i.e. `dynamic`, `void` or
@@ -314,15 +310,24 @@ final class StaticTypeSystem {
   /// supertypes of that type.
   Iterable<InterfaceType> _constructSuperTypes(
       InterfaceType type, List<QualifiedName> coveredClasses) sync* {
+    final hierarchyEntry = _hierarchy.named[type.name.string]!;
     // Consider e.g. a class `List<T> extends Iterable<T>` for which we have an
     // instantiation `List<int>` and now want to find supertypes.
     // First, create a mapping `T -> int`:
+    final typeParameters = <StaticTypeParameter>[];
+    final parameterIdToTypeParameter = <int, StaticTypeParameter>{};
+
+    for (final parameter in hierarchyEntry.typeParameters) {
+      final resolved = StaticTypeParameter();
+      typeParameters.add(resolved);
+      parameterIdToTypeParameter[parameter.identifier] = resolved;
+    }
+
     final substitution = TypeSubstitution(substitution: {
-      for (var i = 0; i < type.parameters.length; i++)
-        type.parameters[i]: type.instantiation[i]
+      for (var i = 0; i < typeParameters.length; i++)
+        typeParameters[i]: type.instantiation[i]
     });
 
-    final hierarchyEntry = _hierarchy.named[type.name.string]!;
     for (final superType in hierarchyEntry.supertypes) {
       if (coveredClasses.contains(superType.name)) {
         continue;
@@ -337,10 +342,7 @@ final class StaticTypeSystem {
       // already have.
       final superTypeUsingThisTypesTypeParameters = StaticType(
         StaticTypeDesc.namedTypeDesc(superType),
-        translatedParameters: {
-          for (final (i, param) in hierarchyEntry.typeParameters.indexed)
-            param.identifier: type.parameters[i],
-        },
+        translatedParameters: parameterIdToTypeParameter,
       );
 
       // Which then allows instantiating the supertype based on the
@@ -501,11 +503,6 @@ final class StaticTypeSystem {
 extension on TypeHierarchyEntry {
   InterfaceType instantiate(List<StaticType> typeArguments) {
     final raw = StaticType(StaticTypeDesc.namedTypeDesc(self)) as InterfaceType;
-
-    final substitution = TypeSubstitution(substitution: {
-      for (final (i, param) in raw.parameters.indexed) param: typeArguments[i],
-    });
-
-    return substitution.applyTo(raw) as InterfaceType;
+    return InterfaceType(name: raw.name, instantiation: typeArguments);
   }
 }
