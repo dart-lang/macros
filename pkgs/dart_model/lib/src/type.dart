@@ -15,6 +15,15 @@ import 'dart_model.dart';
 sealed class StaticType {
   const StaticType._();
 
+  /// Converts a serialized type [description] from the model into a
+  /// [StaticType].
+  ///
+  /// The [translatedParameters] are a map of [StaticTypeParameterDesc.identifier]
+  /// to their resolved [StaticTypeParameter] instance available from the
+  /// context of this type. For self-contained type descriptions, an empty map
+  /// is sufficient. To parse types inside a structure containing type
+  /// parameters (e.g. the return type of a generic function), all available
+  /// type parameters need to be provided as context.
   factory StaticType(
     StaticTypeDesc description, {
     Map<int, StaticTypeParameter>? translatedParameters,
@@ -62,9 +71,20 @@ sealed class StaticType {
 
   StaticTypeDesc _buildDescription(_StaticTypeToDescription context);
 
+  /// Calls the appropriate `visit` method on the [visitor] depending on the
+  /// kind of type.
+  ///
+  /// For types that are unknown to this macro client, e.g. because a new type
+  /// representation has been added to the SDK, this method throws an error.
   Ret accept<Arg, Ret>(TypeVisitor<Arg, Ret> visitor, Arg arg);
 }
 
+/// An unknown type from the schema that doesn't have a known representation.
+///
+/// This type is introcuced to handle schema changes introducing new types in
+/// future Dart versions - we can't introspect these types without upgrading
+/// the macro implementation, but we don't break existing programs not using
+/// these types.
 final class _UnknownType extends StaticType {
   final StaticTypeDesc _original;
 
@@ -81,6 +101,10 @@ final class _UnknownType extends StaticType {
   }
 }
 
+/// Context passed around [StaticType._buildDescription] to keep track of which
+/// type parameters have been assigned which identifiers in the serialized form.
+/// Introducing this level of indirection is required to handle recursive
+/// type structures (e.g. `Function<T extends LinkedListEntry<T>>()`).
 final class _StaticTypeToDescription {
   final Map<StaticTypeParameter, int> parameterIds = {};
 
@@ -93,8 +117,16 @@ final class _StaticTypeToDescription {
   }
 }
 
+/// A type backed by a class, mixin, interface or extension type.
 final class InterfaceType extends StaticType {
+  /// The name introducing this type.
   final QualifiedName name;
+
+  /// The instantiation this type, containing the type arguments passed to the
+  /// type parameters on [name].
+  ///
+  /// For instance, the type `Future<void>` would be represented with a single-
+  /// element [instantiation] containing a [VoidType].
   final List<StaticType> instantiation;
 
   const InterfaceType({
@@ -151,7 +183,9 @@ final class InterfaceType extends StaticType {
       QualifiedName('dart:async#FutureOr');
 }
 
+/// A type of the form `T?`.
 final class NullableType extends StaticType {
+  /// The inner type `T` in `T?`.
   final StaticType inner;
 
   const NullableType(this.inner) : super._();
@@ -169,11 +203,16 @@ final class NullableType extends StaticType {
 }
 
 final class StaticTypeParameter {
+  /// The statically declared bound of this type parameter.
+  ///
+  /// If omitted, the implicit bound is a [DynamicType].
   StaticType? bound;
 
   StaticTypeParameter([this.bound]);
 }
 
+/// A type referencing a [StaticTypeParameter], e.g. the return type in the
+/// function type `T Function<T>()`.
 final class TypeParameterType extends StaticType {
   final StaticTypeParameter parameter;
 
@@ -191,6 +230,7 @@ final class TypeParameterType extends StaticType {
   }
 }
 
+/// The type `dynamic`.
 final class DynamicType extends StaticType {
   const DynamicType() : super._();
 
@@ -205,6 +245,7 @@ final class DynamicType extends StaticType {
   }
 }
 
+/// The type `void`.
 final class VoidType extends StaticType {
   const VoidType() : super._();
 
@@ -220,6 +261,7 @@ final class VoidType extends StaticType {
   }
 }
 
+/// The type `Never`.
 final class NeverType extends StaticType {
   const NeverType() : super._();
 
@@ -234,6 +276,8 @@ final class NeverType extends StaticType {
   }
 }
 
+/// The representation for record types, containing positional and named record
+/// fields.
 final class RecordType extends StaticType {
   final List<StaticType> positional;
   final Map<String, StaticType> named;
@@ -262,6 +306,8 @@ final class RecordType extends StaticType {
   }
 }
 
+/// The type representation for function types, consisting of introduced type
+/// parameters, the return and argument types.
 final class FunctionType extends StaticType {
   final StaticType returnType;
   final List<StaticTypeParameter> typeParameters;
@@ -370,6 +416,9 @@ final class FunctionType extends StaticType {
   /// This returns a new function type without type parameters obtained by
   /// substituting [typeParameters] with [typeArguments] in the return and
   /// argument types.
+  ///
+  /// For instance, instantiating the generic function type `T Function<T>()`
+  /// with `[VoidType()]` as type argument yields `void Function()`.
   FunctionType instantiate(List<StaticType> typeArguments) {
     if (typeArguments.length != typeParameters.length) {
       throw ArgumentError.value(typeArguments, 'typeArguments',
@@ -418,41 +467,44 @@ final class NamedFunctionParameter {
 }
 
 abstract class TypeVisitor<Arg, Ret> {
-  Ret visitUnknownType(StaticType type, Arg arg);
+  Ret defaultType(StaticType type, Arg arg);
 
   Ret visitDynamicType(DynamicType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitFunctionType(FunctionType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitNeverType(NeverType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitNullableType(NullableType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitInterfaceType(InterfaceType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitRecordType(RecordType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitTypeParameterType(TypeParameterType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 
   Ret visitVoidType(VoidType type, Arg arg) {
-    return visitUnknownType(type, arg);
+    return defaultType(type, arg);
   }
 }
 
+/// A substitution replacing [StaticTypeParameter]s with other types.
+///
+/// Applying substitutions is useful when instantiating other generic types.
 final class TypeSubstitution {
   final Map<StaticTypeParameter, StaticType> substitution;
 
@@ -552,7 +604,7 @@ final class _ApplyTypeSubstitution
   }
 
   @override
-  StaticType visitUnknownType(StaticType type, TypeSubstitution arg) {
+  StaticType defaultType(StaticType type, TypeSubstitution arg) {
     return type;
   }
 
