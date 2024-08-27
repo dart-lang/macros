@@ -18,12 +18,12 @@ extension ClosedMaps on JsonBufferBuilder {
   static const _valueSize = _typeSize + _pointerSize;
   static const _entrySize = _keySize + _valueSize;
 
-  /// Adds a `Map` to the buffer, returns the [Pointer] to it.
+  /// Adds a `Map` to the buffer, returns the [_Pointer] to it.
   ///
   /// The `Map` should be small and already evaluated, making it fast to
   /// iterate. For large maps see "growable map" methods.
-  Pointer _addClosedMap(Map<String, Object?> map) {
-    explanations?.push('addClosedMap $map');
+  _Pointer _addClosedMap(Map<String, Object?> map) {
+    _explanations?.push('addClosedMap $map');
 
     final length = map.length;
     final pointer = _reserve(_lengthSize + length * _entrySize);
@@ -39,12 +39,12 @@ extension ClosedMaps on JsonBufferBuilder {
       entryPointer += _entrySize;
     }
 
-    explanations?.pop();
+    _explanations?.pop();
     return pointer;
   }
 
   /// Returns the [_ClosedMap] at [pointer].
-  Map<String, Object?> readClosedMap(Pointer pointer) {
+  Map<String, Object?> _readClosedMap(_Pointer pointer) {
     return _ClosedMap(this, pointer);
   }
 }
@@ -52,12 +52,12 @@ extension ClosedMaps on JsonBufferBuilder {
 class _ClosedMap
     with MapMixin<String, Object?>, _EntryMapMixin<String, Object?> {
   final JsonBufferBuilder _buffer;
-  final Pointer _pointer;
+  final _Pointer _pointer;
   @override
   final int length;
 
   _ClosedMap(this._buffer, this._pointer)
-      : length = _buffer.readUint32(_pointer);
+      : length = _buffer._readLength(_pointer);
 
   @override
   Object? operator [](Object? key) {
@@ -86,28 +86,31 @@ class _ClosedMap
 
   @override
   void operator []=(String key, Object? value) {
-    throw UnsupportedError('ClosedMap is readonly.');
+    throw UnsupportedError(
+        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
   }
 
   @override
   Object? remove(Object? key) {
-    throw UnsupportedError('ClosedMap is readonly.');
+    throw UnsupportedError(
+        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
   }
 
   @override
   void clear() {
-    throw UnsupportedError('ClosedMap is readonly.');
+    throw UnsupportedError(
+        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
   }
 }
 
 /// `Iterator` that reads a "closed map" in a [JsonBufferBuilder].
 abstract class _ClosedMapIterator<T> implements Iterator<T> {
   final JsonBufferBuilder _buffer;
-  final Pointer _last;
+  final _Pointer _last;
 
-  Pointer _pointer;
+  _Pointer _pointer;
 
-  _ClosedMapIterator(this._buffer, Pointer pointer, int length)
+  _ClosedMapIterator(this._buffer, _Pointer pointer, int length)
       : _last = pointer + _lengthSize + length * ClosedMaps._entrySize,
         // Subtract because `moveNext` is called before reading.
         _pointer = pointer + _lengthSize - ClosedMaps._entrySize;
@@ -115,7 +118,7 @@ abstract class _ClosedMapIterator<T> implements Iterator<T> {
   @override
   T get current;
 
-  String get _currentKey => _buffer.readString(_buffer.readPointer(_pointer));
+  String get _currentKey => _buffer._readString(_buffer._readPointer(_pointer));
   Object? get _currentValue => _buffer._readAny(_pointer + _pointerSize);
 
   @override

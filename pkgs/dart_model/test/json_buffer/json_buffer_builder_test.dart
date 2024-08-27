@@ -11,11 +11,11 @@ void main() {
 
     setUp(() {
       builder = JsonBufferBuilder();
-      explanations = Explanations();
     });
 
     tearDown(() {
-      print(builder);
+      printOnFailure('Try: dart -Ddebug_json_buffer=true test -c source');
+      printOnFailure(builder.toString());
     });
 
     test('writes and reads supported types', () {

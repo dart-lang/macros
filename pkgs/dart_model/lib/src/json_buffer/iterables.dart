@@ -5,7 +5,7 @@
 part of 'json_buffer_builder.dart';
 
 /// More efficient implementations than `MapMixin` for maps with efficient
-/// `entries`.
+/// `entries` and `length`.
 mixin _EntryMapMixin<K, V> on Map<K, V> {
   // `MapMixin` iterates keys then looks up each value.
   //
@@ -16,6 +16,14 @@ mixin _EntryMapMixin<K, V> on Map<K, V> {
       action(entry.key, entry.value);
     }
   }
+
+  // `MapMixin` uses `keys.isEmpty`.
+  @override
+  bool get isEmpty => length == 0;
+
+// `MapMixin` uses `keys.isNotEmpty`.
+  @override
+  bool get isNotEmpty => length != 0;
 }
 
 /// An [Iterable] that uses the supplied function to create an [Iterator].

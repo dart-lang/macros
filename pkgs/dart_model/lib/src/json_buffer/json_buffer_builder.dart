@@ -27,10 +27,16 @@ class JsonBufferBuilder {
   /// Whether writes are allowed.
   final bool _allowWrites;
 
-  final Map<TypedMapSchema, Pointer> _pointersBySchema = Map.identity();
-  final Map<Pointer, TypedMapSchema> _schemasByPointer = {};
+  /// [_Pointer]s to [TypedMapSchema]s used by [_TypedMap]s, so that the
+  /// same schema is only written once.
+  final Map<TypedMapSchema, _Pointer> _pointersBySchema = Map.identity();
 
-  final Map<String, Pointer> _pointersByString = {};
+  /// [TypedMapSchema] used by [_TypedMap]s by [_Pointer], so that the same
+  /// schema is only read once.
+  final Map<_Pointer, TypedMapSchema> _schemasByPointer = {};
+
+  /// [_Pointer]s to `String`s, so that the same `String` is only written once.
+  final Map<String, _Pointer> _pointersByString = {};
 
   JsonBufferBuilder.deserialize(this._buffer)
       : _allowWrites = false,
@@ -54,44 +60,44 @@ class JsonBufferBuilder {
   /// The number of bytes written.
   int get length => _nextFree;
 
-  /// Reads the value at [Pointer], which must have been written with
+  /// Reads the value at [_Pointer], which must have been written with
   /// [_writeAny].
-  Object? _readAny(Pointer pointer) {
-    final type = readType(pointer);
+  Object? _readAny(_Pointer pointer) {
+    final type = _readType(pointer);
     return _read(type, pointer + _typeSize);
   }
 
-  /// Reads the value of type [Type] at [Pointer].
-  Object? _read(Type type, Pointer pointer) {
+  /// Reads the value of type [Type] at [_Pointer].
+  Object? _read(Type type, _Pointer pointer) {
     switch (type) {
       case Type.nil:
         return null;
       case Type.type:
-        return readType(pointer);
+        return _readType(pointer);
       case Type.pointer:
-        return readPointer(pointer);
+        return _readPointer(pointer);
       case Type.uint32:
-        return readUint32(pointer);
+        return _readUint32(pointer);
       case Type.boolean:
-        return readBoolean(pointer);
+        return _readBoolean(pointer);
       case Type.stringPointer:
-        return readString(readPointer(pointer));
+        return _readString(_readPointer(pointer));
       case Type.closedMapPointer:
-        return readClosedMap(readPointer(pointer));
+        return _readClosedMap(_readPointer(pointer));
       case Type.growableMapPointer:
-        return _readGrowableMap<Object?>(readPointer(pointer));
+        return _readGrowableMap<Object?>(_readPointer(pointer));
       case Type.typedMapPointer:
-        return readTypedMap(readPointer(pointer));
+        return _readTypedMap(_readPointer(pointer));
     }
   }
 
   /// Writes the type of [value] then writes the value using [_writeAnyOfType].
-  void _writeAny(Pointer pointer, Object? value) {
-    explanations?.push('_writeAny $pointer $value');
+  void _writeAny(_Pointer pointer, Object? value) {
+    _explanations?.push('_writeAny $pointer $value');
     final type = Type._of(value);
     _writeType(pointer, type);
     _writeAnyOfType(type, pointer + _typeSize, value);
-    explanations?.pop();
+    _explanations?.pop();
   }
 
   /// Writes [value] of type [type] to [pointer].
@@ -102,8 +108,8 @@ class JsonBufferBuilder {
   ///
   /// Otherwise, a pointer is written. It might be a pointer to an existing
   /// value if there is one, or a new value may be written as well.
-  void _writeAnyOfType(Type type, Pointer pointer, Object? value) {
-    explanations?.push('_writeAnyOfType $type $pointer $value');
+  void _writeAnyOfType(Type type, _Pointer pointer, Object? value) {
+    _explanations?.push('_writeAnyOfType $type $pointer $value');
     switch (type) {
       case Type.nil:
         // Nothing to write.
@@ -113,7 +119,7 @@ class JsonBufferBuilder {
         _writeType(pointer, value as Type);
 
       case Type.pointer:
-        _writePointer(pointer, value as Pointer);
+        _writePointer(pointer, value as _Pointer);
 
       case Type.uint32:
         _writeUint32(pointer, value as int);
@@ -134,95 +140,107 @@ class JsonBufferBuilder {
       case Type.typedMapPointer:
         _writePointer(pointer, _pointerToTypedMap(value as _TypedMap));
     }
-    explanations?.pop();
+    _explanations?.pop();
   }
 
-  /// Returns a [Pointer] to the `String` [value].
+  /// Returns a [_Pointer] to the `String` [string].
   ///
-  /// Returns the [Pointer] of an existing equal `String` if there is one,
+  /// Returns the [_Pointer] of an existing equal `String` if there is one,
   /// otherwise adds it.
-  Pointer _pointerToString(String value) =>
-      _pointersByString[value] ??= _addString(value);
+  _Pointer _pointerToString(String string) =>
+      _pointersByString[string] ??= _addString(string);
 
-  Pointer _addString(String value) {
-    explanations?.push('__pointerToString $value');
-    final bytes = utf8.encode(value);
+  /// Adds the `String` [string], returns a [_Pointer] to it.
+  _Pointer _addString(String string) {
+    _explanations?.push('__pointerToString $string');
+    final bytes = utf8.encode(string);
     final length = bytes.length;
     final pointer = _reserve(_lengthSize + length);
     _writeLength(pointer, length);
-    _setRange(pointer + 4, pointer + 4 + length, bytes);
-    explanations?.pop();
+    _setRange(pointer + _lengthSize, pointer + _lengthSize + length, bytes);
+    _explanations?.pop();
     return pointer;
   }
 
-  void _writeType(Pointer pointer, Type value) {
-    explanations?.push('_writeType $value');
-    _setByte(pointer, value.index);
-    explanations?.pop();
+  /// Reads the String at [pointer].
+  String _readString(_Pointer pointer) {
+    final length = _readLength(pointer);
+    return utf8.decode(
+        _buffer.sublist(pointer + _lengthSize, pointer + _lengthSize + length));
   }
 
-  Type readType(Pointer pointer) {
+  /// Writes [type] at [pointer].
+  void _writeType(_Pointer pointer, Type type) {
+    _explanations?.push('_writeType $type');
+    _setByte(pointer, type.index);
+    _explanations?.pop();
+  }
+
+  /// Reads the `Type` at [pointer].
+  Type _readType(_Pointer pointer) {
     return Type.values[_buffer[pointer]];
   }
 
-  void _writeLength(Pointer pointer, Pointer value,
+  /// Writes [length] at [pointer].
+  void _writeLength(_Pointer pointer, int length,
       {bool allowOverwrite = false}) {
-    explanations?.push('_writeLength $value');
-    __writeUint32(pointer, value, allowOverwrite: allowOverwrite);
-    explanations?.pop();
+    _explanations?.push('_writeLength $length');
+    __writeUint32(pointer, length, allowOverwrite: allowOverwrite);
+    _explanations?.pop();
   }
 
-  /// Adds a new pointer pointing to [pointer], returns it.
-  Pointer _addPointerTo(Pointer pointer) {
-    explanations?.push('_addPointerToPointer $pointer');
-    final result = _reserve(4);
+  /// Reads the length at [_Pointer].
+  _Pointer _readLength(_Pointer pointer) => _readUint32(pointer);
+
+  /// Adds [pointer] to the buffer, returns a new [_Pointer] to it.
+  _Pointer _addPointerTo(_Pointer pointer) {
+    _explanations?.push('_addPointerToPointer $pointer');
+    final result = _reserve(_pointerSize);
     _writePointer(result, pointer);
-    explanations?.pop();
+    _explanations?.pop();
     return result;
   }
 
-  void _writePointer(Pointer pointer, Pointer value) {
-    explanations?.push('_writePointer $value');
-    __writeUint32(pointer, value);
-    explanations?.pop();
+  /// Writes [pointerValue] at [pointer].
+  void _writePointer(_Pointer pointer, _Pointer pointerValue) {
+    _explanations?.push('_writePointer $pointerValue');
+    __writeUint32(pointer, pointerValue);
+    _explanations?.pop();
   }
 
-  void _writeUint32(Pointer pointer, int value) {
-    explanations?.push('_writeUint32 $value');
+  /// Reads the [_Pointer] at [_Pointer].
+  _Pointer _readPointer(_Pointer pointer) => _readUint32(pointer);
+
+  /// Writes [value] at [pointer].
+  void _writeUint32(_Pointer pointer, int value) {
+    _explanations?.push('_writeUint32 $value');
     __writeUint32(pointer, value);
-    explanations?.pop();
+    _explanations?.pop();
   }
 
-  void __writeUint32(Pointer pointer, int value,
+  void __writeUint32(_Pointer pointer, int value,
       {bool allowOverwrite = false}) {
     _setFourBytes(pointer, value & 0xff, (value >> 8) & 0xff,
         (value >> 16) & 0xff, (value >> 24) & 0xff,
         allowOverwrite: allowOverwrite);
   }
 
-  void _writeBoolean(Pointer pointer, bool value) {
-    explanations?.push('_writeBoolean $value');
-    _setByte(pointer, value ? 1 : 0);
-    explanations?.pop();
-  }
-
-  /// Reads the length at [Pointer].
-  Pointer readLength(Pointer pointer) => _readUint32(pointer);
-
-  /// Reads the [Pointer] at [Pointer].
-  Pointer readPointer(Pointer pointer) => _readUint32(pointer);
-
-  /// Reads the uint32 at [Pointer].
-  int readUint32(Pointer pointer) => _readUint32(pointer);
-
-  int _readUint32(Pointer pointer) =>
+  /// Reads the uint32 at [_Pointer].
+  int _readUint32(_Pointer pointer) =>
       _buffer[pointer] +
       (_buffer[pointer + 1] << 8) +
       (_buffer[pointer + 2] << 16) +
       (_buffer[pointer + 3] << 24);
 
-  /// Reads the boolean at [Pointer].
-  bool readBoolean(Pointer pointer) {
+  /// Writes [boolean] at [pointer].
+  void _writeBoolean(_Pointer pointer, bool boolean) {
+    _explanations?.push('_writeBoolean $boolean');
+    _setByte(pointer, boolean ? 1 : 0);
+    _explanations?.pop();
+  }
+
+  /// Reads the `bool` at [_Pointer].
+  bool _readBoolean(_Pointer pointer) {
     switch (_buffer[pointer]) {
       case 0:
         return false;
@@ -233,34 +251,26 @@ class JsonBufferBuilder {
     }
   }
 
-  /// Reads the String at [Pointer].
-  String readString(Pointer pointer) {
-    final length = readLength(pointer);
-    return utf8.decode(
-        _buffer.sublist(pointer + _lengthSize, pointer + _lengthSize + length));
-  }
-
-  void _setBit(Pointer pointer, int bitIndex, bool value) {
-    _checkAllowWrites();
-    explanations?.explain(pointer, allowOverwrite: true);
-    if (value) {
-      _buffer[pointer] |= 1 << bitIndex;
-    } else {
-      _buffer[pointer] &= 0xff ^ (1 << bitIndex);
-    }
-  }
-
-  bool readBit(Pointer pointer, int bitIndex) {
+  /// Reads the bit at [pointer], index [bitIndex].
+  bool _readBit(_Pointer pointer, int bitIndex) {
     return ((_buffer[pointer] >> bitIndex) & 1) == 1;
   }
 
-  void _setByte(Pointer pointer, int uint8, {bool allowOverwrite = false}) {
+  /// Sets the byte at [pointer] to [uint8].
+  ///
+  /// If [_explanations] is being used, [allowOverwrite] controls whether
+  /// multiple writes to the same byte will be allowed or will throw.
+  void _setByte(_Pointer pointer, int uint8, {bool allowOverwrite = false}) {
     _checkAllowWrites();
-    explanations?.explain(pointer, allowOverwrite: allowOverwrite);
+    _explanations?.explain(pointer, allowOverwrite: allowOverwrite);
     _buffer[pointer] = uint8;
   }
 
-  void _setFourBytes(Pointer pointer, int b1, int b2, int b3, int b4,
+  /// Sets the four bytes at [pointer] to [b1] [b2] [b3] [b4].
+  ///
+  /// If [_explanations] is being used, [allowOverwrite] controls whether
+  /// multiple writes to the same byte will be allowed or will throw.
+  void _setFourBytes(_Pointer pointer, int b1, int b2, int b3, int b4,
       {bool allowOverwrite = false}) {
     _setByte(pointer, b1, allowOverwrite: allowOverwrite);
     _setByte(pointer + 1, b2, allowOverwrite: allowOverwrite);
@@ -268,9 +278,10 @@ class JsonBufferBuilder {
     _setByte(pointer + 3, b4, allowOverwrite: allowOverwrite);
   }
 
-  void _setRange(Pointer from, Pointer to, Uint8List bytes) {
+  /// Sets the rang of bytes [from] until [to] to [bytes].
+  void _setRange(_Pointer from, _Pointer to, Uint8List bytes) {
     _checkAllowWrites();
-    explanations?.explainRange(from, to);
+    _explanations?.explainRange(from, to);
     _buffer.setRange(from, to, bytes);
   }
 
@@ -278,8 +289,8 @@ class JsonBufferBuilder {
   ///
   /// Increases `_nextFree` accordingly. Expands the buffer if necessary.
   ///
-  /// Returns a [Pointer] to the reserved space.
-  Pointer _reserve(int bytes) {
+  /// Returns a [_Pointer] to the reserved space.
+  _Pointer _reserve(int bytes) {
     _checkAllowWrites();
     final result = _nextFree;
     _nextFree += bytes;
@@ -297,17 +308,27 @@ class JsonBufferBuilder {
     _buffer.setRange(0, oldBuffer.length, oldBuffer);
   }
 
+  /// Throws if writes are not allowed.
   void _checkAllowWrites() {
     if (!_allowWrites) throw StateError('This JsonBufferBuilder is read-only.');
   }
 
+  /// Explanations of each byte in the buffer.
+  ///
+  /// Run tests with `dart -Ddebug_json_buffer=true test -c source` to enable.
+  ///
+  /// Then, [JsonBufferBuilder#toString] prints additional information for
+  /// each byte.
+  final _Explanations? _explanations =
+      const bool.fromEnvironment('debug_json_buffer') ? _Explanations() : null;
+
   @override
   String toString() {
-    if (explanations == null) return 'JsonBufferBuilder($_nextFree, $_buffer)';
+    if (_explanations == null) return 'JsonBufferBuilder($_nextFree, $_buffer)';
     final result = StringBuffer('JsonBufferBuilder($_nextFree):\n');
     for (var i = 0; i != _nextFree; ++i) {
       final value = _buffer[i];
-      final explanation = explanations!._explanationsByPointer[i];
+      final explanation = _explanations._explanationsByPointer[i];
       if (explanation == null) {
         result.writeln('$i: $value');
       } else {

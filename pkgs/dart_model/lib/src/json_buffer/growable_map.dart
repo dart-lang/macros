@@ -38,19 +38,19 @@ extension GrowableMaps on JsonBufferBuilder {
   /// somewhere in the buffer. Otherwise, it won't be reachable from the
   /// root [map].
   Map<String, V> createGrowableMap<V>() {
-    explanations?.push('addGrowableMap');
+    _explanations?.push('addGrowableMap');
     final pointer = _reserve(_pointerSize + _lengthSize);
     // Initially a "growable map" is just a null pointer and zero size, so
     // there is nothing to write.
-    explanations?.pop();
+    _explanations?.pop();
     return _readGrowableMap<V>(pointer);
   }
 
-  /// Returns the [Pointer] to [map].
+  /// Returns the [_Pointer] to [map].
   ///
   /// The [map] must have been created in this buffer using
   /// [createGrowableMap]. Otherwise, [UnsupportedError] is thrown.
-  Pointer _pointerToGrowableMap(_GrowableMap<Object?> map) {
+  _Pointer _pointerToGrowableMap(_GrowableMap<Object?> map) {
     _checkGrowableMapOwnership(map);
     return map._pointer;
   }
@@ -58,25 +58,25 @@ extension GrowableMaps on JsonBufferBuilder {
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkGrowableMapOwnership(_GrowableMap map) {
     if (map._buffer != this) {
-      throw UnsupportedError('Maps created with `addGrowableMap` can only '
+      throw UnsupportedError('Maps created with `createGrowableMap` can only '
           'be added to the JsonBufferBuilder instance that created them.');
     }
   }
 
   /// Returns the [_GrowableMap] at [pointer].
-  Map<String, V> _readGrowableMap<V>(Pointer pointer) {
+  Map<String, V> _readGrowableMap<V>(_Pointer pointer) {
     return _GrowableMap<V>(this, pointer);
   }
 }
 
 class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
   final JsonBufferBuilder _buffer;
-  final Pointer _pointer;
+  final _Pointer _pointer;
   int _length;
-  Pointer? _lastPointer;
+  _Pointer? _lastPointer;
 
   _GrowableMap(this._buffer, this._pointer)
-      : _length = _buffer.readLength(_pointer + _pointerSize);
+      : _length = _buffer._readLength(_pointer + _pointerSize);
 
   @override
   int get length => _length;
@@ -115,7 +115,7 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
   /// iterable.
   @override
   void operator []=(String key, V value) {
-    explanations?.push('GrowableMap[]= $key $value');
+    _buffer._explanations?.push('GrowableMap[]= $key $value');
 
     // If `_lastPointer` is not set yet, walk the map to find the end of it.
     if (_lastPointer == null) {
@@ -140,7 +140,7 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
     // Update length.
     ++_length;
     _buffer._writeLength(_pointer + _pointerSize, length, allowOverwrite: true);
-    explanations?.pop();
+    _buffer._explanations?.pop();
   }
 
   @override
@@ -157,7 +157,7 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
 /// `Iterator` that reads a "growable map" in a [JsonBufferBuilder].
 abstract class _GrowableMapIterator<T> implements Iterator<T> {
   final JsonBufferBuilder _buffer;
-  Pointer _pointer;
+  _Pointer _pointer;
 
   _GrowableMapIterator(this._buffer, this._pointer);
 
@@ -165,13 +165,13 @@ abstract class _GrowableMapIterator<T> implements Iterator<T> {
   T get current;
 
   String get _currentKey =>
-      _buffer.readString(_buffer.readPointer(_pointer + _pointerSize));
+      _buffer._readString(_buffer._readPointer(_pointer + _pointerSize));
   Object? get _currentValue =>
       _buffer._readAny(_pointer + _pointerSize + GrowableMaps._keySize);
 
   @override
   bool moveNext() {
-    _pointer = _buffer.readPointer(_pointer);
+    _pointer = _buffer._readPointer(_pointer);
     return _pointer != 0;
   }
 }

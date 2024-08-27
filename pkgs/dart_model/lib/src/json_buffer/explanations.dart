@@ -4,20 +4,9 @@
 
 part of 'json_buffer_builder.dart';
 
-/// Global hook for turning on "debug logs" for [JsonBufferBuilder].
-///
-/// Set to an instance of [Explanations] to turn on logging, reset to null to
-/// turn off logging. If set, [JsonBufferBuilder#toString] will print
-/// additional information for each byte.
-///
-/// TODO(davidmorgan): this is only intended for use in local unit tests.
-/// If debug logs are useful elsewhere, do something more robust, but take
-/// care not to degrade performance when logs are off.
-Explanations? explanations;
-
 /// Tracks why each byte in a [JsonBufferBuilder] was written, and does
 /// additional checks.
-class Explanations {
+class _Explanations {
   final Map<int, String> _explanationsByPointer = {};
   final List<String> _explanationsStack = [];
 
@@ -44,7 +33,7 @@ class Explanations {
   ///
   /// Set [allowOverwrite] if multiple writes to this location are allowed.
   /// Otherwise, this method throws on multiple writes.
-  void explain(Pointer pointer, {bool allowOverwrite = false}) {
+  void explain(_Pointer pointer, {bool allowOverwrite = false}) {
     if (_explanationsStack.isNotEmpty) {
       final explanation = _explanationsStack.join(', ') +
           (allowOverwrite ? _allowOverwriteTag : '');
@@ -61,7 +50,7 @@ class Explanations {
   }
 
   /// Associate the current explanation stack with all bytes [from] until [to].
-  void explainRange(Pointer from, Pointer to) {
+  void explainRange(_Pointer from, _Pointer to) {
     for (var pointer = from; pointer != to; ++pointer) {
       explain(pointer);
     }

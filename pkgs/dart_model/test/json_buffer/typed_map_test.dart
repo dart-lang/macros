@@ -13,11 +13,11 @@ void main() {
 
     setUp(() {
       builder = JsonBufferBuilder();
-      explanations = Explanations();
     });
 
     tearDown(() {
-      print(builder);
+      printOnFailure('Try: dart -Ddebug_json_buffer=true test -c source');
+      printOnFailure(builder.toString());
     });
 
     test('with some values missing can be written and read', () {
@@ -29,7 +29,6 @@ void main() {
         'missing2': Type.stringPointer
       });
       final map = builder.createTypedMap(schema, 'aa', true, null, 12345, null);
-      print(map);
       expectFullyEquivalentMaps(map, {'a': 'aa', 'b': true, 'c': 12345});
     });
 
@@ -121,6 +120,33 @@ void main() {
 
       // Size should be schema pointer, one byte for eight bools.
       expect(length2 - length1, 4 + 1);
+    });
+
+    test('if all fields are bools or nulls they are packed into bits', () {
+      final schema = TypedMapSchema({
+        'a': Type.boolean,
+        'b': Type.boolean,
+        'c': Type.boolean,
+        'd': Type.boolean,
+        'e': Type.boolean,
+        'f': Type.boolean,
+        'g': Type.boolean,
+        'h': Type.boolean,
+      });
+
+      // Write once so schema is written.
+      builder.createTypedMap(
+          schema, null, false, true, false, true, false, true, false);
+
+      // Check length of write with already-written schema.
+      final length1 = builder.length;
+      builder.createTypedMap(
+          schema, true, null, true, false, true, false, true, false);
+      final length2 = builder.length;
+
+      // Size should be schema pointer, one byte field set, one byte for seven
+      // bools.
+      expect(length2 - length1, 4 + 1 + 1);
     });
 
     test('if not filled skipped fields save space', () {
