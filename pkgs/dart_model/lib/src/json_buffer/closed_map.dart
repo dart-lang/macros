@@ -22,16 +22,15 @@ extension ClosedMaps on JsonBufferBuilder {
   ///
   /// The `Map` should be small and already evaluated, making it fast to
   /// iterate. For large maps see "growable map" methods.
-  Pointer _pointerToClosedMap(Map<String, Object?> map) {
+  Pointer _addClosedMap(Map<String, Object?> map) {
     explanations?.push('addClosedMap $map');
 
-    final pointer = _nextFree;
     final length = map.length;
-    _reserve(_lengthSize + length * _entrySize);
+    final pointer = _reserve(_lengthSize + length * _entrySize);
 
     _writeLength(pointer, length);
 
-    var entryPointer = pointer + _pointerSize;
+    var entryPointer = pointer + _lengthSize;
     for (final entry in map.entries) {
       final key = entry.key;
       final value = entry.value;
@@ -54,8 +53,11 @@ class _ClosedMap
     with MapMixin<String, Object?>, _EntryMapMixin<String, Object?> {
   final JsonBufferBuilder _buffer;
   final Pointer _pointer;
+  @override
+  final int length;
 
-  _ClosedMap(this._buffer, this._pointer);
+  _ClosedMap(this._buffer, this._pointer)
+      : length = _buffer.readUint32(_pointer);
 
   @override
   Object? operator [](Object? key) {
@@ -67,16 +69,20 @@ class _ClosedMap
   }
 
   @override
-  late final Iterable<String> keys =
-      _ClosedMapEntryIterable(_buffer, _pointer).map((e) => e.key);
+  late final Iterable<String> keys = _IteratorFunctionIterable(
+      () => _ClosedMapKeyIterator(_buffer, _pointer, length),
+      length: length);
 
   @override
-  late final Iterable<Object?> values =
-      _ClosedMapEntryIterable(_buffer, _pointer).map((e) => e.value);
+  late final Iterable<Object?> values = _IteratorFunctionIterable(
+      () => _ClosedMapValueIterator(_buffer, _pointer, length),
+      length: length);
 
   @override
-  late Iterable<MapEntry<String, Object?>> entries =
-      _ClosedMapEntryIterable(_buffer, _pointer);
+  late final Iterable<MapEntry<String, Object?>> entries =
+      _IteratorFunctionIterable(
+          () => _ClosedMapEntryIterator(_buffer, _pointer, length),
+          length: length);
 
   @override
   void operator []=(String key, Object? value) {
@@ -94,35 +100,23 @@ class _ClosedMap
   }
 }
 
-/// `Iterable` that reads a "closed map" in a [JsonBufferBuilder].
-class _ClosedMapEntryIterable extends Iterable<MapEntry<String, Object?>> {
-  final JsonBufferBuilder _buffer;
-  final Pointer _pointer;
-
-  _ClosedMapEntryIterable(this._buffer, this._pointer);
-
-  @override
-  Iterator<MapEntry<String, Object?>> get iterator =>
-      _ClosedMapEntryIterator(_buffer, _pointer);
-}
-
 /// `Iterator` that reads a "closed map" in a [JsonBufferBuilder].
-class _ClosedMapEntryIterator implements Iterator<MapEntry<String, Object?>> {
+abstract class _ClosedMapIterator<T> implements Iterator<T> {
   final JsonBufferBuilder _buffer;
   final Pointer _last;
 
   Pointer _pointer;
 
-  _ClosedMapEntryIterator(this._buffer, Pointer pointer)
-      : _last = pointer +
-            _pointerSize +
-            _buffer.readUint32(pointer) * ClosedMaps._entrySize,
-        _pointer = pointer + _pointerSize - ClosedMaps._entrySize;
+  _ClosedMapIterator(this._buffer, Pointer pointer, int length)
+      : _last = pointer + _lengthSize + length * ClosedMaps._entrySize,
+        // Subtract because `moveNext` is called before reading.
+        _pointer = pointer + _lengthSize - ClosedMaps._entrySize;
 
   @override
-  MapEntry<String, Object?> get current => MapEntry(
-      _buffer.readString(_buffer.readPointer(_pointer)),
-      _buffer._readAny(_pointer + _pointerSize));
+  T get current;
+
+  String get _currentKey => _buffer.readString(_buffer.readPointer(_pointer));
+  Object? get _currentValue => _buffer._readAny(_pointer + _pointerSize);
 
   @override
   bool moveNext() {
@@ -131,4 +125,26 @@ class _ClosedMapEntryIterator implements Iterator<MapEntry<String, Object?>> {
     _pointer += ClosedMaps._entrySize;
     return _pointer != _last;
   }
+}
+
+class _ClosedMapKeyIterator extends _ClosedMapIterator<String> {
+  _ClosedMapKeyIterator(super._buffer, super.pointer, super.length);
+
+  @override
+  String get current => _currentKey;
+}
+
+class _ClosedMapValueIterator extends _ClosedMapIterator<Object?> {
+  _ClosedMapValueIterator(super._buffer, super.pointer, super.length);
+
+  @override
+  Object? get current => _currentValue;
+}
+
+class _ClosedMapEntryIterator
+    extends _ClosedMapIterator<MapEntry<String, Object?>> {
+  _ClosedMapEntryIterator(super._buffer, super.pointer, super.length);
+
+  @override
+  MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }

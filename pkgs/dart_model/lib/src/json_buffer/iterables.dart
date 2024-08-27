@@ -17,3 +17,17 @@ mixin _EntryMapMixin<K, V> on Map<K, V> {
     }
   }
 }
+
+/// An [Iterable] that uses the supplied function to create an [Iterator].
+///
+/// [length] is also passed in, as the default implementation is very slow.
+class _IteratorFunctionIterable<T> extends Iterable<T> {
+  final Iterator<T> Function() _function;
+  @override
+  final int length;
+
+  _IteratorFunctionIterable(this._function, {required this.length});
+
+  @override
+  Iterator<T> get iterator => _function();
+}

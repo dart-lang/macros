@@ -7,9 +7,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 part 'closed_map.dart';
-part 'entry_map.dart';
 part 'explanations.dart';
 part 'growable_map.dart';
+part 'iterables.dart';
 part 'type.dart';
 part 'typed_map.dart';
 
@@ -19,21 +19,29 @@ class JsonBufferBuilder {
   /// It's a "growable map": entries can be added to it.
   late final Map<String, Object?> map;
 
-  Uint8List _buffer = Uint8List(32);
+  Uint8List _buffer;
 
   /// The next free location to write to in the buffer.
-  int _nextFree = 0;
+  int _nextFree;
+
+  /// Whether writes are allowed.
+  final bool _allowWrites;
 
   final Map<TypedMapSchema, Pointer> _pointersBySchema = Map.identity();
   final Map<Pointer, TypedMapSchema> _schemasByPointer = {};
 
   final Map<String, Pointer> _pointersByString = {};
 
-  JsonBufferBuilder.deserialize(this._buffer) : _nextFree = _buffer.length {
+  JsonBufferBuilder.deserialize(this._buffer)
+      : _allowWrites = false,
+        _nextFree = _buffer.length {
     map = _readGrowableMap<Object?>(0);
   }
 
-  JsonBufferBuilder() {
+  JsonBufferBuilder()
+      : _allowWrites = true,
+        _buffer = Uint8List(_initialBufferSize),
+        _nextFree = 0 {
     map = createGrowableMap<Object?>();
   }
 
@@ -43,9 +51,11 @@ class JsonBufferBuilder {
   /// mutated.
   Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
 
+  /// The number of bytes written.
   int get length => _nextFree;
 
-  /// Reads the value at [Pointer], which must have been added with [addAny].
+  /// Reads the value at [Pointer], which must have been written with
+  /// [_writeAny].
   Object? _readAny(Pointer pointer) {
     final type = readType(pointer);
     return _read(type, pointer + _typeSize);
@@ -75,59 +85,10 @@ class JsonBufferBuilder {
     }
   }
 
-  /// Adds a [value] of type [type], returns a [Pointer] to it.
-  Pointer _add(Type type, Object? value) {
-    explanations?.push('add $type $value');
-    var pointer = _nextFree;
-    switch (type) {
-      case Type.nil:
-        pointer = 0;
-
-      case Type.type:
-        _reserve(1);
-        _writeType(pointer, value as Type);
-
-      case Type.pointer:
-        _reserve(4);
-        _writePointer(pointer, value as Pointer);
-
-      case Type.uint32:
-        _reserve(4);
-        _writeUint32(pointer, value as int);
-
-      case Type.boolean:
-        _reserve(1);
-        _writeBoolean(pointer, value as bool);
-
-      case Type.stringPointer:
-        _reserve(4);
-        _writePointer(pointer, _pointerToString(value as String));
-
-      case Type.closedMapPointer:
-        _reserve(4);
-        _writePointer(
-            pointer, _pointerToClosedMap(value as Map<String, Object?>));
-
-      case Type.growableMapPointer:
-        _reserve(4);
-        _writePointer(
-            pointer, _pointerToGrowableMap(value as _GrowableMap<Object?>));
-
-      case Type.typedMapPointer:
-        _reserve(4);
-        _writePointer(pointer, _pointerToTypedMap(value as _TypedMap));
-    }
-    explanations?.pop();
-    return pointer;
-  }
-
-  /// Writes [value] to [pointer], recording the type.
-  ///
-  /// If the type and value fits in five bytes, writes them directly. Otherwise
-  /// writes the value elsewhere and writes a pointer to it.
+  /// Writes the type of [value] then writes the value using [_writeAnyOfType].
   void _writeAny(Pointer pointer, Object? value) {
     explanations?.push('_writeAny $pointer $value');
-    final type = Type.of(value);
+    final type = Type._of(value);
     _writeType(pointer, type);
     _writeAnyOfType(type, pointer + _typeSize, value);
     explanations?.pop();
@@ -145,7 +106,8 @@ class JsonBufferBuilder {
     explanations?.push('_writeAnyOfType $type $pointer $value');
     switch (type) {
       case Type.nil:
-        pointer = 0;
+        // Nothing to write.
+        break;
 
       case Type.type:
         _writeType(pointer, value as Type);
@@ -163,8 +125,7 @@ class JsonBufferBuilder {
         _writePointer(pointer, _pointerToString(value as String));
 
       case Type.closedMapPointer:
-        _writePointer(
-            pointer, _pointerToClosedMap(value as Map<String, Object?>));
+        _writePointer(pointer, _addClosedMap(value as Map<String, Object?>));
 
       case Type.growableMapPointer:
         _writePointer(
@@ -176,25 +137,27 @@ class JsonBufferBuilder {
     explanations?.pop();
   }
 
+  /// Returns a [Pointer] to the `String` [value].
+  ///
+  /// Returns the [Pointer] of an existing equal `String` if there is one,
+  /// otherwise adds it.
   Pointer _pointerToString(String value) =>
-      _pointersByString[value] ??= __pointerToString(value);
+      _pointersByString[value] ??= _addString(value);
 
-  Pointer __pointerToString(String value) {
+  Pointer _addString(String value) {
+    explanations?.push('__pointerToString $value');
     final bytes = utf8.encode(value);
     final length = bytes.length;
-    final pointer = _nextFree;
-    _reserve(4 + length);
-    _writeUint32(pointer, length);
+    final pointer = _reserve(_lengthSize + length);
+    _writeLength(pointer, length);
     _setRange(pointer + 4, pointer + 4 + length, bytes);
+    explanations?.pop();
     return pointer;
   }
 
-  /// Reads a `Null`, `Pointer` must be zero.
-  Null readNull(Pointer pointer) => null;
-
   void _writeType(Pointer pointer, Type value) {
     explanations?.push('_writeType $value');
-    _set(pointer, value.index);
+    _setByte(pointer, value.index);
     explanations?.pop();
   }
 
@@ -202,10 +165,20 @@ class JsonBufferBuilder {
     return Type.values[_buffer[pointer]];
   }
 
-  void _writeLength(Pointer pointer, Pointer value) {
+  void _writeLength(Pointer pointer, Pointer value,
+      {bool allowOverwrite = false}) {
     explanations?.push('_writeLength $value');
-    __writeUint32(pointer, value);
+    __writeUint32(pointer, value, allowOverwrite: allowOverwrite);
     explanations?.pop();
+  }
+
+  /// Adds a new pointer pointing to [pointer], returns it.
+  Pointer _addPointerTo(Pointer pointer) {
+    explanations?.push('_addPointerToPointer $pointer');
+    final result = _reserve(4);
+    _writePointer(result, pointer);
+    explanations?.pop();
+    return result;
   }
 
   void _writePointer(Pointer pointer, Pointer value) {
@@ -220,26 +193,29 @@ class JsonBufferBuilder {
     explanations?.pop();
   }
 
-  void __writeUint32(Pointer pointer, int value) {
-    _set4(pointer, value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff,
-        (value >> 24) & 0xff);
+  void __writeUint32(Pointer pointer, int value,
+      {bool allowOverwrite = false}) {
+    _setFourBytes(pointer, value & 0xff, (value >> 8) & 0xff,
+        (value >> 16) & 0xff, (value >> 24) & 0xff,
+        allowOverwrite: allowOverwrite);
   }
 
   void _writeBoolean(Pointer pointer, bool value) {
     explanations?.push('_writeBoolean $value');
-    _set(pointer, value ? 1 : 0);
+    _setByte(pointer, value ? 1 : 0);
     explanations?.pop();
   }
 
+  /// Reads the length at [Pointer].
+  Pointer readLength(Pointer pointer) => _readUint32(pointer);
+
   /// Reads the [Pointer] at [Pointer].
-  Pointer readPointer(Pointer pointer) =>
-      _buffer[pointer] +
-      (_buffer[pointer + 1] << 8) +
-      (_buffer[pointer + 2] << 16) +
-      (_buffer[pointer + 3] << 24);
+  Pointer readPointer(Pointer pointer) => _readUint32(pointer);
 
   /// Reads the uint32 at [Pointer].
-  int readUint32(Pointer pointer) =>
+  int readUint32(Pointer pointer) => _readUint32(pointer);
+
+  int _readUint32(Pointer pointer) =>
       _buffer[pointer] +
       (_buffer[pointer + 1] << 8) +
       (_buffer[pointer + 2] << 16) +
@@ -259,11 +235,13 @@ class JsonBufferBuilder {
 
   /// Reads the String at [Pointer].
   String readString(Pointer pointer) {
-    final length = readUint32(pointer);
-    return utf8.decode(_buffer.sublist(pointer + 4, pointer + 4 + length));
+    final length = readLength(pointer);
+    return utf8.decode(
+        _buffer.sublist(pointer + _lengthSize, pointer + _lengthSize + length));
   }
 
   void _setBit(Pointer pointer, int bitIndex, bool value) {
+    _checkAllowWrites();
     explanations?.explain(pointer, allowOverwrite: true);
     if (value) {
       _buffer[pointer] |= 1 << bitIndex;
@@ -276,19 +254,22 @@ class JsonBufferBuilder {
     return ((_buffer[pointer] >> bitIndex) & 1) == 1;
   }
 
-  void _set(Pointer pointer, int uint8, {bool allowOverwrite = false}) {
+  void _setByte(Pointer pointer, int uint8, {bool allowOverwrite = false}) {
+    _checkAllowWrites();
     explanations?.explain(pointer, allowOverwrite: allowOverwrite);
     _buffer[pointer] = uint8;
   }
 
-  void _set4(Pointer pointer, int b1, int b2, int b3, int b4) {
-    _set(pointer, b1);
-    _set(pointer + 1, b2);
-    _set(pointer + 2, b3);
-    _set(pointer + 3, b4);
+  void _setFourBytes(Pointer pointer, int b1, int b2, int b3, int b4,
+      {bool allowOverwrite = false}) {
+    _setByte(pointer, b1, allowOverwrite: allowOverwrite);
+    _setByte(pointer + 1, b2, allowOverwrite: allowOverwrite);
+    _setByte(pointer + 2, b3, allowOverwrite: allowOverwrite);
+    _setByte(pointer + 3, b4, allowOverwrite: allowOverwrite);
   }
 
   void _setRange(Pointer from, Pointer to, Uint8List bytes) {
+    _checkAllowWrites();
     explanations?.explainRange(from, to);
     _buffer.setRange(from, to, bytes);
   }
@@ -296,12 +277,17 @@ class JsonBufferBuilder {
   /// Reserves [bytes] number of bytes.
   ///
   /// Increases `_nextFree` accordingly. Expands the buffer if necessary.
-  void _reserve(int bytes) {
+  ///
+  /// Returns a [Pointer] to the reserved space.
+  Pointer _reserve(int bytes) {
+    _checkAllowWrites();
+    final result = _nextFree;
     _nextFree += bytes;
     while (_nextFree > _buffer.length) {
       // TODO(davidmorgan): pass desired size to avoid multiple copies.
       _expand();
     }
+    return result;
   }
 
   /// Copies into a new buffer that's twice as big.
@@ -309,6 +295,10 @@ class JsonBufferBuilder {
     final oldBuffer = _buffer;
     _buffer = Uint8List(_buffer.length * 2);
     _buffer.setRange(0, oldBuffer.length, oldBuffer);
+  }
+
+  void _checkAllowWrites() {
+    if (!_allowWrites) throw StateError('This JsonBufferBuilder is read-only.');
   }
 
   @override

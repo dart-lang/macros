@@ -13,10 +13,14 @@ const int _pointerSize = 4;
 /// Bytes to store the length of a collection.
 const int _lengthSize = 4;
 
+/// Initial size of the buffer.
+///
+/// TODO(davidmorgan): this matters for performance; optimize.
+const int _initialBufferSize = 32;
+
 typedef Pointer = int;
 
 enum Type {
-  // Fixed size.
   nil,
   type,
   pointer,
@@ -27,22 +31,23 @@ enum Type {
   growableMapPointer,
   typedMapPointer;
 
-  static Type of(Object? value) {
-    if (value == null) return Type.nil;
+  static Type _of(Object? value) {
     switch (value) {
-      case String _:
+      case Null():
+        return Type.nil;
+      case String():
         return Type.stringPointer;
-      case int _:
+      case int():
         return Type.uint32;
-      case bool _:
+      case bool():
         return Type.boolean;
-      case Type _:
+      case Type():
         return Type.type;
-      case _TypedMap _:
+      case _TypedMap():
         return Type.typedMapPointer;
-      case _GrowableMap _:
+      case _GrowableMap():
         return Type.growableMapPointer;
-      case Map _:
+      case Map():
         return Type.closedMapPointer;
     }
     throw UnsupportedError(

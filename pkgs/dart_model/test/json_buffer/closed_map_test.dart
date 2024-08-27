@@ -5,6 +5,8 @@
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
+import 'testing.dart';
+
 void main() {
   group('ClosedMap', () {
     late JsonBufferBuilder builder;
@@ -22,9 +24,9 @@ void main() {
       final value = {'a': 1, 'b': 2};
       builder.map['value'] = value;
 
-      final deserializedValue = builder.map['value'];
-      expect(Type.of(deserializedValue), Type.closedMapPointer);
-      expect(deserializedValue, value);
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_ClosedMap');
+      expectFullyEquivalentMaps(deserializedValue, value);
     });
 
     test('write and read with nested maps', () {
@@ -35,9 +37,9 @@ void main() {
         }
       };
       builder.map['value'] = value;
-      final deserializedValue = builder.map['value'];
-      expect(Type.of(deserializedValue), Type.closedMapPointer);
-      expect(deserializedValue, value);
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_ClosedMap');
+      expectFullyEquivalentMaps(deserializedValue, value);
     });
   });
 }

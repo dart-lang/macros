@@ -9,6 +9,10 @@ part of 'json_buffer_builder.dart';
 /// Set to an instance of [Explanations] to turn on logging, reset to null to
 /// turn off logging. If set, [JsonBufferBuilder#toString] will print
 /// additional information for each byte.
+///
+/// TODO(davidmorgan): this is only intended for use in local unit tests.
+/// If debug logs are useful elsewhere, do something more robust, but take
+/// care not to degrade performance when logs are off.
 Explanations? explanations;
 
 /// Tracks why each byte in a [JsonBufferBuilder] was written, and does

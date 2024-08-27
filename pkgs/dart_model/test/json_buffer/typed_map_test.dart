@@ -5,6 +5,8 @@
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
+import 'testing.dart';
+
 void main() {
   group('TypedMap', () {
     late JsonBufferBuilder builder;
@@ -26,9 +28,9 @@ void main() {
         'c': Type.uint32,
         'missing2': Type.stringPointer
       });
-      final map = builder.addTypedMap(schema, 'aa', true, null, 12345, null);
+      final map = builder.createTypedMap(schema, 'aa', true, null, 12345, null);
       print(map);
-      expect(map, {'a': 'aa', 'b': true, 'c': 12345});
+      expectFullyEquivalentMaps(map, {'a': 'aa', 'b': true, 'c': 12345});
     });
 
     test('with all bools some values missing can be written and read', () {
@@ -39,8 +41,8 @@ void main() {
         'c': Type.boolean,
         'missing2': Type.boolean,
       });
-      final map = builder.addTypedMap(schema, true, false, null, true, null);
-      expect(map, {'a': true, 'b': false, 'c': true});
+      final map = builder.createTypedMap(schema, true, false, null, true, null);
+      expectFullyEquivalentMaps(map, {'a': true, 'b': false, 'c': true});
     });
 
     test('with all bools all present can be written and read', () {
@@ -50,9 +52,9 @@ void main() {
         'c': Type.boolean,
         'd': Type.boolean,
       });
-      final map = builder.addTypedMap(schema, false, true, false, true);
-      print(map);
-      expect(map, {'a': false, 'b': true, 'c': false, 'd': true});
+      final map = builder.createTypedMap(schema, false, true, false, true);
+      expectFullyEquivalentMaps(
+          map, {'a': false, 'b': true, 'c': false, 'd': true});
     });
 
     test('schemas are written once per buffer', () {
@@ -61,11 +63,11 @@ void main() {
 
       // Write three times, checking how much the buffer grows.
       final length1 = builder.length;
-      builder.addTypedMap(schema, 'aa', 12345);
+      builder.createTypedMap(schema, 'aa', 12345);
       final length2 = builder.length;
-      builder.addTypedMap(schema, 'aa', 12345);
+      builder.createTypedMap(schema, 'aa', 12345);
       final length3 = builder.length;
-      builder.addTypedMap(schema, 'aa', 12345);
+      builder.createTypedMap(schema, 'aa', 12345);
       final length4 = builder.length;
 
       // Second write takes up less space than first, because the schema is
@@ -86,9 +88,9 @@ void main() {
       });
 
       // Write one to write schema, again to check size without schema.
-      builder.addTypedMap(schema, 37, false, true, false, true);
+      builder.createTypedMap(schema, 37, false, true, false, true);
       final length1 = builder.length;
-      builder.addTypedMap(schema, 37, false, true, false, true);
+      builder.createTypedMap(schema, 37, false, true, false, true);
       final length2 = builder.length;
 
       // Size should be schema pointer, one four byte int, four one byte bools.
@@ -108,12 +110,12 @@ void main() {
       });
 
       // Write once so schema is written.
-      builder.addTypedMap(
+      builder.createTypedMap(
           schema, true, false, true, false, true, false, true, false);
 
       // Check length of write with already-written schema.
       final length1 = builder.length;
-      builder.addTypedMap(
+      builder.createTypedMap(
           schema, true, false, true, false, true, false, true, false);
       final length2 = builder.length;
 
@@ -131,9 +133,9 @@ void main() {
       });
 
       // Write one to write schema, again to check size without schema.
-      builder.addTypedMap(schema, 37, null, true, null, false);
+      builder.createTypedMap(schema, 37, null, true, null, false);
       final length1 = builder.length;
-      builder.addTypedMap(schema, 37, null, true, null, false);
+      builder.createTypedMap(schema, 37, null, true, null, false);
       final length2 = builder.length;
 
       // Size should be schema pointer, one four byte int pointer, one byte

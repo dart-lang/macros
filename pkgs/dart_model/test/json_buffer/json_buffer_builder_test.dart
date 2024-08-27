@@ -43,5 +43,40 @@ void main() {
       final deserializedValue = builder.map['value'];
       expect(deserializedValue, value);
     });
+
+    test('is serializable and deserializable', () {
+      final growableMap = builder.createGrowableMap<Object?>();
+      growableMap['A'] = 'B';
+      final value = {
+        '1': null,
+        '2': Type.stringPointer,
+        '3': Type.uint32,
+        '4': false,
+        '5': true,
+        '6': 0,
+        '7': 0xffffffff,
+        '8': 'a',
+        '9': 'abc' * 10,
+        '10': {
+          'a': {'aa': 'bb'},
+          'b': 2
+        },
+        '11': growableMap,
+      };
+      builder.map['value'] = value;
+      growableMap['C'] = 'D';
+
+      final serialized = builder.serialize();
+      final deserializedBuilder = JsonBufferBuilder.deserialize(serialized);
+
+      final deserializedValue = deserializedBuilder.map['value'];
+      expect(deserializedValue, value);
+    });
+
+    test('deserialized does not allow modification', () {
+      final deserializedBuilder =
+          JsonBufferBuilder.deserialize(JsonBufferBuilder().serialize());
+      expect(() => deserializedBuilder.map['a'] = 'b', throwsStateError);
+    });
   });
 }

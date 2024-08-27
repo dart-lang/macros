@@ -10,8 +10,8 @@ class TypedMapSchema {
   final List<int> _offsets;
   final bool isAllBooleans;
 
-  factory TypedMapSchema(Map<String, Type> fieldTypes) => TypedMapSchema._(
-      fieldTypes.keys.toList(), fieldTypes.values.cast<Type>().toList());
+  TypedMapSchema(Map<String, Type> fieldTypes)
+      : this._(fieldTypes.keys.toList(), fieldTypes.values.toList());
 
   TypedMapSchema._(this._keys, this._valueTypes)
       : _offsets = List<int>.filled(_keys.length + 1, 0),
@@ -21,15 +21,18 @@ class TypedMapSchema {
     }
   }
 
-  Map<String, Type> toMap() => Map.fromEntries([
-        for (var i = 0; i != _keys.length; ++i)
-          MapEntry(_keys[i], _valueTypes[i]),
-      ]);
+  Map<String, Type> toMap() => {
+        for (var i = 0; i != _keys.length; ++i) _keys[i]: _valueTypes[i],
+      };
 
+  // Schemas should be instantiated once per type in generated code, so looking
+  // up by identity is sufficient. It's also the fastest way to do it.
+  //
+  // Adding deep equality and hashCode to make testing easier is tempting, so
+  // add throwing implementations to prevent that.
   @override
   bool operator ==(Object other) =>
       throw UnsupportedError('TypedMapSchema should be compared by identity.');
-
   @override
   int get hashCode =>
       throw UnsupportedError('TypedMapSchema should be compared by identity.');
@@ -50,7 +53,15 @@ class TypedMapSchema {
 }
 
 extension TypedMaps on JsonBufferBuilder {
-  Map<String, Object?> addTypedMap(TypedMapSchema schema,
+  /// Creates and fills a "typed map".
+  ///
+  /// It is linked to the `JsonBufferBuilder` that creates it: it can be added
+  /// to any collection in the same `JsonBufferBuilder` without copying.
+  /// Adding to a collection in a different `JsonBufferBuilder` is an error.
+  ///
+  /// The returned value must be separately added to the buffer. Otherwise,
+  /// the buffer contains data that is not reachable from the root [map].
+  Map<String, Object?> createTypedMap(TypedMapSchema schema,
       [Object? v0,
       Object? v1,
       Object? v2,
@@ -93,9 +104,8 @@ extension TypedMaps on JsonBufferBuilder {
     };
 
     var schemaPointer = _pointersBySchema[schema] ??=
-        _add(Type.closedMapPointer, schema.toMap());
+        _addPointerTo(_addClosedMap(schema.toMap()));
     if (filled) schemaPointer |= 0x80000000;
-    var pointer = _nextFree;
 
     final size = filled
         ? schema.valueSize
@@ -108,10 +118,12 @@ extension TypedMaps on JsonBufferBuilder {
             (v6 == null ? 0 : schema.typeAtIndex(6).sizeInBytes) +
             (v7 == null ? 0 : schema.typeAtIndex(7).sizeInBytes);
 
-    _reserve(_pointerSize + (filled ? 0 : schema.fieldSetSize) + size);
+    final pointer =
+        _reserve(_pointerSize + (filled ? 0 : schema.fieldSetSize) + size);
+    _writePointer(pointer, schemaPointer);
 
     if (!filled) {
-      _set(
+      _setByte(
           pointer + _pointerSize,
           (v0 == null ? 0 : 1) +
               (v1 == null ? 0 : 2) +
@@ -122,8 +134,6 @@ extension TypedMaps on JsonBufferBuilder {
               (v6 == null ? 0 : 64) +
               (v7 == null ? 0 : 128));
     }
-
-    _writePointer(pointer, schemaPointer);
 
     var offset = 0;
 
@@ -163,6 +173,10 @@ extension TypedMaps on JsonBufferBuilder {
     return _TypedMap(this, pointer);
   }
 
+  /// Returns the [Pointer] to [map].
+  ///
+  /// The [map] must have been created in this buffer using
+  /// [createTypedMap].
   Pointer _pointerToTypedMap(_TypedMap map) {
     _checkTypedMapOwnership(map);
     return map._pointer;
@@ -186,14 +200,18 @@ class _TypedMap
     implements Map<String, Object?> {
   final JsonBufferBuilder _buffer;
   final Pointer _pointer;
-  final Pointer _schemaPointer;
+
+  // If a `TypedMap` is created then immediately added to another `Map` then
+  // these values are never needed, just the `_pointer`. Use `late` so they are
+  // only computed if needed.
+  late final Pointer _schemaPointer =
+      _buffer.readPointer(_pointer) & 0x7fffffff;
   late final TypedMapSchema _schema =
       _buffer._schemasByPointer[_schemaPointer] ??= TypedMapSchema(
           _buffer.readClosedMap(_buffer.readPointer(_schemaPointer)).cast());
   late final bool filled = (_buffer.readPointer(_pointer) & 0x80000000) != 0;
 
-  _TypedMap(this._buffer, this._pointer)
-      : _schemaPointer = _buffer.readPointer(_pointer) & 0x7fffffff;
+  _TypedMap(this._buffer, this._pointer);
 
   bool hasField(int index) {
     if (index < 0 || index >= _schema.length) {
@@ -240,16 +258,26 @@ class _TypedMap
   bool get isNotEmpty => !isEmpty;
 
   @override
-  late final Iterable<String> keys =
-      _TypedMapEntryIterable(this).map((e) => e.key);
+  late final Iterable<String> keys = _IteratorFunctionIterable<String>(
+      _schema.isAllBooleans
+          ? () => _AllBoolsTypedMapKeyIterator(this)
+          : () => _PartialTypedMapKeyIterator(this),
+      length: length);
 
   @override
-  late final Iterable<Object?> values =
-      _TypedMapEntryIterable(this).map((e) => e.value);
+  late final Iterable<Object?> values = _IteratorFunctionIterable<Object?>(
+      _schema.isAllBooleans
+          ? () => _AllBoolsTypedMapValueIterator(this)
+          : () => _PartialTypedMapValueIterator(this),
+      length: length);
 
   @override
   late Iterable<MapEntry<String, Object?>> entries =
-      _TypedMapEntryIterable(this);
+      _IteratorFunctionIterable<MapEntry<String, Object?>>(
+          _schema.isAllBooleans
+              ? () => _AllBoolsTypedMapEntryIterator(this)
+              : () => _PartialTypedMapEntryIterator(this),
+          length: length);
 
   @override
   void operator []=(String key, Object? value) {
@@ -267,23 +295,8 @@ class _TypedMap
   }
 }
 
-/// `Iterable` that reads a `Map` in a [JsonBufferBuilder].
-class _TypedMapEntryIterable
-    with IterableMixin<MapEntry<String, Object?>>
-    implements Iterable<MapEntry<String, Object?>> {
-  final _TypedMap _map;
-
-  _TypedMapEntryIterable(this._map);
-
-  @override
-  Iterator<MapEntry<String, Object?>> get iterator => _map._schema.isAllBooleans
-      ? _AllBoolsTypedMapEntryIterator(_map)
-      : _PartialTypedMapEntryIterator(_map);
-}
-
 /// `Iterator` that reads a `Map` in a [JsonBufferBuilder].
-class _PartialTypedMapEntryIterator
-    implements Iterator<MapEntry<String, Object?>> {
+abstract class _PartialTypedMapIterator<T> implements Iterator<T> {
   final _TypedMap _map;
   final JsonBufferBuilder _buffer;
   final TypedMapSchema _schema;
@@ -291,7 +304,7 @@ class _PartialTypedMapEntryIterator
   int _offset = -1;
   int _index = -1;
 
-  _PartialTypedMapEntryIterator(this._map)
+  _PartialTypedMapIterator(this._map)
       : _buffer = _map._buffer,
         _schema = _map._schema,
         _valuesPointer = _map._pointer +
@@ -299,10 +312,11 @@ class _PartialTypedMapEntryIterator
             (_map.filled ? 0 : _map._schema.fieldSetSize);
 
   @override
-  MapEntry<String, Object?> get current {
-    return MapEntry(_schema._keys[_index],
-        _buffer._read(_schema._valueTypes[_index], _valuesPointer + _offset));
-  }
+  T get current;
+
+  String get _currentKey => _schema._keys[_index];
+  Object? get _currentValue =>
+      _buffer._read(_schema._valueTypes[_index], _valuesPointer + _offset);
 
   @override
   bool moveNext() {
@@ -315,9 +329,30 @@ class _PartialTypedMapEntryIterator
   }
 }
 
+class _PartialTypedMapKeyIterator extends _PartialTypedMapIterator<String> {
+  _PartialTypedMapKeyIterator(super._map);
+
+  @override
+  String get current => _currentKey;
+}
+
+class _PartialTypedMapValueIterator extends _PartialTypedMapIterator<Object?> {
+  _PartialTypedMapValueIterator(super._map);
+
+  @override
+  Object? get current => _currentValue;
+}
+
+class _PartialTypedMapEntryIterator
+    extends _PartialTypedMapIterator<MapEntry<String, Object?>> {
+  _PartialTypedMapEntryIterator(super._map);
+
+  @override
+  MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
+}
+
 /// `Iterator` that reads a `Map` in a [JsonBufferBuilder].
-class _AllBoolsTypedMapEntryIterator
-    implements Iterator<MapEntry<String, Object?>> {
+abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
   final _TypedMap _map;
   final JsonBufferBuilder _buffer;
   final TypedMapSchema _schema;
@@ -326,7 +361,7 @@ class _AllBoolsTypedMapEntryIterator
   int _intOffset = -1;
   int _bitOffset = 7;
 
-  _AllBoolsTypedMapEntryIterator(this._map)
+  _AllBoolsTypedMapIterator(this._map)
       : _buffer = _map._buffer,
         _schema = _map._schema,
         _valuesPointer = _map._pointer +
@@ -334,8 +369,11 @@ class _AllBoolsTypedMapEntryIterator
             (_map.filled ? 0 : _map._schema.fieldSetSize);
 
   @override
-  MapEntry<String, Object?> get current => MapEntry(_schema._keys[_index],
-      _buffer.readBit(_valuesPointer + _intOffset, _bitOffset));
+  T get current;
+
+  String get _currentKey => _schema._keys[_index];
+  Object? get _currentValue =>
+      _buffer.readBit(_valuesPointer + _intOffset, _bitOffset);
 
   @override
   bool moveNext() {
@@ -350,4 +388,27 @@ class _AllBoolsTypedMapEntryIterator
     } while (!_map.hasField(_index));
     return true;
   }
+}
+
+class _AllBoolsTypedMapKeyIterator extends _AllBoolsTypedMapIterator<String> {
+  _AllBoolsTypedMapKeyIterator(super._map);
+
+  @override
+  String get current => _currentKey;
+}
+
+class _AllBoolsTypedMapValueIterator
+    extends _AllBoolsTypedMapIterator<Object?> {
+  _AllBoolsTypedMapValueIterator(super._map);
+
+  @override
+  Object? get current => _currentValue;
+}
+
+class _AllBoolsTypedMapEntryIterator
+    extends _AllBoolsTypedMapIterator<MapEntry<String, Object?>> {
+  _AllBoolsTypedMapEntryIterator(super._map);
+
+  @override
+  MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }

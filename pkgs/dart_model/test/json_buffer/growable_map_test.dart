@@ -5,6 +5,8 @@
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
+import 'testing.dart';
+
 void main() {
   group('GrowableMap', () {
     late JsonBufferBuilder builder;
@@ -18,15 +20,34 @@ void main() {
       print(builder);
     });
 
+    test('can be written and read if empty', () {
+      final value = builder.createGrowableMap<int>();
+      builder.map['value'] = value;
+
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_GrowableMap<Object?>');
+      expectFullyEquivalentMaps(deserializedValue, value);
+    });
+
+    test('can be written and read with one value', () {
+      final value = builder.createGrowableMap<int>();
+      value['a'] = 1;
+      builder.map['value'] = value;
+
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_GrowableMap<Object?>');
+      expectFullyEquivalentMaps(deserializedValue, value);
+    });
+
     test('can be written and read', () {
       final value = builder.createGrowableMap<int>();
       value['a'] = 1;
       value['b'] = 2;
       builder.map['value'] = value;
 
-      final deserializedValue = builder.map['value'];
-      expect(Type.of(deserializedValue), Type.growableMapPointer);
-      expect(deserializedValue, value);
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_GrowableMap<Object?>');
+      expectFullyEquivalentMaps(deserializedValue, value);
     });
 
     test('can be written and read with nested maps', () {
@@ -43,9 +64,9 @@ void main() {
 
       builder.map['value'] = map1;
 
-      final deserializedValue = builder.map['value'];
-      expect(Type.of(deserializedValue), Type.growableMapPointer);
-      expect(deserializedValue, {
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue.runtimeType.toString(), '_GrowableMap<Object?>');
+      expectFullyEquivalentMaps(deserializedValue, {
         'a': 1,
         'b': 2,
         'c': {
