@@ -61,6 +61,9 @@ void main() {
       // is a reference not a copy.
       map2['B'] = 2;
       map2['C'] = {'x': 1, 'y': 2};
+      map2['D'] = [1, 2, 3];
+      map2['E'] = [];
+      map2['F'] = <String, Object?>{};
 
       builder.map['value'] = map1;
 
@@ -72,7 +75,10 @@ void main() {
         'c': {
           'A': 1,
           'B': 2,
-          'C': {'x': 1, 'y': 2}
+          'C': {'x': 1, 'y': 2},
+          'D': [1, 2, 3],
+          'E': <Object?>[],
+          'F': <String, Object?>{},
         }
       });
     });

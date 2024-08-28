@@ -6,6 +6,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
+part 'closed_list.dart';
 part 'closed_map.dart';
 part 'explanations.dart';
 part 'growable_map.dart';
@@ -57,6 +58,16 @@ class JsonBufferBuilder {
   /// mutated.
   Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
 
+  static Uint8List serializeToBinary(Map<String, Object?> map) {
+    if (map is _GrowableMap) {
+      return map._buffer.serialize();
+    } else {
+      final buffer = JsonBufferBuilder();
+      buffer.map.addAll(map);
+      return buffer.serialize();
+    }
+  }
+
   /// The number of bytes written.
   int get length => _nextFree;
 
@@ -82,6 +93,8 @@ class JsonBufferBuilder {
         return _readBoolean(pointer);
       case Type.stringPointer:
         return _readString(_readPointer(pointer));
+      case Type.closedListPointer:
+        return _readClosedList(_readPointer(pointer));
       case Type.closedMapPointer:
         return _readClosedMap(_readPointer(pointer));
       case Type.growableMapPointer:
@@ -129,6 +142,9 @@ class JsonBufferBuilder {
 
       case Type.stringPointer:
         _writePointer(pointer, _pointerToString(value as String));
+
+      case Type.closedListPointer:
+        _writePointer(pointer, _addClosedList(value as List<Object?>));
 
       case Type.closedMapPointer:
         _writePointer(pointer, _addClosedMap(value as Map<String, Object?>));
