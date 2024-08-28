@@ -13,7 +13,7 @@ extension ClosedMaps on JsonBufferBuilder {
   //
   // Each entry is: [key (pointer to string), value type, value].
   //
-  // Values are stored with `_writeSmallValueOrPointer`.
+  // Values are stored with `_writeAny`.
   static const _keySize = _pointerSize;
   static const _valueSize = _typeSize + _pointerSize;
   static const _entrySize = _keySize + _valueSize;
