@@ -33,9 +33,18 @@ void main() {
         '9': 'abc' * 10,
         '10': {
           'a': {'aa': 'bb'},
-          'b': 2
+          'b': 2,
+          'c': ['a', 'b'],
         },
         '11': growableMap,
+        '12': [
+          '1',
+          null,
+          Type.stringPointer,
+          false,
+          0,
+          {'a': 'aa'}
+        ],
       };
       builder.map['value'] = value;
       growableMap['C'] = 'D';

@@ -29,6 +29,7 @@ enum Type {
   uint32,
   boolean,
   stringPointer,
+  closedListPointer,
   closedMapPointer,
   growableMapPointer,
   typedMapPointer;
@@ -46,6 +47,8 @@ enum Type {
         return Type.boolean;
       case Type():
         return Type.type;
+      case List():
+        return Type.closedListPointer;
       case _TypedMap():
         return Type.typedMapPointer;
       case _GrowableMap():
@@ -67,6 +70,7 @@ enum Type {
         return 1;
       case uint32:
       case pointer:
+      case closedListPointer:
       case stringPointer:
       case closedMapPointer:
       case growableMapPointer:

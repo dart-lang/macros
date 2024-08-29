@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
-import 'src/json_buffer.dart';
+import 'src/json_buffer/json_buffer_builder.dart';
 
 extension SerializeExtension on Map<String, Object?> {
-  Uint8List serializeToBinary() => JsonBuffer.serializeToBinary(this);
+  Uint8List serializeToBinary() => JsonBufferBuilder.serializeToBinary(this);
 }
 
 extension DeserializeExtension on Uint8List {
   Map<String, Object?> deserializeFromBinary() =>
-      JsonBuffer.deserialize(this).asMap;
+      JsonBufferBuilder.deserialize(this).map;
 }

@@ -29,12 +29,18 @@ void main() {
       expectFullyEquivalentMaps(deserializedValue, value);
     });
 
-    test('write and read with nested maps', () {
+    test('write and read with nested lists and maps', () {
       final value = {
         'a': null,
+        'a0': <Object?>[],
+        'a00': <String, Object?>{},
         'bb': {
           'ccc': {'a': 3}
-        }
+        },
+        'cc': [
+          {'a': 'b'},
+          ['a', 'b'],
+        ],
       };
       builder.map['value'] = value;
       final deserializedValue = builder.map['value'] as Map<String, Object?>;
