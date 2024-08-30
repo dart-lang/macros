@@ -11,7 +11,6 @@ import 'lazy_maps_json_wire_benchmark.dart';
 import 'sdk_maps_buffer_wire_benchmark.dart';
 import 'sdk_maps_builder_wire_benchmark.dart';
 import 'sdk_maps_json_wire_benchmark.dart';
-import 'serialization_benchmark.dart';
 
 void main() {
   final sdkMapsJsonWireBenchmark = SdkMapsJsonWireBenchmark();
