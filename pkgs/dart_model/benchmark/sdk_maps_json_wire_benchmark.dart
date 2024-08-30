@@ -18,8 +18,7 @@ class SdkMapsJsonWireBenchmark extends SerializationBenchmark {
     return Map<String, Object?>.fromIterable(mapKeys, value: (key) {
       final intKey = int.parse(key as String);
       return Interface(
-        members: Map<String, Object?>.fromIterable(
-            const ['a', 'aa', 'aaa', 'aaaa'],
+        members: Map<String, Object?>.fromIterable(makeMemberNames(intKey),
             value: (k) => _makeMember(k as String)).cast(),
         properties: Properties(
           isAbstract: (intKey & 1) == 1,

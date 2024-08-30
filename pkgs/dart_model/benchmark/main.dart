@@ -4,24 +4,27 @@
 
 import 'package:collection/collection.dart';
 
-import 'buffer_maps_buffer_wire_benchmark.dart';
-import 'buffer_maps_json_wire_benchmark.dart';
 import 'builder_maps_builder_wire_benchmark.dart';
 import 'builder_maps_json_wire_benchmark.dart';
+import 'lazy_maps_buffer_wire_benchmark.dart';
+import 'lazy_maps_json_wire_benchmark.dart';
 import 'sdk_maps_buffer_wire_benchmark.dart';
 import 'sdk_maps_builder_wire_benchmark.dart';
 import 'sdk_maps_json_wire_benchmark.dart';
 import 'serialization_benchmark.dart';
 
 void main() {
+  final sdkMapsJsonWireBenchmark = SdkMapsJsonWireBenchmark();
+  final lazyMapsBufferWireBenchmark = LazyMapsBufferWireBenchmark();
+  final builderMapsBuilderWireBenchmark = BuilderMapsBuilderWireBenchmark();
   final serializationBenchmarks = [
-    SdkMapsJsonWireBenchmark(),
+    sdkMapsJsonWireBenchmark,
     SdkMapsBufferWireBenchmark(),
     SdkMapsBuilderWireBenchmark(),
-    BufferMapsJsonWireBenchmark(),
-    BufferMapsBufferWireBenchmark(),
+    LazyMapsJsonWireBenchmark(),
+    lazyMapsBufferWireBenchmark,
     BuilderMapsJsonWireBenchmark(),
-    BuilderMapsBuilderWireBenchmark(),
+    builderMapsBuilderWireBenchmark,
   ];
 
   for (var i = 0; i != 3; ++i) {
@@ -37,9 +40,9 @@ void main() {
     print('');
 
     for (final benchmark in [
-      ProcessBenchmark(serializationBenchmarks[0]), // JSON.
-      ProcessBenchmark(serializationBenchmarks[3]), // JsonBuffer.
-      ProcessBenchmark(serializationBenchmarks[5]), // JsonBufferBuilder.
+      sdkMapsJsonWireBenchmark.processBenchmark(),
+      lazyMapsBufferWireBenchmark.processBenchmark(),
+      builderMapsBuilderWireBenchmark.processBenchmark(),
     ]) {
       final measure = benchmark.measure().toMilliseconds;
       final paddedName = benchmark.name.padLeft(36);

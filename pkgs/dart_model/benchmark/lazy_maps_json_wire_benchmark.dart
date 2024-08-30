@@ -5,11 +5,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'buffer_maps_buffer_wire_benchmark.dart';
+import 'lazy_maps_buffer_wire_benchmark.dart';
 
 /// Benchmark accumulating data into a `JsonBuffer` via `LazyMap` then
 /// serializing it to JSON.
-class BufferMapsJsonWireBenchmark extends BufferMapsBufferWireBenchmark {
+class LazyMapsJsonWireBenchmark extends LazyMapsBufferWireBenchmark {
   @override
   void run() {
     serialized = json.fuse(utf8).encode(createData()) as Uint8List;

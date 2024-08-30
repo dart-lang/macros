@@ -33,10 +33,9 @@ class BuilderMapsBuilderWireBenchmark extends SerializationBenchmark {
               isField: (intKey & 8) == 8,
               isMethod: (intKey & 16) == 16,
               isStatic: (intKey & 32) == 32));
-      members['a'] = _makeMember('a');
-      members['aa'] = _makeMember('aa');
-      members['aaa'] = _makeMember('aaa');
-      members['aaaa'] = _makeMember('aaaa');
+      for (final memberName in makeMemberNames(intKey)) {
+        members[memberName] = _makeMember(memberName);
+      }
     }
 
     return buffer.map;

@@ -7,7 +7,7 @@ import 'package:dart_model/src/json_buffer.dart';
 import 'serialization_benchmark.dart';
 
 /// Benchmark accumulating data into a [JsonBuffer] via [LazyMap].
-class BufferMapsBufferWireBenchmark extends SerializationBenchmark {
+class LazyMapsBufferWireBenchmark extends SerializationBenchmark {
   @override
   void run() {
     serialized = JsonBuffer(createData()).serialize();
@@ -17,8 +17,7 @@ class BufferMapsBufferWireBenchmark extends SerializationBenchmark {
     return LazyMap(mapKeys, (key) {
       final intKey = int.parse(key);
       return Interface(
-        // TODO(davidmorgan): list of members won't be fixed / known in advance.
-        members: LazyMap(const ['a', 'aa', 'aaa', 'aaaa'], _makeMember).cast(),
+        members: LazyMap(makeMemberNames(intKey), _makeMember).cast(),
         properties: Properties(
           isAbstract: (intKey & 1) == 1,
           isClass: (intKey & 2) == 2,

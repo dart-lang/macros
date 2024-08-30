@@ -27,6 +27,14 @@ abstract class SerializationBenchmark extends BenchmarkBase {
 
   /// Creates a [ProcessBenchmark] based on the deserialized data.
   ProcessBenchmark processBenchmark() => ProcessBenchmark(this);
+
+  List<String> makeMemberNames(int key) {
+    final length = key % 10;
+    return List<String>.generate(
+        // "key % 2999" so some member names are reused.
+        length,
+        (i) => 'interface${key % 2999}member$i');
+  }
 }
 
 /// Benchmark that walks the full deserialized data.
