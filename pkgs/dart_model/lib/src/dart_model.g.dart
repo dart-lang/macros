@@ -1,6 +1,6 @@
-// This file is generated. To make changes edit schemas/*.schema.json
+// This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
-
+// ignore: implementation_imports
 /// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
 extension type Augmentation.fromJson(Map<String, Object?> node)
     implements Object {
@@ -37,6 +37,8 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
             'optionalPositionalParameters': optionalPositionalParameters,
           if (namedParameters != null) 'namedParameters': namedParameters,
         });
+
+  /// The return type of this function type.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
 
   /// Static type parameters introduced by this function type.
@@ -78,12 +80,14 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
           if (properties != null) 'properties': properties,
         });
 
-  /// The metadata annotations attached to this iterface.
+  /// The metadata annotations attached to this interface.
   List<MetadataAnnotation> get metadataAnnotations =>
       (node['metadataAnnotations'] as List).cast();
 
   /// Map of members by name.
   Map<String, Member> get members => (node['members'] as Map).cast();
+
+  /// The type of the expression `this` when used in this interface.
   NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
 
   /// The properties of this interface.
@@ -126,6 +130,8 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
 
   /// Libraries by URI.
   Map<String, Library> get uris => (node['uris'] as Map).cast();
+
+  /// The resolved static type hierarchy.
   TypeHierarchy get types => node['types'] as TypeHierarchy;
 }
 
@@ -160,7 +166,7 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
 }
 
-/// A resolved static type
+/// A resolved static type.
 extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
     implements Object {
   NamedTypeDesc({
@@ -188,6 +194,8 @@ extension type NullableTypeDesc.fromJson(Map<String, Object?> node)
   }) : this.fromJson({
           if (inner != null) 'inner': inner,
         });
+
+  /// The type T.
   StaticTypeDesc get inner => node['inner'] as StaticTypeDesc;
 }
 
@@ -265,9 +273,9 @@ enum StaticTypeDescType {
   _unknown,
   dynamicTypeDesc,
   functionTypeDesc,
+  namedTypeDesc,
   neverTypeDesc,
   nullableTypeDesc,
-  namedTypeDesc,
   recordTypeDesc,
   typeParameterTypeDesc,
   voidTypeDesc;
@@ -287,6 +295,11 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
         'type': 'FunctionTypeDesc',
         'value': functionTypeDesc,
       });
+  static StaticTypeDesc namedTypeDesc(NamedTypeDesc namedTypeDesc) =>
+      StaticTypeDesc.fromJson({
+        'type': 'NamedTypeDesc',
+        'value': namedTypeDesc,
+      });
   static StaticTypeDesc neverTypeDesc(NeverTypeDesc neverTypeDesc) =>
       StaticTypeDesc.fromJson({
         'type': 'NeverTypeDesc',
@@ -296,11 +309,6 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
       StaticTypeDesc.fromJson({
         'type': 'NullableTypeDesc',
         'value': nullableTypeDesc,
-      });
-  static StaticTypeDesc namedTypeDesc(NamedTypeDesc namedTypeDesc) =>
-      StaticTypeDesc.fromJson({
-        'type': 'NamedTypeDesc',
-        'value': namedTypeDesc,
       });
   static StaticTypeDesc recordTypeDesc(RecordTypeDesc recordTypeDesc) =>
       StaticTypeDesc.fromJson({
@@ -324,12 +332,12 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
         return StaticTypeDescType.dynamicTypeDesc;
       case 'FunctionTypeDesc':
         return StaticTypeDescType.functionTypeDesc;
+      case 'NamedTypeDesc':
+        return StaticTypeDescType.namedTypeDesc;
       case 'NeverTypeDesc':
         return StaticTypeDescType.neverTypeDesc;
       case 'NullableTypeDesc':
         return StaticTypeDescType.nullableTypeDesc;
-      case 'NamedTypeDesc':
-        return StaticTypeDescType.namedTypeDesc;
       case 'RecordTypeDesc':
         return StaticTypeDescType.recordTypeDesc;
       case 'TypeParameterTypeDesc':
@@ -355,6 +363,13 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
     return FunctionTypeDesc.fromJson(node['value'] as Map<String, Object?>);
   }
 
+  NamedTypeDesc get asNamedTypeDesc {
+    if (node['type'] != 'NamedTypeDesc') {
+      throw StateError('Not a NamedTypeDesc.');
+    }
+    return NamedTypeDesc.fromJson(node['value'] as Map<String, Object?>);
+  }
+
   NeverTypeDesc get asNeverTypeDesc {
     if (node['type'] != 'NeverTypeDesc') {
       throw StateError('Not a NeverTypeDesc.');
@@ -367,13 +382,6 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
       throw StateError('Not a NullableTypeDesc.');
     }
     return NullableTypeDesc.fromJson(node['value'] as Map<String, Object?>);
-  }
-
-  NamedTypeDesc get asNamedTypeDesc {
-    if (node['type'] != 'NamedTypeDesc') {
-      throw StateError('Not a NamedTypeDesc.');
-    }
-    return NamedTypeDesc.fromJson(node['value'] as Map<String, Object?>);
   }
 
   RecordTypeDesc get asRecordTypeDesc {
@@ -439,9 +447,11 @@ extension type TypeHierarchyEntry.fromJson(Map<String, Object?> node)
           if (supertypes != null) 'supertypes': supertypes,
         });
 
-  /// Type parameters defined on this interface-defining element..
+  /// Type parameters defined on this interface-defining element.
   List<StaticTypeParameterDesc> get typeParameters =>
       (node['typeParameters'] as List).cast();
+
+  /// The named static type represented by this entry.
   NamedTypeDesc get self => node['self'] as NamedTypeDesc;
 
   /// All direct supertypes of this type.

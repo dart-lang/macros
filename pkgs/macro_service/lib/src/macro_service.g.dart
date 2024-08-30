@@ -1,7 +1,7 @@
-// This file is generated. To make changes edit schemas/*.schema.json
+// This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
-
-import 'package:dart_model/dart_model.dart';
+// ignore: implementation_imports
+import 'package:dart_model/src/dart_model.g.dart';
 
 /// A request to a macro to augment some code.
 extension type AugmentRequest.fromJson(Map<String, Object?> node)
@@ -17,7 +17,7 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
   /// Which phase to run: 1, 2 or 3.
   int get phase => node['phase'] as int;
 
-  /// The class to augment. TODO(davidmorgan): expand to more types of target
+  /// The class to augment. TODO(davidmorgan): expand to more types of target.
   QualifiedName get target => node['target'] as QualifiedName;
 }
 
@@ -121,6 +121,8 @@ extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
   }) : this.fromJson({
           if (macroDescription != null) 'macroDescription': macroDescription,
         });
+
+  /// The macro description.
   MacroDescription get macroDescription =>
       node['macroDescription'] as MacroDescription;
 }
@@ -209,6 +211,8 @@ extension type QueryRequest.fromJson(Map<String, Object?> node)
   }) : this.fromJson({
           if (query != null) 'query': query,
         });
+
+  /// The query.
   Query get query => node['query'] as Query;
 }
 
@@ -220,6 +224,8 @@ extension type QueryResponse.fromJson(Map<String, Object?> node)
   }) : this.fromJson({
           if (model != null) 'model': model,
         });
+
+  /// The model.
   Model get model => node['model'] as Model;
 }
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "anyOf": [
+  "oneOf": [
     {
       "$ref": "#/$defs/HostRequest"
     },
@@ -17,11 +17,11 @@
       "description": "A request to a macro to augment some code.",
       "properties": {
         "phase": {
-          "description": "Which phase to run: 1, 2 or 3.",
-          "type": "integer"
+          "type": "integer",
+          "description": "Which phase to run: 1, 2 or 3."
         },
         "target": {
-          "$comment": "The class to augment. TODO(davidmorgan): expand to more types of target",
+          "$comment": "The class to augment. TODO(davidmorgan): expand to more types of target.",
           "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
         }
       }
@@ -31,8 +31,8 @@
       "description": "Macro's response to an [AugmentRequest]: the resulting augmentations.",
       "properties": {
         "augmentations": {
-          "description": "The augmentations.",
           "type": "array",
+          "description": "The augmentations.",
           "items": {
             "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
           }
@@ -44,8 +44,8 @@
       "description": "Request could not be handled.",
       "properties": {
         "error": {
-          "description": "The error.",
-          "type": "string"
+          "type": "string",
+          "description": "The error."
         }
       }
     },
@@ -54,18 +54,15 @@
       "description": "A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?",
       "properties": {
         "port": {
-          "description": "TCP port to connect to.",
-          "type": "integer"
+          "type": "integer",
+          "description": "TCP port to connect to."
         }
       }
     },
     "HostRequest": {
-      "$description": "A request sent from host to macro.",
+      "type": "object",
+      "description": "A request sent from host to macro.",
       "properties": {
-        "id": {
-          "description": "The id of this request, must be returned in responses.",
-          "type": "integer"
-        },
         "type": {
           "type": "string"
         },
@@ -75,21 +72,25 @@
               "$ref": "#/$defs/AugmentRequest"
             }
           ]
-        }
-      },
-      "required": [
-        "id",
-        "type",
-        "value"
-      ]
+        },
+        "id": {
+          "type": "integer",
+          "description": "The id of this request, must be returned in responses."
+        },
+        "required": [
+          "id",
+          "type",
+          "value"
+        ]
+      }
     },
     "MacroDescription": {
       "type": "object",
       "description": "Information about a macro that the macro provides to the host.",
       "properties": {
         "runsInPhases": {
-          "description": "Phases that the macro runs in: 1, 2 and/or 3.",
           "type": "array",
+          "description": "Phases that the macro runs in: 1, 2 and/or 3.",
           "items": {
             "type": "integer"
           }
@@ -101,21 +102,20 @@
       "description": "Informs the host that a macro has started.",
       "properties": {
         "macroDescription": {
+          "$comment": "The macro description.",
           "$ref": "#/$defs/MacroDescription"
         }
       }
     },
     "MacroStartedResponse": {
       "type": "object",
-      "description": "Host's response to a [MacroStartedRequest]."
+      "description": "Host's response to a [MacroStartedRequest].",
+      "properties": {}
     },
     "MacroRequest": {
-      "$description": "A request sent from macro to host.",
+      "type": "object",
+      "description": "A request sent from macro to host.",
       "properties": {
-        "id": {
-          "description": "The id of this request, must be returned in responses.",
-          "type": "integer"
-        },
         "type": {
           "type": "string"
         },
@@ -128,13 +128,17 @@
               "$ref": "#/$defs/QueryRequest"
             }
           ]
-        }
-      },
-      "required": [
-        "id",
-        "type",
-        "value"
-      ]
+        },
+        "id": {
+          "type": "integer",
+          "description": "The id of this request, must be returned in responses."
+        },
+        "required": [
+          "id",
+          "type",
+          "value"
+        ]
+      }
     },
     "Protocol": {
       "type": "object",
@@ -151,6 +155,7 @@
       "description": "Macro's query about the code it should augment.",
       "properties": {
         "query": {
+          "$comment": "The query.",
           "$ref": "file:dart_model.schema.json#/$defs/Query"
         }
       }
@@ -160,17 +165,15 @@
       "description": "Host's response to a [QueryRequest].",
       "properties": {
         "model": {
+          "$comment": "The model.",
           "$ref": "file:dart_model.schema.json#/$defs/Model"
         }
       }
     },
     "Response": {
-      "$description": "A response to a request.",
+      "type": "object",
+      "description": "A response to a request",
       "properties": {
-        "requestId": {
-          "description": "The id of the request this is responding to.",
-          "type": "integer"
-        },
         "type": {
           "type": "string"
         },
@@ -189,13 +192,17 @@
               "$ref": "#/$defs/QueryResponse"
             }
           ]
-        }
-      },
-      "required": [
-        "requestId",
-        "type",
-        "value"
-      ]
+        },
+        "requestId": {
+          "type": "integer",
+          "description": "The id of the request this is responding to."
+        },
+        "required": [
+          "requestId",
+          "type",
+          "value"
+        ]
+      }
     }
   }
 }
