@@ -46,7 +46,7 @@ void main() {
       Map<String, Object?>? macroOutput;
       final updateGoldens = Platform.environment['UPDATE_GOLDENS'] == 'yes';
       setUp(() {
-        goldenFile = File(p.setExtension(path, '.json'));
+        goldenFile = File(p.setExtension(path, '.analyzer.json'));
         golden =
             json.decode(goldenFile.readAsStringSync()) as Map<String, Object?>;
       });
