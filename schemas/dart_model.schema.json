@@ -135,7 +135,7 @@
     },
     "NamedFunctionTypeParameter": {
       "type": "object",
-      "description": "A resolved named parameter as part of a [FunctionType].",
+      "description": "A resolved named parameter as part of a [FunctionTypeDesc].",
       "properties": {
         "name": {
           "type": "string"
@@ -150,7 +150,7 @@
     },
     "NamedRecordField": {
       "type": "object",
-      "description": "A named field in a [RecordType] definition, consisting of the field name and the associated type.",
+      "description": "A named field in a [RecordTypeDesc], consisting of the field name and the associated type.",
       "properties": {
         "name": {
           "type": "string"
@@ -271,7 +271,7 @@
       }
     },
     "StaticTypeParameterDesc": {
-      "description": "A resolved type parameter introduced by a [FunctionType].",
+      "description": "A resolved type parameter introduced by a [FunctionTypeDesc].",
       "type": "object",
       "properties": {
         "identifier": {

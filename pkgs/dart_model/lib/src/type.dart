@@ -344,10 +344,11 @@ final class FunctionType extends StaticType {
       // Now that the mapping from id -> type parameters ready, we translate
       // bounds.
       for (final (i, desc) in desc.typeParameters.indexed) {
-        if (desc.bound case final bound?) {
-          typeParameters[i].bound =
-              StaticType._translateFromDescription(bound, parameters);
-        }
+        // TODO(simolus3): Handle nullable fields in schema
+//        if (desc.bound case final bound?) {
+        typeParameters[i].bound =
+            StaticType._translateFromDescription(desc.bound, parameters);
+//        }
       }
     }
 

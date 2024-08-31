@@ -129,7 +129,7 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
   TypeHierarchy get types => node['types'] as TypeHierarchy;
 }
 
-/// A resolved named parameter as part of a [FunctionType].
+/// A resolved named parameter as part of a [FunctionTypeDesc].
 extension type NamedFunctionTypeParameter.fromJson(Map<String, Object?> node)
     implements Object {
   NamedFunctionTypeParameter({
@@ -146,7 +146,7 @@ extension type NamedFunctionTypeParameter.fromJson(Map<String, Object?> node)
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
 }
 
-/// A named field in a [RecordType] definition, consisting of the field name and the associated type.
+/// A named field in a [RecordTypeDesc], consisting of the field name and the associated type.
 extension type NamedRecordField.fromJson(Map<String, Object?> node)
     implements Object {
   NamedRecordField({
@@ -399,7 +399,7 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
   }
 }
 
-/// A resolved type parameter introduced by a [FunctionType].
+/// A resolved type parameter introduced by a [FunctionTypeDesc].
 extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
     implements Object {
   StaticTypeParameterDesc({
