@@ -5,3 +5,5 @@
 export 'src/dart_model.dart';
 export 'src/json.dart';
 export 'src/json_changes.dart';
+export 'src/type.dart';
+export 'src/type_system.dart';

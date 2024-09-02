@@ -10,8 +10,11 @@ import 'package:front_end/src/source/source_class_builder.dart' as cfe;
 import 'package:front_end/src/source/source_field_builder.dart' as cfe;
 // ignore: implementation_imports
 import 'package:front_end/src/source/source_loader.dart' as cfe;
+import 'package:kernel/kernel.dart' as kernel;
 import 'package:macro_service/macro_service.dart';
 import 'package:macros/macros.dart' hide Library;
+
+import 'src/type_translation.dart';
 
 // Hack to access CFE internals via the introspector that's available.
 // TODO(davidmorgan): remove hack by injecting an explicit API into the
@@ -65,6 +68,59 @@ class CfeQueryService implements QueryService {
           },
         ),
       },
+      types: _buildTypeHierarchy({classBuilder.actualCls}),
     );
+  }
+
+  TypeHierarchy _buildTypeHierarchy(Set<kernel.Class> classes) {
+    // These classes need to be present in every type hierarchy due to their
+    // special role. Other types are only relevant if reachable from [classes].
+    final coreTypes = sourceLoader.coreTypes;
+    classes.add(coreTypes.objectClass);
+    classes.add(coreTypes.deprecatedNullClass);
+    classes.add(coreTypes.futureClass);
+
+    // Make sure we include all supertypes of involved classes to close the
+    // type hierarchy.
+    var pending = <kernel.Class>[...classes];
+
+    while (pending.isNotEmpty) {
+      final clazz = pending.removeLast();
+
+      for (final superType in clazz.supers) {
+        if (!classes.contains(superType.classNode) &&
+            !pending.contains(superType.classNode)) {
+          classes.add(clazz);
+          pending.add(clazz);
+        }
+      }
+    }
+
+    final serialized = <String, TypeHierarchyEntry>{};
+    final context = TypeTranslationContext();
+    const translator = KernelTypeToMacros();
+
+    for (final element in classes) {
+      final asNamedType = element
+          .getThisType(coreTypes, kernel.Nullability.nonNullable)
+          .accept1(translator, context)
+          .asNamedTypeDesc;
+
+      serialized[asNamedType.name.string] = TypeHierarchyEntry(
+        self: asNamedType,
+        typeParameters: [
+          for (final typeParameter in element.typeParameters)
+            translator.translateTypeParameter(typeParameter, context),
+        ],
+        supertypes: [
+          for (final superType in element.supers)
+            superType.asInterfaceType
+                .accept1(translator, context)
+                .asNamedTypeDesc
+        ],
+      );
+    }
+
+    return TypeHierarchy(named: serialized);
   }
 }

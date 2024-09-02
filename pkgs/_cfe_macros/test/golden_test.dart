@@ -54,7 +54,7 @@ void main() {
       Map<String, Object?>? macroOutput;
       final updateGoldens = Platform.environment['UPDATE_GOLDENS'] == 'yes';
       setUp(() {
-        goldenFile = File(p.setExtension(path, '.json'));
+        goldenFile = File(p.setExtension(path, '.cfe.json'));
         golden =
             json.decode(goldenFile.readAsStringSync()) as Map<String, Object?>;
       });
@@ -122,11 +122,9 @@ Map<String, Object?> _merge(Iterable<Map<String, Object?>> maps) {
   final result = <String, Object?>{};
   for (final map in maps) {
     for (final entry in map.entries) {
-      if (result.containsKey(entry.key)) {
-        result[entry.key] = _merge([
-          result[entry.key]! as Map<String, Object?>,
-          entry.value as Map<String, Object?>
-        ]);
+      if (result[entry.key] case final Map<String, Object?> nested) {
+        result[entry.key] =
+            _merge([nested, entry.value as Map<String, Object?>]);
       } else {
         result[entry.key] = entry.value;
       }

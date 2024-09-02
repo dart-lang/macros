@@ -10,6 +10,7 @@ dependencies:
   _macro_host: any
   dart_model: any
   front_end: any
+  kernel: any
   macro_service: any
   macros: any
 
