@@ -13,111 +13,155 @@ final schemas = Schemas([
         'Model',
       ],
       declarations: [
-        Declaration.clazz(
+        Definition.clazz(
           'Augmentation',
-          'An augmentation to Dart code. '
+          description: 'An augmentation to Dart code. '
               'TODO(davidmorgan): this is a placeholder.',
-          [
-            Field('code', 'String', 'Augmentation code.'),
+          properties: [
+            Property('code', type: 'String', description: 'Augmentation code.'),
           ],
         ),
-        Declaration.nullTypedef('DynamicTypeDesc',
-            'The type-hierarchy representation of the type `dynamic`.'),
-        Declaration.clazz('FunctionTypeDesc',
-            'A static type representation for function types.', [
-          Field('returnType', 'StaticTypeDesc',
-              'The return type of this function type.'),
-          Field('typeParameters', 'List<StaticTypeParameterDesc>',
-              'Static type parameters introduced by this function type.'),
-          Field('requiredPositionalParameters', 'List<StaticTypeDesc>', ''),
-          Field('optionalPositionalParameters', 'List<StaticTypeDesc>', ''),
-          Field('namedParameters', 'List<NamedFunctionTypeParameter>', ''),
-        ]),
-        Declaration.clazz('MetadataAnnotation', 'A metadata annotation.', [
-          Field('type', 'QualifiedName', 'The type of the annotation.'),
-        ]),
-        Declaration.clazz(
-          'Interface',
-          'An interface.',
-          [
-            Field('metadataAnnotations', 'List<MetadataAnnotation>',
-                'The metadata annotations attached to this interface.'),
-            Field('members', 'Map<Member>', 'Map of members by name.'),
-            Field(
-                'thisType',
-                'NamedTypeDesc',
-                'The type of the expression `this` when used in this '
-                    'interface.'),
-            Field('properties', 'Properties',
-                'The properties of this interface.'),
-          ],
-        ),
-        Declaration.clazz('Library', 'Library.', [
-          Field('scopes', 'Map<Interface>', 'Scopes by name.'),
-        ]),
-        Declaration.clazz('Member', 'Member of a scope.', [
-          Field('properties', 'Properties', 'The properties of this member.'),
-        ]),
-        Declaration.clazz(
-            'Model', 'Partial model of a corpus of Dart source code.', [
-          Field('uris', 'Map<Library>', 'Libraries by URI.'),
-          Field(
-              'types', 'TypeHierarchy', 'The resolved static type hierarchy.'),
-        ]),
-        Declaration.clazz('NamedFunctionTypeParameter',
-            'A resolved named parameter as part of a [FunctionTypeDesc].', [
-          Field('name', 'String', ''),
-          Field('required', 'bool', ''),
-          Field('type', 'StaticTypeDesc', ''),
-        ]),
-        Declaration.clazz(
-            'NamedRecordField',
-            'A named field in a [RecordTypeDesc], consisting of the field name '
-                'and the associated type.',
-            [
-              Field('name', 'String', ''),
-              Field('type', 'StaticTypeDesc', ''),
+        Definition.nullTypedef('DynamicTypeDesc',
+            description:
+                'The type-hierarchy representation of the type `dynamic`.'),
+        Definition.clazz('FunctionTypeDesc',
+            description: 'A static type representation for function types.',
+            properties: [
+              Property('returnType',
+                  type: 'StaticTypeDesc',
+                  description: 'The return type of this function type.'),
+              Property('typeParameters',
+                  type: 'List<StaticTypeParameterDesc>',
+                  description:
+                      'Static type parameters introduced by this function '
+                      'type.'),
+              Property('requiredPositionalParameters',
+                  type: 'List<StaticTypeDesc>'),
+              Property('optionalPositionalParameters',
+                  type: 'List<StaticTypeDesc>'),
+              Property('namedParameters',
+                  type: 'List<NamedFunctionTypeParameter>'),
             ]),
-        Declaration.clazz('NamedTypeDesc', 'A resolved static type.', [
-          Field('name', 'QualifiedName', ''),
-          Field('instantiation', 'List<StaticTypeDesc>', ''),
-        ]),
-        Declaration.nullTypedef(
-            'NeverTypeDesc', 'Representation of the bottom type [Never].'),
-        Declaration.clazz(
-          'NullableTypeDesc',
-          'A Dart type of the form `T?` for an inner type `T`.',
-          [Field('inner', 'StaticTypeDesc', 'The type T.')],
+        Definition.clazz('MetadataAnnotation',
+            description: 'A metadata annotation.',
+            properties: [
+              Property('type',
+                  type: 'QualifiedName',
+                  description: 'The type of the annotation.'),
+            ]),
+        Definition.clazz(
+          'Interface',
+          description: 'An interface.',
+          properties: [
+            Property('metadataAnnotations',
+                type: 'List<MetadataAnnotation>',
+                description:
+                    'The metadata annotations attached to this interface.'),
+            Property('members',
+                type: 'Map<Member>', description: 'Map of members by name.'),
+            Property('thisType',
+                type: 'NamedTypeDesc',
+                description:
+                    'The type of the expression `this` when used in this '
+                    'interface.'),
+            Property('properties',
+                type: 'Properties',
+                description: 'The properties of this interface.'),
+          ],
         ),
-        Declaration.clazz('Properties', 'Set of boolean properties.', [
-          Field('isAbstract', 'bool',
-              'Whether the entity is abstract, meaning it has no definition.'),
-          Field('isClass', 'bool', 'Whether the entity is a class.'),
-          Field('isGetter', 'bool', 'Whether the entity is a getter.'),
-          Field('isField', 'bool', 'Whether the entity is a field.'),
-          Field('isMethod', 'bool', 'Whether the entity is a method.'),
-          Field('isStatic', 'bool', 'Whether the entity is static.'),
+        Definition.clazz('Library', description: 'Library.', properties: [
+          Property('scopes',
+              type: 'Map<Interface>', description: 'Scopes by name.'),
         ]),
-        Declaration.stringTypedef(
-            'QualifiedName', 'A URI combined with a name.'),
-        Declaration.clazz(
-            'Query',
-            'Query about a corpus of Dart source code. '
+        Definition.clazz('Member',
+            description: 'Member of a scope.',
+            properties: [
+              Property('properties',
+                  type: 'Properties',
+                  description: 'The properties of this member.'),
+            ]),
+        Definition.clazz('Model',
+            description: 'Partial model of a corpus of Dart source code.',
+            properties: [
+              Property('uris',
+                  type: 'Map<Library>', description: 'Libraries by URI.'),
+              Property('types',
+                  type: 'TypeHierarchy',
+                  description: 'The resolved static type hierarchy.'),
+            ]),
+        Definition.clazz('NamedFunctionTypeParameter',
+            description:
+                'A resolved named parameter as part of a [FunctionTypeDesc].',
+            properties: [
+              Property('name', type: 'String'),
+              Property('required', type: 'bool'),
+              Property('type', type: 'StaticTypeDesc'),
+            ]),
+        Definition.clazz('NamedRecordField',
+            description:
+                'A named field in a [RecordTypeDesc], consisting of the field '
+                'name and the associated type.',
+            properties: [
+              Property('name', type: 'String'),
+              Property('type', type: 'StaticTypeDesc'),
+            ]),
+        Definition.clazz('NamedTypeDesc',
+            description: 'A resolved static type.',
+            properties: [
+              Property('name', type: 'QualifiedName'),
+              Property('instantiation', type: 'List<StaticTypeDesc>'),
+            ]),
+        Definition.nullTypedef('NeverTypeDesc',
+            description: 'Representation of the bottom type [Never].'),
+        Definition.clazz(
+          'NullableTypeDesc',
+          description: 'A Dart type of the form `T?` for an inner type `T`.',
+          properties: [
+            Property('inner',
+                type: 'StaticTypeDesc', description: 'The type T.')
+          ],
+        ),
+        Definition.clazz('Properties',
+            description: 'Set of boolean properties.',
+            properties: [
+              Property('isAbstract',
+                  type: 'bool',
+                  description:
+                      'Whether the entity is abstract, meaning it has no '
+                      'definition.'),
+              Property('isClass',
+                  type: 'bool', description: 'Whether the entity is a class.'),
+              Property('isGetter',
+                  type: 'bool', description: 'Whether the entity is a getter.'),
+              Property('isField',
+                  type: 'bool', description: 'Whether the entity is a field.'),
+              Property('isMethod',
+                  type: 'bool', description: 'Whether the entity is a method.'),
+              Property('isStatic',
+                  type: 'bool', description: 'Whether the entity is static.'),
+            ]),
+        Definition.stringTypedef('QualifiedName',
+            description: 'A URI combined with a name.'),
+        Definition.clazz('Query',
+            description: 'Query about a corpus of Dart source code. '
                 'TODO(davidmorgan): this queries about a single class, expand '
                 'to a union type for different types of queries.',
-            [
-              Field('target', 'QualifiedName', 'The class to query about.'),
+            properties: [
+              Property('target',
+                  type: 'QualifiedName',
+                  description: 'The class to query about.'),
             ]),
-        Declaration.clazz(
-            'RecordTypeDesc', 'A resolved record type in the type hierarchy.', [
-          Field('positional', 'List<StaticTypeDesc>', ''),
-          Field('named', 'List<NamedRecordField>', '')
-        ]),
-        Declaration.union(
-            'StaticTypeDesc',
-            'A partially-resolved description of a type as it appears in '
+        Definition.clazz('RecordTypeDesc',
+            description: 'A resolved record type in the type hierarchy.',
+            properties: [
+              Property('positional', type: 'List<StaticTypeDesc>'),
+              Property('named', type: 'List<NamedRecordField>')
+            ]),
+        Definition.union('StaticTypeDesc',
+            description:
+                'A partially-resolved description of a type as it appears in '
                 "Dart's type hierarchy.",
-            [
+            types: [
               'DynamicTypeDesc',
               'FunctionTypeDesc',
               'NamedTypeDesc',
@@ -127,44 +171,51 @@ final schemas = Schemas([
               'TypeParameterTypeDesc',
               'VoidTypeDesc',
             ],
-            []),
-        Declaration.clazz('StaticTypeParameterDesc',
-            'A resolved type parameter introduced by a [FunctionTypeDesc].', [
-          Field('identifier', 'int', ''),
-          Field('bound', 'StaticTypeDesc', '')
-        ]),
-        Declaration.clazz(
-            'TypeHierarchy',
-            "View of a subset of a Dart program's type hierarchy as part of a "
-                'queried model.',
-            [
-              Field(
-                  'named',
-                  'Map<TypeHierarchyEntry>',
-                  'Map of qualified interface names to their resolved named '
-                      'type.')
+            properties: []),
+        Definition.clazz('StaticTypeParameterDesc',
+            description:
+                'A resolved type parameter introduced by a [FunctionTypeDesc].',
+            properties: [
+              Property('identifier', type: 'int'),
+              Property('bound', type: 'StaticTypeDesc')
             ]),
-        Declaration.clazz(
-            'TypeHierarchyEntry',
-            "Entry of an interface in Dart's type hierarchy, along with "
+        Definition.clazz('TypeHierarchy',
+            description:
+                "View of a subset of a Dart program's type hierarchy as part "
+                'of a queried model.',
+            properties: [
+              Property('named',
+                  type: 'Map<TypeHierarchyEntry>',
+                  description:
+                      'Map of qualified interface names to their resolved '
+                      'named type.')
+            ]),
+        Definition.clazz('TypeHierarchyEntry',
+            description:
+                "Entry of an interface in Dart's type hierarchy, along with "
                 'supertypes.',
-            [
-              Field(
-                  'typeParameters',
-                  'List<StaticTypeParameterDesc>',
-                  'Type parameters defined on this interface-defining '
+            properties: [
+              Property('typeParameters',
+                  type: 'List<StaticTypeParameterDesc>',
+                  description:
+                      'Type parameters defined on this interface-defining '
                       'element.'),
-              Field('self', 'NamedTypeDesc',
-                  'The named static type represented by this entry.'),
-              Field('supertypes', 'List<NamedTypeDesc>',
-                  'All direct supertypes of this type.'),
+              Property('self',
+                  type: 'NamedTypeDesc',
+                  description:
+                      'The named static type represented by this entry.'),
+              Property('supertypes',
+                  type: 'List<NamedTypeDesc>',
+                  description: 'All direct supertypes of this type.'),
             ]),
-        Declaration.clazz('TypeParameterTypeDesc',
-            'A type formed by a reference to a type parameter.', [
-          Field('parameterId', 'int', ''),
-        ]),
-        Declaration.nullTypedef('VoidTypeDesc',
-            'The type-hierarchy representation of the type `void`.'),
+        Definition.clazz('TypeParameterTypeDesc',
+            description: 'A type formed by a reference to a type parameter.',
+            properties: [
+              Property('parameterId', type: 'int'),
+            ]),
+        Definition.nullTypedef('VoidTypeDesc',
+            description:
+                'The type-hierarchy representation of the type `void`.'),
       ]),
   Schema(
       schemaPath: 'macro_service.schema.json',
@@ -176,94 +227,118 @@ final schemas = Schemas([
         'Response',
       ],
       declarations: [
-        Declaration.clazz(
-            'AugmentRequest', 'A request to a macro to augment some code.', [
-          Field('phase', 'int', 'Which phase to run: 1, 2 or 3.'),
-          Field(
-              'target',
-              'QualifiedName',
-              'The class to augment. '
-                  'TODO(davidmorgan): expand to more types of target.'),
-        ]),
-        Declaration.clazz(
-            'AugmentResponse',
-            "Macro's response to an [AugmentRequest]: the resulting "
-                'augmentations.',
-            [
-              Field(
-                  'augmentations', 'List<Augmentation>', 'The augmentations.'),
+        Definition.clazz('AugmentRequest',
+            description: 'A request to a macro to augment some code.',
+            properties: [
+              Property('phase',
+                  type: 'int', description: 'Which phase to run: 1, 2 or 3.'),
+              Property('target',
+                  type: 'QualifiedName',
+                  description: 'The class to augment. '
+                      'TODO(davidmorgan): expand to more types of target.'),
             ]),
-        Declaration.clazz('ErrorResponse', 'Request could not be handled.', [
-          Field('error', 'String', 'The error.'),
-        ]),
-        Declaration.clazz(
-            'HostEndpoint',
-            'A macro host server endpoint. TODO(davidmorgan): this should be a '
-                'oneOf supporting different types of connection. '
+        Definition.clazz('AugmentResponse',
+            description:
+                "Macro's response to an [AugmentRequest]: the resulting "
+                'augmentations.',
+            properties: [
+              Property('augmentations',
+                  type: 'List<Augmentation>',
+                  description: 'The augmentations.'),
+            ]),
+        Definition.clazz('ErrorResponse',
+            description: 'Request could not be handled.',
+            properties: [
+              Property('error', type: 'String', description: 'The error.'),
+            ]),
+        Definition.clazz('HostEndpoint',
+            description:
+                'A macro host server endpoint. TODO(davidmorgan): this should '
+                'be a oneOf supporting different types of connection. '
                 "TODO(davidmorgan): it's not clear if this belongs in this "
                 'package! But, where else?',
-            [
-              Field('port', 'int', 'TCP port to connect to.'),
+            properties: [
+              Property('port',
+                  type: 'int', description: 'TCP port to connect to.'),
             ]),
-        Declaration.union('HostRequest', 'A request sent from host to macro.', [
-          'AugmentRequest'
-        ], [
-          Field('id', 'int',
-              'The id of this request, must be returned in responses.',
-              required: true),
-        ]),
-        Declaration.clazz('MacroDescription',
-            'Information about a macro that the macro provides to the host.', [
-          Field('runsInPhases', 'List<int>',
-              'Phases that the macro runs in: 1, 2 and/or 3.'),
-        ]),
-        Declaration.clazz(
+        Definition.union('HostRequest',
+            description: 'A request sent from host to macro.',
+            types: [
+              'AugmentRequest'
+            ],
+            properties: [
+              Property('id',
+                  type: 'int',
+                  description:
+                      'The id of this request, must be returned in responses.',
+                  required: true),
+            ]),
+        Definition.clazz('MacroDescription',
+            description:
+                'Information about a macro that the macro provides to the '
+                'host.',
+            properties: [
+              Property('runsInPhases',
+                  type: 'List<int>',
+                  description: 'Phases that the macro runs in: 1, 2 and/or 3.'),
+            ]),
+        Definition.clazz(
           'MacroStartedRequest',
-          'Informs the host that a macro has started.',
-          [
-            Field('macroDescription', 'MacroDescription',
-                'The macro description.'),
+          description: 'Informs the host that a macro has started.',
+          properties: [
+            Property('macroDescription',
+                type: 'MacroDescription',
+                description: 'The macro description.'),
           ],
         ),
-        Declaration.clazz('MacroStartedResponse',
-            "Host's response to a [MacroStartedRequest].", []),
-        Declaration.union(
-            'MacroRequest', 'A request sent from macro to host.', [
-          'MacroStartedRequest',
-          'QueryRequest',
-        ], [
-          Field('id', 'int',
-              'The id of this request, must be returned in responses.',
-              required: true),
-        ]),
-        Declaration.clazz(
-            'Protocol',
-            'The macro to host protocol version and encoding. '
+        Definition.clazz('MacroStartedResponse',
+            description: "Host's response to a [MacroStartedRequest].",
+            properties: []),
+        Definition.union('MacroRequest',
+            description: 'A request sent from macro to host.',
+            types: [
+              'MacroStartedRequest',
+              'QueryRequest',
+            ],
+            properties: [
+              Property('id',
+                  type: 'int',
+                  description:
+                      'The id of this request, must be returned in responses.',
+                  required: true),
+            ]),
+        Definition.clazz('Protocol',
+            description: 'The macro to host protocol version and encoding. '
                 'TODO(davidmorgan): add the version.',
-            [
-              Field(
-                  'encoding',
-                  'String',
-                  'The wire format: json or binary. '
+            properties: [
+              Property('encoding',
+                  type: 'String',
+                  description: 'The wire format: json or binary. '
                       'TODO(davidmorgan): use an enum?'),
             ]),
-        Declaration.clazz(
-            'QueryRequest', "Macro's query about the code it should augment.", [
-          Field('query', 'Query', 'The query.'),
-        ]),
-        Declaration.clazz(
-            'QueryResponse', "Host's response to a [QueryRequest].", [
-          Field('model', 'Model', 'The model.'),
-        ]),
-        Declaration.union('Response', 'A response to a request', [
-          'AugmentResponse',
-          'ErrorResponse',
-          'MacroStartedResponse',
-          'QueryResponse',
-        ], [
-          Field('requestId', 'int',
-              'The id of the request this is responding to.',
-              required: true),
-        ]),
+        Definition.clazz('QueryRequest',
+            description: "Macro's query about the code it should augment.",
+            properties: [
+              Property('query', type: 'Query', description: 'The query.'),
+            ]),
+        Definition.clazz('QueryResponse',
+            description: "Host's response to a [QueryRequest].",
+            properties: [
+              Property('model', type: 'Model', description: 'The model.'),
+            ]),
+        Definition.union('Response',
+            description: 'A response to a request',
+            types: [
+              'AugmentResponse',
+              'ErrorResponse',
+              'MacroStartedResponse',
+              'QueryResponse',
+            ],
+            properties: [
+              Property('requestId',
+                  type: 'int',
+                  description: 'The id of the request this is responding to.',
+                  required: true),
+            ]),
       ]),
 ]);

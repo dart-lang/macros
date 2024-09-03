@@ -1,5 +1,6 @@
 // This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
+
 // ignore: implementation_imports
 import 'package:dart_model/src/dart_model.g.dart';
 

@@ -25,7 +25,7 @@ class GenerationContext {
   String lookupReferencePath(String typeName) {
     final schema = lookupDeclaringSchema(typeName);
     if (schema == null) {
-      throw ArgumentError('No schema declares type: $typeName');
+      throw ArgumentError('No schema defines type: $typeName');
     } else if (schema == currentSchema) {
       // It's in this schema.
       return '#/\$defs/$typeName';
@@ -35,7 +35,7 @@ class GenerationContext {
     }
   }
 
-  /// Gets the schema that declares [typeName], or `null` if no schema does.
+  /// Gets the schema that defines [typeName], or `null` if no schema does.
   Schema? lookupDeclaringSchema(String typeName) {
     for (final schema in schemas.schemas) {
       if (schema.hasType(typeName)) {
@@ -46,8 +46,8 @@ class GenerationContext {
   }
 
   /// Gets the declaration of the type named [typeName], or throws if it is not
-  /// declared in any schema.
-  Declaration lookupDeclaration(String typeName) {
+  /// defined in any schema.
+  Definition lookupDefinition(String typeName) {
     final result = lookupDeclaringSchema(typeName)
         ?.declarations
         .where((d) => d.name == typeName)
@@ -58,18 +58,17 @@ class GenerationContext {
 
   /// Generates any needed import statements.
   Set<String> generateImports() {
-    // Find any types declared in schemas other than the current schema, add
+    // Find any types defined in schemas other than the current schema, add
     // imports for them.
     final schemas = {
       for (final typeName in currentSchema.allTypeNames)
         lookupDeclaringSchema(typeName),
     }.nonNulls;
-    return {
-      '// ignore: implementation_imports',
+    return [
       for (final schema in schemas)
         if (schema != currentSchema)
           "import 'package:${schema.codePackage}/${schema.codePath}';",
-    };
+    ].expand((i) => ['// ignore: implementation_imports', i]).toSet();
   }
 }
 
@@ -122,8 +121,8 @@ class Schema {
   /// The top level valid types of the schema.
   final List<String> rootTypes;
 
-  /// The types declared in the schema.
-  final List<Declaration> declarations;
+  /// The types defined in the schema.
+  final List<Definition> declarations;
 
   Schema({
     required this.schemaPath,
@@ -133,7 +132,7 @@ class Schema {
     required this.declarations,
   });
 
-  /// Whether [typeName] is declared in this schema.
+  /// Whether [typeName] is defined in this schema.
   bool hasType(String typeName) => declarations.any((d) => d.name == typeName);
 
   /// Generates JSON schema corresponding to this schema definition.
@@ -154,6 +153,7 @@ class Schema {
     final result = StringBuffer('''
 // This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
+
 ''');
 
     for (final import in context.generateImports()) {
@@ -174,29 +174,29 @@ class Schema {
       };
 }
 
-/// Declaration of a type.
-abstract class Declaration {
-  /// The name of the declared type.
+/// Definition of a type.
+abstract class Definition {
+  /// The name of the defined type.
   String get name;
 
-  /// Declares a class.
-  factory Declaration.clazz(
-    String name,
-    String description,
-    List<Field> properties,
-  ) = ClassTypeDeclaration;
+  /// Defines a class.
+  factory Definition.clazz(String name,
+      {required String description,
+      required List<Property> properties}) = ClassTypeDefinition;
 
-  /// Declares a union.
-  factory Declaration.union(String name, String description, List<String> types,
-      List<Field> fields) = UnionTypeDeclaration;
+  /// Defines a union.
+  factory Definition.union(String name,
+      {required String description,
+      required List<String> types,
+      required List<Property> properties}) = UnionTypeDefinition;
 
-  /// Declares a named type represented in JSON as a string.
-  factory Declaration.stringTypedef(String name, String description) =
-      StringTypedefDeclaration;
+  /// Defines a named type represented in JSON as a string.
+  factory Definition.stringTypedef(String name, {required String description}) =
+      StringTypedefDefinition;
 
-  /// Declares a named type represented in JSON as `null`.
-  factory Declaration.nullTypedef(String name, String description) =
-      NullTypedefDeclaration;
+  /// Defines a named type represented in JSON as `null`.
+  factory Definition.nullTypedef(String name, {required String description}) =
+      NullTypedefDefinition;
 
   /// Generates JSON schema for this type.
   Map<String, Object?> generateSchema(GenerationContext context);
@@ -211,34 +211,32 @@ abstract class Declaration {
   String get representationTypeName;
 }
 
-/// A field in a declaration.
-class Field {
+/// A property in a declaration.
+class Property {
   String name;
   TypeReference type;
-  String description;
+  String? description;
   bool required;
 
-  /// Field with [name], [type], [description] and optionally [required].
-  ///
-  /// Pass empty [description] for no description.
-  Field(this.name, String type, this.description, {this.required = false})
+  /// Property with [name], [type], [description] and optionally [required].
+  Property(this.name,
+      {required String type, this.description, this.required = false})
       : type = TypeReference(type);
 
   /// Generates JSON schema for this type.
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        name: type.generateSchema(context,
-            description: description.isEmpty ? null : description),
+        name: type.generateSchema(context, description: description),
       };
 
-  /// Dart code for declaring a parameter corresponding to this field.
+  /// Dart code for declaring a parameter corresponding to this property.
   String get parameterCode => '${required ? 'required ' : ''}'
       '${type.dartType}${required ? '' : '?'} $name,';
 
-  /// Dart code for passing a named argument corresponding to this field.
+  /// Dart code for passing a named argument corresponding to this property.
   String get namedArgumentCode =>
       "${required ? '' : 'if ($name != null) '}'$name': $name,";
 
-  /// Dart code for a getter for this field.
+  /// Dart code for a getter for this property.
   String get getterCode {
     if (type.isMap) {
       return _describe(
@@ -253,9 +251,9 @@ class Field {
   }
 
   String _describe(String code) =>
-      description.isEmpty ? code : '/// $description\n$code';
+      description == null ? code : '/// $description\n$code';
 
-  /// The names of all types referenced by this field.
+  /// The names of all types referenced by this property.
   Set<String> get allTypeNames {
     if (type.isMap) return {'Map', type.elementType!};
     if (type.isList) return {'List', type.elementType!};
@@ -337,7 +335,7 @@ class TypeReference {
       };
     }
     // Not a built-in type, look up a user-defined type. This throws if there
-    // is no such type declared.
+    // is no such type defined.
     return {
       if (description != null) r'$comment': description,
       r'$ref': context.lookupReferencePath(name),
@@ -345,21 +343,23 @@ class TypeReference {
   }
 }
 
-/// Declaration of a class type.
-class ClassTypeDeclaration implements Declaration {
+/// Definition of a class type.
+class ClassTypeDefinition implements Definition {
   @override
   final String name;
   final String description;
-  final List<Field> fields;
+  final List<Property> properties;
 
-  ClassTypeDeclaration(this.name, this.description, this.fields);
+  ClassTypeDefinition(this.name,
+      {required this.description, required this.properties});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
         'type': 'object',
         'description': description,
         'properties': {
-          for (final field in fields) ...field.generateSchema(context),
+          for (final property in properties)
+            ...property.generateSchema(context),
         }
       };
 
@@ -372,36 +372,37 @@ class ClassTypeDeclaration implements Declaration {
         ' implements Object {');
 
     // Generate the non-JSON constructor, which accepts an optional value for
-    // every field and constructs JSON from it.
-    if (fields.isEmpty) {
+    // every property and constructs JSON from it.
+    if (properties.isEmpty) {
       result.writeln('  $name() : this.fromJson({});');
     } else {
       result.writeln('  $name({');
-      for (final field in fields) {
-        result.writeln(field.parameterCode);
+      for (final property in properties) {
+        result.writeln(property.parameterCode);
       }
       result.writeln('}) : this.fromJson({');
-      for (final field in fields) {
-        result.writeln(field.namedArgumentCode);
+      for (final property in properties) {
+        result.writeln(property.namedArgumentCode);
       }
       result.writeln('});');
     }
 
-    for (final field in fields) {
-      result.writeln(field.getterCode);
+    for (final property in properties) {
+      result.writeln(property.getterCode);
     }
     result.writeln('}');
     return result.toString();
   }
 
   @override
-  Set<String> get allTypeNames => fields.expand((f) => f.allTypeNames).toSet();
+  Set<String> get allTypeNames =>
+      properties.expand((f) => f.allTypeNames).toSet();
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
 }
 
-/// Declaration of a union type.
+/// Definition of a union type.
 ///
 /// It has a list of possible actual types, and optionally properties of its
 /// own like a class.
@@ -414,13 +415,16 @@ class ClassTypeDeclaration implements Declaration {
 ///
 /// On the wire the union type is: `{"type": <name>, "value": <value>}` and
 /// may have additional properties as well.
-class UnionTypeDeclaration implements Declaration {
+class UnionTypeDefinition implements Definition {
   @override
   final String name;
   final String description;
   final List<String> types;
-  final List<Field> fields;
-  UnionTypeDeclaration(this.name, this.description, this.types, this.fields);
+  final List<Property> properties;
+  UnionTypeDefinition(this.name,
+      {required this.description,
+      required this.types,
+      required this.properties});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -436,11 +440,12 @@ class UnionTypeDeclaration implements Declaration {
                 TypeReference(type).generateSchema(context),
             ],
           },
-          for (final field in fields) ...field.generateSchema(context),
+          for (final property in properties)
+            ...property.generateSchema(context),
           'required': [
             'type',
             'value',
-            ...fields.where((e) => e.required).map((e) => e.name)
+            ...properties.where((e) => e.required).map((e) => e.name)
           ]..sort(),
         }
       };
@@ -466,10 +471,10 @@ class UnionTypeDeclaration implements Declaration {
     for (final type in types) {
       final lowerType = _firstToLowerCase(type);
       result.writeln('static $name $lowerType($type $lowerType');
-      if (fields.isNotEmpty) {
+      if (properties.isNotEmpty) {
         result.writeln(', {');
-        for (final field in fields) {
-          result.writeln(field.parameterCode);
+        for (final property in properties) {
+          result.writeln(property.parameterCode);
         }
         result.write('}');
       }
@@ -478,8 +483,8 @@ class UnionTypeDeclaration implements Declaration {
         ..writeln('$name.fromJson({')
         ..writeln("'type': '$type',")
         ..writeln("'value': $lowerType,");
-      for (final field in fields) {
-        result.writeln(field.namedArgumentCode);
+      for (final property in properties) {
+        result.writeln(property.namedArgumentCode);
       }
       result.writeln('});');
     }
@@ -503,12 +508,12 @@ class UnionTypeDeclaration implements Declaration {
             "{ throw StateError('Not a $type.'); }")
         ..writeln('return $type.fromJson'
             "(node['value'] as "
-            '${context.lookupDeclaration(type).representationTypeName});')
+            '${context.lookupDefinition(type).representationTypeName});')
         ..writeln('}');
     }
 
-    for (final field in fields) {
-      result.writeln(field.getterCode);
+    for (final property in properties) {
+      result.writeln(property.getterCode);
     }
     result.writeln('}');
     return result.toString();
@@ -516,18 +521,18 @@ class UnionTypeDeclaration implements Declaration {
 
   @override
   Set<String> get allTypeNames =>
-      {...types, ...fields.expand((f) => f.allTypeNames)};
+      {...types, ...properties.expand((f) => f.allTypeNames)};
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
 }
 
-/// Declaration of a named type that is actually a String.
-class StringTypedefDeclaration implements Declaration {
+/// Definition of a named type that is actually a String.
+class StringTypedefDefinition implements Definition {
   @override
   String name;
   String description;
-  StringTypedefDeclaration(this.name, this.description);
+  StringTypedefDefinition(this.name, {required this.description});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -550,13 +555,13 @@ class StringTypedefDeclaration implements Declaration {
   String get representationTypeName => 'String';
 }
 
-/// Declaration of a named type that is actually a null.
-class NullTypedefDeclaration implements Declaration {
+/// Definition of a named type that is actually a null.
+class NullTypedefDefinition implements Definition {
   @override
   final String name;
   final String description;
 
-  NullTypedefDeclaration(this.name, this.description);
+  NullTypedefDefinition(this.name, {required this.description});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {

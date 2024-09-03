@@ -1,6 +1,6 @@
 // This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
-// ignore: implementation_imports
+
 /// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
 extension type Augmentation.fromJson(Map<String, Object?> node)
     implements Object {
