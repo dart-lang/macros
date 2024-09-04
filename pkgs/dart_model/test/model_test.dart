@@ -9,21 +9,23 @@ import 'package:test/test.dart';
 
 void main() {
   group(Model, () {
-    final model = Model(uris: {
-      'package:dart_model/dart_model.dart': Library(scopes: {
-        'JsonData': Interface(
-            properties: Properties(isClass: true),
-            metadataAnnotations: [
-              MetadataAnnotation(
-                  type: QualifiedName(
-                      'package:dart_model/dart_model.dart#SomeAnnotation'))
-            ],
-            members: {
-              '_root': Member(
+    late Model model;
+
+    setUp(() {
+      Scope.macro.run(() {
+        model = Model()
+          ..uris['package:dart_model/dart_model.dart'] = (Library()
+            ..scopes['JsonData'] = (Interface(
+                properties: Properties(isClass: true),
+                metadataAnnotations: [
+                  MetadataAnnotation(
+                      type: QualifiedName(
+                          'package:dart_model/dart_model.dart#SomeAnnotation'))
+                ])
+              ..members['_root'] = Member(
                 properties: Properties(isField: true),
-              )
-            })
-      })
+              )));
+      });
     });
 
     final expected = {

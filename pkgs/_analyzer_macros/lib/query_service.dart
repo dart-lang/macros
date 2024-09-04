@@ -31,28 +31,19 @@ class AnalyzerQueryService implements QueryService {
     final uri = target.uri;
     final library = _elementFactory.libraryOfUri2(Uri.parse(uri));
     final clazz = library.getClass(target.name)!;
-    return Model(
-      uris: {
-        uri: Library(
-          scopes: {
-            clazz.name: Interface(members: {
-              // TODO(davidmorgan): return more than just fields.
-              // TODO(davidmorgan): specify in the query what to return.
-              for (final field in clazz.fields)
-                field.name: Member(
-                    properties: Properties(
-                  isAbstract: field.isAbstract,
-                  isGetter: false,
-                  isField: true,
-                  isMethod: false,
-                  isStatic: field.isStatic,
-                )),
-            })
-          },
-        ),
-      },
-      types: _buildTypeHierarchy(library, {clazz}),
-    );
+    final interface = Interface();
+    for (final field in clazz.fields) {
+      interface.members[field.name] = Member(
+          properties: Properties(
+        isAbstract: field.isAbstract,
+        isGetter: false,
+        isField: true,
+        isMethod: false,
+        isStatic: field.isStatic,
+      ));
+    }
+    return Model(types: _buildTypeHierarchy(library, {clazz}))
+      ..uris[uri] = (Library()..scopes[clazz.name] = interface);
   }
 
   TypeHierarchy _buildTypeHierarchy(
@@ -72,10 +63,9 @@ class AnalyzerQueryService implements QueryService {
       }
     }
 
-    final serialized = <String, TypeHierarchyEntry>{};
     final context = TypeTranslationContext();
     const translator = AnalyzerTypesToMacros();
-
+    final result = TypeHierarchy();
     for (final element in classes) {
       final asNamedType = element.thisType
           .acceptWithArgument(translator, context)
@@ -87,7 +77,7 @@ class AnalyzerQueryService implements QueryService {
         ...element.mixins,
       ];
 
-      serialized[asNamedType.name.string] = TypeHierarchyEntry(
+      result.named[asNamedType.name.string] = TypeHierarchyEntry(
         self: asNamedType,
         typeParameters: [
           for (final typeParameter in element.typeParameters)
@@ -99,7 +89,6 @@ class AnalyzerQueryService implements QueryService {
         ],
       );
     }
-
-    return TypeHierarchy(named: serialized);
+    return result;
   }
 }

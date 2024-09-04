@@ -168,5 +168,33 @@ void main() {
       // field set, two one byte bools.
       expect(length2 - length1, 4 + 4 + 1 + 2);
     });
+
+    test('fields of anyPointer can hold any value', () {
+      final schema = TypedMapSchema({
+        'a': Type.anyPointer,
+        'b': Type.anyPointer,
+        'c': Type.anyPointer,
+        'd': Type.anyPointer,
+        'e': Type.anyPointer,
+        'f': Type.anyPointer,
+        'g': Type.anyPointer,
+      });
+
+      final typedMap =
+          builder.createTypedMap(TypedMapSchema({'a': Type.boolean}), true);
+      final growableMap = builder.createGrowableMap<int>();
+      growableMap['foo'] = 3;
+
+      final map = builder.createTypedMap(schema, null, 1, false, {'a': 'b'},
+          ['a', 'b', 'c'], typedMap, growableMap);
+      expectFullyEquivalentMaps(map, {
+        'b': 1,
+        'c': false,
+        'd': {'a': 'b'},
+        'e': ['a', 'b', 'c'],
+        'f': typedMap,
+        'g': growableMap
+      });
+    });
   });
 }

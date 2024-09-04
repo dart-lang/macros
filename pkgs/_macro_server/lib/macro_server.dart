@@ -50,9 +50,10 @@ class MacroServer {
     protocol.decode(socket).forEach((jsonData) {
       final request = MacroRequest.fromJson(jsonData);
       if (request.type.isKnown) {
-        service
+        // Each query is handled and responded to in a new query scope.
+        Scope.query.runAsync(() async => service
             .handle(request)
-            .then((response) => protocol.send(socket.add, response.node));
+            .then((response) => protocol.send(socket.add, response.node)));
       }
       final response = Response.fromJson(jsonData);
       if (response.type.isKnown) {

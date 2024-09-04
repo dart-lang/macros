@@ -114,14 +114,14 @@ void main() {
           },
         );
 
-        protocol.send(
+        Scope.query.run(() => protocol.send(
             socket.add,
             Response.queryResponse(
                     QueryResponse(
-                        model:
-                            Model(uris: {'package:foo/foo.dart': Library()})),
+                        model: Model()
+                          ..uris['package:foo/foo.dart'] = Library()),
                     requestId: queryRequestId)
-                .node);
+                .node));
 
         final augmentRequest = await responses.next;
         expect(
@@ -132,7 +132,7 @@ void main() {
             'value': {
               'augmentations': [
                 {
-                  'code': '// {"uris":{"package:foo/foo.dart":{}}}',
+                  'code': '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}',
                 }
               ]
             }

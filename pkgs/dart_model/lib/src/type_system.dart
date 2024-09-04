@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
 import 'dart_model.dart';
+import 'scopes.dart';
 import 'type.dart';
 
 final class StaticTypeSystem {
@@ -50,6 +51,12 @@ final class StaticTypeSystem {
   }
 
   bool isSubtype(StaticType a, StaticType b) {
+    // Drop into "evaluating" scope which provides temporary storage for any
+    // types creating while doing type computations.
+    return Scope.evaluating.run(() => _isSubtype(a, b));
+  }
+
+  bool _isSubtype(StaticType a, StaticType b) {
     // This is using `T0` and `T1` names to make the implementation easier to
     // compare with the specification at
     // https://github.com/dart-lang/language/blob/main/resources/type-system/subtyping.md#rules
@@ -69,7 +76,7 @@ final class StaticTypeSystem {
     // Left top: If `T0` is `dynamic` or `void` then `T0 <: T1` if
     // `Object? <: T1`
     if ((T0 is DynamicType || T1 is VoidType) &&
-        isSubtype(_objectQuestion, T1)) {
+        _isSubtype(_objectQuestion, T1)) {
       return true;
     }
 
@@ -84,7 +91,7 @@ final class StaticTypeSystem {
       // iff `B <: Object`.
       if (T0 case TypeParameterType(:final parameter)) {
         final bound = parameter.bound ?? const DynamicType();
-        return isSubtype(bound, _object);
+        return _isSubtype(bound, _object);
       }
 
       // Note: Promoted type variables are not currently represented in macros.
@@ -96,7 +103,7 @@ final class StaticTypeSystem {
             isDartAsyncFutureOr: true,
             instantiation: [final S]
           )) {
-        return isSubtype(S, _object);
+        return _isSubtype(S, _object);
       }
 
       // Neither are legacy types, so the `S*` rule is not applicable.
@@ -125,7 +132,7 @@ final class StaticTypeSystem {
           isDartAsyncFutureOr: true,
           instantiation: [final S],
         ) =>
-          isSubtype(_null, S),
+          _isSubtype(_null, S),
         // If `T1` is `Null`, `S?` or `S*` for some `S` then the query is true.
         InterfaceType(isDartCoreNull: true) || NullableType() => true,
         // Otherwise, the query is false
@@ -143,13 +150,13 @@ final class StaticTypeSystem {
           isDartAsyncFutureOr: true,
           instantiation: [final S0]
         )) {
-      return isSubtype(S0, T1) && isSubtype(_future(S0), T1);
+      return _isSubtype(S0, T1) && _isSubtype(_future(S0), T1);
     }
 
     // Left Nullable: if `T0` is `S0?` then: `T0 <: T1` iff `S0 <: T1` and
     // `Null <: T1`
     if (T0 case NullableType(inner: final S0)) {
-      return isSubtype(S0, T1) && isSubtype(_null, T1);
+      return _isSubtype(S0, T1) && _isSubtype(_null, T1);
     }
 
     // Type Variable Reflexivity 1: If `T0` is a type variable `X0` and `T1`
@@ -169,18 +176,18 @@ final class StaticTypeSystem {
           isDartAsyncFutureOr: true,
           instantiation: [final S1]
         )) {
-      if (isSubtype(T0, _future(S1))) {
+      if (_isSubtype(T0, _future(S1))) {
         // `T0 <: Future<S1>`
         return true;
       }
-      if (isSubtype(T0, T1)) {
+      if (_isSubtype(T0, T1)) {
         // `T0 <: T1`
         return true;
       }
       if (T0
           case TypeParameterType(
             parameter: StaticTypeParameter(bound: final S0?)
-          ) when isSubtype(S0, T1)) {
+          ) when _isSubtype(S0, T1)) {
         // `T0` is `X0` and `X0` has bound `S0` and `S0 <: T1`
         return true;
       }
@@ -193,17 +200,17 @@ final class StaticTypeSystem {
     // Right Nullable: If `T1` is `S1?` then `T0 <: T1` iff any of the following
     // hold:
     if (T1 case NullableType(inner: final S1)) {
-      if (isSubtype(T0, S1)) {
+      if (_isSubtype(T0, S1)) {
         // either `T0 <: S1`
         return true;
       }
-      if (isSubtype(T0, _null)) {
+      if (_isSubtype(T0, _null)) {
         // or `T0 <: Null`
       }
       if (T0
           case TypeParameterType(
             parameter: StaticTypeParameter(bound: final S0?)
-          ) when isSubtype(S0, T1)) {
+          ) when _isSubtype(S0, T1)) {
         // `T0` is `X0` and `X0` has bound `S0` and `S0 <: T1`
         return true;
       }
@@ -220,7 +227,7 @@ final class StaticTypeSystem {
     // and `B0 <: T1`.
     if (T0
         case TypeParameterType(parameter: StaticTypeParameter(bound: final B0?))
-        when isSubtype(B0, T1)) {
+        when _isSubtype(B0, T1)) {
       return true;
     }
 
@@ -256,14 +263,14 @@ final class StaticTypeSystem {
       }
 
       for (var i = 0; i < T0.positional.length; i++) {
-        if (!isSubtype(T0.positional[i], T1.positional[i])) {
+        if (!_isSubtype(T0.positional[i], T1.positional[i])) {
           return false;
         }
       }
 
       for (final MapEntry(key: name, value: Vk) in T0.named.entries) {
         final Sk = T1.named[name];
-        if (Sk == null || !isSubtype(Vk, Sk)) {
+        if (Sk == null || !_isSubtype(Vk, Sk)) {
           return false;
         }
       }
@@ -298,7 +305,7 @@ final class StaticTypeSystem {
     assert(left.length == right.length);
 
     for (var i = 0; i < left.length; i++) {
-      if (!isSubtype(left[i], right[i])) {
+      if (!_isSubtype(left[i], right[i])) {
         return false;
       }
     }
@@ -371,7 +378,7 @@ final class StaticTypeSystem {
     left = left.instantiate(freshTypeArgs);
     right = right.instantiate(freshTypeArgs);
 
-    if (!isSubtype(left.returnType, right.returnType)) {
+    if (!_isSubtype(left.returnType, right.returnType)) {
       return false;
     }
 
@@ -395,7 +402,7 @@ final class StaticTypeSystem {
             ? left.optionalPositional[i - n]
             : left.requiredPositional[i];
 
-        if (!isSubtype(Si, Vi)) {
+        if (!_isSubtype(Si, Vi)) {
           return false;
         }
       }
@@ -408,7 +415,7 @@ final class StaticTypeSystem {
       }
 
       for (var i = 0; i < left.requiredPositional.length; i++) {
-        if (!isSubtype(
+        if (!_isSubtype(
             right.requiredPositional[i], left.requiredPositional[i])) {
           return false;
         }
@@ -420,7 +427,7 @@ final class StaticTypeSystem {
       for (final superTypeNamed in right.named) {
         for (final subTypeNamed in left.named) {
           if (subTypeNamed.name == superTypeNamed.name) {
-            if (!isSubtype(superTypeNamed.type, subTypeNamed.type)) {
+            if (!_isSubtype(superTypeNamed.type, subTypeNamed.type)) {
               return false;
             }
             continue checkRight;

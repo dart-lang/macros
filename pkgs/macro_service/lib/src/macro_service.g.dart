@@ -1,8 +1,12 @@
 // This file is generated. To make changes edit tool/dart_model_generator
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
-// ignore: implementation_imports
+// ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/dart_model.g.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:dart_model/src/scopes.dart';
 
 /// A request to a macro to augment some code.
 extension type AugmentRequest.fromJson(Map<String, Object?> node)

@@ -60,9 +60,11 @@ class MacroClient {
     final hostRequest = HostRequest.fromJson(jsonData);
     switch (hostRequest.type) {
       case HostRequestType.augmentRequest:
-        _sendResponse(Response.augmentResponse(
-            await macros.single.augment(_host, hostRequest.asAugmentRequest),
-            requestId: hostRequest.id));
+        await Scope.macro.runAsync(() async => _sendResponse(
+            Response.augmentResponse(
+                await macros.single
+                    .augment(_host, hostRequest.asAugmentRequest),
+                requestId: hostRequest.id)));
       default:
       // Ignore unknown request.
       // TODO(davidmorgan): make handling of unknown request types a designed
@@ -94,8 +96,11 @@ class RemoteMacroHost implements Host {
 
   @override
   Future<Model> query(Query query) async {
-    _client._sendRequest(MacroRequest.queryRequest(QueryRequest(query: query),
-        id: nextRequestId));
+    // The macro scope is used to accumulate augment results, drop into
+    // "none" scope to avoid clashing with those when sending the query.
+    Scope.none.run(() => _client._sendRequest(MacroRequest.queryRequest(
+        QueryRequest(query: query),
+        id: nextRequestId)));
     // TODO(davidmorgan): this is needed because the constructor doesn't wait
     // for responses to `MacroStartedRequest`, so we need to discard the
     // responses. Properly track requests and responses.
