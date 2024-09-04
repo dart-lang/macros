@@ -418,7 +418,7 @@ extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
           if (bound != null) 'bound': bound,
         });
   int get identifier => node['identifier'] as int;
-  StaticTypeDesc get bound => node['bound'] as StaticTypeDesc;
+  StaticTypeDesc? get bound => node['bound'] as StaticTypeDesc?;
 }
 
 /// View of a subset of a Dart program's type hierarchy as part of a queried model.
