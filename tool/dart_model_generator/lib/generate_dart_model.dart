@@ -217,11 +217,17 @@ class Property {
   TypeReference type;
   String? description;
   bool required;
+  bool nullable;
 
-  /// Property with [name], [type], [description] and optionally [required].
-  Property(this.name,
-      {required String type, this.description, this.required = false})
-      : type = TypeReference(type);
+  /// Property with [name], [type], [description] and optionally [required] or
+  /// [nullable].
+  Property(
+    this.name, {
+    required String type,
+    this.description,
+    this.required = false,
+    this.nullable = false,
+  }) : type = TypeReference(type);
 
   /// Generates JSON schema for this type.
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -230,7 +236,7 @@ class Property {
 
   /// Dart code for declaring a parameter corresponding to this property.
   String get parameterCode => '${required ? 'required ' : ''}'
-      '${type.dartType}${required ? '' : '?'} $name,';
+      '${_type(nullable: !required)} $name,';
 
   /// Dart code for passing a named argument corresponding to this property.
   String get namedArgumentCode =>
@@ -238,20 +244,27 @@ class Property {
 
   /// Dart code for a getter for this property.
   String get getterCode {
+    final nullAwareCast = nullable ? '?.cast()' : '.cast()';
+
     if (type.isMap) {
-      return _describe(
-          "${type.dartType} get $name => (node['$name'] as Map).cast();");
+      final representationType = nullable ? 'Map?' : 'Map';
+      return _describe('${_type()} get $name => '
+          "(node['$name'] as $representationType)$nullAwareCast;");
     } else if (type.isList) {
-      return _describe(
-          "${type.dartType} get $name => (node['$name'] as List).cast();");
+      final representationType = nullable ? 'List?' : 'List';
+      return _describe('${_type()} get $name => '
+          "(node['$name'] as $representationType)$nullAwareCast;");
     } else {
-      return _describe(
-          "${type.dartType} get $name => node['$name'] as ${type.dartType};");
+      return _describe("${_type()} get $name => node['$name'] as ${_type()};");
     }
   }
 
   String _describe(String code) =>
       description == null ? code : '/// $description\n$code';
+
+  String _type({bool nullable = false}) {
+    return '${type.dartType}${(nullable || this.nullable) ? '?' : ''}';
+  }
 
   /// The names of all types referenced by this property.
   Set<String> get allTypeNames {

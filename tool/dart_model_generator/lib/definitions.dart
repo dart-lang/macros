@@ -177,7 +177,7 @@ final schemas = Schemas([
                 'A resolved type parameter introduced by a [FunctionTypeDesc].',
             properties: [
               Property('identifier', type: 'int'),
-              Property('bound', type: 'StaticTypeDesc')
+              Property('bound', type: 'StaticTypeDesc', nullable: true),
             ]),
         Definition.clazz('TypeHierarchy',
             description:
