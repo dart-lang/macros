@@ -4,20 +4,14 @@
 
 import 'dart:io';
 
-import 'package:generate_dart_model/generate_dart_model.dart'
-    as dart_model_generator;
+import 'package:generate_dart_model/definitions.dart';
 import 'package:test/test.dart';
 
 void main() {
-  for (final package in ['dart_model', 'macro_service']) {
-    test('$package output is up to date', () {
-      final expected = dart_model_generator.generate(
-          File('../../schemas/$package.schema.json').readAsStringSync(),
-          importDartModel: package == 'macro_service',
-          dartModelJson:
-              File('../../schemas/dart_model.schema.json').readAsStringSync());
-      final actual = File('../../pkgs/$package/lib/src/$package.g.dart')
-          .readAsStringSync();
+  for (final generationResult in schemas.generate()) {
+    test('${generationResult.path} is up to date', () {
+      final expected = generationResult.content;
+      final actual = File('../../${generationResult.path}').readAsStringSync();
       // TODO: On windows we get carriage returns, which makes this fail
       // without ignoring white space. In theory this shouldn't happen.
       expect(actual, equalsIgnoringWhitespace(expected), reason: '''

@@ -7,8 +7,8 @@
   ],
   "$defs": {
     "Augmentation": {
-      "description": "An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.",
       "type": "object",
+      "description": "An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.",
       "properties": {
         "code": {
           "type": "string",
@@ -17,23 +17,23 @@
       }
     },
     "DynamicTypeDesc": {
-      "description": "The type-hierarchy representation of the type `dynamic`.",
-      "type": "null"
+      "type": "null",
+      "description": "The type-hierarchy representation of the type `dynamic`."
     },
     "FunctionTypeDesc": {
-      "description": "A static type representation for function types.",
       "type": "object",
+      "description": "A static type representation for function types.",
       "properties": {
         "returnType": {
-          "$ref": "#/$defs/StaticTypeDesc",
-          "description": "The return type of this function type."
+          "$comment": "The return type of this function type.",
+          "$ref": "#/$defs/StaticTypeDesc"
         },
         "typeParameters": {
           "type": "array",
+          "description": "Static type parameters introduced by this function type.",
           "items": {
             "$ref": "#/$defs/StaticTypeParameterDesc"
-          },
-          "description": "Static type parameters introduced by this function type."
+          }
         },
         "requiredPositionalParameters": {
           "type": "array",
@@ -70,8 +70,8 @@
       "description": "An interface.",
       "properties": {
         "metadataAnnotations": {
-          "description": "The metadata annotations attached to this iterface.",
           "type": "array",
+          "description": "The metadata annotations attached to this interface.",
           "items": {
             "$ref": "#/$defs/MetadataAnnotation"
           }
@@ -84,7 +84,7 @@
           }
         },
         "thisType": {
-          "description": "The type of the expression `this` when used in this interface.",
+          "$comment": "The type of the expression `this` when used in this interface.",
           "$ref": "#/$defs/NamedTypeDesc"
         },
         "properties": {
@@ -94,8 +94,8 @@
       }
     },
     "Library": {
-      "description": "Library.",
       "type": "object",
+      "description": "Library.",
       "properties": {
         "scopes": {
           "type": "object",
@@ -128,7 +128,7 @@
           }
         },
         "types": {
-          "description": "The resolved static type hierarchy.",
+          "$comment": "The resolved static type hierarchy.",
           "$ref": "#/$defs/TypeHierarchy"
         }
       }
@@ -162,7 +162,7 @@
     },
     "NamedTypeDesc": {
       "type": "object",
-      "description": "A resolved static type",
+      "description": "A resolved static type.",
       "properties": {
         "name": {
           "$ref": "#/$defs/QualifiedName"
@@ -184,6 +184,7 @@
       "description": "A Dart type of the form `T?` for an inner type `T`.",
       "properties": {
         "inner": {
+          "$comment": "The type T.",
           "$ref": "#/$defs/StaticTypeDesc"
         }
       }
@@ -193,34 +194,34 @@
       "description": "Set of boolean properties.",
       "properties": {
         "isAbstract": {
-          "description": "Whether the entity is abstract, meaning it has no definition.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is abstract, meaning it has no definition."
         },
         "isClass": {
-          "description": "Whether the entity is a class.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is a class."
         },
         "isGetter": {
-          "description": "Whether the entity is a getter.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is a getter."
         },
         "isField": {
-          "description": "Whether the entity is a field.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is a field."
         },
         "isMethod": {
-          "description": "Whether the entity is a method.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is a method."
         },
         "isStatic": {
-          "description": "Whether the entity is static.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the entity is static."
         }
       }
     },
     "QualifiedName": {
-      "description": "A URI combined with a name.",
-      "type": "string"
+      "type": "string",
+      "description": "A URI combined with a name."
     },
     "Query": {
       "type": "object",
@@ -251,6 +252,7 @@
       }
     },
     "StaticTypeDesc": {
+      "type": "object",
       "description": "A partially-resolved description of a type as it appears in Dart's type hierarchy.",
       "properties": {
         "type": {
@@ -258,21 +260,41 @@
         },
         "value": {
           "oneOf": [
-            {"$ref": "#/$defs/DynamicTypeDesc"},
-            {"$ref": "#/$defs/FunctionTypeDesc"},
-            {"$ref": "#/$defs/NeverTypeDesc"},
-            {"$ref": "#/$defs/NullableTypeDesc"},
-            {"$ref": "#/$defs/NamedTypeDesc"},
-            {"$ref": "#/$defs/RecordTypeDesc"},
-            {"$ref": "#/$defs/TypeParameterTypeDesc"},
-            {"$ref": "#/$defs/VoidTypeDesc"}
+            {
+              "$ref": "#/$defs/DynamicTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/FunctionTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/NamedTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/NeverTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/NullableTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/RecordTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/TypeParameterTypeDesc"
+            },
+            {
+              "$ref": "#/$defs/VoidTypeDesc"
+            }
           ]
-        }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
       }
     },
     "StaticTypeParameterDesc": {
-      "description": "A resolved type parameter introduced by a [FunctionTypeDesc].",
       "type": "object",
+      "description": "A resolved type parameter introduced by a [FunctionTypeDesc].",
       "properties": {
         "identifier": {
           "type": "integer"
@@ -283,12 +305,12 @@
       }
     },
     "TypeHierarchy": {
-      "description": "View of a subset of a Dart program's type hierarchy as part of a queried model.",
       "type": "object",
+      "description": "View of a subset of a Dart program's type hierarchy as part of a queried model.",
       "properties": {
         "named": {
-          "description": "Map of qualified interface names to their resolved named type.",
           "type": "object",
+          "description": "Map of qualified interface names to their resolved named type.",
           "additionalProperties": {
             "$ref": "#/$defs/TypeHierarchyEntry"
           }
@@ -296,23 +318,23 @@
       }
     },
     "TypeHierarchyEntry": {
-      "description": "Entry of an interface in Dart's type hierarchy, along with supertypes.",
       "type": "object",
+      "description": "Entry of an interface in Dart's type hierarchy, along with supertypes.",
       "properties": {
         "typeParameters": {
-          "description": "Type parameters defined on this interface-defining element..",
           "type": "array",
+          "description": "Type parameters defined on this interface-defining element.",
           "items": {
             "$ref": "#/$defs/StaticTypeParameterDesc"
           }
         },
         "self": {
-          "description": "The named static type represented by this entry.",
+          "$comment": "The named static type represented by this entry.",
           "$ref": "#/$defs/NamedTypeDesc"
         },
         "supertypes": {
-          "description": "All direct supertypes of this type.",
           "type": "array",
+          "description": "All direct supertypes of this type.",
           "items": {
             "$ref": "#/$defs/NamedTypeDesc"
           }
@@ -320,8 +342,8 @@
       }
     },
     "TypeParameterTypeDesc": {
-      "description": "A type formed by a reference to a type parameter.",
       "type": "object",
+      "description": "A type formed by a reference to a type parameter.",
       "properties": {
         "parameterId": {
           "type": "integer"
@@ -329,8 +351,8 @@
       }
     },
     "VoidTypeDesc": {
-      "description": "The type-hierarchy representation of the type `void`.",
-      "type": "null"
+      "type": "null",
+      "description": "The type-hierarchy representation of the type `void`."
     }
   }
 }
