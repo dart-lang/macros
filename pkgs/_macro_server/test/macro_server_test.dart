@@ -12,8 +12,8 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: 'json'),
-    Protocol(encoding: 'binary')
+    Protocol(encoding: ProtocolEncoding.json),
+    Protocol(encoding: ProtocolEncoding.binary)
   ]) {
     group('MacroServer using ${protocol.encoding}', () {
       test('serves a macro service', () async {

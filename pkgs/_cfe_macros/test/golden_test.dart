@@ -38,7 +38,7 @@ void main() {
 
       // Inject test macro implementation.
       injected.macroImplementation = await CfeMacroImplementation.start(
-          protocol: Protocol(encoding: 'json'),
+          protocol: Protocol(encoding: ProtocolEncoding.json),
           packageConfig: Isolate.packageConfigSync!);
     });
 
