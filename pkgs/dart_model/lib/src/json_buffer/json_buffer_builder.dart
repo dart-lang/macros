@@ -58,16 +58,6 @@ class JsonBufferBuilder {
   /// mutated.
   Uint8List serialize() => Uint8List.sublistView(_buffer, 0, _nextFree);
 
-  static Uint8List serializeToBinary(Map<String, Object?> map) {
-    if (map is _GrowableMap) {
-      return map._buffer.serialize();
-    } else {
-      final buffer = JsonBufferBuilder();
-      buffer.map.addAll(map);
-      return buffer.serialize();
-    }
-  }
-
   /// The number of bytes written.
   int get length => _nextFree;
 
@@ -91,6 +81,8 @@ class JsonBufferBuilder {
         return _readUint32(pointer);
       case Type.boolean:
         return _readBoolean(pointer);
+      case Type.anyPointer:
+        return _read(_readType(pointer), pointer + _typeSize);
       case Type.stringPointer:
         return _readString(_readPointer(pointer));
       case Type.closedListPointer:
@@ -107,7 +99,7 @@ class JsonBufferBuilder {
   /// Writes the type of [value] then writes the value using [_writeAnyOfType].
   void _writeAny(_Pointer pointer, Object? value) {
     _explanations?.push('_writeAny $pointer $value');
-    final type = Type._of(value);
+    final type = Type._of(value, this);
     _writeType(pointer, type);
     _writeAnyOfType(type, pointer + _typeSize, value);
     _explanations?.pop();
@@ -121,6 +113,11 @@ class JsonBufferBuilder {
   ///
   /// Otherwise, a pointer is written. It might be a pointer to an existing
   /// value if there is one, or a new value may be written as well.
+  ///
+  /// `Type.anyPointer` is a special case; it uses five bytes. Because
+  /// `Type._of` never returns `Type.anyPointer` the caller can always know
+  /// ahead of time that `anyPointer` will be needed, and should reserve five
+  /// bytes.
   void _writeAnyOfType(Type type, _Pointer pointer, Object? value) {
     _explanations?.push('_writeAnyOfType $type $pointer $value');
     switch (type) {
@@ -139,6 +136,9 @@ class JsonBufferBuilder {
 
       case Type.boolean:
         _writeBoolean(pointer, value as bool);
+
+      case Type.anyPointer:
+        _writeAny(pointer, value);
 
       case Type.stringPointer:
         _writePointer(pointer, _pointerToString(value as String));

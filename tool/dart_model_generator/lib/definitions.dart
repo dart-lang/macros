@@ -15,6 +15,7 @@ final schemas = Schemas([
       declarations: [
         Definition.clazz(
           'Augmentation',
+          createInBuffer: true,
           description: 'An augmentation to Dart code. '
               'TODO(davidmorgan): this is a placeholder.',
           properties: [
@@ -26,6 +27,7 @@ final schemas = Schemas([
                 'The type-hierarchy representation of the type `dynamic`.'),
         Definition.clazz('FunctionTypeDesc',
             description: 'A static type representation for function types.',
+            createInBuffer: true,
             properties: [
               Property('returnType',
                   type: 'StaticTypeDesc',
@@ -44,6 +46,7 @@ final schemas = Schemas([
             ]),
         Definition.clazz('MetadataAnnotation',
             description: 'A metadata annotation.',
+            createInBuffer: true,
             properties: [
               Property('type',
                   type: 'QualifiedName',
@@ -52,6 +55,7 @@ final schemas = Schemas([
         Definition.clazz(
           'Interface',
           description: 'An interface.',
+          createInBuffer: true,
           properties: [
             Property('metadataAnnotations',
                 type: 'List<MetadataAnnotation>',
@@ -69,12 +73,16 @@ final schemas = Schemas([
                 description: 'The properties of this interface.'),
           ],
         ),
-        Definition.clazz('Library', description: 'Library.', properties: [
-          Property('scopes',
-              type: 'Map<Interface>', description: 'Scopes by name.'),
-        ]),
+        Definition.clazz('Library',
+            description: 'Library.',
+            createInBuffer: true,
+            properties: [
+              Property('scopes',
+                  type: 'Map<Interface>', description: 'Scopes by name.'),
+            ]),
         Definition.clazz('Member',
             description: 'Member of a scope.',
+            createInBuffer: true,
             properties: [
               Property('properties',
                   type: 'Properties',
@@ -82,6 +90,7 @@ final schemas = Schemas([
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',
+            createInBuffer: true,
             properties: [
               Property('uris',
                   type: 'Map<Library>', description: 'Libraries by URI.'),
@@ -92,6 +101,7 @@ final schemas = Schemas([
         Definition.clazz('NamedFunctionTypeParameter',
             description:
                 'A resolved named parameter as part of a [FunctionTypeDesc].',
+            createInBuffer: true,
             properties: [
               Property('name', type: 'String'),
               Property('required', type: 'bool'),
@@ -101,12 +111,14 @@ final schemas = Schemas([
             description:
                 'A named field in a [RecordTypeDesc], consisting of the field '
                 'name and the associated type.',
+            createInBuffer: true,
             properties: [
               Property('name', type: 'String'),
               Property('type', type: 'StaticTypeDesc'),
             ]),
         Definition.clazz('NamedTypeDesc',
             description: 'A resolved static type.',
+            createInBuffer: true,
             properties: [
               Property('name', type: 'QualifiedName'),
               Property('instantiation', type: 'List<StaticTypeDesc>'),
@@ -116,6 +128,7 @@ final schemas = Schemas([
         Definition.clazz(
           'NullableTypeDesc',
           description: 'A Dart type of the form `T?` for an inner type `T`.',
+          createInBuffer: true,
           properties: [
             Property('inner',
                 type: 'StaticTypeDesc', description: 'The type T.')
@@ -123,6 +136,7 @@ final schemas = Schemas([
         ),
         Definition.clazz('Properties',
             description: 'Set of boolean properties.',
+            createInBuffer: true,
             properties: [
               Property('isAbstract',
                   type: 'bool',
@@ -153,6 +167,7 @@ final schemas = Schemas([
             ]),
         Definition.clazz('RecordTypeDesc',
             description: 'A resolved record type in the type hierarchy.',
+            createInBuffer: true,
             properties: [
               Property('positional', type: 'List<StaticTypeDesc>'),
               Property('named', type: 'List<NamedRecordField>')
@@ -161,6 +176,7 @@ final schemas = Schemas([
             description:
                 'A partially-resolved description of a type as it appears in '
                 "Dart's type hierarchy.",
+            createInBuffer: true,
             types: [
               'DynamicTypeDesc',
               'FunctionTypeDesc',
@@ -175,6 +191,7 @@ final schemas = Schemas([
         Definition.clazz('StaticTypeParameterDesc',
             description:
                 'A resolved type parameter introduced by a [FunctionTypeDesc].',
+            createInBuffer: true,
             properties: [
               Property('identifier', type: 'int'),
               Property('bound', type: 'StaticTypeDesc', nullable: true),
@@ -183,6 +200,7 @@ final schemas = Schemas([
             description:
                 "View of a subset of a Dart program's type hierarchy as part "
                 'of a queried model.',
+            createInBuffer: true,
             properties: [
               Property('named',
                   type: 'Map<TypeHierarchyEntry>',
@@ -194,6 +212,7 @@ final schemas = Schemas([
             description:
                 "Entry of an interface in Dart's type hierarchy, along with "
                 'supertypes.',
+            createInBuffer: true,
             properties: [
               Property('typeParameters',
                   type: 'List<StaticTypeParameterDesc>',
@@ -210,6 +229,7 @@ final schemas = Schemas([
             ]),
         Definition.clazz('TypeParameterTypeDesc',
             description: 'A type formed by a reference to a type parameter.',
+            createInBuffer: true,
             properties: [
               Property('parameterId', type: 'int'),
             ]),

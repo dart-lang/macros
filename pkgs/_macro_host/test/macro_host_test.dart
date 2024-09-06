@@ -35,8 +35,8 @@ void main() {
 
         expect(
             await host.augment(macroName, AugmentRequest(phase: 2)),
-            AugmentResponse(
-                augmentations: [Augmentation(code: 'int get x => 3;')]));
+            Scope.macro.run(() => AugmentResponse(
+                augmentations: [Augmentation(code: 'int get x => 3;')])));
       });
 
       test('hosts a macro, responds to queries', () async {
@@ -63,9 +63,11 @@ void main() {
                 AugmentRequest(
                     phase: 3,
                     target: QualifiedName('package:foo/foo.dart#Foo'))),
-            AugmentResponse(augmentations: [
-              Augmentation(code: '// {"uris":{"package:foo/foo.dart":{}}}')
-            ]));
+            Scope.macro.run(() => AugmentResponse(augmentations: [
+                  Augmentation(
+                      code:
+                          '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}')
+                ])));
       });
     });
   }
@@ -75,6 +77,6 @@ class TestQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(
-        model: Model(uris: {'package:foo/foo.dart': Library()}));
+        model: Model()..uris['package:foo/foo.dart'] = Library());
   }
 }

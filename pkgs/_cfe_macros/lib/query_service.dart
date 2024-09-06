@@ -45,10 +45,10 @@ class CfeQueryService implements QueryService {
     if (classBuilder == null) throw StateError('Not found $target');
     final fieldIterator =
         classBuilder.fullMemberIterator<cfe.SourceFieldBuilder>();
-    final fields = <String, Member>{};
+    final interface = Interface();
     while (fieldIterator.moveNext()) {
       final current = fieldIterator.current;
-      fields[current.name] = Member(
+      interface.members[current.name] = Member(
           properties: Properties(
         isAbstract: current.isAbstract,
         isGetter: current.isGetter,
@@ -58,18 +58,13 @@ class CfeQueryService implements QueryService {
       ));
     }
 
-    return Model(
-      uris: {
-        uri: Library(
-          scopes: {
+    return Model(types: _buildTypeHierarchy({classBuilder.actualCls}))
+      ..uris[uri] = (Library()
+        ..
             // TODO(davidmorgan): return more than just fields.
             // TODO(davidmorgan): specify in the query what to return.
-            target.name: Interface(members: fields)
-          },
-        ),
-      },
-      types: _buildTypeHierarchy({classBuilder.actualCls}),
-    );
+
+            scopes[target.name] = interface);
   }
 
   TypeHierarchy _buildTypeHierarchy(Set<kernel.Class> classes) {
@@ -96,17 +91,16 @@ class CfeQueryService implements QueryService {
       }
     }
 
-    final serialized = <String, TypeHierarchyEntry>{};
     final context = TypeTranslationContext();
     const translator = KernelTypeToMacros();
-
+    final result = TypeHierarchy();
     for (final element in classes) {
       final asNamedType = element
           .getThisType(coreTypes, kernel.Nullability.nonNullable)
           .accept1(translator, context)
           .asNamedTypeDesc;
 
-      serialized[asNamedType.name.string] = TypeHierarchyEntry(
+      result.named[asNamedType.name.string] = TypeHierarchyEntry(
         self: asNamedType,
         typeParameters: [
           for (final typeParameter in element.typeParameters)
@@ -121,6 +115,6 @@ class CfeQueryService implements QueryService {
       );
     }
 
-    return TypeHierarchy(named: serialized);
+    return result;
   }
 }

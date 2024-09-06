@@ -28,6 +28,7 @@ enum Type {
   pointer,
   uint32,
   boolean,
+  anyPointer,
   stringPointer,
   closedListPointer,
   closedMapPointer,
@@ -35,7 +36,10 @@ enum Type {
   typedMapPointer;
 
   /// Returns the [Type] of [value], or throws if it is not a supported type.
-  static Type _of(Object? value) {
+  ///
+  /// [builder] is used to check maps to see if they are already in the current
+  /// `JsonBufferBuilder` or need to be copied.
+  static Type _of(Object? value, JsonBufferBuilder builder) {
     switch (value) {
       case Null():
         return Type.nil;
@@ -50,9 +54,13 @@ enum Type {
       case List():
         return Type.closedListPointer;
       case _TypedMap():
-        return Type.typedMapPointer;
+        return builder == value._buffer
+            ? Type.typedMapPointer
+            : Type.closedMapPointer;
       case _GrowableMap():
-        return Type.growableMapPointer;
+        return builder == value._buffer
+            ? Type.growableMapPointer
+            : Type.closedMapPointer;
       case Map():
         return Type.closedMapPointer;
     }
@@ -76,6 +84,8 @@ enum Type {
       case growableMapPointer:
       case typedMapPointer:
         return 4;
+      case anyPointer:
+        return 5;
     }
   }
 }

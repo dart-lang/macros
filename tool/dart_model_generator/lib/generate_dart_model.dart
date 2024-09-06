@@ -57,18 +57,27 @@ class GenerationContext {
   }
 
   /// Generates any needed import statements.
-  Set<String> generateImports() {
+  List<String> generateImports() {
     // Find any types defined in schemas other than the current schema, add
     // imports for them.
     final schemas = {
       for (final typeName in currentSchema.allTypeNames)
         lookupDeclaringSchema(typeName),
     }.nonNulls;
-    return [
+    return ([
+      "import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';",
+      "import 'package:dart_model/src/scopes.dart';",
       for (final schema in schemas)
         if (schema != currentSchema)
           "import 'package:${schema.codePackage}/${schema.codePath}';",
-    ].expand((i) => ['// ignore: implementation_imports', i]).toSet();
+    ].toList()
+          ..sort())
+        .expand((i) => [
+              '// ignore: implementation_imports,'
+                  'unused_import,prefer_relative_imports',
+              i
+            ])
+        .toList();
   }
 }
 
@@ -180,15 +189,25 @@ abstract class Definition {
   String get name;
 
   /// Defines a class.
+  ///
+  /// [createInBuffer] specifies whether the type is written directly to a
+  /// buffer when created. If so, it must be created in a `Scope` which will
+  /// provide the buffer.
   factory Definition.clazz(String name,
       {required String description,
-      required List<Property> properties}) = ClassTypeDefinition;
+      required List<Property> properties,
+      bool createInBuffer}) = ClassTypeDefinition;
 
   /// Defines a union.
+  ///
+  /// [createInBuffer] specifies whether the type is written directly to a
+  /// buffer when created. If so, it must be created in a `Scope` which will
+  /// provide the buffer.
   factory Definition.union(String name,
       {required String description,
       required List<String> types,
-      required List<Property> properties}) = UnionTypeDefinition;
+      required List<Property> properties,
+      bool createInBuffer}) = UnionTypeDefinition;
 
   /// Defines a named type represented in JSON as a string.
   factory Definition.stringTypedef(String name, {required String description}) =
@@ -259,6 +278,11 @@ class Property {
     }
   }
 
+  /// Dart code for entry in  `TypedMapSchema`.
+  String typedMapSchemaCode(GenerationContext context) {
+    return "'$name':${type.typedMapSchemaType(context)},";
+  }
+
   String _describe(String code) =>
       description == null ? code : '/// $description\n$code';
 
@@ -315,6 +339,30 @@ class TypeReference {
     return name;
   }
 
+  String typedMapSchemaType(GenerationContext context) {
+    if (isMap) {
+      return 'Type.growableMapPointer';
+    } else if (isList) {
+      return 'Type.closedListPointer';
+    } else if (name == 'String') {
+      return 'Type.stringPointer';
+    } else if (name == 'bool') {
+      return 'Type.boolean';
+    } else if (name == 'int') {
+      return 'Type.uint32';
+    } else {
+      final representationType =
+          context.lookupDefinition(name).representationTypeName;
+      if (representationType == 'Map<String, Object?>') {
+        return 'Type.typedMapPointer';
+      } else if (representationType == 'String') {
+        return 'Type.stringPointer';
+      } else {
+        throw UnsupportedError('Representation type: $representationType');
+      }
+    }
+  }
+
   /// Generates JSON schema for this type.
   Map<String, Object?> generateSchema(GenerationContext context,
       {String? description}) {
@@ -362,9 +410,12 @@ class ClassTypeDefinition implements Definition {
   final String name;
   final String description;
   final List<Property> properties;
+  final bool createInBuffer;
 
   ClassTypeDefinition(this.name,
-      {required this.description, required this.properties});
+      {required this.description,
+      required this.properties,
+      this.createInBuffer = false});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -376,6 +427,9 @@ class ClassTypeDefinition implements Definition {
         }
       };
 
+  List<Property> get propertiesExceptMap =>
+      properties.where((p) => !p.type.isMap).toList();
+
   @override
   String generateCode(GenerationContext context) {
     final result = StringBuffer();
@@ -384,21 +438,49 @@ class ClassTypeDefinition implements Definition {
     result.write('extension type $name.fromJson(Map<String, Object?> node)'
         ' implements Object {');
 
+    if (createInBuffer) {
+      result.write('static final TypedMapSchema _schema = TypedMapSchema({');
+      for (final property in properties) {
+        result.write(property.typedMapSchemaCode(context));
+      }
+      result.write('});');
+    }
+
     // Generate the non-JSON constructor, which accepts an optional value for
     // every property and constructs JSON from it.
-    if (properties.isEmpty) {
-      result.writeln('  $name() : this.fromJson({});');
+    if (propertiesExceptMap.isEmpty) {
+      result.writeln('  $name() : ');
     } else {
       result.writeln('  $name({');
-      for (final property in properties) {
+      for (final property in propertiesExceptMap) {
         result.writeln(property.parameterCode);
       }
-      result.writeln('}) : this.fromJson({');
-      for (final property in properties) {
-        result.writeln(property.namedArgumentCode);
-      }
-      result.writeln('});');
+      result.writeln('}) : ');
     }
+
+    result.writeln('this.fromJson(');
+    if (createInBuffer) {
+      result.writeln('Scope.createMap(_schema,');
+      for (final property in properties) {
+        if (property.type.isMap) {
+          result.writeln('Scope.createGrowableMap(),');
+        } else {
+          result.writeln('${property.name},');
+        }
+      }
+      result.writeln(')');
+    } else {
+      result.writeln('{');
+      for (final property in properties) {
+        if (property.type.isMap) {
+          result.writeln('${property.name}: {},');
+        } else {
+          result.writeln(property.namedArgumentCode);
+        }
+      }
+      result.writeln('}');
+    }
+    result.writeln(');');
 
     for (final property in properties) {
       result.writeln(property.getterCode);
@@ -434,10 +516,12 @@ class UnionTypeDefinition implements Definition {
   final String description;
   final List<String> types;
   final List<Property> properties;
+  final bool createInBuffer;
   UnionTypeDefinition(this.name,
       {required this.description,
       required this.types,
-      required this.properties});
+      required this.properties,
+      this.createInBuffer = false});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -481,6 +565,18 @@ class UnionTypeDefinition implements Definition {
     result.writeln(
         'extension type $name.fromJson(Map<String, Object?> node)  implements '
         'Object {');
+
+    if (createInBuffer) {
+      result
+        ..writeln('static final TypedMapSchema _schema = TypedMapSchema({')
+        ..writeln("'type': Type.stringPointer,")
+        ..writeln("'value': Type.anyPointer,");
+      for (final property in properties) {
+        result.write(property.typedMapSchemaCode(context));
+      }
+      result.write('});');
+    }
+
     for (final type in types) {
       final lowerType = _firstToLowerCase(type);
       result.writeln('static $name $lowerType($type $lowerType');
@@ -491,15 +587,30 @@ class UnionTypeDefinition implements Definition {
         }
         result.write('}');
       }
-      result
-        ..writeln(') =>')
-        ..writeln('$name.fromJson({')
-        ..writeln("'type': '$type',")
-        ..writeln("'value': $lowerType,");
-      for (final property in properties) {
-        result.writeln(property.namedArgumentCode);
+      result.writeln(') =>');
+      if (createInBuffer) {
+        result
+          ..writeln('$name.fromJson(Scope.createMap(_schema,')
+          ..writeln("'$type',")
+          ..writeln('$lowerType,');
+        for (final property in properties) {
+          if (property.type.isMap) {
+            result.writeln('Scope.createGrowableMap(),');
+          } else {
+            result.writeln('${property.name},');
+          }
+        }
+        result.writeln('));');
+      } else {
+        result
+          ..writeln('$name.fromJson({')
+          ..writeln("'type': '$type',")
+          ..writeln("'value': $lowerType,");
+        for (final property in properties) {
+          result.writeln(property.namedArgumentCode);
+        }
+        result.writeln('});');
       }
-      result.writeln('});');
     }
 
     result

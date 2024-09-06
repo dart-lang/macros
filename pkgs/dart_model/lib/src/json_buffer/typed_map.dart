@@ -233,7 +233,7 @@ extension TypedMaps on JsonBufferBuilder {
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkTypedMapOwnership(_TypedMap map) {
     if (map._buffer != this) {
-      throw UnsupportedError('Maps created with `addGrowableMap` can only '
+      throw UnsupportedError('Maps created with `createTypedMap` can only '
           'be added to the JsonBufferBuilder instance that created them.');
     }
   }

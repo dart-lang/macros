@@ -47,5 +47,49 @@ void main() {
       expect(deserializedValue.runtimeType.toString(), '_ClosedMap');
       expectFullyEquivalentMaps(deserializedValue, value);
     });
+
+    test('typed maps created in the same buffer are stored as typed maps', () {
+      final typedMap = builder.createTypedMap(TypedMapSchema({}));
+      final value = {
+        'a': typedMap,
+      };
+      builder.map['value'] = value;
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue['a'].runtimeType.toString(), '_TypedMap');
+    });
+
+    test('typed maps created in a different buffer are copied to closed maps',
+        () {
+      final typedMap = JsonBufferBuilder().createTypedMap(TypedMapSchema({}));
+      final value = {
+        'a': typedMap,
+      };
+      builder.map['value'] = value;
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue['a'].runtimeType.toString(), '_ClosedMap');
+    });
+
+    test(
+        'growable maps created in the same buffer are stored as growable '
+        'maps', () {
+      final growableMap = builder.createGrowableMap<int>();
+      final value = {
+        'a': growableMap,
+      };
+      builder.map['value'] = value;
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue['a'].runtimeType.toString(),
+          '_GrowableMap<Object?>');
+    });
+
+    test('growable maps created in a different buffer are copied', () {
+      final growableMap = JsonBufferBuilder().createGrowableMap<int>();
+      final value = {
+        'a': growableMap,
+      };
+      builder.map['value'] = value;
+      final deserializedValue = builder.map['value'] as Map<String, Object?>;
+      expect(deserializedValue['a'].runtimeType.toString(), '_ClosedMap');
+    });
   });
 }
