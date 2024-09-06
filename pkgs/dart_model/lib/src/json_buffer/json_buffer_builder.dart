@@ -82,7 +82,7 @@ class JsonBufferBuilder {
       case Type.boolean:
         return _readBoolean(pointer);
       case Type.anyPointer:
-        return _read(_readType(pointer), pointer + 1);
+        return _read(_readType(pointer), pointer + _typeSize);
       case Type.stringPointer:
         return _readString(_readPointer(pointer));
       case Type.closedListPointer:

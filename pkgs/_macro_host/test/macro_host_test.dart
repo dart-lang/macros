@@ -76,7 +76,7 @@ void main() {
 class TestQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
-    return Scope.query.run(() => QueryResponse(
-        model: Model()..uris['package:foo/foo.dart'] = Library()));
+    return QueryResponse(
+        model: Model()..uris['package:foo/foo.dart'] = Library());
   }
 }

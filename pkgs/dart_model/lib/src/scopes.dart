@@ -26,31 +26,49 @@ enum Scope {
   /// Server-side scope for handling queries.
   ///
   /// Provides a new buffer for the query result.
+  ///
+  /// Cannot be nested.
   query,
 
   /// Client-side scope for macro code to run in.
   ///
   /// Provides a new buffer for the macro's augmentations.
+  ///
+  /// Cannot be nested.
   macro,
 
   /// Temporary scope for type evaluation.
   ///
   /// A new buffer is introduced for temporary intermediate values. It's an
   /// error to try to serialize it.
+  ///
+  /// Can be nested.
   evaluating;
 
   /// Runs [function] in this scope.
   T run<T>(T Function() function) {
+    _checkNesting();
     return runZoned(function, zoneValues: {
       _symbol: _ScopeData._(this, this == none ? null : JsonBufferBuilder())
     });
   }
 
   /// Runs [function] in this scope.
-  Future<T> runAsync<T>(Future<T> Function() function) async {
-    return await runZoned(function, zoneValues: {
+  Future<T> runAsync<T>(Future<T> Function() function) {
+    _checkNesting();
+    return runZoned(function, zoneValues: {
       _symbol: _ScopeData._(this, this == none ? null : JsonBufferBuilder())
     });
+  }
+
+  void _checkNesting() {
+    if (this == Scope.macro || this == Scope.query) {
+      final current = _currentOrNull?.type ?? Scope.none;
+      if (current != Scope.none) {
+        throw StateError('$this cannot be nested in another scope; '
+            'but, currently running: $current');
+      }
+    }
   }
 
   /// Creates a "typed map" in the buffer of the current scope.
