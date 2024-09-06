@@ -54,9 +54,9 @@ final class StaticTypeSystem {
   }
 
   bool isSubtype(StaticType a, StaticType b) {
-    // Drop into "evaluating" scope which provides temporary storage for any
-    // types creating while doing type computations.
-    return Scope.evaluating.run(() => _isSubtype(a, b));
+    // Drop into "none" scope to ensure that data created during evaluation
+    // is not stored.
+    return Scope.none.run(() => _isSubtype(a, b));
   }
 
   bool _isSubtype(StaticType a, StaticType b) {
@@ -289,13 +289,13 @@ final class StaticTypeSystem {
     // <: Object queries are handled by other rules.
     assert(!superType.isDartCoreObject);
 
-    if (subType.name == superType.name) {
+    if (subType.name.equals(superType.name)) {
       return _matchingInstantiation(
           subType.instantiation, superType.instantiation);
     }
 
     for (final actualSuperType in _constructSuperTypes(subType, [])) {
-      if (actualSuperType.name == superType.name) {
+      if (actualSuperType.name.equals(superType.name)) {
         return _matchingInstantiation(
             actualSuperType.instantiation, superType.instantiation);
       }
@@ -320,7 +320,7 @@ final class StaticTypeSystem {
   /// supertypes of that type.
   Iterable<InterfaceType> _constructSuperTypes(
       InterfaceType type, List<QualifiedName> coveredClasses) sync* {
-    final hierarchyEntry = _hierarchy.named[type.name.string]!;
+    final hierarchyEntry = _hierarchy.named[type.name.asString]!;
     // Consider e.g. a class `List<T> extends Iterable<T>` for which we have an
     // instantiation `List<int>` and now want to find supertypes.
     // First, create a mapping `T -> int`:

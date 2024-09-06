@@ -149,11 +149,11 @@ final class InterfaceType extends StaticType {
     );
   }
 
-  bool get isDartCoreObject => name == objectName;
-  bool get isDartCoreNull => name == nullName;
-  bool get isDartCoreFunction => name == functionName;
-  bool get isDartCoreRecord => name == recordName;
-  bool get isDartAsyncFutureOr => name == futureOrName;
+  bool get isDartCoreObject => name.equals(objectName);
+  bool get isDartCoreNull => name.equals(nullName);
+  bool get isDartCoreFunction => name.equals(functionName);
+  bool get isDartCoreRecord => name.equals(recordName);
+  bool get isDartAsyncFutureOr => name.equals(futureOrName);
 
   @override
   StaticTypeDesc _buildDescription(_StaticTypeToDescription context) {
@@ -171,20 +171,24 @@ final class InterfaceType extends StaticType {
   }
 
   /// The [QualifiedName] for the [Object] type in `dart:core`.
-  static final QualifiedName objectName = QualifiedName('dart:core#Object');
+  static final QualifiedName objectName =
+      QualifiedName(uri: 'dart:core', name: 'Object');
 
   /// The [QualifiedName] for the [Null] type in `dart:core`.
-  static final QualifiedName nullName = QualifiedName('dart:core#Null');
+  static final QualifiedName nullName =
+      QualifiedName(uri: 'dart:core', name: 'Null');
 
   /// The [QualifiedName] for the [Function] type in `dart:core`.
-  static final QualifiedName functionName = QualifiedName('dart:core#Function');
+  static final QualifiedName functionName =
+      QualifiedName(uri: 'dart:core', name: 'Function');
 
   /// The [QualifiedName] for the [Record] type in `dart:core`.
-  static final QualifiedName recordName = QualifiedName('dart:core#Record');
+  static final QualifiedName recordName =
+      QualifiedName(uri: 'dart:core', name: 'Record');
 
   /// The [QualifiedName] for the [FutureOr] type in `dart:async`.
   static final QualifiedName futureOrName =
-      QualifiedName('dart:async#FutureOr');
+      QualifiedName(uri: 'dart:async', name: 'FutureOr');
 }
 
 /// A type of the form `T?`.

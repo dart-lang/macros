@@ -69,16 +69,15 @@ class MacroPackageConfig {
     final pubspecUri = packageUri.resolve('pubspec.yaml');
     final lines = File.fromUri(pubspecUri).readAsLinesSync();
 
-    final implsByLibraryQualifiedName = <String, String>{};
+    final implsByLibraryQualifiedName = <String, QualifiedName>{};
     for (final line in lines) {
       if (!line.startsWith('# macro ')) continue;
       final items = line.split(' ');
       // The rest of the line should be the library qualified name of the
       // annotation then the fully qualified name of the implementation.
-      implsByLibraryQualifiedName[items[2]] = items[3];
+      implsByLibraryQualifiedName[items[2]] = QualifiedName.parse(items[3]);
     }
 
-    final result = implsByLibraryQualifiedName[libraryPathAndName];
-    return result == null ? null : QualifiedName(result);
+    return implsByLibraryQualifiedName[libraryPathAndName];
   }
 }

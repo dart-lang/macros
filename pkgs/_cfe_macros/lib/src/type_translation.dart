@@ -88,7 +88,7 @@ final class KernelTypeToMacros extends kernel
     // Pretend that this is a `FutureOr` class instantiation, which macros use
     // to represent `FutureOr` types.
     return model.StaticTypeDesc.namedTypeDesc(model.NamedTypeDesc(
-      name: model.QualifiedName('dart:async#FutureOr'),
+      name: model.QualifiedName(uri: 'dart:async', name: 'FutureOr'),
       instantiation: [
         node.typeArgument.accept1(this, arg),
       ],
@@ -100,10 +100,10 @@ final class KernelTypeToMacros extends kernel
       kernel.InterfaceType node, TypeTranslationContext arg) {
     final definingClass = node.classNode;
     final library = definingClass.enclosingLibrary;
-    final uri = library.importUri.replace(fragment: definingClass.name);
 
     return model.StaticTypeDesc.namedTypeDesc(model.NamedTypeDesc(
-      name: model.QualifiedName(uri.toString()),
+      name: model.QualifiedName(
+          uri: '${library.importUri}', name: definingClass.name),
       instantiation: [
         for (final typeArg in node.typeArguments) typeArg.accept1(this, arg),
       ],

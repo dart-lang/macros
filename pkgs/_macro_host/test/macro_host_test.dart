@@ -16,10 +16,11 @@ void main() {
   ]) {
     group('MacroHost using ${protocol.encoding}', () {
       test('hosts a macro, receives augmentations', () async {
-        final macroName =
-            QualifiedName('package:_test_macros/declare_x_macro.dart#DeclareX');
+        final macroName = QualifiedName(
+            uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX');
         final macroImplementation = QualifiedName(
-            'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
+            uri: 'package:_test_macros/declare_x_macro.dart',
+            name: 'DeclareXImplementation');
 
         final queryService = TestQueryService();
         final host = await MacroHost.serve(
@@ -40,10 +41,11 @@ void main() {
       });
 
       test('hosts a macro, responds to queries', () async {
-        final macroName =
-            QualifiedName('package:_test_macros/query_class.dart#QueryClass');
+        final macroName = QualifiedName(
+            uri: 'package:_test_macros/query_class.dart', name: 'QueryClass');
         final macroImplementation = QualifiedName(
-            'package:_test_macros/query_class.dart#QueryClassImplementation');
+            uri: 'package:_test_macros/query_class.dart',
+            name: 'QueryClassImplementation');
 
         final queryService = TestQueryService();
         final host = await MacroHost.serve(
@@ -62,7 +64,8 @@ void main() {
                 macroName,
                 AugmentRequest(
                     phase: 3,
-                    target: QualifiedName('package:foo/foo.dart#Foo'))),
+                    target: QualifiedName(
+                        uri: 'package:foo/foo.dart', name: 'Foo'))),
             Scope.macro.run(() => AugmentResponse(augmentations: [
                   Augmentation(
                       code:

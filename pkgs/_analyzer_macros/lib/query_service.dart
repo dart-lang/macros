@@ -77,7 +77,7 @@ class AnalyzerQueryService implements QueryService {
         ...element.mixins,
       ];
 
-      result.named[asNamedType.name.string] = TypeHierarchyEntry(
+      result.named[asNamedType.name.asString] = TypeHierarchyEntry(
         self: asNamedType,
         typeParameters: [
           for (final typeParameter in element.typeParameters)

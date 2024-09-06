@@ -28,7 +28,8 @@ void main() {
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [DeclareXImplementation()]));
 
-        await serverSocket.first.timeout(const Duration(seconds: 10));
+        await (await serverSocket.first.timeout(const Duration(seconds: 10)))
+            .close();
       });
 
       test('sends augmentation requests to macros, sends reponse', () async {
@@ -98,7 +99,8 @@ void main() {
             HostRequest.augmentRequest(
                     AugmentRequest(
                         phase: 3,
-                        target: QualifiedName('package:foo/foo.dart#Foo')),
+                        target: QualifiedName(
+                            uri: 'package:foo/foo.dart', name: 'Foo')),
                     id: requestId)
                 .node);
         final queryRequest = await responses.next;
@@ -109,7 +111,9 @@ void main() {
             'id': queryRequestId,
             'type': 'QueryRequest',
             'value': {
-              'query': {'target': 'package:foo/foo.dart#Foo'}
+              'query': {
+                'target': {'uri': 'package:foo/foo.dart', 'name': 'Foo'}
+              }
             },
           },
         );

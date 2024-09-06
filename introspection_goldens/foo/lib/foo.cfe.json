@@ -36,12 +36,18 @@
       "package:foo/foo.dart#Foo": {
         "typeParameters": [],
         "self": {
-          "name": "package:foo/foo.dart#Foo",
+          "name": {
+            "uri": "package:foo/foo.dart",
+            "name": "Foo"
+          },
           "instantiation": []
         },
         "supertypes": [
           {
-            "name": "dart:core#Object",
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
             "instantiation": []
           }
         ]
@@ -49,7 +55,10 @@
       "dart:core#Object": {
         "typeParameters": [],
         "self": {
-          "name": "dart:core#Object",
+          "name": {
+            "uri": "dart:core",
+            "name": "Object"
+          },
           "instantiation": []
         },
         "supertypes": []
@@ -57,12 +66,18 @@
       "dart:core#Null": {
         "typeParameters": [],
         "self": {
-          "name": "dart:core#Null",
+          "name": {
+            "uri": "dart:core",
+            "name": "Null"
+          },
           "instantiation": []
         },
         "supertypes": [
           {
-            "name": "dart:core#Object",
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
             "instantiation": []
           }
         ]
@@ -77,7 +92,10 @@
                 "inner": {
                   "type": "NamedTypeDesc",
                   "value": {
-                    "name": "dart:core#Object",
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "Object"
+                    },
                     "instantiation": []
                   }
                 }
@@ -86,7 +104,10 @@
           }
         ],
         "self": {
-          "name": "dart:async#Future",
+          "name": {
+            "uri": "dart:async",
+            "name": "Future"
+          },
           "instantiation": [
             {
               "type": "TypeParameterTypeDesc",
@@ -98,7 +119,10 @@
         },
         "supertypes": [
           {
-            "name": "dart:core#Object",
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
             "instantiation": []
           }
         ]
@@ -106,12 +130,18 @@
       "package:foo/foo.dart#Bar": {
         "typeParameters": [],
         "self": {
-          "name": "package:foo/foo.dart#Bar",
+          "name": {
+            "uri": "package:foo/foo.dart",
+            "name": "Bar"
+          },
           "instantiation": []
         },
         "supertypes": [
           {
-            "name": "dart:core#Object",
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
             "instantiation": []
           }
         ]

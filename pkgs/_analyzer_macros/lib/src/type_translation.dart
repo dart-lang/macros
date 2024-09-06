@@ -77,10 +77,9 @@ final class AnalyzerTypesToMacros extends UnifyingTypeVisitorWithArgument<
   model.StaticTypeDesc visitInterfaceType(
       InterfaceType type, TypeTranslationContext argument) {
     final element = type.element;
-    final uri = element.librarySource.uri.replace(fragment: element.name);
-
     return model.StaticTypeDesc.namedTypeDesc(model.NamedTypeDesc(
-      name: model.QualifiedName(uri.toString()),
+      name: model.QualifiedName(
+          uri: '${element.librarySource.uri}', name: element.name),
       instantiation: [
         for (final arg in type.typeArguments)
           arg.acceptWithArgument(this, argument),

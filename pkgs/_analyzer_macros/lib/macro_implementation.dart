@@ -54,7 +54,7 @@ class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(QualifiedName('$uri#$name'));
+      _impl._host.isMacro(QualifiedName(uri: '$uri', name: name));
 }
 
 class AnalyzerMacroRunner implements injected.MacroRunner {
@@ -65,8 +65,9 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
   @override
   injected.RunningMacro run(Uri uri, String name) => AnalyzerRunningMacro.run(
       _impl,
-      QualifiedName('$uri#$name'),
-      _impl._host.lookupMacroImplementation(QualifiedName('$uri#$name'))!);
+      QualifiedName(uri: '$uri', name: name),
+      _impl._host
+          .lookupMacroImplementation(QualifiedName(uri: '$uri', name: name))!);
 }
 
 class AnalyzerRunningMacro implements injected.RunningMacro {
@@ -182,7 +183,7 @@ extension MacroTargetExtension on MacroTarget {
     final element =
         ((this as Declaration).identifier as analyzer.IdentifierImpl).element!;
     return QualifiedName(
-        '${element.library!.definingCompilationUnit.source.uri}#'
-        '${element.displayName}');
+        uri: '${element.library!.definingCompilationUnit.source.uri}',
+        name: element.displayName);
   }
 }

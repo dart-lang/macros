@@ -8,25 +8,13 @@ import 'package:test/test.dart';
 
 void main() {
   group(Scope, () {
-    test('create map throws on no scope', () {
-      expect(() => Scope.createMap(TypedMapSchema({})), throwsStateError);
-      expect(Scope.createGrowableMap, throwsStateError);
-    });
-
-    test('serialize works in no scope', () {
-      expect(Scope.serializeToBinary({}), [0, 0, 0, 0, 0, 0, 0, 0]);
-    });
-
-    test('serialize throws in evaluating scope', () {
-      expect(() => Scope.evaluating.run(() => Scope.serializeToBinary({})),
-          throwsStateError);
-    });
-
-    for (final scope in [Scope.evaluating, Scope.macro, Scope.query]) {
-      test('create maps works in $scope', () {
+    for (final scope in [Scope.none, Scope.macro, Scope.query]) {
+      test('create maps and serialize work in $scope', () {
         expect(scope.run(() => Scope.createMap(TypedMapSchema({}))),
             <String, Object?>{});
         expect(scope.run(Scope.createGrowableMap), <String, Object?>{});
+        expect(scope.run(() => Scope.serializeToBinary(<String, Object>{})),
+            JsonBufferBuilder().serialize());
       });
     }
 
@@ -39,17 +27,10 @@ void main() {
           throwsStateError);
       expect(() => Scope.query.run(() => Scope.query.run(() {})),
           throwsStateError);
-      expect(() => Scope.evaluating.run(() => Scope.macro.run(() {})),
-          throwsStateError);
-      expect(() => Scope.evaluating.run(() => Scope.query.run(() {})),
-          throwsStateError);
     });
 
-    test('none and evaluating scopes can be nested in macro or query scopes',
-        () {
-      Scope.macro.run(() => Scope.evaluating.run(() {}));
+    test('none scope can be nested in macro or query scopes', () {
       Scope.macro.run(() => Scope.none.run(() {}));
-      Scope.query.run(() => Scope.evaluating.run(() {}));
       Scope.query.run(() => Scope.none.run(() {}));
     });
   });
