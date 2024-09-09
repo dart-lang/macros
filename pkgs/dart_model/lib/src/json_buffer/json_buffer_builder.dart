@@ -208,15 +208,6 @@ class JsonBufferBuilder {
   /// Reads the length at [_Pointer].
   _Pointer _readLength(_Pointer pointer) => _readUint32(pointer);
 
-  /// Adds [pointer] to the buffer, returns a new [_Pointer] to it.
-  _Pointer _addPointerTo(_Pointer pointer) {
-    _explanations?.push('_addPointerToPointer $pointer');
-    final result = _reserve(_pointerSize);
-    _writePointer(result, pointer);
-    _explanations?.pop();
-    return result;
-  }
-
   /// Writes [pointerValue] at [pointer].
   void _writePointer(_Pointer pointer, _Pointer pointerValue) {
     _explanations?.push('_writePointer $pointerValue');
