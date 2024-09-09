@@ -77,6 +77,10 @@
           "type": "integer",
           "description": "The id of this request, must be returned in responses."
         },
+        "macroAnnotation": {
+          "$comment": "The annotation identifying the macro that should handle the request.",
+          "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
+        },
         "required": [
           "id",
           "type",
@@ -88,6 +92,10 @@
       "type": "object",
       "description": "Information about a macro that the macro provides to the host.",
       "properties": {
+        "annotation": {
+          "$comment": "The annotation that triggers the macro.",
+          "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
+        },
         "runsInPhases": {
           "type": "array",
           "description": "Phases that the macro runs in: 1, 2 and/or 3.",

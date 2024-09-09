@@ -42,47 +42,57 @@ class MacroHost {
   /// Whether [name] is a macro according to that package's `pubspec.yaml`.
   bool isMacro(QualifiedName name) => lookupMacroImplementation(name) != null;
 
-  /// Checks whether [name] is a macro annotation.
+  /// Checks whether [annotation] is a macro annotation.
   ///
   /// If so, returns the qualified name of the macro implementation.
   ///
   /// If not, returns `null`.
-  QualifiedName? lookupMacroImplementation(QualifiedName name) =>
-      macroPackageConfig.lookupMacroImplementation(name);
+  QualifiedName? lookupMacroImplementation(QualifiedName annotation) =>
+      macroPackageConfig.lookupMacroImplementation(annotation);
 
-  /// Determines which phases the macro implemented at [name] runs in.
+  /// Determines which phases the macro triggered by [annotation] runs in.
   Future<Set<int>> queryMacroPhases(
-      Uri packageConfig, QualifiedName name) async {
-    // TODO(davidmorgan): track macro lifecycle, correctly run once per macro
-    // code change including if queried multiple times before response returns.
-    if (_hostService._macroPhases != null) {
-      return _hostService._macroPhases!.future;
+      Uri packageConfig, QualifiedName annotation) async {
+    await _ensureRunning(annotation);
+    return _hostService._macroState[annotation.string]!.phases;
+  }
+
+  /// Sends [request] to the macro triggered by [annotation].
+  Future<AugmentResponse> augment(
+      QualifiedName annotation, AugmentRequest request) async {
+    await _ensureRunning(annotation);
+    final response = await macroServer.sendToMacro(HostRequest.augmentRequest(
+        macroAnnotation: annotation, request, id: nextRequestId));
+    return response.asAugmentResponse;
+  }
+
+  /// If the macro triggered by [annotation] is not running, builds it and
+  /// launches it.
+  Future<void> _ensureRunning(QualifiedName annotation) async {
+    if (_hostService._macroState.containsKey(annotation.string)) return;
+    await buildAndRunMacro(annotation);
+  }
+
+  /// Builds and runs the macro triggered by [annotation].
+  ///
+  /// Throws if it's already running.
+  Future<void> buildAndRunMacro(QualifiedName annotation) async {
+    if (_hostService._macroState.containsKey(annotation.string)) {
+      throw StateError('Macro is already running: ${annotation.string}');
     }
-    _hostService._macroPhases = Completer();
-    final macroBundle = await macroBuilder.build(packageConfig, [name]);
+    _hostService._macroState[annotation.string] = _MacroState();
+    final macroBundle = await macroBuilder.build(
+        macroPackageConfig.uri, [lookupMacroImplementation(annotation)!]);
     macroRunner.start(
         macroBundle: macroBundle,
         protocol: macroServer.protocol,
         endpoint: macroServer.endpoint);
-    return _hostService._macroPhases!.future;
-  }
-
-  /// Sends [request] to the macro with [name].
-  Future<AugmentResponse> augment(
-      QualifiedName name, AugmentRequest request) async {
-    // TODO(davidmorgan): this just assumes the macro is running, actually
-    // track macro lifecycle.
-    final response = await macroServer.sendToMacro(
-        name, HostRequest.augmentRequest(request, id: nextRequestId));
-    return response.asAugmentResponse;
   }
 }
 
 class _HostService implements HostService {
   final QueryService queryService;
-  // TODO(davidmorgan): this should be per macro, as part of tracking per-macro
-  // lifecycle state.
-  Completer<Set<int>>? _macroPhases;
+  final Map<String, _MacroState> _macroState = {};
 
   _HostService(this.queryService);
 
@@ -91,9 +101,11 @@ class _HostService implements HostService {
   Future<Response> handle(MacroRequest request) async {
     switch (request.type) {
       case MacroRequestType.macroStartedRequest:
-        _macroPhases!.complete(request
-            .asMacroStartedRequest.macroDescription.runsInPhases
-            .toSet());
+        final macroStartedRequest = request.asMacroStartedRequest;
+        _macroState[macroStartedRequest.macroDescription.annotation.string]!
+            ._phasesCompleter
+            .complete(
+                macroStartedRequest.macroDescription.runsInPhases.toSet());
         return Response.macroStartedResponse(MacroStartedResponse(),
             requestId: request.id);
       case MacroRequestType.queryRequest:
@@ -110,4 +122,11 @@ class _HostService implements HostService {
 /// Service provided by the frontend the host integrates with.
 abstract interface class QueryService {
   Future<QueryResponse> handle(QueryRequest request);
+}
+
+class _MacroState {
+  // The first thing a macro does when it runs is sent a `MacroStartedRequest`
+  // with its phases, so this value is expected as soon as the macro runs.
+  final Completer<Set<int>> _phasesCompleter = Completer();
+  Future<Set<int>> get phases => _phasesCompleter.future;
 }

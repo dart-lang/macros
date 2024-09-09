@@ -79,11 +79,13 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
   static HostRequest augmentRequest(
     AugmentRequest augmentRequest, {
     required int id,
+    QualifiedName? macroAnnotation,
   }) =>
       HostRequest.fromJson({
         'type': 'AugmentRequest',
         'value': augmentRequest,
         'id': id,
+        if (macroAnnotation != null) 'macroAnnotation': macroAnnotation,
       });
   HostRequestType get type {
     switch (node['type'] as String) {
@@ -103,16 +105,24 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
 
   /// The id of this request, must be returned in responses.
   int get id => node['id'] as int;
+
+  /// The annotation identifying the macro that should handle the request.
+  QualifiedName get macroAnnotation => node['macroAnnotation'] as QualifiedName;
 }
 
 /// Information about a macro that the macro provides to the host.
 extension type MacroDescription.fromJson(Map<String, Object?> node)
     implements Object {
   MacroDescription({
+    QualifiedName? annotation,
     List<int>? runsInPhases,
   }) : this.fromJson({
+          if (annotation != null) 'annotation': annotation,
           if (runsInPhases != null) 'runsInPhases': runsInPhases,
         });
+
+  /// The annotation that triggers the macro.
+  QualifiedName get annotation => node['annotation'] as QualifiedName;
 
   /// Phases that the macro runs in: 1, 2 and/or 3.
   List<int> get runsInPhases => (node['runsInPhases'] as List).cast();

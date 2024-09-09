@@ -12,8 +12,12 @@ class DeclareX {
 }
 
 class DeclareXImplementation implements Macro {
+  // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
-  MacroDescription get description => MacroDescription(runsInPhases: [2]);
+  MacroDescription get description => MacroDescription(
+      annotation:
+          QualifiedName('package:_test_macros/declare_x_macro.dart#DeclareX'),
+      runsInPhases: [2]);
 
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {

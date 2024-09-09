@@ -28,7 +28,39 @@ void main() {
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [DeclareXImplementation()]));
 
-        await serverSocket.first.timeout(const Duration(seconds: 10));
+        await (await serverSocket.first.timeout(const Duration(seconds: 10)))
+            .close();
+      });
+
+      test('error response if no such macro', () async {
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+
+        unawaited(MacroClient.run(
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port),
+            macros: []));
+
+        final socket = await serverSocket.first;
+        final responses = StreamQueue(protocol.decode(socket));
+
+        final requestId = nextRequestId;
+        protocol.send(
+            socket.add,
+            HostRequest.augmentRequest(
+                    id: requestId,
+                    macroAnnotation: QualifiedName(
+                        'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                    AugmentRequest(phase: 2))
+                .node);
+        final augmentResponse = await responses.next;
+        expect(augmentResponse, {
+          'requestId': requestId,
+          'type': 'ErrorResponse',
+          'value': {
+            'error': 'No macro for annotation: '
+                'package:_test_macros/declare_x_macro.dart#DeclareX'
+          }
+        });
       });
 
       test('sends augmentation requests to macros, sends reponse', () async {
@@ -48,6 +80,8 @@ void main() {
           'type': 'MacroStartedRequest',
           'value': {
             'macroDescription': {
+              'annotation':
+                  'package:_test_macros/declare_x_macro.dart#DeclareX',
               'runsInPhases': [2]
             }
           }
@@ -56,7 +90,11 @@ void main() {
         final requestId = nextRequestId;
         protocol.send(
             socket.add,
-            HostRequest.augmentRequest(AugmentRequest(phase: 2), id: requestId)
+            HostRequest.augmentRequest(
+                    id: requestId,
+                    macroAnnotation: QualifiedName(
+                        'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                    AugmentRequest(phase: 2))
                 .node);
         final augmentResponse = await responses.next;
         expect(augmentResponse, {
@@ -87,6 +125,7 @@ void main() {
           'type': 'MacroStartedRequest',
           'value': {
             'macroDescription': {
+              'annotation': 'package:_test_macros/query_class.dart#QueryClass',
               'runsInPhases': [3]
             }
           },
@@ -96,11 +135,12 @@ void main() {
         protocol.send(
             socket.add,
             HostRequest.augmentRequest(
-                    AugmentRequest(
-                        phase: 3,
-                        target: QualifiedName('package:foo/foo.dart#Foo')),
-                    id: requestId)
-                .node);
+              id: requestId,
+              macroAnnotation: QualifiedName(
+                  'package:_test_macros/query_class.dart#QueryClass'),
+              AugmentRequest(
+                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')),
+            ).node);
         final queryRequest = await responses.next;
         final queryRequestId = MacroRequest.fromJson(queryRequest).id;
         expect(
@@ -123,9 +163,9 @@ void main() {
                     requestId: queryRequestId)
                 .node));
 
-        final augmentRequest = await responses.next;
+        final augmentResponse = await responses.next;
         expect(
-          augmentRequest,
+          augmentResponse,
           {
             'requestId': requestId,
             'type': 'AugmentResponse',
@@ -133,6 +173,91 @@ void main() {
               'augmentations': [
                 {
                   'code': '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}',
+                }
+              ]
+            }
+          },
+        );
+      });
+
+      test('handles concurrent queries', () async {
+        final serverSocket = await ServerSocket.bind('localhost', 0);
+
+        unawaited(MacroClient.run(
+            protocol: protocol,
+            endpoint: HostEndpoint(port: serverSocket.port),
+            macros: [QueryClassImplementation()]));
+
+        final socket = await serverSocket.first;
+
+        final responses = StreamQueue(protocol.decode(socket));
+        // MacroStartedRequest, ignore.
+        await responses.next;
+
+        final requestId1 = nextRequestId;
+        final requestId2 = nextRequestId;
+        for (final requestId in [requestId1, requestId2]) {
+          protocol.send(
+              socket.add,
+              HostRequest.augmentRequest(
+                id: requestId,
+                macroAnnotation: QualifiedName(
+                    'package:_test_macros/query_class.dart#QueryClass'),
+                AugmentRequest(
+                    phase: 3,
+                    target: QualifiedName('package:foo/foo.dart#Foo')),
+              ).node);
+        }
+
+        final queryRequest1 = await responses.next;
+        final queryRequestId1 = MacroRequest.fromJson(queryRequest1).id;
+        Scope.query.run(() => protocol.send(
+            socket.add,
+            Response.queryResponse(
+                    QueryResponse(
+                        model: Model()
+                          ..uris['package:foo/foo1.dart'] = Library()),
+                    requestId: queryRequestId1)
+                .node));
+
+        final queryRequest2 = await responses.next;
+        final queryRequestId2 = MacroRequest.fromJson(queryRequest2).id;
+        Scope.query.run(() => protocol.send(
+            socket.add,
+            Response.queryResponse(
+                    QueryResponse(
+                        model: Model()
+                          ..uris['package:foo/foo2.dart'] = Library()),
+                    requestId: queryRequestId2)
+                .node));
+
+        final augmentResponse1 = await responses.next;
+        final augmentResponse2 = await responses.next;
+
+        expect(
+          augmentResponse1,
+          {
+            'requestId': requestId1,
+            'type': 'AugmentResponse',
+            'value': {
+              'augmentations': [
+                {
+                  'code': '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}',
+                }
+              ]
+            }
+          },
+        );
+
+        expect(
+          augmentResponse2,
+          {
+            'requestId': requestId2,
+            'type': 'AugmentResponse',
+            'value': {
+              'augmentations': [
+                {
+                  'code': '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}',
                 }
               ]
             }

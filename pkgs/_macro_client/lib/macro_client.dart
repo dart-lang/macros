@@ -20,7 +20,9 @@ class MacroClient {
   final Iterable<Macro> macros;
   final Socket socket;
   late final RemoteMacroHost _host;
-  Completer<Response>? _responseCompleter;
+
+  /// A completer for each pending request to the host, by request ID.
+  final Map<int, Completer<Response>> _responseCompleters = {};
 
   MacroClient._(this.protocol, this.macros, this.socket) {
     _host = RemoteMacroHost(this);
@@ -48,8 +50,10 @@ class MacroClient {
     return MacroClient._(protocol, macros, socket);
   }
 
-  void _sendRequest(MacroRequest request) {
+  Future<Response> _sendRequest(MacroRequest request) async {
+    final completer = _responseCompleters[request.id] = Completer<Response>();
     protocol.send(socket.add, request.node);
+    return completer.future;
   }
 
   void _sendResponse(Response response) {
@@ -60,21 +64,37 @@ class MacroClient {
     final hostRequest = HostRequest.fromJson(jsonData);
     switch (hostRequest.type) {
       case HostRequestType.augmentRequest:
-        await Scope.macro.runAsync(() async => _sendResponse(
-            Response.augmentResponse(
-                await macros.single
-                    .augment(_host, hostRequest.asAugmentRequest),
-                requestId: hostRequest.id)));
+        final macro = macros
+            .where((m) =>
+                m.description.annotation.string ==
+                hostRequest.macroAnnotation.string)
+            .singleOrNull;
+
+        if (macro == null) {
+          _sendResponse(Response.errorResponse(
+              requestId: hostRequest.id,
+              ErrorResponse(
+                  error: 'No macro for annotation: '
+                      '${hostRequest.macroAnnotation}')));
+        } else {
+          await Scope.macro.runAsync(() async => _sendResponse(
+              Response.augmentResponse(
+                  await macro.augment(_host, hostRequest.asAugmentRequest),
+                  requestId: hostRequest.id)));
+        }
       default:
       // Ignore unknown request.
       // TODO(davidmorgan): make handling of unknown request types a designed
       // part of the protocol+code, update implementation here and below.
     }
     final response = Response.fromJson(jsonData);
-    // TODO(davidmorgan): track requests and responses properly.
-    if (_responseCompleter != null) {
-      _responseCompleter!.complete(response);
-      _responseCompleter = null;
+    if (response.type.isKnown) {
+      final completer = _responseCompleters.remove(response.requestId);
+      if (completer == null) {
+        throw StateError('Unknown requestId: ${response.requestId}.');
+      } else {
+        completer.complete(response);
+      }
     }
   }
 }
@@ -96,25 +116,12 @@ class RemoteMacroHost implements Host {
 
   @override
   Future<Model> query(Query query) async {
+    final id = nextRequestId;
     // The macro scope is used to accumulate augment results, drop into
     // "none" scope to avoid clashing with those when sending the query.
-    Scope.none.run(() => _client._sendRequest(MacroRequest.queryRequest(
-        QueryRequest(query: query),
-        id: nextRequestId)));
-    // TODO(davidmorgan): this is needed because the constructor doesn't wait
-    // for responses to `MacroStartedRequest`, so we need to discard the
-    // responses. Properly track requests and responses.
-    while (true) {
-      final nextResponse = await _nextResponse();
-      if (nextResponse.type == ResponseType.macroStartedResponse) {
-        continue;
-      }
-      return nextResponse.asQueryResponse.model;
-    }
-  }
-
-  Future<Response> _nextResponse() async {
-    _client._responseCompleter = Completer<Response>();
-    return await _client._responseCompleter!.future;
+    return (await Scope.none.runAsync(() async => _client._sendRequest(
+            MacroRequest.queryRequest(QueryRequest(query: query), id: id))))
+        .asQueryResponse
+        .model;
   }
 }

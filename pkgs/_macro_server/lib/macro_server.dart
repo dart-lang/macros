@@ -15,11 +15,11 @@ class MacroServer {
   final HostEndpoint endpoint;
   final ServerSocket serverSocket;
 
-  // TODO(davidmorgan): track which socket corresponds to which macro(s).
-  Socket? _lastSocket;
+  final List<_Connection> _connections = [];
 
-  // TODO(davidmorgan): properly track requests and responses.
-  Completer<Response>? _responseCompleter;
+  /// Emits an event whenever a macro connects and sends its description.
+  final StreamController<void> _macroDescriptionBecomesKnown =
+      StreamController.broadcast();
 
   MacroServer._(this.protocol, this.service, this.endpoint, this.serverSocket) {
     serverSocket.forEach(_handleConnection);
@@ -39,17 +39,43 @@ class MacroServer {
         protocol, service, HostEndpoint(port: serverSocket.port), serverSocket);
   }
 
-  Future<Response> sendToMacro(QualifiedName name, HostRequest request) async {
-    _responseCompleter = Completer<Response>();
-    protocol.send(_lastSocket!.add, request.node);
-    return _responseCompleter!.future;
+  /// Sends to the macro identified by `request#macroAnnotation`.
+  ///
+  /// If no such macro is connected, repeatedly waits [timeout] for a new
+  /// macro to connect and checks again.
+  ///
+  /// Throws [TimeoutException] if no such macro connects in the time allowed.
+  Future<Response> sendToMacro(HostRequest request,
+      {Duration timeout = const Duration(seconds: 5)}) async {
+    _Connection? connection;
+    while (true) {
+      // Look up the connection with the macro corresponding to `annotation`.
+      connection = _connections
+          .where((c) => c.descriptions.any(
+              (d) => d.annotation.string == request.macroAnnotation.string))
+          .singleOrNull;
+      // If it's found: done.
+      if (connection != null) break;
+      // Not found, wait [timeout] then recheck. Throws `StateError` on
+      // timeout.
+      await _macroDescriptionBecomesKnown.stream.first.timeout(timeout);
+      continue;
+    }
+    protocol.send(connection.socket.add, request.node);
+    return connection.responses.where((r) => r.requestId == request.id).first;
   }
 
   void _handleConnection(Socket socket) {
-    _lastSocket = socket;
+    final connection = _Connection(socket);
+    _connections.add(connection);
     protocol.decode(socket).forEach((jsonData) {
       final request = MacroRequest.fromJson(jsonData);
       if (request.type.isKnown) {
+        if (request.type == MacroRequestType.macroStartedRequest) {
+          connection.descriptions
+              .add(request.asMacroStartedRequest.macroDescription);
+          _macroDescriptionBecomesKnown.add(null);
+        }
         // Each query is handled and responded to in a new query scope.
         Scope.query.runAsync(() async => service
             .handle(request)
@@ -57,9 +83,29 @@ class MacroServer {
       }
       final response = Response.fromJson(jsonData);
       if (response.type.isKnown) {
-        _responseCompleter!.complete(response);
-        _responseCompleter = null;
+        connection._responsesController.add(response);
       }
     });
   }
+}
+
+/// A connected macro bundle.
+class _Connection {
+  /// The socket the macro bundle is connect on.
+  final Socket socket;
+
+  /// The macros available in the macro bundle; starts empty, filled one amcro
+  /// at a time.
+  final List<MacroDescription> descriptions = [];
+
+  final StreamController<Response> _responsesController =
+      StreamController.broadcast();
+
+  /// Responses to query requests from the macro.
+  Stream<Response> get responses => _responsesController.stream;
+
+  _Connection(this.socket);
+
+  @override
+  String toString() => '_Connection($descriptions)';
 }
