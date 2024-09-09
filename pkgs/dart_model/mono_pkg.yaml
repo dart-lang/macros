@@ -9,7 +9,7 @@ stages:
     sdk:
     - dev
 - unit_test:
-  - test: --test-randomize-ordering-seed=random
+  - test: --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source
     os:
     - linux
     - windows

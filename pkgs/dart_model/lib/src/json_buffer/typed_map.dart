@@ -196,7 +196,11 @@ extension TypedMaps on JsonBufferBuilder {
       if (v5 != null) addBit(v5 == true);
       if (v6 != null) addBit(v6 == true);
       if (v7 != null) addBit(v7 == true);
-      _setByte(valuePointer, byte);
+
+      // Only write the byte if at least one bit was written.
+      if (bitmask != 0x01) {
+        _setByte(valuePointer, byte);
+      }
     } else {
       // If not all booleans, write only present values according to their
       // size in bytes.
