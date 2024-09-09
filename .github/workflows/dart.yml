@@ -423,7 +423,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -458,7 +458,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_cfe_macros;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_cfe_macros;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_cfe_macros
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -493,7 +493,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_builder;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_builder;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_builder
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -528,7 +528,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_client;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_client;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_client
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -563,7 +563,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_host;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_host;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_host
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -598,7 +598,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_runner;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_runner;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_runner
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -633,7 +633,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_server;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_server;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_macro_server
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -668,7 +668,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/macro_service;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/macro_service;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/macro_service
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -703,7 +703,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:tool/dart_model_generator;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:tool/dart_model_generator;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -731,14 +731,14 @@ jobs:
       - job_003
       - job_004
   job_014:
-    name: "unit_test; linux; Dart 3.6.0-198.0.dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; linux; Dart 3.6.0-198.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/dart_model;commands:test_1"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/dart_model;commands:command"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/dart_model
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
@@ -756,8 +756,8 @@ jobs:
         run: dart pub upgrade
         if: "always() && steps.checkout.conclusion == 'success'"
         working-directory: pkgs/dart_model
-      - name: "pkgs/dart_model; dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
-        run: "dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+      - name: "pkgs/dart_model; dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+        run: "dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
         if: "always() && steps.pkgs_dart_model_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/dart_model
     needs:
@@ -773,7 +773,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -808,7 +808,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_builder;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_builder;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_builder
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -843,7 +843,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_client;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_client;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_client
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -878,7 +878,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_host;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_host;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_host
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -913,7 +913,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_runner;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_runner;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_runner
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -948,7 +948,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_server;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_server;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_macro_server
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -983,7 +983,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/macro_service;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/macro_service;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/macro_service
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -1018,7 +1018,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:tool/dart_model_generator;commands:test_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:tool/dart_model_generator;commands:test"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -1046,14 +1046,14 @@ jobs:
       - job_003
       - job_004
   job_023:
-    name: "unit_test; linux; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; linux; Dart dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/dart_model;commands:test_1"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/dart_model;commands:command"
           restore-keys: |
             os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/dart_model
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
@@ -1071,8 +1071,8 @@ jobs:
         run: dart pub upgrade
         if: "always() && steps.checkout.conclusion == 'success'"
         working-directory: pkgs/dart_model
-      - name: "pkgs/dart_model; dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
-        run: "dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+      - name: "pkgs/dart_model; dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+        run: "dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
         if: "always() && steps.pkgs_dart_model_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/dart_model
     needs:
@@ -1306,7 +1306,7 @@ jobs:
       - job_003
       - job_004
   job_033:
-    name: "unit_test; windows; Dart 3.6.0-198.0.dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; windows; Dart 3.6.0-198.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
@@ -1321,8 +1321,8 @@ jobs:
         run: dart pub upgrade
         if: "always() && steps.checkout.conclusion == 'success'"
         working-directory: pkgs/dart_model
-      - name: "pkgs/dart_model; dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
-        run: "dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+      - name: "pkgs/dart_model; dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+        run: "dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
         if: "always() && steps.pkgs_dart_model_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/dart_model
     needs:
@@ -1531,7 +1531,7 @@ jobs:
       - job_003
       - job_004
   job_042:
-    name: "unit_test; windows; Dart dev; PKG: pkgs/dart_model; `dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; windows; Dart dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
@@ -1546,8 +1546,8 @@ jobs:
         run: dart pub upgrade
         if: "always() && steps.checkout.conclusion == 'success'"
         working-directory: pkgs/dart_model
-      - name: "pkgs/dart_model; dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
-        run: "dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+      - name: "pkgs/dart_model; dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
+        run: "dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source"
         if: "always() && steps.pkgs_dart_model_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/dart_model
     needs:

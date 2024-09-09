@@ -67,17 +67,17 @@ for PKG in ${PKGS}; do
         echo 'dart analyze --fatal-infos .'
         dart analyze --fatal-infos . || EXIT_CODE=$?
         ;;
+      command)
+        echo 'dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source'
+        dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source || EXIT_CODE=$?
+        ;;
       format)
         echo 'dart format --output=none --set-exit-if-changed .'
         dart format --output=none --set-exit-if-changed . || EXIT_CODE=$?
         ;;
-      test_0)
+      test)
         echo 'dart test --test-randomize-ordering-seed=random'
         dart test --test-randomize-ordering-seed=random || EXIT_CODE=$?
-        ;;
-      test_1)
-        echo 'dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source'
-        dart test --test-randomize-ordering-seed=random && dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source || EXIT_CODE=$?
         ;;
       *)
         echo -e "\033[31mUnknown TASK '${TASK}' - TERMINATING JOB\033[0m"
