@@ -15,8 +15,12 @@ class QueryClass {
 }
 
 class QueryClassImplementation implements Macro {
+  // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
-  MacroDescription get description => MacroDescription(runsInPhases: [3]);
+  MacroDescription get description => MacroDescription(
+      annotation:
+          QualifiedName('package:_test_macros/query_class.dart#QueryClass'),
+      runsInPhases: [3]);
 
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {

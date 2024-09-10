@@ -292,12 +292,22 @@ final schemas = Schemas([
                   description:
                       'The id of this request, must be returned in responses.',
                   required: true),
+              Property(
+                'macroAnnotation',
+                type: 'QualifiedName',
+                description:
+                    'The annotation identifying the macro that should handle '
+                    'the request.',
+              )
             ]),
         Definition.clazz('MacroDescription',
             description:
                 'Information about a macro that the macro provides to the '
                 'host.',
             properties: [
+              Property('annotation',
+                  type: 'QualifiedName',
+                  description: 'The annotation that triggers the macro.'),
               Property('runsInPhases',
                   type: 'List<int>',
                   description: 'Phases that the macro runs in: 1, 2 and/or 3.'),

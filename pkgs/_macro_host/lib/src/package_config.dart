@@ -10,10 +10,12 @@ import 'package:package_config/package_config.dart';
 /// Reads a package config to determine information about macros.
 class MacroPackageConfig {
   final PackageConfig packageConfig;
+  final Uri uri;
 
-  MacroPackageConfig({required this.packageConfig});
+  MacroPackageConfig({required this.uri, required this.packageConfig});
 
   factory MacroPackageConfig.readFromUri(Uri uri) => MacroPackageConfig(
+      uri: uri,
       packageConfig:
           PackageConfig.parseBytes(File.fromUri(uri).readAsBytesSync(), uri));
 

@@ -73,26 +73,17 @@ class CfeRunningMacro implements injected.RunningMacro {
   final CfeMacroImplementation _impl;
   final QualifiedName name;
   final QualifiedName implementation;
-  late final Future _started;
 
   CfeRunningMacro._(this._impl, this.name, this.implementation);
 
-  // TODO(davidmorgan): should this be async, removing the need for `_started`?
-  // If so the API injected into analyzer+CFE needs to change to be async.
   static CfeRunningMacro run(CfeMacroImplementation impl, QualifiedName name,
       QualifiedName implementation) {
-    final result = CfeRunningMacro._(impl, name, implementation);
-    // TODO(davidmorgan): this is currently what starts the macro running,
-    // make it explicit.
-    result._started =
-        impl._host.queryMacroPhases(impl.packageConfig, implementation);
-    return result;
+    return CfeRunningMacro._(impl, name, implementation);
   }
 
   @override
   Future<CfeMacroExecutionResult> executeDeclarationsPhase(MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = declarationsPhaseIntrospector;
     return CfeMacroExecutionResult(
@@ -104,7 +95,6 @@ class CfeRunningMacro implements injected.RunningMacro {
   @override
   Future<CfeMacroExecutionResult> executeDefinitionsPhase(MacroTarget target,
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = definitionPhaseIntrospector;
     return CfeMacroExecutionResult(
@@ -116,7 +106,6 @@ class CfeRunningMacro implements injected.RunningMacro {
   @override
   Future<CfeMacroExecutionResult> executeTypesPhase(
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = typePhaseIntrospector;
     return CfeMacroExecutionResult(
