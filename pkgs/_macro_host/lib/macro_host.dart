@@ -80,6 +80,9 @@ class MacroHost {
     if (_hostService._macroState.containsKey(annotation.string)) {
       throw StateError('Macro is already running: ${annotation.string}');
     }
+    // TODO(davidmorgan): additional state is needed to track that a macro
+    // is still building; currently requests while the macro is building will
+    // time out after 5s.
     _hostService._macroState[annotation.string] = _MacroState();
     final macroBundle = await macroBuilder.build(
         macroPackageConfig.uri, [lookupMacroImplementation(annotation)!]);
