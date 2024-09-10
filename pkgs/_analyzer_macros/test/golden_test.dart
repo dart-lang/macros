@@ -115,7 +115,7 @@ void main() {
 
           expect(introspectionMacroOutput, introspectionGolden,
               reason: updateGoldens
-                  ? null
+                  ? '\n--> Goldens updated! Should pass on rerun.'
                   : '\n--> To update goldens, run: '
                       'UPDATE_GOLDENS=yes dart test');
         }
@@ -124,7 +124,7 @@ void main() {
           applicationMacroOutput = augmentationUnit.content;
           expect(applicationMacroOutput, applicationGolden,
               reason: updateGoldens
-                  ? null
+                  ? '\n--> Goldens updated! Should pass on rerun.'
                   : '\n--> To update goldens, run: '
                       'UPDATE_GOLDENS=yes dart test');
         }
