@@ -16,7 +16,7 @@ void main() {
   ]) {
     group('MacroHost using ${protocol.encoding}', () {
       test('hosts a macro, receives augmentations', () async {
-        final macroName = QualifiedName(
+        final macroAnnotation = QualifiedName(
             uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX');
 
         final queryService = TestQueryService();
@@ -38,7 +38,7 @@ void main() {
       });
 
       test('hosts a macro, responds to queries', () async {
-        final macroAnnotation =
+        final macroAnnotation = QualifiedName(
             uri: 'package:_test_macros/query_class.dart', name: 'QueryClass');
 
         final queryService = TestQueryService();
@@ -69,8 +69,11 @@ void main() {
 
       test('hosts two macros', () async {
         final macroNames = [
-          QualifiedName('package:_test_macros/declare_x_macro.dart#DeclareX'),
-          QualifiedName('package:_test_macros/query_class.dart#QueryClass'),
+          QualifiedName(
+              uri: 'package:_test_macros/declare_x_macro.dart',
+              name: 'DeclareX'),
+          QualifiedName(
+              uri: 'package:_test_macros/query_class.dart', name: 'QueryClass'),
         ];
 
         final queryService = TestQueryService();
@@ -83,7 +86,9 @@ void main() {
           await host.augment(
               macroName,
               AugmentRequest(
-                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')));
+                  phase: 3,
+                  target:
+                      QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo')));
         }
       });
     });

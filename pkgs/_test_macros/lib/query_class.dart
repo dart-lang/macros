@@ -18,8 +18,8 @@ class QueryClassImplementation implements Macro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
-      annotation:
-          QualifiedName('package:_test_macros/query_class.dart#QueryClass'),
+      annotation: QualifiedName(
+          uri: 'package:_test_macros/query_class.dart', name: 'QueryClass'),
       runsInPhases: [3]);
 
   @override

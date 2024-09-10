@@ -65,7 +65,7 @@ class CfeMacroRunner implements injected.MacroRunner {
   @override
   injected.RunningMacro run(Uri uri, String name) => CfeRunningMacro.run(
       _impl,
-      QualifiedName(uri: 'uri', name: name),
+      QualifiedName(uri: '$uri', name: name),
       _impl._host
           .lookupMacroImplementation(QualifiedName(uri: '$uri', name: name))!);
 }

@@ -69,8 +69,7 @@ class MacroClient {
       case HostRequestType.augmentRequest:
         final macro = macros
             .where((m) =>
-                m.description.annotation.string ==
-                hostRequest.macroAnnotation.string)
+                m.description.annotation.equals(hostRequest.macroAnnotation))
             .singleOrNull;
 
         if (macro == null) {
@@ -78,7 +77,7 @@ class MacroClient {
               requestId: hostRequest.id,
               ErrorResponse(
                   error: 'No macro for annotation: '
-                      '${hostRequest.macroAnnotation}')));
+                      '${hostRequest.macroAnnotation.asString}')));
         } else {
           await Scope.macro.runAsync(() async => _sendResponse(
               Response.augmentResponse(
