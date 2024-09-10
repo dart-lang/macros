@@ -88,7 +88,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = declarationsPhaseIntrospector;
-    return AnalyzerMacroExecutionResult(
+    return await AnalyzerMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 2, target: target.qualifiedName)));
@@ -100,7 +100,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = definitionPhaseIntrospector;
-    return AnalyzerMacroExecutionResult(
+    return await AnalyzerMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 3, target: target.qualifiedName)));
@@ -111,7 +111,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = typePhaseIntrospector;
-    return AnalyzerMacroExecutionResult(
+    return await AnalyzerMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 1, target: target.qualifiedName)));
@@ -124,9 +124,27 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
 /// functionality of `MacroExecutionResult`.
 class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
   final MacroTarget target;
-  final AugmentResponse augmentResponse;
+  @override
+  final Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;
 
-  AnalyzerMacroExecutionResult(this.target, this.augmentResponse);
+  AnalyzerMacroExecutionResult(
+      this.target, Iterable<DeclarationCode> declarations)
+      // TODO(davidmorgan): this assumes augmentations are for the macro
+      // application target. Instead, it should be explicit in
+      // `AugmentResponse`.
+      : typeAugmentations = {(target as Declaration).identifier: declarations};
+
+  static Future<AnalyzerMacroExecutionResult> expandTemplates(
+      MacroTarget target, AugmentResponse augmentResponse) async {
+    final declarations = <DeclarationCode>[];
+    for (final augmentation in augmentResponse.augmentations) {
+      declarations.add(
+          DeclarationCode.fromParts(await _expandTemplates(augmentation.code)));
+    }
+    return AnalyzerMacroExecutionResult(target, declarations);
+  }
+
+  Future<void> resolveTypes() async {}
 
   @override
   List<Diagnostic> get diagnostics => [];
@@ -155,16 +173,6 @@ class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
 
   @override
   void serialize(Object serializer) => throw UnimplementedError();
-
-  @override
-  Map<Identifier, Iterable<DeclarationCode>> get typeAugmentations => {
-        // TODO(davidmorgan): this assumes augmentations are for the macro
-        // application target. Instead, it should be explicit in
-        // `AugmentResponse`.
-        (target as Declaration).identifier: augmentResponse.augmentations
-            .map((a) => DeclarationCode.fromParts([a.code]))
-            .toList(),
-      };
 }
 
 extension MacroTargetExtension on MacroTarget {
@@ -175,4 +183,36 @@ extension MacroTargetExtension on MacroTarget {
         uri: '${element.library!.definingCompilationUnit.source.uri}',
         name: element.displayName);
   }
+}
+
+/// Converts [code] to a mix of `Identifier` and `String`.
+///
+/// Looks up references of the form `{{uri#name}}` using `resolveIdentifier`.
+Future<List<Object>> _expandTemplates(String code) async {
+  final result = <Object>[];
+  var index = 0;
+  while (index < code.length) {
+    final start = code.indexOf('{{', index);
+    if (start == -1) {
+      result.add(code.substring(index));
+      break;
+    }
+    result.add(code.substring(index, start));
+    final end = code.indexOf('}}', start);
+    if (end == -1) {
+      throw ArgumentError('Unmatched opening brace: $code');
+    }
+    final name = code.substring(start + 2, end);
+    final parts = name.split('#');
+    if (parts.length != 2) {
+      throw ArgumentError('Expected "uri#name" in: $name');
+    }
+    final uri = Uri.parse(parts[0]);
+    final identifier = await (introspector as TypePhaseIntrospector)
+        // ignore: deprecated_member_use
+        .resolveIdentifier(uri, parts[1]);
+    result.add(identifier);
+    index = end + 2;
+  }
+  return result;
 }

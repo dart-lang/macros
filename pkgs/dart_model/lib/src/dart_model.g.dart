@@ -137,16 +137,22 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
 extension type Member.fromJson(Map<String, Object?> node) implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'properties': Type.typedMapPointer,
+    'returnType': Type.typedMapPointer,
   });
   Member({
     Properties? properties,
+    StaticTypeDesc? returnType,
   }) : this.fromJson(Scope.createMap(
           _schema,
           properties,
+          returnType,
         ));
 
   /// The properties of this member.
   Properties get properties => node['properties'] as Properties;
+
+  /// The return type of this member, if it has one.
+  StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
 }
 
 /// Partial model of a corpus of Dart source code.

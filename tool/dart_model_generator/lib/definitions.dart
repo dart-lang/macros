@@ -87,6 +87,11 @@ final schemas = Schemas([
               Property('properties',
                   type: 'Properties',
                   description: 'The properties of this member.'),
+              Property(
+                'returnType',
+                type: 'StaticTypeDesc',
+                description: 'The return type of this member, if it has one.',
+              ),
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',
