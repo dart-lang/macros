@@ -46,29 +46,27 @@ int _nextRequestId = 0;
 final _jsonConverter = json.fuse(utf8);
 
 extension ProtocolExtension on Protocol {
-  bool get isJson => encoding == 'json';
-  bool get isBinary => encoding == 'binary';
-
   /// Serializes [node] and sends it to [sink].
   void send(void Function(Uint8List) sink, Map<String, Object?> node) {
-    if (isJson) {
-      sink(_jsonConverter.encode(node) as Uint8List);
-      sink(_utf8Newline);
-    } else if (isBinary) {
-      // Four byte message length followed by message.
-      // TODO(davidmorgan): variable length int encoding probably makes more
-      // sense than fixed four bytes.
-      final binary = node.serializeToBinary();
-      final length = binary.length;
-      sink(Uint8List.fromList([
-        (length >> 24) & 255,
-        (length >> 16) & 255,
-        (length >> 8) & 255,
-        length & 255,
-      ]));
-      sink(binary);
-    } else {
-      throw StateError('Unsupported protocol: $this.');
+    switch (encoding) {
+      case ProtocolEncoding.json:
+        sink(_jsonConverter.encode(node) as Uint8List);
+        sink(_utf8Newline);
+      case ProtocolEncoding.binary:
+        // Four byte message length followed by message.
+        // TODO(davidmorgan): variable length int encoding probably makes more
+        // sense than fixed four bytes.
+        final binary = node.serializeToBinary();
+        final length = binary.length;
+        sink(Uint8List.fromList([
+          (length >> 24) & 255,
+          (length >> 16) & 255,
+          (length >> 8) & 255,
+          length & 255,
+        ]));
+        sink(binary);
+      default:
+        throw StateError('Unsupported protocol: $this.');
     }
   }
 
@@ -77,17 +75,18 @@ extension ProtocolExtension on Protocol {
   /// The data on `stream` can be arbitrarily split to `Uint8List` instances,
   /// it does not have to be one list per message.
   Stream<Map<String, Object?>> decode(Stream<Uint8List> stream) {
-    if (isJson) {
-      return const Utf8Decoder()
-          .bind(stream)
-          .transform(const LineSplitter())
-          .map((line) => json.decode(line) as Map<String, Object?>);
-    } else if (isBinary) {
-      return MessageGrouper(stream)
-          .messageStream
-          .map((message) => message.deserializeFromBinary());
-    } else {
-      throw StateError('Unsupported protocol: $this');
+    switch (encoding) {
+      case ProtocolEncoding.json:
+        return const Utf8Decoder()
+            .bind(stream)
+            .transform(const LineSplitter())
+            .map((line) => json.decode(line) as Map<String, Object?>);
+      case ProtocolEncoding.binary:
+        return MessageGrouper(stream)
+            .messageStream
+            .map((message) => message.deserializeFromBinary());
+      default:
+        throw StateError('Unsupported protocol: $this');
     }
   }
 }

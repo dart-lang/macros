@@ -308,12 +308,22 @@ static QualifiedName parse(String string) {
                   description:
                       'The id of this request, must be returned in responses.',
                   required: true),
+              Property(
+                'macroAnnotation',
+                type: 'QualifiedName',
+                description:
+                    'The annotation identifying the macro that should handle '
+                    'the request.',
+              )
             ]),
         Definition.clazz('MacroDescription',
             description:
                 'Information about a macro that the macro provides to the '
                 'host.',
             properties: [
+              Property('annotation',
+                  type: 'QualifiedName',
+                  description: 'The annotation that triggers the macro.'),
               Property('runsInPhases',
                   type: 'List<int>',
                   description: 'Phases that the macro runs in: 1, 2 and/or 3.'),
@@ -348,10 +358,11 @@ static QualifiedName parse(String string) {
                 'TODO(davidmorgan): add the version.',
             properties: [
               Property('encoding',
-                  type: 'String',
-                  description: 'The wire format: json or binary. '
-                      'TODO(davidmorgan): use an enum?'),
+                  type: 'ProtocolEncoding',
+                  description: 'The wire format: json or binary.'),
             ]),
+        Definition.$enum('ProtocolEncoding',
+            description: 'The wire encoding used.', values: ['json', 'binary']),
         Definition.clazz('QueryRequest',
             description: "Macro's query about the code it should augment.",
             properties: [

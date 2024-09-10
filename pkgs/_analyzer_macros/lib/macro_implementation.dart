@@ -74,27 +74,18 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
   final AnalyzerMacroImplementation _impl;
   final QualifiedName name;
   final QualifiedName implementation;
-  late final Future _started;
 
   AnalyzerRunningMacro._(this._impl, this.name, this.implementation);
 
-  // TODO(davidmorgan): should this be async, removing the need for `_started`?
-  // If so the API injected into analyzer+CFE needs to change to be async.
   static AnalyzerRunningMacro run(AnalyzerMacroImplementation impl,
       QualifiedName name, QualifiedName implementation) {
-    final result = AnalyzerRunningMacro._(impl, name, implementation);
-    // TODO(davidmorgan): this is currently what starts the macro running,
-    // make it explicit.
-    result._started =
-        impl._host.queryMacroPhases(impl.packageConfig, implementation);
-    return result;
+    return AnalyzerRunningMacro._(impl, name, implementation);
   }
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
       MacroTarget target,
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = declarationsPhaseIntrospector;
     return AnalyzerMacroExecutionResult(
@@ -107,7 +98,6 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
   Future<AnalyzerMacroExecutionResult> executeDefinitionsPhase(
       MacroTarget target,
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = definitionPhaseIntrospector;
     return AnalyzerMacroExecutionResult(
@@ -119,7 +109,6 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
   @override
   Future<AnalyzerMacroExecutionResult> executeTypesPhase(
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
-    await _started;
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = typePhaseIntrospector;
     return AnalyzerMacroExecutionResult(

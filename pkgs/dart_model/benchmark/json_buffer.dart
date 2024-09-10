@@ -6,6 +6,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
+// This implementation has been superceded by `JsonBufferBuilder` and is only
+// kept for benchmarking.
+
 /// Map with lazily evaluated values.
 ///
 /// This is the efficient way to accumulate data into a [JsonBuffer]. Nested

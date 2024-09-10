@@ -13,8 +13,8 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: 'json'),
-    Protocol(encoding: 'binary')
+    Protocol(encoding: ProtocolEncoding.json),
+    Protocol(encoding: ProtocolEncoding.binary)
   ]) {
     group('MacroRunner with ${protocol.encoding}', () {
       test('runs macros', () async {

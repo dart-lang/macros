@@ -11,16 +11,13 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: 'json'),
-    Protocol(encoding: 'binary')
+    Protocol(encoding: ProtocolEncoding.json),
+    Protocol(encoding: ProtocolEncoding.binary)
   ]) {
     group('MacroHost using ${protocol.encoding}', () {
       test('hosts a macro, receives augmentations', () async {
         final macroName = QualifiedName(
             uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX');
-        final macroImplementation = QualifiedName(
-            uri: 'package:_test_macros/declare_x_macro.dart',
-            name: 'DeclareXImplementation');
 
         final queryService = TestQueryService();
         final host = await MacroHost.serve(
@@ -30,22 +27,19 @@ void main() {
 
         final packageConfig = Isolate.packageConfigSync!;
 
-        expect(host.isMacro(macroName), true);
-        expect(await host.queryMacroPhases(packageConfig, macroImplementation),
-            {2});
+        expect(host.isMacro(macroAnnotation), true);
+        expect(
+            await host.queryMacroPhases(packageConfig, macroAnnotation), {2});
 
         expect(
-            await host.augment(macroName, AugmentRequest(phase: 2)),
+            await host.augment(macroAnnotation, AugmentRequest(phase: 2)),
             Scope.macro.run(() => AugmentResponse(
                 augmentations: [Augmentation(code: 'int get x => 3;')])));
       });
 
       test('hosts a macro, responds to queries', () async {
-        final macroName = QualifiedName(
+        final macroAnnotation =
             uri: 'package:_test_macros/query_class.dart', name: 'QueryClass');
-        final macroImplementation = QualifiedName(
-            uri: 'package:_test_macros/query_class.dart',
-            name: 'QueryClassImplementation');
 
         final queryService = TestQueryService();
         final host = await MacroHost.serve(
@@ -55,13 +49,13 @@ void main() {
 
         final packageConfig = Isolate.packageConfigSync!;
 
-        expect(host.isMacro(macroName), true);
-        expect(await host.queryMacroPhases(packageConfig, macroImplementation),
-            {3});
+        expect(host.isMacro(macroAnnotation), true);
+        expect(
+            await host.queryMacroPhases(packageConfig, macroAnnotation), {3});
 
         expect(
             await host.augment(
-                macroName,
+                macroAnnotation,
                 AugmentRequest(
                     phase: 3,
                     target: QualifiedName(
@@ -71,6 +65,26 @@ void main() {
                       code:
                           '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}')
                 ])));
+      });
+
+      test('hosts two macros', () async {
+        final macroNames = [
+          QualifiedName('package:_test_macros/declare_x_macro.dart#DeclareX'),
+          QualifiedName('package:_test_macros/query_class.dart#QueryClass'),
+        ];
+
+        final queryService = TestQueryService();
+        final host = await MacroHost.serve(
+            protocol: protocol,
+            packageConfig: Isolate.packageConfigSync!,
+            queryService: queryService);
+
+        for (final macroName in macroNames) {
+          await host.augment(
+              macroName,
+              AugmentRequest(
+                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')));
+        }
       });
     });
   }
