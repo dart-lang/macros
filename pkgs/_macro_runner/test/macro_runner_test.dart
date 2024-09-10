@@ -31,7 +31,6 @@ void main() {
         final runner = MacroRunner();
         runner.start(
             macroBundle: bundle,
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port));
 
         expect(

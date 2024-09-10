@@ -33,8 +33,7 @@ class AnalyzerMacroImplementation implements injected.MacroImplementation {
       AnalyzerMacroImplementation._(
           packageConfig,
           await MacroHost.serve(
-              // TODO(davidmorgan): this should be negotiated per client, not
-              // set here.
+              // TODO(davidmorgan): support serving multiple protocols.
               protocol: protocol,
               packageConfig: packageConfig,
               queryService: AnalyzerQueryService()));

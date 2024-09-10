@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/HandshakeRequest"
+    },
+    {
+      "$ref": "#/$defs/HandshakeResponse"
+    }
+  ],
+  "$defs": {
+    "HandshakeRequest": {
+      "type": "object",
+      "description": "Request to pick a protocol.",
+      "properties": {
+        "protocols": {
+          "type": "array",
+          "description": "Supported protocols.",
+          "items": {
+            "$ref": "#/$defs/Protocol"
+          }
+        }
+      }
+    },
+    "HandshakeResponse": {
+      "type": "object",
+      "description": "The picked protocol, or `null` if no requested protocol is supported.",
+      "properties": {
+        "protocol": {
+          "$comment": "Supported protocol.",
+          "$ref": "#/$defs/Protocol"
+        }
+      }
+    },
+    "Protocol": {
+      "type": "object",
+      "description": "The macro to host protocol version and encoding. TODO(davidmorgan): add the version.",
+      "properties": {
+        "encoding": {
+          "$comment": "The wire format: json or binary.",
+          "$ref": "#/$defs/ProtocolEncoding"
+        },
+        "version": {
+          "$comment": "The protocol version, a name and number.",
+          "$ref": "#/$defs/ProtocolVersion"
+        }
+      }
+    },
+    "ProtocolEncoding": {
+      "type": "string",
+      "description": "The wire encoding used."
+    },
+    "ProtocolVersion": {
+      "type": "string",
+      "description": "The protocol version."
+    }
+  }
+}
