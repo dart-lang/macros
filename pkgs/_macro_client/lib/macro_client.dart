@@ -51,6 +51,9 @@ class MacroClient {
   }
 
   Future<Response> _sendRequest(MacroRequest request) async {
+    if (_responseCompleters.containsKey(request.id)) {
+      throw StateError('Request already pending with ID ${request.id}.');
+    }
     final completer = _responseCompleters[request.id] = Completer<Response>();
     protocol.send(socket.add, request.node);
     return completer.future;
@@ -116,11 +119,11 @@ class RemoteMacroHost implements Host {
 
   @override
   Future<Model> query(Query query) async {
-    final id = nextRequestId;
     // The macro scope is used to accumulate augment results, drop into
     // "none" scope to avoid clashing with those when sending the query.
     return (await Scope.none.runAsync(() async => _client._sendRequest(
-            MacroRequest.queryRequest(QueryRequest(query: query), id: id))))
+            MacroRequest.queryRequest(QueryRequest(query: query),
+                id: nextRequestId))))
         .asQueryResponse
         .model;
   }

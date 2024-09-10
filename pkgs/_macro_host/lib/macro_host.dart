@@ -92,6 +92,8 @@ class MacroHost {
 
 class _HostService implements HostService {
   final QueryService queryService;
+
+  /// Macro state by its annotation [QualifiedName] string representation.
   final Map<String, _MacroState> _macroState = {};
 
   _HostService(this.queryService);
