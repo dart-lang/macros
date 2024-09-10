@@ -15,8 +15,8 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: 'json'),
-    Protocol(encoding: 'binary')
+    Protocol(encoding: ProtocolEncoding.json),
+    Protocol(encoding: ProtocolEncoding.binary)
   ]) {
     group('MacroClient using ${protocol.encoding}', () {
       test('connects to service', () async {

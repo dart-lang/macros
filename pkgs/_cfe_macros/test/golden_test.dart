@@ -20,7 +20,7 @@ void main() {
 
     final directory = Directory(
         Isolate.resolvePackageUriSync(Uri.parse('package:foo/foo.dart'))!
-            .resolve('../../../introspection_goldens')
+            .resolve('../../../goldens')
             .toFilePath());
 
     setUp(() async {
@@ -38,7 +38,7 @@ void main() {
 
       // Inject test macro implementation.
       injected.macroImplementation = await CfeMacroImplementation.start(
-          protocol: Protocol(encoding: 'json'),
+          protocol: Protocol(encoding: ProtocolEncoding.json),
           packageConfig: Isolate.packageConfigSync!);
     });
 
@@ -49,23 +49,56 @@ void main() {
       final path = file.path;
       final relativePath = p.relative(path, from: directory.path);
 
-      late File goldenFile;
-      late Map<String, Object?> golden;
-      Map<String, Object?>? macroOutput;
+      File? introspectionGoldenFile;
+      Map<String, Object?>? introspectionGolden;
+      Map<String, Object?>? introspectionMacroOutput;
+
+      File? applicationGoldenFile;
+      String? applicationGolden;
+      String? applicationMacroOutput;
+
       final updateGoldens = Platform.environment['UPDATE_GOLDENS'] == 'yes';
+
       setUp(() {
-        goldenFile = File(p.setExtension(path, '.cfe.json'));
-        golden =
-            json.decode(goldenFile.readAsStringSync()) as Map<String, Object?>;
+        introspectionGoldenFile = File(p.setExtension(path, '.cfe.json'));
+        if (introspectionGoldenFile!.existsSync()) {
+          introspectionGolden =
+              json.decode(introspectionGoldenFile!.readAsStringSync())
+                  as Map<String, Object?>;
+        } else {
+          introspectionGoldenFile = null;
+        }
+
+        applicationGoldenFile =
+            File(p.setExtension(path, '.cfe.augmentations'));
+        if (applicationGoldenFile!.existsSync()) {
+          applicationGolden = applicationGoldenFile!.readAsStringSync();
+        } else {
+          applicationGoldenFile = null;
+        }
+
+        if (introspectionGoldenFile == null && applicationGoldenFile == null) {
+          throw StateError('Setup failed, no goldens for $path');
+        }
       });
       if (updateGoldens) {
         tearDown(() {
-          if (macroOutput != null) {
-            final string =
-                (const JsonEncoder.withIndent('  ')).convert(macroOutput);
-            if (goldenFile.readAsStringSync() != string) {
-              print('Updating mismatched golden: ${goldenFile.path}');
-              goldenFile.writeAsStringSync(string);
+          if (introspectionGoldenFile != null &&
+              introspectionMacroOutput != null) {
+            final string = (const JsonEncoder.withIndent('  '))
+                .convert(introspectionMacroOutput);
+            if (introspectionGoldenFile!.readAsStringSync() != string) {
+              print('Updating mismatched golden: '
+                  '${introspectionGoldenFile!.path}');
+              introspectionGoldenFile!.writeAsStringSync(string);
+            }
+          }
+          if (applicationGoldenFile != null && applicationMacroOutput != null) {
+            if (applicationGoldenFile!.readAsStringSync() !=
+                applicationMacroOutput) {
+              print(
+                  'Updating mismatched golden: ${applicationGoldenFile!.path}');
+              applicationGoldenFile!.writeAsStringSync(applicationMacroOutput!);
             }
           }
         });
@@ -94,25 +127,36 @@ void main() {
 
         final sources = computeKernelResult
             .previousState!.incrementalCompiler!.context.uriToSource;
-        final macroSource = sources.entries
+        applicationMacroOutput = sources.entries
             .singleWhere((e) => e.key.scheme == 'dart-macro+file')
             .value
             .text;
 
-        // Each `QueryClass` outputs its query result as a comment in an
-        // augmentation. Collect them and merge them to compare with the
-        // golden.
-        final macroOutputs = macroSource
-            .split('\n')
-            .where((l) => l.startsWith('// '))
-            .map((l) =>
-                json.decode(l.substring('// '.length)) as Map<String, Object?>);
-        macroOutput = _merge(macroOutputs);
+        if (introspectionGolden != null) {
+          // Each `QueryClass` outputs its query result as a comment in an
+          // augmentation. Collect them and merge them to compare with the
+          // golden.
+          final macroOutputs = applicationMacroOutput!
+              .split('\n')
+              .where((l) => l.startsWith('// '))
+              .map((l) => json.decode(l.substring('// '.length))
+                  as Map<String, Object?>);
+          introspectionMacroOutput = _merge(macroOutputs);
 
-        expect(macroOutput, golden,
-            reason: updateGoldens
-                ? null
-                : '\n--> To update goldens, run: UPDATE_GOLDENS=yes dart test');
+          expect(introspectionMacroOutput, introspectionGolden,
+              reason: updateGoldens
+                  ? '\n--> Goldens updated! Should pass on rerun.'
+                  : '\n--> To update goldens, run: '
+                      'UPDATE_GOLDENS=yes dart test');
+        }
+
+        if (applicationGolden != null) {
+          expect(applicationMacroOutput, applicationGolden,
+              reason: updateGoldens
+                  ? '\n--> Goldens updated! Should pass on rerun.'
+                  : '\n--> To update goldens, run: '
+                      'UPDATE_GOLDENS=yes dart test');
+        }
       });
     }
   });

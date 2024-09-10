@@ -209,6 +209,11 @@ abstract class Definition {
       required List<Property> properties,
       bool createInBuffer}) = UnionTypeDefinition;
 
+  /// Defines an enum.
+  factory Definition.$enum(String name,
+      {required String description,
+      required List<String> values}) = EnumTypeDefinition;
+
   /// Defines a named type represented in JSON as a string.
   factory Definition.stringTypedef(String name, {required String description}) =
       StringTypedefDefinition;
@@ -649,6 +654,43 @@ class UnionTypeDefinition implements Definition {
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
+}
+
+/// Definition of an enum type.
+class EnumTypeDefinition implements Definition {
+  @override
+  final String name;
+  final String description;
+  final List<String> values;
+
+  EnumTypeDefinition(this.name,
+      {required this.description, required this.values});
+
+  @override
+  Map<String, Object?> generateSchema(GenerationContext context) => {
+        'type': 'string',
+        'description': description,
+      };
+
+  @override
+  String generateCode(GenerationContext context) {
+    final result = StringBuffer();
+
+    result.writeln('/// $description');
+    result.write('extension type const $name.fromJson(String string)'
+        ' implements Object {');
+    for (final value in values) {
+      result.writeln("static const $name $value = $name.fromJson('$value');");
+    }
+    result.writeln('}');
+    return result.toString();
+  }
+
+  @override
+  Set<String> get allTypeNames => {};
+
+  @override
+  String get representationTypeName => 'String';
 }
 
 /// Definition of a named type that is actually a String.

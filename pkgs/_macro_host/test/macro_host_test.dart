@@ -11,8 +11,8 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: 'json'),
-    Protocol(encoding: 'binary')
+    Protocol(encoding: ProtocolEncoding.json),
+    Protocol(encoding: ProtocolEncoding.binary)
   ]) {
     group('MacroHost using ${protocol.encoding}', () {
       test('hosts a macro, receives augmentations', () async {

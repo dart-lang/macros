@@ -209,13 +209,20 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 /// The macro to host protocol version and encoding. TODO(davidmorgan): add the version.
 extension type Protocol.fromJson(Map<String, Object?> node) implements Object {
   Protocol({
-    String? encoding,
+    ProtocolEncoding? encoding,
   }) : this.fromJson({
           if (encoding != null) 'encoding': encoding,
         });
 
-  /// The wire format: json or binary. TODO(davidmorgan): use an enum?
-  String get encoding => node['encoding'] as String;
+  /// The wire format: json or binary.
+  ProtocolEncoding get encoding => node['encoding'] as ProtocolEncoding;
+}
+
+/// The wire encoding used.
+extension type const ProtocolEncoding.fromJson(String string)
+    implements Object {
+  static const ProtocolEncoding json = ProtocolEncoding.fromJson('json');
+  static const ProtocolEncoding binary = ProtocolEncoding.fromJson('binary');
 }
 
 /// Macro's query about the code it should augment.

@@ -342,10 +342,11 @@ final schemas = Schemas([
                 'TODO(davidmorgan): add the version.',
             properties: [
               Property('encoding',
-                  type: 'String',
-                  description: 'The wire format: json or binary. '
-                      'TODO(davidmorgan): use an enum?'),
+                  type: 'ProtocolEncoding',
+                  description: 'The wire format: json or binary.'),
             ]),
+        Definition.$enum('ProtocolEncoding',
+            description: 'The wire encoding used.', values: ['json', 'binary']),
         Definition.clazz('QueryRequest',
             description: "Macro's query about the code it should augment.",
             properties: [
