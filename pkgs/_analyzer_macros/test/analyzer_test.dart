@@ -25,7 +25,7 @@ void main() {
           AnalysisContextCollection(includedPaths: [directory.path]);
       analysisContext = contextCollection.contexts.first;
       injected.macroImplementation = await AnalyzerMacroImplementation.start(
-          protocol: Protocol(encoding: 'binary'),
+          protocol: Protocol(encoding: ProtocolEncoding.binary),
           packageConfig: Isolate.packageConfigSync!);
     });
 
