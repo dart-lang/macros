@@ -1,0 +1,3 @@
+# Stop git from changing golden file line endings on checkout.
+*.augmentations binary
+*.json binary

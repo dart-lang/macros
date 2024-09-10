@@ -1,0 +1,5 @@
+part of 'package:foo/declare_x.dart';
+
+augment class Foo {
+int get x => 3;
+}
