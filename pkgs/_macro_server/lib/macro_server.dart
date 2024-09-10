@@ -51,8 +51,8 @@ class MacroServer {
     while (true) {
       // Look up the connection with the macro corresponding to `annotation`.
       connection = _connections
-          .where((c) => c.descriptions.any(
-              (d) => d.annotation.string == request.macroAnnotation.string))
+          .where((c) => c.descriptions
+              .any((d) => d.annotation.equals(request.macroAnnotation)))
           .singleOrNull;
       // If it's found: done.
       if (connection != null) break;

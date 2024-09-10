@@ -71,7 +71,7 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
 extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'type': Type.stringPointer,
+    'type': Type.typedMapPointer,
   });
   MetadataAnnotation({
     QualifiedName? type,
@@ -216,7 +216,7 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
 extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'name': Type.stringPointer,
+    'name': Type.typedMapPointer,
     'instantiation': Type.closedListPointer,
   });
   NamedTypeDesc({
@@ -302,8 +302,34 @@ extension type Properties.fromJson(Map<String, Object?> node)
 }
 
 /// A URI combined with a name.
-extension type QualifiedName.fromJson(String string) implements Object {
-  QualifiedName(String string) : this.fromJson(string);
+extension type QualifiedName.fromJson(Map<String, Object?> node)
+    implements Object {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'uri': Type.stringPointer,
+    'name': Type.stringPointer,
+  });
+  QualifiedName({
+    String? uri,
+    String? name,
+  }) : this.fromJson(Scope.createMap(
+          _schema,
+          uri,
+          name,
+        ));
+
+  /// Parses [string] of the form `uri#name`.
+  static QualifiedName parse(String string) {
+    final index = string.indexOf('#');
+    if (index == -1) throw ArgumentError('Expected `#` in string: $string');
+    return QualifiedName(
+        uri: string.substring(0, index), name: string.substring(index + 1));
+  }
+
+  /// The URI of the file containing the name.
+  String get uri => node['uri'] as String;
+
+  /// The name.
+  String get name => node['name'] as String;
 }
 
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.

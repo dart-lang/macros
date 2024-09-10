@@ -35,15 +35,7 @@ enum Scope {
   /// Provides a new buffer for the macro's augmentations.
   ///
   /// Cannot be nested.
-  macro,
-
-  /// Temporary scope for type evaluation.
-  ///
-  /// A new buffer is introduced for temporary intermediate values. It's an
-  /// error to try to serialize it.
-  ///
-  /// Can be nested.
-  evaluating;
+  macro;
 
   /// Runs [function] in this scope.
   T run<T>(T Function() function) {
@@ -73,7 +65,8 @@ enum Scope {
 
   /// Creates a "typed map" in the buffer of the current scope.
   ///
-  /// Throws if there is no current scope.
+  /// If there is no current scope, creates a buffer just for this map, which
+  /// is slow.
   static Map<String, Object?> createMap(TypedMapSchema schema,
       [Object? v0,
       Object? v1,
@@ -84,18 +77,17 @@ enum Scope {
       Object? v6,
       Object? v7]) {
     final scope = Scope._currentOrNull;
-    final buffer = scope?.buffer;
-    if (buffer == null) throw StateError(_noScopeMessage);
+    final buffer = scope?.buffer ?? JsonBufferBuilder();
     return buffer.createTypedMap(schema, v0, v1, v2, v3, v4, v5, v6, v7);
   }
 
   /// Creates a "growable map" in the buffer of the current scope.
   ///
-  /// Throws if there is no current scope.
+  /// If there is no current scope, creates a buffer just for this map, which
+  /// is slow.
   static Map<String, Object?> createGrowableMap() {
     final scope = Scope._currentOrNull;
-    final buffer = scope?.buffer;
-    if (buffer == null) throw StateError(_noScopeMessage);
+    final buffer = scope?.buffer ?? JsonBufferBuilder();
     return buffer.createGrowableMap();
   }
 
@@ -107,10 +99,6 @@ enum Scope {
   /// Throws if called more than once in the same scope.
   static Uint8List serializeToBinary(Map<String, Object?> node) {
     final scope = _currentOrNull;
-    if (scope?.type == Scope.evaluating) {
-      throw StateError('Current scope is Scope.evaluating, '
-          'which should not serialize anything.');
-    }
     final buffer = scope?.buffer ?? JsonBufferBuilder();
     if (buffer.map.isNotEmpty) {
       throw StateError('Buffer was already used to send: '
@@ -133,7 +121,3 @@ class _ScopeData {
 
   _ScopeData._(this.type, this.buffer);
 }
-
-const _noScopeMessage =
-    'Not running in a scope, but this `dart_model` type can only be '
-    'instantiated in a scope. See Scope#run.';

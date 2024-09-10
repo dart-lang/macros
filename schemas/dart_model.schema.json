@@ -220,8 +220,18 @@
       }
     },
     "QualifiedName": {
-      "type": "string",
-      "description": "A URI combined with a name."
+      "type": "object",
+      "description": "A URI combined with a name.",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file containing the name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name."
+        }
+      }
     },
     "Query": {
       "type": "object",

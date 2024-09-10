@@ -14,7 +14,7 @@ void main() {
   InterfaceType interfaceType(String name,
       [List<StaticType> instantiation = const []]) {
     return InterfaceType(
-        name: QualifiedName(name), instantiation: instantiation);
+        name: QualifiedName.parse(name), instantiation: instantiation);
   }
 
   InterfaceType future(StaticType of) {
@@ -103,12 +103,12 @@ TypeHierarchyEntry _entryWithoutTypeArguments(String name,
     typeParameters: [],
     supertypes: [
       NamedTypeDesc(
-        name: QualifiedName(supertype),
+        name: QualifiedName.parse(supertype),
         instantiation: [],
       ),
     ],
     self: NamedTypeDesc(
-      name: QualifiedName(name),
+      name: QualifiedName.parse(name),
       instantiation: [],
     ),
   );
@@ -122,7 +122,7 @@ final _model = Model(
           typeParameters: [],
           supertypes: [],
           self: NamedTypeDesc(
-            name: QualifiedName('dart:core#Object'),
+            name: QualifiedName.parse('dart:core#Object'),
             instantiation: [],
           ),
         ),
@@ -141,12 +141,12 @@ final _model = Model(
           ],
           supertypes: [
             NamedTypeDesc(
-              name: QualifiedName('dart:core#Object'),
+              name: QualifiedName.parse('dart:core#Object'),
               instantiation: [],
             ),
           ],
           self: NamedTypeDesc(
-            name: QualifiedName('dart:core#Iterable'),
+            name: QualifiedName.parse('dart:core#Iterable'),
             instantiation: [
               StaticTypeDesc.typeParameterTypeDesc(
                   TypeParameterTypeDesc(parameterId: 0)),
@@ -159,7 +159,7 @@ final _model = Model(
           ],
           supertypes: [
             NamedTypeDesc(
-              name: QualifiedName('dart:core#Iterable'),
+              name: QualifiedName.parse('dart:core#Iterable'),
               instantiation: [
                 StaticTypeDesc.typeParameterTypeDesc(
                     TypeParameterTypeDesc(parameterId: 1)),
@@ -167,7 +167,7 @@ final _model = Model(
             ),
           ],
           self: NamedTypeDesc(
-            name: QualifiedName('dart:core#List'),
+            name: QualifiedName.parse('dart:core#List'),
             instantiation: [
               StaticTypeDesc.typeParameterTypeDesc(
                   TypeParameterTypeDesc(parameterId: 1)),
@@ -180,12 +180,12 @@ final _model = Model(
           ],
           supertypes: [
             NamedTypeDesc(
-              name: QualifiedName('dart:core#Object'),
+              name: QualifiedName.parse('dart:core#Object'),
               instantiation: [],
             ),
           ],
           self: NamedTypeDesc(
-            name: QualifiedName('dart:async#Future'),
+            name: QualifiedName.parse('dart:async#Future'),
             instantiation: [
               StaticTypeDesc.typeParameterTypeDesc(
                   TypeParameterTypeDesc(parameterId: 2)),

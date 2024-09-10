@@ -21,7 +21,8 @@ void main() {
         final builder = MacroBuilder();
         final bundle = await builder.build(Isolate.packageConfigSync!, [
           QualifiedName(
-              'package:_test_macros/declare_x_macro.dart#DeclareXImplementation')
+              uri: 'package:_test_macros/declare_x_macro.dart',
+              name: 'DeclareXImplementation')
         ]);
 
         final serverSocket = await ServerSocket.bind('localhost', 0);

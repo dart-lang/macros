@@ -54,7 +54,7 @@ class CfeMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(QualifiedName('$uri#$name'));
+      _impl._host.isMacro(QualifiedName(uri: '$uri', name: name));
 }
 
 class CfeMacroRunner implements injected.MacroRunner {
@@ -65,8 +65,9 @@ class CfeMacroRunner implements injected.MacroRunner {
   @override
   injected.RunningMacro run(Uri uri, String name) => CfeRunningMacro.run(
       _impl,
-      QualifiedName('$uri#$name'),
-      _impl._host.lookupMacroImplementation(QualifiedName('$uri#$name'))!);
+      QualifiedName(uri: '$uri', name: name),
+      _impl._host
+          .lookupMacroImplementation(QualifiedName(uri: '$uri', name: name))!);
 }
 
 class CfeRunningMacro implements injected.RunningMacro {
@@ -171,7 +172,6 @@ extension MacroTargetExtension on MacroTarget {
   QualifiedName get qualifiedName {
     final identifier = ((this as Declaration).identifier as cfe.IdentifierImpl)
         .resolveIdentifier();
-    return QualifiedName('${identifier.uri}#'
-        '${identifier.name}');
+    return QualifiedName(uri: '${identifier.uri}', name: identifier.name);
   }
 }

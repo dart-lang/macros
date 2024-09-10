@@ -42,7 +42,8 @@ void main() {
             server.sendToMacro(HostRequest.augmentRequest(AugmentRequest(),
                 id: 1,
                 macroAnnotation: QualifiedName(
-                    'package:_test_macros/test_macros.dart#DeclareX'))),
+                    uri: 'package:_test_macros/test_macros.dart',
+                    name: 'DeclareX'))),
             throwsException);
       });
 
@@ -60,7 +61,8 @@ void main() {
         await server.sendToMacro(HostRequest.augmentRequest(
           id: 1,
           macroAnnotation: QualifiedName(
-              'package:_test_macros/declare_x_macro.dart#DeclareX'),
+              uri: 'package:_test_macros/declare_x_macro.dart',
+              name: 'DeclareX'),
           AugmentRequest(phase: 1),
         ));
       });
@@ -87,13 +89,15 @@ void main() {
           server.sendToMacro(HostRequest.augmentRequest(
             id: 1,
             macroAnnotation: QualifiedName(
-                'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                uri: 'package:_test_macros/declare_x_macro.dart',
+                name: 'DeclareX'),
             AugmentRequest(phase: 1),
           )),
           server.sendToMacro(HostRequest.augmentRequest(
               id: 2,
               macroAnnotation: QualifiedName(
-                  'package:_test_macros/query_class.dart#QueryClass'),
+                  uri: 'package:_test_macros/query_class.dart',
+                  name: 'QueryClass'),
               AugmentRequest(phase: 1)))
         ]);
       });
@@ -115,13 +119,15 @@ void main() {
           server.sendToMacro(HostRequest.augmentRequest(
             id: 1,
             macroAnnotation: QualifiedName(
-                'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                uri: 'package:_test_macros/declare_x_macro.dart',
+                name: 'DeclareX'),
             AugmentRequest(phase: 1),
           )),
           server.sendToMacro(HostRequest.augmentRequest(
             id: 2,
             macroAnnotation: QualifiedName(
-                'package:_test_macros/query_class.dart#QueryClass'),
+                uri: 'package:_test_macros/query_class.dart',
+                name: 'QueryClass'),
             AugmentRequest(phase: 1),
           ))
         ]);

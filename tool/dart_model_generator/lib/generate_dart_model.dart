@@ -188,15 +188,22 @@ abstract class Definition {
   /// The name of the defined type.
   String get name;
 
-  /// Defines a class.
+  /// Defines a "class".
+  ///
+  /// Generated as an extension type over `Map<String, Object?>`.
   ///
   /// [createInBuffer] specifies whether the type is written directly to a
   /// buffer when created. If so, it must be created in a `Scope` which will
   /// provide the buffer.
+  ///
+  /// [extraCode] is arbitrary code to write directly in the extension type.
+  /// Needed for static methods and constructors; "instance" methods can be
+  /// added as extensions outside the generated code.
   factory Definition.clazz(String name,
       {required String description,
       required List<Property> properties,
-      bool createInBuffer}) = ClassTypeDefinition;
+      bool createInBuffer,
+      String? extraCode}) = ClassTypeDefinition;
 
   /// Defines a union.
   ///
@@ -416,11 +423,13 @@ class ClassTypeDefinition implements Definition {
   final String description;
   final List<Property> properties;
   final bool createInBuffer;
+  final String? extraCode;
 
   ClassTypeDefinition(this.name,
       {required this.description,
       required this.properties,
-      this.createInBuffer = false});
+      this.createInBuffer = false,
+      this.extraCode});
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -486,6 +495,10 @@ class ClassTypeDefinition implements Definition {
       result.writeln('}');
     }
     result.writeln(');');
+
+    if (extraCode != null) {
+      result.writeln(extraCode);
+    }
 
     for (final property in properties) {
       result.writeln(property.getterCode);

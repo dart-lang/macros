@@ -49,7 +49,8 @@ void main() {
             HostRequest.augmentRequest(
                     id: requestId,
                     macroAnnotation: QualifiedName(
-                        'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                        uri: 'package:_test_macros/declare_x_macro.dart',
+                        name: 'DeclareX'),
                     AugmentRequest(phase: 2))
                 .node);
         final augmentResponse = await responses.next;
@@ -80,8 +81,10 @@ void main() {
           'type': 'MacroStartedRequest',
           'value': {
             'macroDescription': {
-              'annotation':
-                  'package:_test_macros/declare_x_macro.dart#DeclareX',
+              'annotation': {
+                'uri': 'package:_test_macros/declare_x_macro.dart',
+                'name': 'DeclareX',
+              },
               'runsInPhases': [2]
             }
           }
@@ -93,7 +96,8 @@ void main() {
             HostRequest.augmentRequest(
                     id: requestId,
                     macroAnnotation: QualifiedName(
-                        'package:_test_macros/declare_x_macro.dart#DeclareX'),
+                        uri: 'package:_test_macros/declare_x_macro.dart',
+                        name: 'DeclareX'),
                     AugmentRequest(phase: 2))
                 .node);
         final augmentResponse = await responses.next;
@@ -125,7 +129,10 @@ void main() {
           'type': 'MacroStartedRequest',
           'value': {
             'macroDescription': {
-              'annotation': 'package:_test_macros/query_class.dart#QueryClass',
+              'annotation': {
+                'uri': 'package:_test_macros/query_class.dart',
+                'name': 'QueryClass',
+              },
               'runsInPhases': [3]
             }
           },
@@ -137,9 +144,12 @@ void main() {
             HostRequest.augmentRequest(
               id: requestId,
               macroAnnotation: QualifiedName(
-                  'package:_test_macros/query_class.dart#QueryClass'),
+                  uri: 'package:_test_macros/query_class.dart',
+                  name: 'QueryClass'),
               AugmentRequest(
-                  phase: 3, target: QualifiedName('package:foo/foo.dart#Foo')),
+                  phase: 3,
+                  target:
+                      QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo')),
             ).node);
         final queryRequest = await responses.next;
         final queryRequestId = MacroRequest.fromJson(queryRequest).id;
@@ -149,7 +159,9 @@ void main() {
             'id': queryRequestId,
             'type': 'QueryRequest',
             'value': {
-              'query': {'target': 'package:foo/foo.dart#Foo'}
+              'query': {
+                'target': {'uri': 'package:foo/foo.dart', 'name': 'Foo'}
+              }
             },
           },
         );
@@ -202,10 +214,12 @@ void main() {
               HostRequest.augmentRequest(
                 id: requestId,
                 macroAnnotation: QualifiedName(
-                    'package:_test_macros/query_class.dart#QueryClass'),
+                    uri: 'package:_test_macros/query_class.dart',
+                    name: 'QueryClass'),
                 AugmentRequest(
                     phase: 3,
-                    target: QualifiedName('package:foo/foo.dart#Foo')),
+                    target: QualifiedName(
+                        uri: 'package:foo/foo.dart', name: 'Foo')),
               ).node);
         }
 

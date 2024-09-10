@@ -20,7 +20,8 @@ void main() {
                 metadataAnnotations: [
                   MetadataAnnotation(
                       type: QualifiedName(
-                          'package:dart_model/dart_model.dart#SomeAnnotation'))
+                          uri: 'package:dart_model/dart_model.dart',
+                          name: 'SomeAnnotation'))
                 ])
               ..members['_root'] = Member(
                 properties: Properties(isField: true),
@@ -34,7 +35,12 @@ void main() {
           'scopes': {
             'JsonData': {
               'metadataAnnotations': [
-                {'type': 'package:dart_model/dart_model.dart#SomeAnnotation'}
+                {
+                  'type': {
+                    'uri': 'package:dart_model/dart_model.dart',
+                    'name': 'SomeAnnotation'
+                  }
+                }
               ],
               'members': {
                 '_root': {
@@ -104,13 +110,15 @@ void main() {
   });
 
   group(QualifiedName, () {
-    test('has uri', () {
-      expect(QualifiedName('package:foo/foo.dart#Foo').uri,
-          'package:foo/foo.dart');
+    test('asString', () {
+      expect(QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo').asString,
+          'package:foo/foo.dart#Foo');
     });
 
-    test('has name', () {
-      expect(QualifiedName('package:foo/foo.dart#Foo').name, 'Foo');
+    test('parse', () {
+      expect(QualifiedName.parse('package:foo/foo.dart#Foo').uri,
+          'package:foo/foo.dart');
+      expect(QualifiedName.parse('package:foo/foo.dart#Foo').name, 'Foo');
     });
   });
 }

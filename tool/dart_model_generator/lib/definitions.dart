@@ -154,8 +154,24 @@ final schemas = Schemas([
               Property('isStatic',
                   type: 'bool', description: 'Whether the entity is static.'),
             ]),
-        Definition.stringTypedef('QualifiedName',
-            description: 'A URI combined with a name.'),
+        Definition.clazz('QualifiedName',
+            description: 'A URI combined with a name.',
+            createInBuffer: true,
+            properties: [
+              Property('uri',
+                  type: 'String',
+                  description: 'The URI of the file containing the name.'),
+              Property('name', type: 'String', description: 'The name.'),
+            ],
+            extraCode: r'''
+/// Parses [string] of the form `uri#name`.
+static QualifiedName parse(String string) {
+  final index = string.indexOf('#');
+  if (index == -1) throw ArgumentError('Expected `#` in string: $string');
+  return QualifiedName(
+    uri: string.substring(0, index), name: string.substring(index + 1));
+}
+'''),
         Definition.clazz('Query',
             description: 'Query about a corpus of Dart source code. '
                 'TODO(davidmorgan): this queries about a single class, expand '

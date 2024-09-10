@@ -100,7 +100,7 @@ class CfeQueryService implements QueryService {
           .accept1(translator, context)
           .asNamedTypeDesc;
 
-      result.named[asNamedType.name.string] = TypeHierarchyEntry(
+      result.named[asNamedType.name.asString] = TypeHierarchyEntry(
         self: asNamedType,
         typeParameters: [
           for (final typeParameter in element.typeParameters)

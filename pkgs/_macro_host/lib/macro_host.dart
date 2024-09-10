@@ -54,7 +54,7 @@ class MacroHost {
   Future<Set<int>> queryMacroPhases(
       Uri packageConfig, QualifiedName annotation) async {
     await _ensureRunning(annotation);
-    return _hostService._macroState[annotation.string]!.phases;
+    return _hostService._macroState[annotation.asString]!.phases;
   }
 
   /// Sends [request] to the macro triggered by [annotation].
@@ -69,7 +69,7 @@ class MacroHost {
   /// If the macro triggered by [annotation] is not running, builds it and
   /// launches it.
   Future<void> _ensureRunning(QualifiedName annotation) async {
-    if (_hostService._macroState.containsKey(annotation.string)) return;
+    if (_hostService._macroState.containsKey(annotation.asString)) return;
     await buildAndRunMacro(annotation);
   }
 
@@ -77,13 +77,13 @@ class MacroHost {
   ///
   /// Throws if it's already running.
   Future<void> buildAndRunMacro(QualifiedName annotation) async {
-    if (_hostService._macroState.containsKey(annotation.string)) {
-      throw StateError('Macro is already running: ${annotation.string}');
+    if (_hostService._macroState.containsKey(annotation.asString)) {
+      throw StateError('Macro is already running: ${annotation.asString}');
     }
     // TODO(davidmorgan): additional state is needed to track that a macro
     // is still building; currently requests while the macro is building will
     // time out after 5s.
-    _hostService._macroState[annotation.string] = _MacroState();
+    _hostService._macroState[annotation.asString] = _MacroState();
     final macroBundle = await macroBuilder.build(
         macroPackageConfig.uri, [lookupMacroImplementation(annotation)!]);
     macroRunner.start(
@@ -107,7 +107,7 @@ class _HostService implements HostService {
     switch (request.type) {
       case MacroRequestType.macroStartedRequest:
         final macroStartedRequest = request.asMacroStartedRequest;
-        _macroState[macroStartedRequest.macroDescription.annotation.string]!
+        _macroState[macroStartedRequest.macroDescription.annotation.asString]!
             ._phasesCompleter
             .complete(
                 macroStartedRequest.macroDescription.runsInPhases.toSet());

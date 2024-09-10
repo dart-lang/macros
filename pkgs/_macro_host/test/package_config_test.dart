@@ -18,8 +18,9 @@ void main() {
       expect(
           packageConfig
               .lookupMacroImplementation(QualifiedName(
-                  'package:_test_macros/declare_x_macro.dart#DeclareX'))!
-              .string,
+                  uri: 'package:_test_macros/declare_x_macro.dart',
+                  name: 'DeclareX'))!
+              .asString,
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
     });
 
@@ -33,8 +34,8 @@ void main() {
       expect(
           packageConfig
               .lookupMacroImplementation(
-                  QualifiedName('$sourceFileUri#DeclareX'))!
-              .string,
+                  QualifiedName(uri: '$sourceFileUri', name: 'DeclareX'))!
+              .asString,
           'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
     });
   });
