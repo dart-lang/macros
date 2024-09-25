@@ -658,6 +658,16 @@ class UnionTypeDefinition implements Definition {
       result.writeln(property.getterCode);
     }
     result.writeln('}');
+
+    result.writeln('extension IterableOf${name}Extension on Iterable<$name> {');
+    for (final type in types) {
+      final lowerType = _firstToLowerCase(type);
+      result.writeln('Iterable<$type> whereType$type() => '
+          'where((e) => e.type == ${name}Type.$lowerType)'
+          '.map((e) => e.as$type);');
+    }
+    result.writeln('}');
+
     return result.toString();
   }
 

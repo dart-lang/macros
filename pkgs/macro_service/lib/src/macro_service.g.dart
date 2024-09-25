@@ -110,6 +110,12 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
   QualifiedName get macroAnnotation => node['macroAnnotation'] as QualifiedName;
 }
 
+extension IterableOfHostRequestExtension on Iterable<HostRequest> {
+  Iterable<AugmentRequest> whereTypeAugmentRequest() =>
+      where((e) => e.type == HostRequestType.augmentRequest)
+          .map((e) => e.asAugmentRequest);
+}
+
 /// Information about a macro that the macro provides to the host.
 extension type MacroDescription.fromJson(Map<String, Object?> node)
     implements Object {
@@ -204,6 +210,15 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 
   /// The id of this request, must be returned in responses.
   int get id => node['id'] as int;
+}
+
+extension IterableOfMacroRequestExtension on Iterable<MacroRequest> {
+  Iterable<MacroStartedRequest> whereTypeMacroStartedRequest() =>
+      where((e) => e.type == MacroRequestType.macroStartedRequest)
+          .map((e) => e.asMacroStartedRequest);
+  Iterable<QueryRequest> whereTypeQueryRequest() =>
+      where((e) => e.type == MacroRequestType.queryRequest)
+          .map((e) => e.asQueryRequest);
 }
 
 /// The macro to host protocol version and encoding. TODO(davidmorgan): add the version.
@@ -344,4 +359,19 @@ extension type Response.fromJson(Map<String, Object?> node) implements Object {
 
   /// The id of the request this is responding to.
   int get requestId => node['requestId'] as int;
+}
+
+extension IterableOfResponseExtension on Iterable<Response> {
+  Iterable<AugmentResponse> whereTypeAugmentResponse() =>
+      where((e) => e.type == ResponseType.augmentResponse)
+          .map((e) => e.asAugmentResponse);
+  Iterable<ErrorResponse> whereTypeErrorResponse() =>
+      where((e) => e.type == ResponseType.errorResponse)
+          .map((e) => e.asErrorResponse);
+  Iterable<MacroStartedResponse> whereTypeMacroStartedResponse() =>
+      where((e) => e.type == ResponseType.macroStartedResponse)
+          .map((e) => e.asMacroStartedResponse);
+  Iterable<QueryResponse> whereTypeQueryResponse() =>
+      where((e) => e.type == ResponseType.queryResponse)
+          .map((e) => e.asQueryResponse);
 }
