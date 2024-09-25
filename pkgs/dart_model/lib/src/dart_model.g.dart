@@ -514,6 +514,33 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
   }
 }
 
+extension IterableOfStaticTypeDescExtension on Iterable<StaticTypeDesc> {
+  Iterable<DynamicTypeDesc> whereTypeDynamicTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.dynamicTypeDesc)
+          .map((e) => e.asDynamicTypeDesc);
+  Iterable<FunctionTypeDesc> whereTypeFunctionTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.functionTypeDesc)
+          .map((e) => e.asFunctionTypeDesc);
+  Iterable<NamedTypeDesc> whereTypeNamedTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.namedTypeDesc)
+          .map((e) => e.asNamedTypeDesc);
+  Iterable<NeverTypeDesc> whereTypeNeverTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.neverTypeDesc)
+          .map((e) => e.asNeverTypeDesc);
+  Iterable<NullableTypeDesc> whereTypeNullableTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.nullableTypeDesc)
+          .map((e) => e.asNullableTypeDesc);
+  Iterable<RecordTypeDesc> whereTypeRecordTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.recordTypeDesc)
+          .map((e) => e.asRecordTypeDesc);
+  Iterable<TypeParameterTypeDesc> whereTypeTypeParameterTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.typeParameterTypeDesc)
+          .map((e) => e.asTypeParameterTypeDesc);
+  Iterable<VoidTypeDesc> whereTypeVoidTypeDesc() =>
+      where((e) => e.type == StaticTypeDescType.voidTypeDesc)
+          .map((e) => e.asVoidTypeDesc);
+}
+
 /// A resolved type parameter introduced by a [FunctionTypeDesc].
 extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
     implements Object {

@@ -107,6 +107,26 @@ void main() {
           expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
               'JsonData']!['members']);
     });
+
+    test('whereType extension methods', () {
+      Scope.macro.run(() {
+        final functionType = FunctionTypeDesc();
+        final namedType = NamedTypeDesc(
+            name: QualifiedName.parse('package:foo/foo.dart#Foo'));
+        final namedType2 = NamedTypeDesc(
+            name: QualifiedName.parse('package:foo/foo.dart#Foo2'));
+        final types = [
+          StaticTypeDesc.functionTypeDesc(functionType),
+          StaticTypeDesc.namedTypeDesc(namedType),
+          StaticTypeDesc.namedTypeDesc(namedType2)
+        ];
+
+        expect(types.whereTypeFunctionTypeDesc(), [functionType]);
+        expect(types.whereTypeNamedTypeDesc(), [namedType, namedType2]);
+
+        expect(types.whereTypeNamedTypeDesc().first.name.name, 'Foo');
+      });
+    });
   });
 
   group(QualifiedName, () {
