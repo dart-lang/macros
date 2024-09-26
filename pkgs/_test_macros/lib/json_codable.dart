@@ -79,7 +79,7 @@ ${initializers.join(',\n')};
     result.add(Augmentation(code: '''
 $_jsonMapType toJson() {
   final json = $_jsonMapType{};
-${serializers.map((s) =>'$s;\n').join('')}
+${serializers.map((s) => '$s;\n').join('')}
   return json;
 };
 '''));
@@ -110,16 +110,16 @@ ${serializers.map((s) =>'$s;\n').join('')}
           case 'num':
             return '$reference as ${namedType.name.code}$orNull';
           case 'List':
+            final type = namedType.instantiation.single;
             return '$nullCheck [for (final item in $reference '
                 'as {{dart:core#List}}<{{dart:core#Object}}?>) '
-                '${_convertTypeFromJson(
-                  'item', namedType.instantiation.single)}'
+                '${_convertTypeFromJson('item', type)}'
                 ']';
           case 'Set':
+            final type = namedType.instantiation.single;
             return '$nullCheck {for (final item in $reference '
                 'as {{dart:core#Set}}<{{dart:core#Object}}?>) '
-                '${_convertTypeFromJson(
-                  'item', namedType.instantiation.single)}'
+                '${_convertTypeFromJson('item', type)}'
                 '}';
           case 'Map':
             // TODO(davidmorgan): check for and handle wrong key type.
