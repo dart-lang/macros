@@ -26,6 +26,7 @@ mapOfSerializableField = json[r'mapOfSerializableField'] == null ? null :  {for 
 nullableMapOfSerializableField =  {for (final (:key, :value) in json[r'nullableMapOfSerializableField'] as prefix1.Map<prefix1.String, prefix1.Object?>) key: value == null ? null :  prefix0.C.fromJson(value as prefix1.Map<prefix1.String, prefix1.Object?>};
 
 prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
+  final json = prefix1.Map<prefix1.String, prefix1.Object?>{};
 json[r'boolField'] = boolField;
 json[r'nullableBoolField'] = nullableBoolField;
 json[r'stringField'] = stringField;
@@ -36,12 +37,14 @@ json[r'doubleField'] = doubleField;
 json[r'nullableDoubleField'] = nullableDoubleField;
 json[r'numField'] = numField;
 json[r'nullableNumField'] = nullableNumField;
-json[r'listOfSerializableField'] = listOfSerializableField == null ? null :  {for (final item in listOfSerializableField) item == null ? null :  item.toJson()};
-json[r'nullableListOfSerializableField'] =  {for (final item in nullableListOfSerializableField) item == null ? null :  item.toJson()};
-json[r'setOfSerializableField'] = setOfSerializableField == null ? null :  {for (final item in setOfSerializableField) item == null ? null :  item.toJson()};
-json[r'nullableSetOfSerializableField'] =  {for (final item in nullableSetOfSerializableField) item == null ? null :  item.toJson()};
+json[r'listOfSerializableField'] = listOfSerializableField == null ? null :  [for (final item in listOfSerializableField) item == null ? null :  item.toJson()];
+json[r'nullableListOfSerializableField'] =  [for (final item in nullableListOfSerializableField) item == null ? null :  item.toJson()];
+json[r'setOfSerializableField'] = setOfSerializableField == null ? null :  [for (final item in setOfSerializableField) item == null ? null :  item.toJson()];
+json[r'nullableSetOfSerializableField'] =  [for (final item in nullableSetOfSerializableField) item == null ? null :  item.toJson()];
 json[r'mapOfSerializableField'] = mapOfSerializableField == null ? null :  {for (final (:key, :value) in mapOfSerializableField.entries) key: value == null ? null :  value.toJson()};
-json[r'nullableMapOfSerializableField'] =  {for (final (:key, :value) in nullableMapOfSerializableField.entries) key: value == null ? null :  value.toJson()}
+json[r'nullableMapOfSerializableField'] =  {for (final (:key, :value) in nullableMapOfSerializableField.entries) key: value == null ? null :  value.toJson()};
+
+  return json;
 };
 
 }
@@ -53,7 +56,10 @@ augment prefix0.C.fromJson(prefix1.Map<prefix1.String, prefix1.Object?> json) :
 boolField = json[r'boolField'] as prefix1.bool;
 
 prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
-json[r'boolField'] = boolField
+  final json = prefix1.Map<prefix1.String, prefix1.Object?>{};
+json[r'boolField'] = boolField;
+
+  return json;
 };
 
 }

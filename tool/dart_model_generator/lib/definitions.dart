@@ -80,6 +80,7 @@ final schemas = Schemas([
               Property('scopes',
                   type: 'Map<Interface>', description: 'Scopes by name.'),
             ]),
+        // TODO(davidmorgan): make `Member` a union.
         Definition.clazz('Member',
             description: 'Member of a scope.',
             createInBuffer: true,

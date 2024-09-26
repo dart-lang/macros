@@ -144,8 +144,6 @@ class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
     return AnalyzerMacroExecutionResult(target, declarations);
   }
 
-  Future<void> resolveTypes() async {}
-
   @override
   List<Diagnostic> get diagnostics => [];
 
@@ -188,6 +186,8 @@ extension MacroTargetExtension on MacroTarget {
 /// Converts [code] to a mix of `Identifier` and `String`.
 ///
 /// Looks up references of the form `{{uri#name}}` using `resolveIdentifier`.
+///
+/// TODO(davidmorgan): move to the client side.
 Future<List<Object>> _expandTemplates(String code) async {
   final result = <Object>[];
   var index = 0;
