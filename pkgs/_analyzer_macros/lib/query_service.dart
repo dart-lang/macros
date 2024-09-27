@@ -5,6 +5,7 @@
 import 'package:_macro_host/macro_host.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_provider.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/summary2/linked_element_factory.dart' as analyzer;
 import 'package:dart_model/dart_model.dart' hide InterfaceType;
@@ -31,64 +32,76 @@ class AnalyzerQueryService implements QueryService {
     final uri = target.uri;
     final library = _elementFactory.libraryOfUri2(Uri.parse(uri));
     final clazz = library.getClass(target.name)!;
+    final types = AnalyzerTypeHierarchy(library.typeProvider)
+      ..addInterfaceElement(clazz);
+
     final interface = Interface();
     for (final field in clazz.fields) {
       interface.members[field.name] = Member(
           properties: Properties(
-        isAbstract: field.isAbstract,
-        isGetter: false,
-        isField: true,
-        isMethod: false,
-        isStatic: field.isStatic,
-      ));
+            isAbstract: field.isAbstract,
+            isGetter: false,
+            isField: true,
+            isMethod: false,
+            isStatic: field.isStatic,
+          ),
+          returnType: types.addDartType(field.type));
     }
-    return Model(types: _buildTypeHierarchy(library, {clazz}))
+    return Model(types: types.typeHierarchy)
       ..uris[uri] = (Library()..scopes[clazz.name] = interface);
   }
+}
 
-  TypeHierarchy _buildTypeHierarchy(
-      LibraryElement library, Set<InterfaceElement> classes) {
-    // These classes need to be present in every type hierarchy due to their
-    // special role. Other types are only relevant if reachable from [classes].
-    final typeProvider = library.typeProvider;
-    classes.add(typeProvider.objectElement);
-    classes.add(typeProvider.nullElement);
-    classes.add(typeProvider.futureElement);
+/// Converts between analyzer types and `dart_model` types.
+class AnalyzerTypeHierarchy {
+  final TypeProvider typeProvider;
+  final AnalyzerTypesToMacros translator = const AnalyzerTypesToMacros();
+  final TypeHierarchy typeHierarchy = TypeHierarchy();
+  final TypeTranslationContext context = TypeTranslationContext();
 
-    // Make sure we include all supertypes of involved classes to close the
-    // type hierarchy.
-    for (final included in classes.toList()) {
-      for (final superType in included.allSupertypes) {
-        classes.add(superType.element);
-      }
+  AnalyzerTypeHierarchy(this.typeProvider) {
+    // Types that are always needed.
+    addInterfaceElement(typeProvider.objectElement);
+    addInterfaceElement(typeProvider.nullElement);
+    addInterfaceElement(typeProvider.futureElement);
+  }
+
+  /// Adds [type] to the hierarchy and returns its [StaticTypeDesc].
+  StaticTypeDesc addDartType(DartType type) =>
+      type.acceptWithArgument(translator, context);
+
+  /// Adds [element] and any supertypes to the hierarchy, if not already
+  /// present.
+  void addInterfaceElement(InterfaceElement element) {
+    final asNamedType = element.thisType
+        .acceptWithArgument(translator, context)
+        .asNamedTypeDesc;
+
+    final maybeEntry = typeHierarchy.named[asNamedType.name.asString];
+    if (maybeEntry != null) {
+      return;
     }
 
-    final context = TypeTranslationContext();
-    const translator = AnalyzerTypesToMacros();
-    final result = TypeHierarchy();
-    for (final element in classes) {
-      final asNamedType = element.thisType
-          .acceptWithArgument(translator, context)
-          .asNamedTypeDesc;
+    final superTypes = <InterfaceType>[
+      if (element.supertype case final supertype?) supertype,
+      ...element.interfaces,
+      ...element.mixins,
+    ];
 
-      final superTypes = <InterfaceType>[
-        if (element.supertype case final supertype?) supertype,
-        ...element.interfaces,
-        ...element.mixins,
-      ];
-
-      result.named[asNamedType.name.asString] = TypeHierarchyEntry(
-        self: asNamedType,
-        typeParameters: [
-          for (final typeParameter in element.typeParameters)
-            translator.translateTypeParameter(typeParameter, context),
-        ],
-        supertypes: [
-          for (final superType in superTypes)
-            superType.acceptWithArgument(translator, context).asNamedTypeDesc
-        ],
-      );
+    for (final type in superTypes) {
+      addInterfaceElement(type.element);
     }
-    return result;
+
+    typeHierarchy.named[asNamedType.name.asString] = TypeHierarchyEntry(
+      self: asNamedType,
+      typeParameters: [
+        for (final typeParameter in element.typeParameters)
+          translator.translateTypeParameter(typeParameter, context),
+      ],
+      supertypes: [
+        for (final superType in superTypes)
+          superType.acceptWithArgument(translator, context).asNamedTypeDesc
+      ],
+    );
   }
 }

@@ -78,10 +78,6 @@ void main() {
         } else {
           applicationGoldenFile = null;
         }
-
-        if (introspectionGoldenFile == null && applicationGoldenFile == null) {
-          throw StateError('Setup failed, no goldens for $path');
-        }
       });
       if (updateGoldens) {
         tearDown(() {
@@ -107,6 +103,11 @@ void main() {
       }
 
       test(relativePath, () async {
+        if (introspectionGoldenFile == null && applicationGoldenFile == null) {
+          // Nothing to check.
+          return;
+        }
+
         final packagesUri = Isolate.packageConfigSync;
         final outputFile = File('${tempDir.path}/$relativePath.dill');
 

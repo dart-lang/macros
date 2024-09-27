@@ -11,6 +11,16 @@
                 "isField": true,
                 "isMethod": false,
                 "isStatic": false
+              },
+              "returnType": {
+                "type": "NamedTypeDesc",
+                "value": {
+                  "name": {
+                    "uri": "dart:core",
+                    "name": "int"
+                  },
+                  "instantiation": []
+                }
               }
             }
           }
@@ -24,6 +34,16 @@
                 "isField": true,
                 "isMethod": false,
                 "isStatic": false
+              },
+              "returnType": {
+                "type": "NamedTypeDesc",
+                "value": {
+                  "name": {
+                    "uri": "dart:core",
+                    "name": "int"
+                  },
+                  "instantiation": []
+                }
               }
             }
           }
@@ -33,25 +53,6 @@
   },
   "types": {
     "named": {
-      "package:foo/foo.dart#Foo": {
-        "typeParameters": [],
-        "self": {
-          "name": {
-            "uri": "package:foo/foo.dart",
-            "name": "Foo"
-          },
-          "instantiation": []
-        },
-        "supertypes": [
-          {
-            "name": {
-              "uri": "dart:core",
-              "name": "Object"
-            },
-            "instantiation": []
-          }
-        ]
-      },
       "dart:core#Object": {
         "typeParameters": [],
         "self": {
@@ -101,6 +102,25 @@
               }
             }
           ]
+        },
+        "supertypes": [
+          {
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
+            "instantiation": []
+          }
+        ]
+      },
+      "package:foo/foo.dart#Foo": {
+        "typeParameters": [],
+        "self": {
+          "name": {
+            "uri": "package:foo/foo.dart",
+            "name": "Foo"
+          },
+          "instantiation": []
         },
         "supertypes": [
           {

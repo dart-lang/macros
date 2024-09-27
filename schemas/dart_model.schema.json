@@ -113,6 +113,10 @@
         "properties": {
           "$comment": "The properties of this member.",
           "$ref": "#/$defs/Properties"
+        },
+        "returnType": {
+          "$comment": "The return type of this member, if it has one.",
+          "$ref": "#/$defs/StaticTypeDesc"
         }
       }
     },

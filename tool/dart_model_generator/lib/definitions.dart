@@ -130,6 +130,7 @@ static Protocol handshakeProtocol = Protocol(
               Property('scopes',
                   type: 'Map<Interface>', description: 'Scopes by name.'),
             ]),
+        // TODO(davidmorgan): make `Member` a union.
         Definition.clazz('Member',
             description: 'Member of a scope.',
             createInBuffer: true,
@@ -137,6 +138,11 @@ static Protocol handshakeProtocol = Protocol(
               Property('properties',
                   type: 'Properties',
                   description: 'The properties of this member.'),
+              Property(
+                'returnType',
+                type: 'StaticTypeDesc',
+                description: 'The return type of this member, if it has one.',
+              ),
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',
