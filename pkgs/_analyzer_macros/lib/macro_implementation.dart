@@ -9,7 +9,7 @@ import 'package:analyzer/src/summary2/macro_declarations.dart' as analyzer;
 import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
-import 'package:macros/macros.dart';
+import 'package:macros/macros.dart' hide Code;
 // ignore: implementation_imports
 import 'package:macros/src/executor.dart' as injected;
 
@@ -138,7 +138,7 @@ class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
     final declarations = <DeclarationCode>[];
     for (final augmentation in augmentResponse.augmentations) {
       declarations.add(
-          DeclarationCode.fromParts(await _expandTemplates(augmentation.code)));
+          DeclarationCode.fromParts(await _resolveNames(augmentation.code)));
     }
     return AnalyzerMacroExecutionResult(target, declarations);
   }
@@ -182,36 +182,38 @@ extension MacroTargetExtension on MacroTarget {
   }
 }
 
-/// Converts [code] to a mix of `Identifier` and `String`.
-///
-/// Looks up references of the form `{{uri#name}}` using `resolveIdentifier`.
-///
-/// TODO(davidmorgan): move to the client side.
-Future<List<Object>> _expandTemplates(String code) async {
-  final result = <Object>[];
-  var index = 0;
-  while (index < code.length) {
-    final start = code.indexOf('{{', index);
-    if (start == -1) {
-      result.add(code.substring(index));
-      break;
+/// Converts [codes] to a list of `String` and `Identifier`.
+Future<List<Object>> _resolveNames(List<Code> codes) async {
+  // Find the set of unique [QualifiedName]s used.
+  final qualifiedNameStrings = <String>{};
+  for (final code in codes) {
+    if (code.type == CodeType.qualifiedName) {
+      qualifiedNameStrings.add(code.asQualifiedName.asString);
     }
-    result.add(code.substring(index, start));
-    final end = code.indexOf('}}', start);
-    if (end == -1) {
-      throw ArgumentError('Unmatched opening brace: $code');
-    }
-    final name = code.substring(start + 2, end);
-    final parts = name.split('#');
-    if (parts.length != 2) {
-      throw ArgumentError('Expected "uri#name" in: $name');
-    }
-    final uri = Uri.parse(parts[0]);
-    final identifier = await (introspector as TypePhaseIntrospector)
+  }
+
+  // Create futures looking up their [Identifier]s, then `await` in parallel.
+  final qualifiedNamesList =
+      qualifiedNameStrings.map(QualifiedName.parse).toList();
+  final identifierFutures = <Future<Identifier>>[];
+  for (final qualifiedName in qualifiedNamesList) {
+    identifierFutures.add((introspector as TypePhaseIntrospector)
         // ignore: deprecated_member_use
-        .resolveIdentifier(uri, parts[1]);
-    result.add(identifier);
-    index = end + 2;
+        .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name));
+  }
+  final identifiers = await Future.wait(identifierFutures);
+
+  // Build the result using the looked up [Identifier]s.
+  final identifiersByQualifiedNameStrings =
+      Map.fromIterables(qualifiedNameStrings, identifiers);
+  final result = <Object>[];
+  for (final code in codes) {
+    if (code.type == CodeType.resolvedCode) {
+      result.add(code.asResolvedCode.code);
+    } else if (code.type == CodeType.qualifiedName) {
+      final qualifiedName = code.asQualifiedName;
+      result.add(identifiersByQualifiedNameStrings[qualifiedName.asString]!);
+    }
   }
   return result;
 }

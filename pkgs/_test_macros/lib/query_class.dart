@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:dart_model/dart_model.dart';
+import 'package:dart_model/templating.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
@@ -31,7 +32,8 @@ class QueryClassImplementation implements Macro {
     final model = await host.query(Query(
       target: request.target,
     ));
-    return AugmentResponse(
-        augmentations: [Augmentation(code: '// ${json.encode(model)}')]);
+    return AugmentResponse(augmentations: [
+      Augmentation(code: expandTemplate('// ${json.encode(model)}'))
+    ]);
   }
 }

@@ -66,11 +66,18 @@ static Protocol handshakeProtocol = Protocol(
         Definition.clazz(
           'Augmentation',
           createInBuffer: true,
-          description: 'An augmentation to Dart code. '
-              'TODO(davidmorgan): this is a placeholder.',
+          description: 'An augmentation to Dart code.',
           properties: [
-            Property('code', type: 'String', description: 'Augmentation code.'),
+            Property('code',
+                type: 'List<Code>', description: 'Augmentation code.'),
           ],
+        ),
+        Definition.union(
+          'Code',
+          createInBuffer: true,
+          description: 'Code that is part of augmentations to Dart code.',
+          types: ['QualifiedName', 'ResolvedCode'],
+          properties: [],
         ),
         Definition.nullTypedef('DynamicTypeDesc',
             description:
@@ -244,6 +251,14 @@ static QualifiedName parse(String string) {
               Property('positional', type: 'List<StaticTypeDesc>'),
               Property('named', type: 'List<NamedRecordField>')
             ]),
+        Definition.clazz(
+          'ResolvedCode',
+          description:
+              'Code that is part of an augmentation applied to Dart code.',
+          properties: [
+            Property('code', type: 'String', description: 'The code.'),
+          ],
+        ),
         Definition.union('StaticTypeDesc',
             description:
                 'A partially-resolved description of a type as it appears in '

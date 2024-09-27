@@ -34,8 +34,11 @@ void main() {
 
         expect(
             await host.augment(macroAnnotation, AugmentRequest(phase: 2)),
-            Scope.macro.run(() => AugmentResponse(
-                augmentations: [Augmentation(code: 'int get x => 3;')])));
+            Scope.macro.run(() => AugmentResponse(augmentations: [
+                  Augmentation(code: [
+                    Code.resolvedCode(ResolvedCode(code: 'int get x => 3;'))
+                  ])
+                ])));
       });
 
       test('hosts a macro, responds to queries', () async {
@@ -62,9 +65,11 @@ void main() {
                     target: QualifiedName(
                         uri: 'package:foo/foo.dart', name: 'Foo'))),
             Scope.macro.run(() => AugmentResponse(augmentations: [
-                  Augmentation(
-                      code:
-                          '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}')
+                  Augmentation(code: [
+                    Code.resolvedCode(ResolvedCode(
+                        code:
+                            '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'))
+                  ])
                 ])));
       });
 

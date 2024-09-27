@@ -9,7 +9,7 @@ import 'package:front_end/src/kernel/macro/identifiers.dart' as cfe;
 // ignore: implementation_imports
 import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
 import 'package:macro_service/macro_service.dart';
-import 'package:macros/macros.dart';
+import 'package:macros/macros.dart' hide Code;
 // ignore: implementation_imports
 import 'package:macros/src/executor.dart' as injected;
 
@@ -86,7 +86,7 @@ class CfeRunningMacro implements injected.RunningMacro {
       DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = declarationsPhaseIntrospector;
-    return CfeMacroExecutionResult(
+    return await CfeMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 2, target: target.qualifiedName)));
@@ -97,7 +97,7 @@ class CfeRunningMacro implements injected.RunningMacro {
       DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = definitionPhaseIntrospector;
-    return CfeMacroExecutionResult(
+    return await CfeMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 3, target: target.qualifiedName)));
@@ -108,7 +108,7 @@ class CfeRunningMacro implements injected.RunningMacro {
       MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = typePhaseIntrospector;
-    return CfeMacroExecutionResult(
+    return await CfeMacroExecutionResult.expandTemplates(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 1, target: target.qualifiedName)));
@@ -121,9 +121,29 @@ class CfeRunningMacro implements injected.RunningMacro {
 /// functionality of `MacroExecutionResult`.
 class CfeMacroExecutionResult implements injected.MacroExecutionResult {
   final MacroTarget target;
-  final AugmentResponse augmentResponse;
+  @override
+  final Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;
 
-  CfeMacroExecutionResult(this.target, this.augmentResponse);
+  CfeMacroExecutionResult(this.target, Iterable<DeclarationCode> declarations)
+      // TODO(davidmorgan): this assumes augmentations are for the macro
+      // application target. Instead, it should be explicit in
+      // `AugmentResponse`.
+      : typeAugmentations = {
+          // TODO(davidmorgan): empty augmentations response breaks the test,
+          // it's not clear why.
+          if (declarations.isNotEmpty)
+            (target as Declaration).identifier: declarations
+        };
+
+  static Future<CfeMacroExecutionResult> expandTemplates(
+      MacroTarget target, AugmentResponse augmentResponse) async {
+    final declarations = <DeclarationCode>[];
+    for (final augmentation in augmentResponse.augmentations) {
+      declarations.add(
+          DeclarationCode.fromParts(await _resolveNames(augmentation.code)));
+    }
+    return CfeMacroExecutionResult(target, declarations);
+  }
 
   @override
   List<Diagnostic> get diagnostics => [];
@@ -152,19 +172,6 @@ class CfeMacroExecutionResult implements injected.MacroExecutionResult {
 
   @override
   void serialize(Object serializer) => throw UnimplementedError();
-
-  @override
-  Map<Identifier, Iterable<DeclarationCode>> get typeAugmentations => {
-        // TODO(davidmorgan): this assumes augmentations are for the macro
-        // application target. Instead, it should be explicit in
-        // `AugmentResponse`.
-        // TODO(davidmorgan): empty augmentations response breaks the test,
-        // it's not clear why.
-        if (augmentResponse.augmentations.isNotEmpty)
-          (target as Declaration).identifier: augmentResponse.augmentations
-              .map((a) => DeclarationCode.fromParts([a.code]))
-              .toList(),
-      };
 }
 
 extension MacroTargetExtension on MacroTarget {
@@ -173,4 +180,41 @@ extension MacroTargetExtension on MacroTarget {
         .resolveIdentifier();
     return QualifiedName(uri: '${identifier.uri}', name: identifier.name);
   }
+}
+
+/// Converts [codes] to a list of `String` and `Identifier`.
+// TODO(davidmorgan): share this code with `package:_analyzer_macros`.
+Future<List<Object>> _resolveNames(List<Code> codes) async {
+  // Find the set of unique [QualifiedName]s used.
+  final qualifiedNameStrings = <String>{};
+  for (final code in codes) {
+    if (code.type == CodeType.qualifiedName) {
+      qualifiedNameStrings.add(code.asQualifiedName.asString);
+    }
+  }
+
+  // Create futures looking up their [Identifier]s, then `await` in parallel.
+  final qualifiedNamesList =
+      qualifiedNameStrings.map(QualifiedName.parse).toList();
+  final identifierFutures = <Future<Identifier>>[];
+  for (final qualifiedName in qualifiedNamesList) {
+    identifierFutures.add((introspector as TypePhaseIntrospector)
+        // ignore: deprecated_member_use
+        .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name));
+  }
+  final identifiers = await Future.wait(identifierFutures);
+
+  // Build the result using the looked up [Identifier]s.
+  final identifiersByQualifiedNameStrings =
+      Map.fromIterables(qualifiedNameStrings, identifiers);
+  final result = <Object>[];
+  for (final code in codes) {
+    if (code.type == CodeType.resolvedCode) {
+      result.add(code.asResolvedCode.code);
+    } else if (code.type == CodeType.qualifiedName) {
+      final qualifiedName = code.asQualifiedName;
+      result.add(identifiersByQualifiedNameStrings[qualifiedName.asString]!);
+    }
+  }
+  return result;
 }

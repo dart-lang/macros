@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:dart_model/dart_model.dart';
+import 'package:dart_model/templating.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
@@ -36,10 +37,10 @@ class JsonCodableImplementation implements Macro {
   Future<AugmentResponse> phase1(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
-      Augmentation(code: '''
+      Augmentation(code: expandTemplate('''
 external ${target.code}.fromJson($_jsonMapType json);
 external $_jsonMapType toJson();
-   '''),
+   ''')),
     ]);
   }
 
@@ -61,10 +62,10 @@ external $_jsonMapType toJson();
 
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    result.add(Augmentation(code: expandTemplate('''
 augment ${target.code}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
-'''));
+''')));
 
     final serializers = <String>[];
     for (final field
@@ -76,13 +77,13 @@ ${initializers.join(',\n')};
 
     // TODO(davidmorgan): helper for augmenting methods.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    result.add(Augmentation(code: expandTemplate('''
 $_jsonMapType toJson() {
   final json = $_jsonMapType{};
 ${serializers.map((s) => '$s;\n').join('')}
   return json;
 };
-'''));
+''')));
 
     return AugmentResponse(augmentations: result);
   }
