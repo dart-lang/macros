@@ -15,33 +15,55 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: ProtocolEncoding.json),
-    Protocol(encoding: ProtocolEncoding.binary)
+    Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
+    Protocol(
+        encoding: ProtocolEncoding.binary, version: ProtocolVersion.macros1)
   ]) {
     group('MacroClient using ${protocol.encoding}', () {
+      /// Waits for [HandshakRequest] on [socket], sends response choosing
+      /// [protocol], returns next responses decoded using [protocol].
+      Future<StreamQueue<Map<String, Object?>>> handshake(Socket socket) async {
+        final broadcastStream = socket.asBroadcastStream();
+        final handshakeRequest =
+            await Protocol.handshakeProtocol.decode(broadcastStream).first;
+        final result = StreamQueue(protocol.decode(broadcastStream));
+
+        expect(handshakeRequest, {
+          'protocols': [
+            {'encoding': 'json', 'version': 'macros1'},
+            {'encoding': 'binary', 'version': 'macros1'}
+          ]
+        });
+        Protocol.handshakeProtocol
+            .send(socket.add, HandshakeResponse(protocol: protocol).node);
+
+        return result;
+      }
+
       test('connects to service', () async {
         final serverSocket = await ServerSocket.bind('localhost', 0);
         addTearDown(serverSocket.close);
 
         unawaited(MacroClient.run(
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [DeclareXImplementation()]));
 
-        await (await serverSocket.first.timeout(const Duration(seconds: 10)))
-            .close();
+        final socket = await serverSocket.first;
+        await handshake(socket);
       });
 
       test('error response if no such macro', () async {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port),
-            macros: []));
+            macros: [QueryClassImplementation()]));
 
         final socket = await serverSocket.first;
-        final responses = StreamQueue(protocol.decode(socket));
+        final responses = await handshake(socket);
+
+        // MacroStartedRequest, ignore.
+        await responses.next;
 
         final requestId = nextRequestId;
         protocol.send(
@@ -53,6 +75,7 @@ void main() {
                         name: 'DeclareX'),
                     AugmentRequest(phase: 2))
                 .node);
+
         final augmentResponse = await responses.next;
         expect(augmentResponse, {
           'requestId': requestId,
@@ -68,13 +91,12 @@ void main() {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [DeclareXImplementation()]));
 
         final socket = await serverSocket.first;
+        final responses = await handshake(socket);
 
-        final responses = StreamQueue(protocol.decode(socket));
         final descriptionResponse = await responses.next;
         expect(descriptionResponse, {
           'id': descriptionResponse['id'],
@@ -116,13 +138,12 @@ void main() {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [QueryClassImplementation()]));
 
         final socket = await serverSocket.first;
+        final responses = await handshake(socket);
 
-        final responses = StreamQueue(protocol.decode(socket));
         final descriptionResponse = await responses.next;
         expect(descriptionResponse, {
           'id': descriptionResponse['id'],
@@ -196,13 +217,12 @@ void main() {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
-            protocol: protocol,
             endpoint: HostEndpoint(port: serverSocket.port),
             macros: [QueryClassImplementation()]));
 
         final socket = await serverSocket.first;
+        final responses = await handshake(socket);
 
-        final responses = StreamQueue(protocol.decode(socket));
         // MacroStartedRequest, ignore.
         await responses.next;
 

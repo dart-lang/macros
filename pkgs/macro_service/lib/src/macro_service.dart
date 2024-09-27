@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:dart_model/serialization.dart';
 
+import 'handshake.g.dart';
 import 'macro_service.g.dart';
 import 'message_grouper.dart';
 
@@ -81,6 +82,7 @@ extension ProtocolExtension on Protocol {
             .bind(stream)
             .transform(const LineSplitter())
             .map((line) => json.decode(line) as Map<String, Object?>);
+
       case ProtocolEncoding.binary:
         return MessageGrouper(stream)
             .messageStream
@@ -89,6 +91,9 @@ extension ProtocolExtension on Protocol {
         throw StateError('Unsupported protocol: $this');
     }
   }
+
+  bool equals(Protocol other) =>
+      encoding == other.encoding && version == other.version;
 }
 
 final _utf8Newline = const Utf8Encoder().convert('\n');

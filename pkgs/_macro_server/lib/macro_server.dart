@@ -29,8 +29,7 @@ class MacroServer {
   ///
   /// TODO(davidmorgan): other transports besides TCP/IP.
   static Future<MacroServer> serve({
-    // TODO(davidmorgan): this should be negotiated per client, not set for
-    // each server.
+    // TODO(davidmorgan): support serving multiple protocols.
     required Protocol protocol,
     required HostService service,
   }) async {
@@ -65,10 +64,28 @@ class MacroServer {
     return connection.responses.where((r) => r.requestId == request.id).first;
   }
 
-  void _handleConnection(Socket socket) {
+  void _handleConnection(Socket socket) async {
     final connection = _Connection(socket);
     _connections.add(connection);
-    protocol.decode(socket).forEach((jsonData) {
+
+    final broadcastStream = socket.asBroadcastStream();
+    final firstRequest =
+        Protocol.handshakeProtocol.decode(broadcastStream).first;
+    final handshakeRequest = HandshakeRequest.fromJson(await firstRequest);
+    // TODO(davidmorgan): compute intersection of requested and supported
+    // protocols.
+    if (!handshakeRequest.protocols.any((p) => p.equals(protocol))) {
+      throw StateError('No requested protocol is supported.');
+    }
+    // The macro bundle relies on this message arriving fully before any other
+    // message arrives. This is guaranteed because `sendToMacro` waits for a
+    // matching `MacroStartedRequest` from the bundle before sending to it,
+    // and `MacroStartedRequest` is sent after this message is received and
+    // the protocol set.
+    Protocol.handshakeProtocol
+        .send(socket.add, HandshakeResponse(protocol: protocol).node);
+
+    protocol.decode(broadcastStream).forEach((jsonData) {
       final request = MacroRequest.fromJson(jsonData);
       if (request.type.isKnown) {
         if (request.type == MacroRequestType.macroStartedRequest) {
@@ -85,7 +102,7 @@ class MacroServer {
       if (response.type.isKnown) {
         connection._responsesController.add(response);
       }
-    });
+    }).ignore();
   }
 }
 

@@ -6,6 +6,56 @@ import 'generate_dart_model.dart';
 
 final schemas = Schemas([
   Schema(
+    schemaPath: 'handshake.schema.json',
+    codePackage: 'macro_service',
+    codePath: 'src/handshake.g.dart',
+    rootTypes: ['HandshakeRequest', 'HandshakeResponse'],
+    declarations: [
+      Definition.clazz('HandshakeRequest',
+          description: 'Request to pick a protocol.',
+          properties: [
+            Property(
+              'protocols',
+              type: 'List<Protocol>',
+              description: 'Supported protocols.',
+            ),
+          ]),
+      Definition.clazz('HandshakeResponse',
+          description:
+              'The picked protocol, or `null` if no requested protocol '
+              'is supported.',
+          properties: [
+            Property(
+              'protocol',
+              type: 'Protocol',
+              description: 'Supported protocol.',
+              nullable: true,
+            ),
+          ]),
+      Definition.clazz('Protocol',
+          description: 'The macro to host protocol version and encoding. '
+              'TODO(davidmorgan): add the version.',
+          properties: [
+            Property('encoding',
+                type: 'ProtocolEncoding',
+                description: 'The wire format: json or binary.'),
+            Property('version',
+                type: 'ProtocolVersion',
+                description: 'The protocol version, a name and number.'),
+          ],
+          extraCode: '''
+/// The initial protocol for any `host<->macro` connection.
+static Protocol handshakeProtocol = Protocol(
+    encoding: ProtocolEncoding.json, version: ProtocolVersion.handshake);
+'''),
+      Definition.$enum('ProtocolEncoding',
+          description: 'The wire encoding used.', values: ['json', 'binary']),
+      Definition.$enum('ProtocolVersion',
+          description: 'The protocol version.',
+          values: ['handshake', 'macros1']),
+    ],
+  ),
+  Schema(
       schemaPath: 'dart_model.schema.json',
       codePackage: 'dart_model',
       codePath: 'src/dart_model.g.dart',
@@ -359,16 +409,6 @@ static QualifiedName parse(String string) {
                       'The id of this request, must be returned in responses.',
                   required: true),
             ]),
-        Definition.clazz('Protocol',
-            description: 'The macro to host protocol version and encoding. '
-                'TODO(davidmorgan): add the version.',
-            properties: [
-              Property('encoding',
-                  type: 'ProtocolEncoding',
-                  description: 'The wire format: json or binary.'),
-            ]),
-        Definition.$enum('ProtocolEncoding',
-            description: 'The wire encoding used.', values: ['json', 'binary']),
         Definition.clazz('QueryRequest',
             description: "Macro's query about the code it should augment.",
             properties: [

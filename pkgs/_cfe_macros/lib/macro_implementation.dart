@@ -27,8 +27,7 @@ class CfeMacroImplementation implements injected.MacroImplementation {
   /// [packageConfig] is the package config of the workspace of the code being
   /// edited.
   static Future<CfeMacroImplementation> start({
-    // TODO(davidmorgan): this should be negotiated per client, not
-    // set here.
+    // TODO(davidmorgan): support serving multiple protocols.
     required Protocol protocol,
     required Uri packageConfig,
   }) async =>

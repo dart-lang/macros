@@ -148,20 +148,6 @@
         ]
       }
     },
-    "Protocol": {
-      "type": "object",
-      "description": "The macro to host protocol version and encoding. TODO(davidmorgan): add the version.",
-      "properties": {
-        "encoding": {
-          "$comment": "The wire format: json or binary.",
-          "$ref": "#/$defs/ProtocolEncoding"
-        }
-      }
-    },
-    "ProtocolEncoding": {
-      "type": "string",
-      "description": "The wire encoding used."
-    },
     "QueryRequest": {
       "type": "object",
       "description": "Macro's query about the code it should augment.",

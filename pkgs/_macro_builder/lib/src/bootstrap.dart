@@ -20,11 +20,8 @@ import 'package:macro_service/macro_service.dart' as macro_service;
 
 void main(List<String> arguments) {
    macro_client.MacroClient.run(
-      // TODO(davidmorgan): this should be negotiated, not passed here.
-      protocol: macro_service.Protocol.fromJson(
-        convert.json.decode(arguments[0])),
       endpoint: macro_service.HostEndpoint.fromJson(
-        convert.json.decode(arguments[1])),
+        convert.json.decode(arguments[0])),
       macros: [''');
   for (var i = 0; i != macros.length; ++i) {
     final macro = macros[i];

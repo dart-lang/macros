@@ -14,8 +14,9 @@ import 'package:test/test.dart';
 
 void main() {
   for (final protocol in [
-    Protocol(encoding: ProtocolEncoding.json),
-    Protocol(encoding: ProtocolEncoding.binary)
+    Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
+    Protocol(
+        encoding: ProtocolEncoding.binary, version: ProtocolVersion.macros1)
   ]) {
     group('MacroServer using ${protocol.encoding}', () {
       test('serves a macro service', () async {
@@ -24,10 +25,7 @@ void main() {
             await MacroServer.serve(protocol: protocol, service: service);
 
         await MacroClient.run(
-            // TODO(davidmorgan): this should be negotiated, not set here.
-            protocol: protocol,
-            endpoint: server.endpoint,
-            macros: [DeclareXImplementation()]);
+            endpoint: server.endpoint, macros: [DeclareXImplementation()]);
 
         // Check that the macro sent its description to the host on startup.
         expect((await service.macroStartedRequests.first).macroDescription,
@@ -53,10 +51,7 @@ void main() {
             await MacroServer.serve(protocol: protocol, service: service);
 
         unawaited(MacroClient.run(
-            // TODO(davidmorgan): this should be negotiated, not set here.
-            protocol: protocol,
-            endpoint: server.endpoint,
-            macros: [DeclareXImplementation()]));
+            endpoint: server.endpoint, macros: [DeclareXImplementation()]));
 
         await server.sendToMacro(HostRequest.augmentRequest(
           id: 1,
@@ -74,16 +69,10 @@ void main() {
             await MacroServer.serve(protocol: protocol, service: service);
 
         unawaited(MacroClient.run(
-            // TODO(davidmorgan): this should be negotiated, not set here.
-            protocol: protocol,
-            endpoint: server.endpoint,
-            macros: [DeclareXImplementation()]));
+            endpoint: server.endpoint, macros: [DeclareXImplementation()]));
 
         unawaited(MacroClient.run(
-            // TODO(davidmorgan): this should be negotiated, not set here.
-            protocol: protocol,
-            endpoint: server.endpoint,
-            macros: [QueryClassImplementation()]));
+            endpoint: server.endpoint, macros: [QueryClassImplementation()]));
 
         await Future.wait([
           server.sendToMacro(HostRequest.augmentRequest(
@@ -110,8 +99,6 @@ void main() {
             await MacroServer.serve(protocol: protocol, service: service);
 
         unawaited(MacroClient.run(
-            // TODO(davidmorgan): this should be negotiated, not set here.
-            protocol: protocol,
             endpoint: server.endpoint,
             macros: [DeclareXImplementation(), QueryClassImplementation()]));
 

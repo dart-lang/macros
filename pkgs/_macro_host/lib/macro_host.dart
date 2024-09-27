@@ -27,7 +27,7 @@ class MacroHost {
 
   /// Starts a macro host with introspection queries handled by [queryService].
   static Future<MacroHost> serve({
-    // TODO(davidmorgan): this should be negotiated per client, not set here.
+    // TODO(davidmorgan): support serving multiple protocols.
     required Protocol protocol,
     required Uri packageConfig,
     required QueryService queryService,
@@ -86,10 +86,7 @@ class MacroHost {
     _hostService._macroState[annotation.asString] = _MacroState();
     final macroBundle = await macroBuilder.build(
         macroPackageConfig.uri, [lookupMacroImplementation(annotation)!]);
-    macroRunner.start(
-        macroBundle: macroBundle,
-        protocol: macroServer.protocol,
-        endpoint: macroServer.endpoint);
+    macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
   }
 }
 
