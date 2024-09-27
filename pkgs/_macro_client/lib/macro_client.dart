@@ -16,7 +16,8 @@ import 'package:macro_service/macro_service.dart';
 /// TODO(davidmorgan): split to multpile implementations depending on
 /// transport used to connect to host.
 class MacroClient {
-  final Protocol protocol;
+  /// The protocol, once the handshake is complete.
+  late final Protocol protocol;
   final Iterable<Macro> macros;
   final Socket socket;
   late final RemoteMacroHost _host;
@@ -24,30 +25,59 @@ class MacroClient {
   /// A completer for each pending request to the host, by request ID.
   final Map<int, Completer<Response>> _responseCompleters = {};
 
-  MacroClient._(this.protocol, this.macros, this.socket) {
+  MacroClient._(this.macros, this.socket) {
     _host = RemoteMacroHost(this);
+    _start();
+  }
 
-    // TODO(davidmorgan): negotiation about protocol version goes here.
+  /// Does the protocol handshake then sends [MacroStartedRequest] for each
+  /// macro.
+  void _start() async {
+    // The incoming data starts as JSON strings, `handshakeProtocol`, then
+    // switches to the agreed-upon protocol. So use a broadcast stream to
+    // allow processing the stream in two different ways.
+    final broadcastStream = socket.asBroadcastStream();
+    // Prepare to receive the handshake response, but it won't be sent until
+    // after `HandshakeRequest` is sent below.
+    final firstResponse =
+        Protocol.handshakeProtocol.decode(broadcastStream).first;
+    // Send `HandshakeRequest` telling the host what protocols this macro
+    // bundle supports.
+    Protocol.handshakeProtocol.send(
+        socket.add,
+        HandshakeRequest(protocols: [
+          Protocol(
+              encoding: ProtocolEncoding.json,
+              version: ProtocolVersion.macros1),
+          Protocol(
+              encoding: ProtocolEncoding.binary,
+              version: ProtocolVersion.macros1),
+        ]).node);
+    // Read `HandshakeResponse`, get from it the protocol to use for the rest of
+    // the stream, and decode+handle using that protocol.
+    final handshakeResponse = HandshakeResponse.fromJson(await firstResponse);
+    protocol = handshakeResponse.protocol!;
+    protocol.decode(broadcastStream).listen(_handleRequest);
 
-    // Tell the host which macros are in this bundle.
+    // Note that reading `HandshakeResponse` then switching protocol relies on
+    // no other messages arriving in the same chunk as `HandshakeResponse`. This
+    // is guaranteed because the host won't send anything else until it receives
+    // a `MacroStartedRequest` that is sent next.
+
     for (final macro in macros) {
-      _sendRequest(MacroRequest.macroStartedRequest(
+      unawaited(_sendRequest(MacroRequest.macroStartedRequest(
           MacroStartedRequest(macroDescription: macro.description),
-          id: nextRequestId));
+          id: nextRequestId)));
     }
-
-    protocol.decode(socket).listen(_handleRequest);
   }
 
   /// Runs [macros] for the host at [endpoint].
   static Future<MacroClient> run({
-    // TODO(davidmorgan): this should be negotiated, not just passed in.
-    required Protocol protocol,
     required HostEndpoint endpoint,
     required Iterable<Macro> macros,
   }) async {
     final socket = await Socket.connect('localhost', endpoint.port);
-    return MacroClient._(protocol, macros, socket);
+    return MacroClient._(macros, socket);
   }
 
   Future<Response> _sendRequest(MacroRequest request) async {
