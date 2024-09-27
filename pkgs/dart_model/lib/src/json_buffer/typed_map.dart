@@ -156,8 +156,9 @@ extension TypedMaps on JsonBufferBuilder {
         _pointerSize + (filled ? 0 : schema._fieldSetSize) + valuesSize);
 
     // Write the pointer to schema, setting the high bit if the map is filled.
-    var schemaPointer = _pointersBySchema[schema] ??=
-        _addPointerTo(_addClosedMap(schema.toMap()));
+    var schemaPointer =
+        _pointersBySchema[schema] ??= _addClosedMap(schema.toMap());
+
     if (filled) schemaPointer |= 0x80000000;
     _writePointer(pointer, schemaPointer);
 
@@ -264,8 +265,8 @@ class _TypedMap
 
   /// The schema of this "typed map" giving its field names and types.
   late final TypedMapSchema _schema =
-      _buffer._schemasByPointer[_schemaPointer] ??= TypedMapSchema(
-          _buffer._readClosedMap(_buffer._readPointer(_schemaPointer)).cast());
+      _buffer._schemasByPointer[_schemaPointer] ??=
+          TypedMapSchema(_buffer._readClosedMap(_schemaPointer).cast());
 
   /// Whether all fields are present, meaning no explicit field set was written.
   late final bool filled = (_buffer._readPointer(_pointer) & 0x80000000) != 0;
