@@ -26,25 +26,23 @@ class JsonCodableImplementation implements Macro {
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
     return switch (request.phase) {
-      // TODO(davidmorgan): these should be phases 2 and 3, but that doesn't
-      // work right now, it gives no output for phase 3. Investigate and fix.
-      1 => phase1(host, request),
       2 => phase2(host, request),
+      3 => phase3(host, request),
       _ => AugmentResponse(augmentations: []),
     };
   }
 
-  Future<AugmentResponse> phase1(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
       Augmentation(code: '''
-external ${target.code}.fromJson($_jsonMapType json);
+external ${target.name}.fromJson($_jsonMapType json);
 external $_jsonMapType toJson();
    '''),
     ]);
   }
 
-  Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
     final result = <Augmentation>[];
 
     final target = request.target;
@@ -63,7 +61,7 @@ external $_jsonMapType toJson();
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     result.add(Augmentation(code: '''
-augment ${target.code}.fromJson($_jsonMapType json) :
+augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
 '''));
 
