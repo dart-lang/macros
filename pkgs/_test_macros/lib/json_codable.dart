@@ -12,8 +12,9 @@ class JsonCodable {
   const JsonCodable();
 }
 
-final _jsonMapType =
-    '{{dart:core#Map}}<{{dart:core#String}}, {{dart:core#Object}}?>';
+final _jsonMapTypeForLiteral = '<{{dart:core#String}}, {{dart:core#Object}}?>';
+final _jsonMapType = '{{dart:core#Map}}$_jsonMapTypeForLiteral';
+final _mapEntryType = '{{dart:core#MapEntry}}';
 
 class JsonCodableImplementation implements Macro {
   @override
@@ -77,11 +78,11 @@ ${initializers.join(',\n')};
     // TODO(davidmorgan): helper for augmenting methods.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     result.add(Augmentation(code: '''
-$_jsonMapType toJson() {
-  final json = $_jsonMapType{};
+augment $_jsonMapType toJson() {
+  final json = $_jsonMapTypeForLiteral{};
 ${serializers.map((s) => '$s;\n').join('')}
   return json;
-};
+}
 '''));
 
     return AugmentResponse(augmentations: result);
@@ -94,7 +95,7 @@ ${serializers.map((s) => '$s;\n').join('')}
     // TODO(davidmorgan): check for and handle missing type argument(s).
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
     final orNull = nullable ? '?' : '';
-    final nullCheck = nullable ? '' : '$reference == null ? null : ';
+    final nullCheck = nullable ? '$reference == null ? null : ' : '';
     final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
         ? type.asNullableTypeDesc.inner
         : type;
@@ -123,15 +124,16 @@ ${serializers.map((s) => '$s;\n').join('')}
                 '}';
           case 'Map':
             // TODO(davidmorgan): check for and handle wrong key type.
-            return '$nullCheck {for (final (:key, :value) in $reference '
-                'as $_jsonMapType) key: '
+            return '$nullCheck {for (final $_mapEntryType(:key, :value) '
+                'in ($reference '
+                'as $_jsonMapType).entries) key: '
                 '${_convertTypeFromJson('value', namedType.instantiation.last)}'
                 '}';
         }
       }
       // TODO(davidmorgan): check for fromJson constructor.
       return '$nullCheck ${namedType.name.code}.fromJson($reference as '
-          '$_jsonMapType';
+          '$_jsonMapType)';
     }
 
     // TODO(davidmorgan): error reporting.
@@ -141,7 +143,8 @@ ${serializers.map((s) => '$s;\n').join('')}
   String _convertTypeToJson(String reference, StaticTypeDesc type) {
     // TODO(davidmorgan): add _checkNamedType equivalent.
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
-    final nullCheck = nullable ? '' : '$reference == null ? null : ';
+    final nullCheck = nullable ? '$reference == null ? null : ' : '';
+    final nullCheckedReference = nullable ? '$reference!' : reference;
     final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
         ? type.asNullableTypeDesc.inner
         : type;
@@ -158,12 +161,12 @@ ${serializers.map((s) => '$s;\n').join('')}
             return reference;
           case 'List':
           case 'Set':
-            return '$nullCheck [for (final item in $reference) '
+            return '$nullCheck [for (final item in $nullCheckedReference) '
                 '${_convertTypeToJson('item', namedType.instantiation.first)}'
                 ']';
           case 'Map':
-            return '$nullCheck {for (final (:key, :value) in '
-                '$reference.entries) key: '
+            return '$nullCheck {for (final $_mapEntryType(:key, :value) in '
+                '$nullCheckedReference.entries) key: '
                 '${_convertTypeToJson('value', namedType.instantiation.last)}'
                 '}';
         }

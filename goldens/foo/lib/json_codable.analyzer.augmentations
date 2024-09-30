@@ -18,15 +18,15 @@ doubleField = json[r'doubleField'] as prefix1.double,
 nullableDoubleField = json[r'nullableDoubleField'] as prefix1.double?,
 numField = json[r'numField'] as prefix1.num,
 nullableNumField = json[r'nullableNumField'] as prefix1.num?,
-listOfSerializableField = json[r'listOfSerializableField'] == null ? null :  [for (final item in json[r'listOfSerializableField'] as prefix1.List<prefix1.Object?>) item == null ? null :  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>],
-nullableListOfSerializableField =  [for (final item in json[r'nullableListOfSerializableField'] as prefix1.List<prefix1.Object?>) item == null ? null :  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>],
-setOfSerializableField = json[r'setOfSerializableField'] == null ? null :  {for (final item in json[r'setOfSerializableField'] as prefix1.Set<prefix1.Object?>) item == null ? null :  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>},
-nullableSetOfSerializableField =  {for (final item in json[r'nullableSetOfSerializableField'] as prefix1.Set<prefix1.Object?>) item == null ? null :  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>},
-mapOfSerializableField = json[r'mapOfSerializableField'] == null ? null :  {for (final (:key, :value) in json[r'mapOfSerializableField'] as prefix1.Map<prefix1.String, prefix1.Object?>) key: value == null ? null :  prefix0.C.fromJson(value as prefix1.Map<prefix1.String, prefix1.Object?>},
-nullableMapOfSerializableField =  {for (final (:key, :value) in json[r'nullableMapOfSerializableField'] as prefix1.Map<prefix1.String, prefix1.Object?>) key: value == null ? null :  prefix0.C.fromJson(value as prefix1.Map<prefix1.String, prefix1.Object?>};
+listOfSerializableField =  [for (final item in json[r'listOfSerializableField'] as prefix1.List<prefix1.Object?>)  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>)],
+nullableListOfSerializableField = json[r'nullableListOfSerializableField'] == null ? null :  [for (final item in json[r'nullableListOfSerializableField'] as prefix1.List<prefix1.Object?>)  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>)],
+setOfSerializableField =  {for (final item in json[r'setOfSerializableField'] as prefix1.Set<prefix1.Object?>)  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>)},
+nullableSetOfSerializableField = json[r'nullableSetOfSerializableField'] == null ? null :  {for (final item in json[r'nullableSetOfSerializableField'] as prefix1.Set<prefix1.Object?>)  prefix0.C.fromJson(item as prefix1.Map<prefix1.String, prefix1.Object?>)},
+mapOfSerializableField =  {for (final prefix1.MapEntry(:key, :value) in (json[r'mapOfSerializableField'] as prefix1.Map<prefix1.String, prefix1.Object?>).entries) key:  prefix0.C.fromJson(value as prefix1.Map<prefix1.String, prefix1.Object?>)},
+nullableMapOfSerializableField = json[r'nullableMapOfSerializableField'] == null ? null :  {for (final prefix1.MapEntry(:key, :value) in (json[r'nullableMapOfSerializableField'] as prefix1.Map<prefix1.String, prefix1.Object?>).entries) key:  prefix0.C.fromJson(value as prefix1.Map<prefix1.String, prefix1.Object?>)};
 
-prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
-  final json = prefix1.Map<prefix1.String, prefix1.Object?>{};
+augment prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
+  final json = <prefix1.String, prefix1.Object?>{};
 json[r'boolField'] = boolField;
 json[r'nullableBoolField'] = nullableBoolField;
 json[r'stringField'] = stringField;
@@ -37,15 +37,15 @@ json[r'doubleField'] = doubleField;
 json[r'nullableDoubleField'] = nullableDoubleField;
 json[r'numField'] = numField;
 json[r'nullableNumField'] = nullableNumField;
-json[r'listOfSerializableField'] = listOfSerializableField == null ? null :  [for (final item in listOfSerializableField) item == null ? null :  item.toJson()];
-json[r'nullableListOfSerializableField'] =  [for (final item in nullableListOfSerializableField) item == null ? null :  item.toJson()];
-json[r'setOfSerializableField'] = setOfSerializableField == null ? null :  [for (final item in setOfSerializableField) item == null ? null :  item.toJson()];
-json[r'nullableSetOfSerializableField'] =  [for (final item in nullableSetOfSerializableField) item == null ? null :  item.toJson()];
-json[r'mapOfSerializableField'] = mapOfSerializableField == null ? null :  {for (final (:key, :value) in mapOfSerializableField.entries) key: value == null ? null :  value.toJson()};
-json[r'nullableMapOfSerializableField'] =  {for (final (:key, :value) in nullableMapOfSerializableField.entries) key: value == null ? null :  value.toJson()};
+json[r'listOfSerializableField'] =  [for (final item in listOfSerializableField)  item.toJson()];
+json[r'nullableListOfSerializableField'] = nullableListOfSerializableField == null ? null :  [for (final item in nullableListOfSerializableField!)  item.toJson()];
+json[r'setOfSerializableField'] =  [for (final item in setOfSerializableField)  item.toJson()];
+json[r'nullableSetOfSerializableField'] = nullableSetOfSerializableField == null ? null :  [for (final item in nullableSetOfSerializableField!)  item.toJson()];
+json[r'mapOfSerializableField'] =  {for (final prefix1.MapEntry(:key, :value) in mapOfSerializableField.entries) key:  value.toJson()};
+json[r'nullableMapOfSerializableField'] = nullableMapOfSerializableField == null ? null :  {for (final prefix1.MapEntry(:key, :value) in nullableMapOfSerializableField!.entries) key:  value.toJson()};
 
   return json;
-};
+}
 
 }
 augment class C {
@@ -55,11 +55,11 @@ external prefix1.Map<prefix1.String, prefix1.Object?> toJson();
 augment prefix0.C.fromJson(prefix1.Map<prefix1.String, prefix1.Object?> json) :
 boolField = json[r'boolField'] as prefix1.bool;
 
-prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
-  final json = prefix1.Map<prefix1.String, prefix1.Object?>{};
+augment prefix1.Map<prefix1.String, prefix1.Object?> toJson() {
+  final json = <prefix1.String, prefix1.Object?>{};
 json[r'boolField'] = boolField;
 
   return json;
-};
+}
 
 }
