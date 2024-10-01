@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import '../dart_model.dart';
 import 'json_buffer/json_buffer_builder.dart';
 
 /// Scope for accumulating `dart_model` data for efficient transmission.
@@ -37,20 +38,24 @@ enum Scope {
   /// Cannot be nested.
   macro;
 
+  _ScopeData _createScopeData() {
+    return _ScopeData._(
+      this,
+      this == none ? null : JsonBufferBuilder(),
+      this == macro ? MacroScope._() : null,
+    );
+  }
+
   /// Runs [function] in this scope.
   T run<T>(T Function() function) {
     _checkNesting();
-    return runZoned(function, zoneValues: {
-      _symbol: _ScopeData._(this, this == none ? null : JsonBufferBuilder())
-    });
+    return runZoned(function, zoneValues: {_symbol: _createScopeData()});
   }
 
   /// Runs [function] in this scope.
   Future<T> runAsync<T>(Future<T> Function() function) {
     _checkNesting();
-    return runZoned(function, zoneValues: {
-      _symbol: _ScopeData._(this, this == none ? null : JsonBufferBuilder())
-    });
+    return runZoned(function, zoneValues: {_symbol: _createScopeData()});
   }
 
   void _checkNesting() {
@@ -118,6 +123,47 @@ enum Scope {
 class _ScopeData {
   final Scope type;
   final JsonBufferBuilder? buffer;
+  final MacroScope? macro;
 
-  _ScopeData._(this.type, this.buffer);
+  _ScopeData._(this.type, this.buffer, [this.macro]);
+}
+
+/// Data attached to [Scope.macro] environments to make resolved queries
+/// publicly accessible.
+class MacroScope {
+  Model? _accumulatedModel;
+
+  /// A cached [StaticTypeSystem] instance bound to the resolved type hierarchy
+  /// from the accumulated model.
+  ///
+  /// Since new models added through [addModel] only contribute new aspects of
+  /// the type system without invalidating earlier incomplete views, all queries
+  /// made through earlier type system instances continue to be valid.
+  StaticTypeSystem? _typeSystem;
+
+  MacroScope._();
+
+  /// Returns a type system resolving subtype queries for types known to the
+  /// current Dart model.
+  StaticTypeSystem get typeSystem {
+    return _typeSystem ??= switch (_accumulatedModel) {
+      // TODO: Refactor type system so that we can return an empty type system
+      // here that doesn't know anything?
+      null => throw StateError('Cannot obtain type system without a model'),
+      var model => StaticTypeSystem(model.types),
+    };
+  }
+
+  void addModel(Model model) {
+    // TODO: Integrate new model into accumulated model instead of replacing it
+    _accumulatedModel = model;
+    _typeSystem = null;
+  }
+
+  static MacroScope get current {
+    return switch (Scope._currentOrNull) {
+      _ScopeData(:final macro?) => macro,
+      _ => throw StateError('MacroScope.current can only be called in macros.'),
+    };
+  }
 }
