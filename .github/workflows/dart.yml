@@ -38,16 +38,16 @@ jobs:
       - name: mono_repo self validate
         run: dart pub global run mono_repo generate --validate
   job_002:
-    name: "analyze_and_format; linux; Dart 3.6.0-198.0.dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
+    name: "analyze_and_format; linux; Dart 3.6.0-198.0.dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_macro_tool, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-198.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
@@ -121,6 +121,15 @@ jobs:
         run: dart analyze --fatal-infos .
         if: "always() && steps.pkgs__macro_server_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/_macro_server
+      - id: pkgs__macro_tool_pub_upgrade
+        name: pkgs/_macro_tool; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
+      - name: "pkgs/_macro_tool; dart analyze --fatal-infos ."
+        run: dart analyze --fatal-infos .
+        if: "always() && steps.pkgs__macro_tool_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
       - id: pkgs__test_macros_pub_upgrade
         name: pkgs/_test_macros; dart pub upgrade
         run: dart pub upgrade
@@ -167,16 +176,16 @@ jobs:
         if: "always() && steps.tool_dart_model_generator_pub_upgrade.conclusion == 'success'"
         working-directory: tool/dart_model_generator
   job_003:
-    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
+    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_macro_tool, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
@@ -241,6 +250,15 @@ jobs:
         run: dart analyze --fatal-infos .
         if: "always() && steps.pkgs__macro_server_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/_macro_server
+      - id: pkgs__macro_tool_pub_upgrade
+        name: pkgs/_macro_tool; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
+      - name: "pkgs/_macro_tool; dart analyze --fatal-infos ."
+        run: dart analyze --fatal-infos .
+        if: "always() && steps.pkgs__macro_tool_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
       - id: pkgs__test_macros_pub_upgrade
         name: pkgs/_test_macros; dart pub upgrade
         run: dart pub upgrade
@@ -287,16 +305,16 @@ jobs:
         if: "always() && steps.tool_dart_model_generator_pub_upgrade.conclusion == 'success'"
         working-directory: tool/dart_model_generator
   job_004:
-    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart format --output=none --set-exit-if-changed .`"
+    name: "analyze_and_format; linux; Dart dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_macro_tool, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart format --output=none --set-exit-if-changed .`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:format"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:format"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
             os:ubuntu-latest;pub-cache-hosted;sdk:dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
@@ -370,6 +388,15 @@ jobs:
         run: "dart format --output=none --set-exit-if-changed ."
         if: "always() && steps.pkgs__macro_server_pub_upgrade.conclusion == 'success'"
         working-directory: pkgs/_macro_server
+      - id: pkgs__macro_tool_pub_upgrade
+        name: pkgs/_macro_tool; dart pub upgrade
+        run: dart pub upgrade
+        if: "always() && steps.checkout.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
+      - name: "pkgs/_macro_tool; dart format --output=none --set-exit-if-changed ."
+        run: "dart format --output=none --set-exit-if-changed ."
+        if: "always() && steps.pkgs__macro_tool_pub_upgrade.conclusion == 'success'"
+        working-directory: pkgs/_macro_tool
       - id: pkgs__test_macros_pub_upgrade
         name: pkgs/_test_macros; dart pub upgrade
         run: dart pub upgrade

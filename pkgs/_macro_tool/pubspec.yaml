@@ -1,0 +1,14 @@
+name: _macro_tool
+publish-to: none
+description: >-
+  CLI for running code with macros applied.
+resolution: workspace
+environment:
+  sdk: ^3.6.0-198.0.dev
+
+dependencies:
+  _analyzer_macros: any
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.0.0
+  test: ^1.25.7

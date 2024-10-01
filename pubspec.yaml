@@ -15,6 +15,7 @@ workspace:
   - pkgs/_macro_host
   - pkgs/_macro_runner
   - pkgs/_macro_server
+  - pkgs/_macro_tool
   - pkgs/_test_macros
   - pkgs/dart_model
   - pkgs/macro
