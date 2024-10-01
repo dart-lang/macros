@@ -19,5 +19,6 @@ dev_dependencies:
 
 # TODO(language/3728): use the real feature when there is one.
 # macro lib/declare_x_macro.dart#DeclareX package:_test_macros/declare_x_macro.dart#DeclareXImplementation
+# macro lib/declare_define_constructor.dart#DeclareDefineConstructor package:_test_macros/declare_define_constructor.dart#DeclareDefineConstructorImplementation
 # macro lib/json_codable.dart#JsonCodable package:_test_macros/json_codable.dart#JsonCodableImplementation
 # macro lib/query_class.dart#QueryClass package:_test_macros/query_class.dart#QueryClassImplementation

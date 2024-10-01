@@ -1,0 +1,6 @@
+augment library 'package:foo/declare_define_constructor.dart';
+
+augment class A {
+external A.x();
+augment A.x();
+}
