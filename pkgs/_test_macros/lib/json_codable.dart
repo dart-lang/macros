@@ -13,8 +13,9 @@ class JsonCodable {
   const JsonCodable();
 }
 
-final _jsonMapType =
-    '{{dart:core#Map}}<{{dart:core#String}}, {{dart:core#Object}}?>';
+final _jsonMapTypeForLiteral = '<{{dart:core#String}}, {{dart:core#Object}}?>';
+final _jsonMapType = '{{dart:core#Map}}$_jsonMapTypeForLiteral';
+final _mapEntryType = '{{dart:core#MapEntry}}';
 
 class JsonCodableImplementation implements Macro {
   @override
@@ -26,25 +27,23 @@ class JsonCodableImplementation implements Macro {
   @override
   Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
     return switch (request.phase) {
-      // TODO(davidmorgan): these should be phases 2 and 3, but that doesn't
-      // work right now, it gives no output for phase 3. Investigate and fix.
-      1 => phase1(host, request),
       2 => phase2(host, request),
+      3 => phase3(host, request),
       _ => AugmentResponse(augmentations: []),
     };
   }
 
-  Future<AugmentResponse> phase1(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
       Augmentation(code: expandTemplate('''
-external ${target.code}.fromJson($_jsonMapType json);
+external ${target.name}.fromJson($_jsonMapType json);
 external $_jsonMapType toJson();
    ''')),
     ]);
   }
 
-  Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
     final result = <Augmentation>[];
 
     final target = request.target;
@@ -63,7 +62,7 @@ external $_jsonMapType toJson();
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     result.add(Augmentation(code: expandTemplate('''
-augment ${target.code}.fromJson($_jsonMapType json) :
+augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
 ''')));
 
@@ -78,11 +77,11 @@ ${initializers.join(',\n')};
     // TODO(davidmorgan): helper for augmenting methods.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     result.add(Augmentation(code: expandTemplate('''
-$_jsonMapType toJson() {
-  final json = $_jsonMapType{};
+augment $_jsonMapType toJson() {
+  final json = $_jsonMapTypeForLiteral{};
 ${serializers.map((s) => '$s;\n').join('')}
   return json;
-};
+}
 ''')));
 
     return AugmentResponse(augmentations: result);
@@ -95,7 +94,7 @@ ${serializers.map((s) => '$s;\n').join('')}
     // TODO(davidmorgan): check for and handle missing type argument(s).
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
     final orNull = nullable ? '?' : '';
-    final nullCheck = nullable ? '' : '$reference == null ? null : ';
+    final nullCheck = nullable ? '$reference == null ? null : ' : '';
     final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
         ? type.asNullableTypeDesc.inner
         : type;
@@ -124,15 +123,16 @@ ${serializers.map((s) => '$s;\n').join('')}
                 '}';
           case 'Map':
             // TODO(davidmorgan): check for and handle wrong key type.
-            return '$nullCheck {for (final (:key, :value) in $reference '
-                'as $_jsonMapType) key: '
+            return '$nullCheck {for (final $_mapEntryType(:key, :value) '
+                'in ($reference '
+                'as $_jsonMapType).entries) key: '
                 '${_convertTypeFromJson('value', namedType.instantiation.last)}'
                 '}';
         }
       }
       // TODO(davidmorgan): check for fromJson constructor.
       return '$nullCheck ${namedType.name.code}.fromJson($reference as '
-          '$_jsonMapType';
+          '$_jsonMapType)';
     }
 
     // TODO(davidmorgan): error reporting.
@@ -142,7 +142,8 @@ ${serializers.map((s) => '$s;\n').join('')}
   String _convertTypeToJson(String reference, StaticTypeDesc type) {
     // TODO(davidmorgan): add _checkNamedType equivalent.
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
-    final nullCheck = nullable ? '' : '$reference == null ? null : ';
+    final nullCheck = nullable ? '$reference == null ? null : ' : '';
+    final nullCheckedReference = nullable ? '$reference!' : reference;
     final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
         ? type.asNullableTypeDesc.inner
         : type;
@@ -159,12 +160,12 @@ ${serializers.map((s) => '$s;\n').join('')}
             return reference;
           case 'List':
           case 'Set':
-            return '$nullCheck [for (final item in $reference) '
+            return '$nullCheck [for (final item in $nullCheckedReference) '
                 '${_convertTypeToJson('item', namedType.instantiation.first)}'
                 ']';
           case 'Map':
-            return '$nullCheck {for (final (:key, :value) in '
-                '$reference.entries) key: '
+            return '$nullCheck {for (final $_mapEntryType(:key, :value) in '
+                '$nullCheckedReference.entries) key: '
                 '${_convertTypeToJson('value', namedType.instantiation.last)}'
                 '}';
         }
