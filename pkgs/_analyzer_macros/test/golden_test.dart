@@ -100,6 +100,10 @@ void main() {
           return;
         }
 
+        final errors = (await analysisContext.currentSession.getErrors(path))
+            as ErrorsResult;
+        expect(errors.errors, isEmpty);
+
         final resolvedLibrary = (await analysisContext.currentSession
             .getResolvedLibrary(path)) as ResolvedLibraryResult;
         final augmentationUnit =
