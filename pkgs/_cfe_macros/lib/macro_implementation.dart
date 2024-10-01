@@ -9,7 +9,7 @@ import 'package:front_end/src/kernel/macro/identifiers.dart' as cfe;
 // ignore: implementation_imports
 import 'package:front_end/src/macros/macro_injected_impl.dart' as injected;
 import 'package:macro_service/macro_service.dart';
-import 'package:macros/macros.dart' hide Code;
+import 'package:macros/macros.dart' as injected;
 // ignore: implementation_imports
 import 'package:macros/src/executor.dart' as injected;
 
@@ -82,33 +82,36 @@ class CfeRunningMacro implements injected.RunningMacro {
   }
 
   @override
-  Future<CfeMacroExecutionResult> executeDeclarationsPhase(MacroTarget target,
-      DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
+  Future<CfeMacroExecutionResult> executeDeclarationsPhase(
+      injected.MacroTarget target,
+      injected.DeclarationPhaseIntrospector
+          declarationsPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = declarationsPhaseIntrospector;
-    return await CfeMacroExecutionResult.expandTemplates(
+    return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 2, target: target.qualifiedName)));
   }
 
   @override
-  Future<CfeMacroExecutionResult> executeDefinitionsPhase(MacroTarget target,
-      DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
+  Future<CfeMacroExecutionResult> executeDefinitionsPhase(
+      injected.MacroTarget target,
+      injected.DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = definitionPhaseIntrospector;
-    return await CfeMacroExecutionResult.expandTemplates(
+    return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 3, target: target.qualifiedName)));
   }
 
   @override
-  Future<CfeMacroExecutionResult> executeTypesPhase(
-      MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
+  Future<CfeMacroExecutionResult> executeTypesPhase(injected.MacroTarget target,
+      injected.TypePhaseIntrospector typePhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = typePhaseIntrospector;
-    return await CfeMacroExecutionResult.expandTemplates(
+    return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 1, target: target.qualifiedName)));
@@ -120,11 +123,13 @@ class CfeRunningMacro implements injected.RunningMacro {
 /// TODO(davidmorgan): add to `AugmentationResponse` to cover all the
 /// functionality of `MacroExecutionResult`.
 class CfeMacroExecutionResult implements injected.MacroExecutionResult {
-  final MacroTarget target;
+  final injected.MacroTarget target;
   @override
-  final Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;
+  final Map<injected.Identifier, Iterable<injected.DeclarationCode>>
+      typeAugmentations;
 
-  CfeMacroExecutionResult(this.target, Iterable<DeclarationCode> declarations)
+  CfeMacroExecutionResult(
+      this.target, Iterable<injected.DeclarationCode> declarations)
       // TODO(davidmorgan): this assumes augmentations are for the macro
       // application target. Instead, it should be explicit in
       // `AugmentResponse`.
@@ -132,40 +137,43 @@ class CfeMacroExecutionResult implements injected.MacroExecutionResult {
           // TODO(davidmorgan): empty augmentations response breaks the test,
           // it's not clear why.
           if (declarations.isNotEmpty)
-            (target as Declaration).identifier: declarations
+            (target as injected.Declaration).identifier: declarations
         };
 
-  static Future<CfeMacroExecutionResult> expandTemplates(
-      MacroTarget target, AugmentResponse augmentResponse) async {
-    final declarations = <DeclarationCode>[];
+  static Future<CfeMacroExecutionResult> dartModelToInjected(
+      injected.MacroTarget target, AugmentResponse augmentResponse) async {
+    final declarations = <injected.DeclarationCode>[];
     for (final augmentation in augmentResponse.augmentations) {
-      declarations.add(
-          DeclarationCode.fromParts(await _resolveNames(augmentation.code)));
+      declarations.add(injected.DeclarationCode.fromParts(
+          await _resolveNames(augmentation.code)));
     }
     return CfeMacroExecutionResult(target, declarations);
   }
 
   @override
-  List<Diagnostic> get diagnostics => [];
+  List<injected.Diagnostic> get diagnostics => [];
 
   @override
-  Map<Identifier, Iterable<DeclarationCode>> get enumValueAugmentations => {};
+  Map<injected.Identifier, Iterable<injected.DeclarationCode>>
+      get enumValueAugmentations => {};
 
   @override
-  MacroException? get exception => null;
+  injected.MacroException? get exception => null;
 
   @override
-  Map<Identifier, NamedTypeAnnotationCode> get extendsTypeAugmentations => {};
+  Map<injected.Identifier, injected.NamedTypeAnnotationCode>
+      get extendsTypeAugmentations => {};
 
   @override
-  Map<Identifier, Iterable<TypeAnnotationCode>> get interfaceAugmentations =>
-      {};
+  Map<injected.Identifier, Iterable<injected.TypeAnnotationCode>>
+      get interfaceAugmentations => {};
 
   @override
-  Iterable<DeclarationCode> get libraryAugmentations => {};
+  Iterable<injected.DeclarationCode> get libraryAugmentations => {};
 
   @override
-  Map<Identifier, Iterable<TypeAnnotationCode>> get mixinAugmentations => {};
+  Map<injected.Identifier, Iterable<injected.TypeAnnotationCode>>
+      get mixinAugmentations => {};
 
   @override
   Iterable<String> get newTypeNames => [];
@@ -174,10 +182,11 @@ class CfeMacroExecutionResult implements injected.MacroExecutionResult {
   void serialize(Object serializer) => throw UnimplementedError();
 }
 
-extension MacroTargetExtension on MacroTarget {
+extension MacroTargetExtension on injected.MacroTarget {
   QualifiedName get qualifiedName {
-    final identifier = ((this as Declaration).identifier as cfe.IdentifierImpl)
-        .resolveIdentifier();
+    final identifier =
+        ((this as injected.Declaration).identifier as cfe.IdentifierImpl)
+            .resolveIdentifier();
     return QualifiedName(uri: '${identifier.uri}', name: identifier.name);
   }
 }
@@ -196,9 +205,9 @@ Future<List<Object>> _resolveNames(List<Code> codes) async {
   // Create futures looking up their [Identifier]s, then `await` in parallel.
   final qualifiedNamesList =
       qualifiedNameStrings.map(QualifiedName.parse).toList();
-  final identifierFutures = <Future<Identifier>>[];
+  final identifierFutures = <Future<injected.Identifier>>[];
   for (final qualifiedName in qualifiedNamesList) {
-    identifierFutures.add((introspector as TypePhaseIntrospector)
+    identifierFutures.add((introspector as injected.TypePhaseIntrospector)
         // ignore: deprecated_member_use
         .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name));
   }
