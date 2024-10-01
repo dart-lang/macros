@@ -34,7 +34,7 @@ class MacroTool {
     // TODO(davidmorgan): make it an option to run with the CFE instead.
     if (!await _augmentUsingAnalyzer()) {
       print('No augmentation was generated, nothing to do, exiting.');
-      exit(0);
+      exit(1);
     }
 
     _addImportAugment();
@@ -57,16 +57,17 @@ class MacroTool {
       exitCode = result.exitCode;
     } finally {
       if (skipCleanup) {
-        print('~~~ done running, skipping cleanup because --skip-cleanup');
+        print(
+            '~~~ exit code $exitCode, skipping cleanup because --skip-cleanup');
       } else {
-        print('~~~ done running, cleanup follows');
+        print('~~~ exit code $exitCode, cleanup follows');
         _removeImportAugment();
         _removeAugmentations();
       }
     }
 
     // The analyzer seems to prevent exit.
-    exit(0);
+    exit(exitCode);
   }
 
   /// The path where macro-generated augmentations will be written.
@@ -119,29 +120,36 @@ class MacroTool {
     File(_augmentationFilePath).deleteSync();
   }
 
-  /// The path where the script file will be backed up before modification.
-  String get _backupScriptPath => '$scriptPath.backup';
-
   /// Adds `import augment` of the augmentation file.
   ///
   /// When macros run in the analyzer or CFE this inclusion of the augmentation
   /// output is automatic, but for `macro_tool` it has to be patched in.
   void _addImportAugment() {
     print('Patching to import augmentations: $scriptPath');
-    // Back up the unmodified file for [_removeImportAugment].
-    final file = File(scriptPath);
-    file.copySync(_backupScriptPath);
 
     // Add the `import augment` statement at the start of the file.
     final partName = p.basename(_augmentationFilePath);
-    final line = "import augment '$partName'; // added by macro_tool\n";
+    final line = "import augment '$partName'; $_addedMarker\n";
 
-    file.writeAsStringSync(line + file.readAsStringSync());
+    final file = File(scriptPath);
+    file.writeAsStringSync(
+        line + _removeToolAddedLinesFromSource(file.readAsStringSync()));
   }
 
   /// Reverts the script file.
   void _removeImportAugment() {
     print('Reverting: $scriptPath');
-    File(_backupScriptPath).renameSync(scriptPath);
+    final file = File(scriptPath);
+    file.writeAsStringSync(
+        _removeToolAddedLinesFromSource(file.readAsStringSync()));
   }
+
+  /// Returns [source] with lines added by [_addImportAugment] removed.
+  String _removeToolAddedLinesFromSource(String source) => source
+      .split('\n')
+      .where((l) => !l.endsWith(_addedMarker))
+      .map((l) => '$l\n')
+      .join();
 }
+
+final String _addedMarker = '// added by macro_tool';

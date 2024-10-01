@@ -36,8 +36,9 @@ class JsonCodableImplementation implements Macro {
     final target = request.target;
     return AugmentResponse(augmentations: [
       Augmentation(code: '''
-external ${target.name}.fromJson($_jsonMapType json);
-external $_jsonMapType toJson();
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external ${target.name}.fromJson($_jsonMapType json);
+// external $_jsonMapType toJson();
    '''),
     ]);
   }
@@ -70,7 +71,11 @@ ${initializers.join(',\n')};
         in clazz.members.entries.where((m) => m.value.properties.isField)) {
       final name = field.key;
       final type = field.value.returnType;
-      serializers.add("json[r'$name'] = ${_convertTypeToJson(name, type)}");
+      var serializer = "json[r'$name'] = ${_convertTypeToJson(name, type)};\n";
+      if (type.type == StaticTypeDescType.nullableTypeDesc) {
+        serializer = 'if ($name != null) {\n$serializer}\n';
+      }
+      serializers.add(serializer);
     }
 
     // TODO(davidmorgan): helper for augmenting methods.
@@ -78,7 +83,7 @@ ${initializers.join(',\n')};
     result.add(Augmentation(code: '''
 augment $_jsonMapType toJson() {
   final json = $_jsonMapTypeForLiteral{};
-${serializers.map((s) => '$s;\n').join('')}
+${serializers.join('')}
   return json;
 }
 '''));
@@ -117,7 +122,7 @@ ${serializers.map((s) => '$s;\n').join('')}
           case 'Set':
             final type = namedType.instantiation.single;
             return '$nullCheck {for (final item in $reference '
-                'as {{dart:core#Set}}<{{dart:core#Object}}?>) '
+                'as {{dart:core#List}}<{{dart:core#Object}}?>) '
                 '${_convertTypeFromJson('item', type)}'
                 '}';
           case 'Map':
