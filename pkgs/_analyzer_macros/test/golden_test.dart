@@ -107,7 +107,7 @@ void main() {
         final resolvedLibrary = (await analysisContext.currentSession
             .getResolvedLibrary(path)) as ResolvedLibraryResult;
         final augmentationUnit =
-            resolvedLibrary.units.singleWhere((u) => u.isMacroAugmentation);
+            resolvedLibrary.units.singleWhere((u) => u.isMacroPart);
 
         if (introspectionGolden != null) {
           // Each `QueryClass` outputs its query result as a comment in an

@@ -97,7 +97,7 @@ class MacroTool {
     }
 
     final augmentationUnits =
-        resolvedLibrary.units.where((u) => u.isMacroAugmentation).toList();
+        resolvedLibrary.units.where((u) => u.isMacroPart).toList();
     if (augmentationUnits.isEmpty) {
       return false;
     }
