@@ -85,7 +85,7 @@ class MacroTool {
         protocol: Protocol(
             encoding: ProtocolEncoding.binary,
             version: ProtocolVersion.macros1),
-        packageConfig: File(packageConfigPath).uri);
+        packageConfig: Uri.file(packageConfigPath));
 
     final resolvedLibrary = (await analysisContext.currentSession
         .getResolvedLibrary(scriptPath)) as ResolvedLibraryResult;
@@ -105,7 +105,7 @@ class MacroTool {
     print('Macro output (patched to use augment library): '
         '$_augmentationFilePath');
     File(_augmentationFilePath).writeAsStringSync(augmentationUnits
-        .first.content
+        .single.content
         // The analyzer produces augmentations in parts, but the CFE still
         // wants them in augmentation libraries. Adjust the output accordingly.
         .replaceAll('part of', 'augment library'));
