@@ -6,7 +6,7 @@ repository: https://github.com/dart-lang/macros/tree/master/pkgs/macro_service
 resolution: workspace
 
 environment:
-  sdk: ^3.6.0-198.0.dev
+  sdk: ^3.6.0-300.0.dev
 
 dependencies:
   async: ^2.11.0
