@@ -8,7 +8,8 @@ import 'dart:typed_data';
 import '../dart_model.dart';
 import 'json_buffer/json_buffer_builder.dart';
 
-/// Scope for accumulating `dart_model` data for efficient transmission.
+/// Scope for accumulating `dart_model` queries for efficient transmission and
+/// responses for use in type queries.
 ///
 /// A scope introduces buffers that can be written to. Some `dart_model` types
 /// are then instantiated directly into the buffer instead of on the heap,
@@ -128,8 +129,8 @@ class _ScopeData {
   _ScopeData._(this.type, this.buffer, [this.macro]);
 }
 
-/// Data attached to [Scope.macro] environments to make resolved queries
-/// publicly accessible.
+/// Data attached to [Scope.macro] scopes to make resolved queries publicly
+/// accessible.
 class MacroScope {
   Model? _accumulatedModel;
 
@@ -144,7 +145,7 @@ class MacroScope {
   MacroScope._();
 
   /// Returns a type system resolving subtype queries for types known to the
-  /// current Dart model.
+  /// model constructed via [addModel].
   StaticTypeSystem get typeSystem {
     return _typeSystem ??= switch (_accumulatedModel) {
       // TODO: Refactor type system so that we can return an empty type system
@@ -154,16 +155,21 @@ class MacroScope {
     };
   }
 
+  /// Merges a new partial [model] into the scope's accumulated model spanning
+  /// multiple queries.
+  // TODO: Actually accumulate instead of replacing the model
   void addModel(Model model) {
-    // TODO: Integrate new model into accumulated model instead of replacing it
     _accumulatedModel = model;
     _typeSystem = null;
   }
 
   static MacroScope get current {
-    return switch (Scope._currentOrNull) {
+    final scope = Scope._currentOrNull;
+    return switch (scope) {
       _ScopeData(:final macro?) => macro,
-      _ => throw StateError('MacroScope.current can only be called in macros.'),
+      _ => throw StateError(
+          'MacroScope.current can only be called in macro scope, '
+          'but currently running ${scope?.type ?? Scope.none}.'),
     };
   }
 }
