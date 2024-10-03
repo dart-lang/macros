@@ -150,10 +150,12 @@ class RemoteMacroHost implements Host {
   Future<Model> query(Query query) async {
     // The macro scope is used to accumulate augment results, drop into
     // "none" scope to avoid clashing with those when sending the query.
-    return (await Scope.none.runAsync(() async => _client._sendRequest(
+    final model = (await Scope.none.runAsync(() async => _client._sendRequest(
             MacroRequest.queryRequest(QueryRequest(query: query),
                 id: nextRequestId))))
         .asQueryResponse
         .model;
+    MacroScope.current.addModel(model);
+    return model;
   }
 }

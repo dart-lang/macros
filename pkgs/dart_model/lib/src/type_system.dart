@@ -18,6 +18,8 @@ final class StaticTypeSystem {
 
   StaticTypeSystem(this._hierarchy);
 
+  static StaticTypeSystem get current => MacroScope.current.typeSystem;
+
   TypeHierarchyEntry _lookupEntry(String qualifiedName) {
     return _hierarchy.named[qualifiedName]!;
   }
