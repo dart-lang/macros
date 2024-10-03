@@ -239,10 +239,59 @@
     },
     "Query": {
       "type": "object",
-      "description": "Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.",
+      "description": "Query about a corpus of Dart source code.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/QueryName"
+            },
+            {
+              "$ref": "#/$defs/QueryMultiple"
+            },
+            {
+              "$ref": "#/$defs/QueryStaticType"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "QueryName": {
+      "type": "object",
+      "description": "Query about a Dart element identified by the [target] name. \nThe returned model will contain the element itself, and, if it introduces a type, its position in the type hierarchy.",
       "properties": {
         "target": {
           "$comment": "The class to query about.",
+          "$ref": "#/$defs/QualifiedName"
+        }
+      }
+    },
+    "QueryMultiple": {
+      "type": "object",
+      "description": "Include multiple other queries in a [Query] to query multiple aspects of a corpus of Dart source code at once.",
+      "properties": {
+        "queries": {
+          "type": "array",
+          "description": "The inner queries.",
+          "items": {
+            "$ref": "#/$defs/Query"
+          }
+        }
+      }
+    },
+    "QueryStaticType": {
+      "type": "object",
+      "description": "Queries the position a type-defining [target] has in the type hierarchy.\n\nThe returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike [QueryName] however, no information is included about the structure of resolved classes.",
+      "properties": {
+        "target": {
+          "$comment": "The class for which type information is queried.",
           "$ref": "#/$defs/QualifiedName"
         }
       }

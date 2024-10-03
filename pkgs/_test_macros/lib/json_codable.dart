@@ -46,7 +46,7 @@ external $_jsonMapType toJson();
     final result = <Augmentation>[];
 
     final target = request.target;
-    final model = await host.query(Query(target: target));
+    final model = await host.query(Query.queryName(QueryName(target: target)));
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
     // TODO(davidmorgan): check for super `fromJson`.
     final initializers = <String>[];

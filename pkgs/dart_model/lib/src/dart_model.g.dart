@@ -338,15 +338,103 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
   String get name => node['name'] as String;
 }
 
-/// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
+enum QueryType {
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
+  queryName,
+  queryMultiple,
+  queryStaticType;
+
+  bool get isKnown => this != _unknown;
+}
+
 extension type Query.fromJson(Map<String, Object?> node) implements Object {
-  Query({
+  static Query queryName(QueryName queryName) => Query.fromJson({
+        'type': 'QueryName',
+        'value': queryName,
+      });
+  static Query queryMultiple(QueryMultiple queryMultiple) => Query.fromJson({
+        'type': 'QueryMultiple',
+        'value': queryMultiple,
+      });
+  static Query queryStaticType(QueryStaticType queryStaticType) =>
+      Query.fromJson({
+        'type': 'QueryStaticType',
+        'value': queryStaticType,
+      });
+  QueryType get type {
+    switch (node['type'] as String) {
+      case 'QueryName':
+        return QueryType.queryName;
+      case 'QueryMultiple':
+        return QueryType.queryMultiple;
+      case 'QueryStaticType':
+        return QueryType.queryStaticType;
+      default:
+        return QueryType._unknown;
+    }
+  }
+
+  QueryName get asQueryName {
+    if (node['type'] != 'QueryName') {
+      throw StateError('Not a QueryName.');
+    }
+    return QueryName.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  QueryMultiple get asQueryMultiple {
+    if (node['type'] != 'QueryMultiple') {
+      throw StateError('Not a QueryMultiple.');
+    }
+    return QueryMultiple.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  QueryStaticType get asQueryStaticType {
+    if (node['type'] != 'QueryStaticType') {
+      throw StateError('Not a QueryStaticType.');
+    }
+    return QueryStaticType.fromJson(node['value'] as Map<String, Object?>);
+  }
+}
+
+/// Query about a Dart element identified by the [target] name.
+/// The returned model will contain the element itself, and, if it introduces a type, its position in the type hierarchy.
+extension type QueryName.fromJson(Map<String, Object?> node) implements Object {
+  QueryName({
     QualifiedName? target,
   }) : this.fromJson({
           if (target != null) 'target': target,
         });
 
   /// The class to query about.
+  QualifiedName get target => node['target'] as QualifiedName;
+}
+
+/// Include multiple other queries in a [Query] to query multiple aspects of a corpus of Dart source code at once.
+extension type QueryMultiple.fromJson(Map<String, Object?> node)
+    implements Object {
+  QueryMultiple({
+    List<Query>? queries,
+  }) : this.fromJson({
+          if (queries != null) 'queries': queries,
+        });
+
+  /// The inner queries.
+  List<Query> get queries => (node['queries'] as List).cast();
+}
+
+/// Queries the position a type-defining [target] has in the type hierarchy.
+///
+/// The returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike [QueryName] however, no information is included about the structure of resolved classes.
+extension type QueryStaticType.fromJson(Map<String, Object?> node)
+    implements Object {
+  QueryStaticType({
+    QualifiedName? target,
+  }) : this.fromJson({
+          if (target != null) 'target': target,
+        });
+
+  /// The class for which type information is queried.
   QualifiedName get target => node['target'] as QualifiedName;
 }
 

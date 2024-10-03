@@ -228,14 +228,46 @@ static QualifiedName parse(String string) {
     uri: string.substring(0, index), name: string.substring(index + 1));
 }
 '''),
-        Definition.clazz('Query',
-            description: 'Query about a corpus of Dart source code. '
-                'TODO(davidmorgan): this queries about a single class, expand '
-                'to a union type for different types of queries.',
+        Definition.union(
+          'Query',
+          description: 'Query about a corpus of Dart source code.',
+          types: ['QueryName', 'QueryMultiple', 'QueryStaticType'],
+          properties: [],
+        ),
+        Definition.clazz('QueryName',
+            description:
+                'Query about a Dart element identified by the [target] name. \n'
+                'The returned model will contain the element itself, and, if '
+                'it introduces a type, its position in the type hierarchy.',
             properties: [
               Property('target',
                   type: 'QualifiedName',
                   description: 'The class to query about.'),
+            ]),
+        Definition.clazz('QueryMultiple',
+            description:
+                'Include multiple other queries in a [Query] to query multiple '
+                'aspects of a corpus of Dart source code at once.',
+            properties: [
+              Property(
+                'queries',
+                type: 'List<Query>',
+                description: 'The inner queries.',
+              ),
+            ]),
+        Definition.clazz('QueryStaticType',
+            description:
+                'Queries the position a type-defining [target] has in the type '
+                'hierarchy.\n\n'
+                'The returned model will contain [Model.types] for the queried '
+                'class, as well as all superclasses. Unlike [QueryName] '
+                'however, no information is included about the structure of '
+                'resolved classes.',
+            properties: [
+              Property('target',
+                  type: 'QualifiedName',
+                  description:
+                      'The class for which type information is queried.'),
             ]),
         Definition.clazz('RecordTypeDesc',
             description: 'A resolved record type in the type hierarchy.',

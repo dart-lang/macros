@@ -11,3 +11,16 @@ extension QualifiedNameExtension on QualifiedName {
 
   bool equals(QualifiedName other) => other.uri == uri && other.name == name;
 }
+
+extension QueryExtension on Query {
+  /// Recursively replaces [QueryMultiple] queries with their inner queries.
+  Iterable<Query> expandMultiple() sync* {
+    if (type == QueryType.queryMultiple) {
+      for (final entry in asQueryMultiple.queries) {
+        yield* entry.expandMultiple();
+      }
+    } else {
+      yield this;
+    }
+  }
+}

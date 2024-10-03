@@ -25,30 +25,82 @@ analyzer.LinkedElementFactory get _elementFactory =>
 class AnalyzerQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
-    return QueryResponse(model: _evaluateClassQuery(request.query.target));
+    final result = _PendingAnalyzerModel();
+
+    for (final entry in request.query.expandMultiple()) {
+      switch (entry.type) {
+        case QueryType.queryName:
+          _evaluateQueryName(entry.asQueryName.target, result);
+        case QueryType.queryStaticType:
+          _evaluateQueryType(entry.asQueryStaticType.target, result);
+        default:
+          throw UnsupportedError('Unknown query $entry');
+      }
+    }
+
+    return QueryResponse(model: _createMacroModel(result));
   }
 
-  Model _evaluateClassQuery(QualifiedName target) {
-    final uri = target.uri;
+  InterfaceElement _resolveInterface(QualifiedName name) {
+    final uri = name.uri;
     final library = _elementFactory.libraryOfUri2(Uri.parse(uri));
-    final clazz = library.getClass(target.name)!;
-    final types = AnalyzerTypeHierarchy(library.typeProvider)
-      ..addInterfaceElement(clazz);
+    return library.getClass(name.name)!;
+  }
 
-    final interface = Interface();
-    for (final field in clazz.fields) {
-      interface.members[field.name] = Member(
-          properties: Properties(
-            isAbstract: field.isAbstract,
-            isGetter: false,
-            isField: true,
-            isMethod: false,
-            isStatic: field.isStatic,
-          ),
-          returnType: types.addDartType(field.type));
+  void _evaluateQueryName(QualifiedName target, _PendingAnalyzerModel model) {
+    final interface = _resolveInterface(target);
+    model.addQueryNameResult(interface);
+
+    // Queried classes are also added to the type hierarchy.
+    model.addQueryStaticTypeResult(interface);
+  }
+
+  void _evaluateQueryType(QualifiedName target, _PendingAnalyzerModel model) {
+    model.addQueryStaticTypeResult(_resolveInterface(target));
+  }
+
+  Model _createMacroModel(_PendingAnalyzerModel model) {
+    final librariesByUri = <String, Library>{};
+    final types =
+        AnalyzerTypeHierarchy(_elementFactory.analysisContext.typeProvider);
+
+    for (final clazz in model.resolvedNames) {
+      final interface = Interface();
+      for (final field in clazz.fields) {
+        interface.members[field.name] = Member(
+            properties: Properties(
+              isAbstract: field.isAbstract,
+              isGetter: false,
+              isField: true,
+              isMethod: false,
+              isStatic: field.isStatic,
+            ),
+            returnType: types.addDartType(field.type));
+      }
+
+      librariesByUri
+          .putIfAbsent(clazz.library.source.uri.toString(), Library.new)
+          .scopes[clazz.name] = interface;
     }
-    return Model(types: types.typeHierarchy)
-      ..uris[uri] = (Library()..scopes[clazz.name] = interface);
+
+    for (final type in model.resolvedTypes) {
+      types.addInterfaceElement(type);
+    }
+
+    return Model(types: types.typeHierarchy)..uris.addAll(librariesByUri);
+  }
+}
+
+class _PendingAnalyzerModel {
+  final Set<InterfaceElement> resolvedNames = {};
+  final Set<InterfaceElement> resolvedTypes = {};
+
+  void addQueryNameResult(InterfaceElement element) {
+    resolvedNames.add(element);
+  }
+
+  void addQueryStaticTypeResult(InterfaceElement element) {
+    resolvedTypes.add(element);
   }
 }
 
