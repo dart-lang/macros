@@ -26,12 +26,23 @@ cfe.SourceLoader get sourceLoader =>
 class CfeQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
-    return QueryResponse(
-        model: await _evaluateClassQuery(request.query.target));
+    final model = _PendingCfeModel();
+    for (final query in request.query.expandBatches()) {
+      switch (query.type) {
+        case QueryType.queryCode:
+          await _evaluateCodeQuery(model, query.asQueryCode.target);
+        case QueryType.queryStaticType:
+          await _evaluateTypeQuery(model, query.asQueryStaticType.target);
+        default:
+          throw UnsupportedError('Unknown query $query');
+      }
+    }
+
+    _buildTypeHierarchy(model.pendingModel.types, model.resolvedTypes);
+    return QueryResponse(model: model.pendingModel);
   }
 
-  Future<Model> _evaluateClassQuery(QualifiedName target) async {
-    final uri = target.uri;
+  cfe.SourceClassBuilder _findClass(QualifiedName target) {
     final libraryBuilder = sourceLoader.sourceLibraryBuilders
         .singleWhere((l) => l.importUri.toString() == target.uri);
     final classBuilderIterator =
@@ -43,6 +54,13 @@ class CfeQueryService implements QueryService {
       }
     }
     if (classBuilder == null) throw StateError('Not found $target');
+    return classBuilder;
+  }
+
+  Future<void> _evaluateCodeQuery(
+      _PendingCfeModel model, QualifiedName target) async {
+    final uri = target.uri;
+    final classBuilder = _findClass(target);
     final fieldIterator =
         classBuilder.fullMemberIterator<cfe.SourceFieldBuilder>();
     final interface = Interface();
@@ -58,16 +76,23 @@ class CfeQueryService implements QueryService {
       ));
     }
 
-    return Model(types: _buildTypeHierarchy({classBuilder.actualCls}))
-      ..uris[uri] = (Library()
-        ..
-            // TODO(davidmorgan): return more than just fields.
-            // TODO(davidmorgan): specify in the query what to return.
+    // TODO(davidmorgan): return more than just fields.
+    // TODO(davidmorgan): specify in the query what to return.
+    model.pendingModel.uris.putIfAbsent(uri, Library.new).scopes[target.name] =
+        interface;
 
-            scopes[target.name] = interface);
+    // Resolved code elements declaring types are also included in the type
+    // hierarchy part of the model.
+    model.addStaticTypeResult(classBuilder.actualCls);
   }
 
-  TypeHierarchy _buildTypeHierarchy(Set<kernel.Class> classes) {
+  Future<void> _evaluateTypeQuery(
+      _PendingCfeModel model, QualifiedName target) async {
+    final classBuilder = _findClass(target);
+    model.addStaticTypeResult(classBuilder.actualCls);
+  }
+
+  void _buildTypeHierarchy(TypeHierarchy into, Set<kernel.Class> classes) {
     // These classes need to be present in every type hierarchy due to their
     // special role. Other types are only relevant if reachable from [classes].
     final coreTypes = sourceLoader.coreTypes;
@@ -93,14 +118,13 @@ class CfeQueryService implements QueryService {
 
     final context = TypeTranslationContext();
     const translator = KernelTypeToMacros();
-    final result = TypeHierarchy();
     for (final element in classes) {
       final asNamedType = element
           .getThisType(coreTypes, kernel.Nullability.nonNullable)
           .accept1(translator, context)
           .asNamedTypeDesc;
 
-      result.named[asNamedType.name.asString] = TypeHierarchyEntry(
+      into.named[asNamedType.name.asString] = TypeHierarchyEntry(
         self: asNamedType,
         typeParameters: [
           for (final typeParameter in element.typeParameters)
@@ -114,7 +138,14 @@ class CfeQueryService implements QueryService {
         ],
       );
     }
+  }
+}
 
-    return result;
+class _PendingCfeModel {
+  final Model pendingModel = Model();
+  final Set<kernel.Class> resolvedTypes = {};
+
+  void addStaticTypeResult(kernel.Class dartClass) {
+    resolvedTypes.add(dartClass);
   }
 }
