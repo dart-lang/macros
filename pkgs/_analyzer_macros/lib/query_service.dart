@@ -27,10 +27,10 @@ class AnalyzerQueryService implements QueryService {
   Future<QueryResponse> handle(QueryRequest request) async {
     final result = _PendingAnalyzerModel();
 
-    for (final entry in request.query.expandMultiple()) {
+    for (final entry in request.query.expandBatches()) {
       switch (entry.type) {
-        case QueryType.queryName:
-          _evaluateQueryName(entry.asQueryName.target, result);
+        case QueryType.queryCode:
+          _evaluateQueryCode(entry.asQueryCode.target, result);
         case QueryType.queryStaticType:
           _evaluateQueryType(entry.asQueryStaticType.target, result);
         default:
@@ -47,16 +47,16 @@ class AnalyzerQueryService implements QueryService {
     return library.getClass(name.name)!;
   }
 
-  void _evaluateQueryName(QualifiedName target, _PendingAnalyzerModel model) {
+  void _evaluateQueryCode(QualifiedName target, _PendingAnalyzerModel model) {
     final interface = _resolveInterface(target);
-    model.addQueryNameResult(interface);
+    model.addCodeResult(interface);
 
     // Queried classes are also added to the type hierarchy.
-    model.addQueryStaticTypeResult(interface);
+    model.addStaticTypeResult(interface);
   }
 
   void _evaluateQueryType(QualifiedName target, _PendingAnalyzerModel model) {
-    model.addQueryStaticTypeResult(_resolveInterface(target));
+    model.addStaticTypeResult(_resolveInterface(target));
   }
 
   Model _createMacroModel(_PendingAnalyzerModel model) {
@@ -95,11 +95,11 @@ class _PendingAnalyzerModel {
   final Set<InterfaceElement> resolvedNames = {};
   final Set<InterfaceElement> resolvedTypes = {};
 
-  void addQueryNameResult(InterfaceElement element) {
+  void addCodeResult(InterfaceElement element) {
     resolvedNames.add(element);
   }
 
-  void addQueryStaticTypeResult(InterfaceElement element) {
+  void addStaticTypeResult(InterfaceElement element) {
     resolvedTypes.add(element);
   }
 }

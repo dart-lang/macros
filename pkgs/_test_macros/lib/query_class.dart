@@ -28,7 +28,7 @@ class QueryClassImplementation implements Macro {
     // that this is not needed.
     if (request.phase != 3) return AugmentResponse(augmentations: []);
 
-    final model = await host.query(Query.queryName(QueryName(
+    final model = await host.query(Query.queryCode(QueryCode(
       target: request.target,
     )));
     return AugmentResponse(

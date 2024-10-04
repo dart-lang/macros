@@ -231,10 +231,10 @@ static QualifiedName parse(String string) {
         Definition.union(
           'Query',
           description: 'Query about a corpus of Dart source code.',
-          types: ['QueryName', 'QueryMultiple', 'QueryStaticType'],
+          types: ['QueryCode', 'BatchQuery', 'QueryStaticType'],
           properties: [],
         ),
-        Definition.clazz('QueryName',
+        Definition.clazz('QueryCode',
             description:
                 'Query about a Dart element identified by the [target] name. \n'
                 'The returned model will contain the element itself, and, if '
@@ -244,7 +244,7 @@ static QualifiedName parse(String string) {
                   type: 'QualifiedName',
                   description: 'The class to query about.'),
             ]),
-        Definition.clazz('QueryMultiple',
+        Definition.clazz('BatchQuery',
             description:
                 'Include multiple other queries in a [Query] to query multiple '
                 'aspects of a corpus of Dart source code at once.',
@@ -260,7 +260,7 @@ static QualifiedName parse(String string) {
                 'Queries the position a type-defining [target] has in the type '
                 'hierarchy.\n\n'
                 'The returned model will contain [Model.types] for the queried '
-                'class, as well as all superclasses. Unlike [QueryName] '
+                'class, as well as all superclasses. Unlike with [QueryCode] '
                 'however, no information is included about the structure of '
                 'resolved classes.',
             properties: [

@@ -247,10 +247,10 @@
         "value": {
           "oneOf": [
             {
-              "$ref": "#/$defs/QueryName"
+              "$ref": "#/$defs/QueryCode"
             },
             {
-              "$ref": "#/$defs/QueryMultiple"
+              "$ref": "#/$defs/BatchQuery"
             },
             {
               "$ref": "#/$defs/QueryStaticType"
@@ -263,7 +263,7 @@
         ]
       }
     },
-    "QueryName": {
+    "QueryCode": {
       "type": "object",
       "description": "Query about a Dart element identified by the [target] name. \nThe returned model will contain the element itself, and, if it introduces a type, its position in the type hierarchy.",
       "properties": {
@@ -273,7 +273,7 @@
         }
       }
     },
-    "QueryMultiple": {
+    "BatchQuery": {
       "type": "object",
       "description": "Include multiple other queries in a [Query] to query multiple aspects of a corpus of Dart source code at once.",
       "properties": {
@@ -288,7 +288,7 @@
     },
     "QueryStaticType": {
       "type": "object",
-      "description": "Queries the position a type-defining [target] has in the type hierarchy.\n\nThe returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike [QueryName] however, no information is included about the structure of resolved classes.",
+      "description": "Queries the position a type-defining [target] has in the type hierarchy.\n\nThe returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike with [QueryCode] however, no information is included about the structure of resolved classes.",
       "properties": {
         "target": {
           "$comment": "The class for which type information is queried.",

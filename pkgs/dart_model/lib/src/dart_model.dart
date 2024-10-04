@@ -13,11 +13,11 @@ extension QualifiedNameExtension on QualifiedName {
 }
 
 extension QueryExtension on Query {
-  /// Recursively replaces [QueryMultiple] queries with their inner queries.
-  Iterable<Query> expandMultiple() sync* {
-    if (type == QueryType.queryMultiple) {
-      for (final entry in asQueryMultiple.queries) {
-        yield* entry.expandMultiple();
+  /// Recursively replaces [BatchQuery] queries with their inner queries.
+  Iterable<Query> expandBatches() sync* {
+    if (type == QueryType.batchQuery) {
+      for (final entry in asBatchQuery.queries) {
+        yield* entry.expandBatches();
       }
     } else {
       yield this;

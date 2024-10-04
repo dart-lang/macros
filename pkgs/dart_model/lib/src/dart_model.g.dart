@@ -341,21 +341,21 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
 enum QueryType {
   // Private so switches must have a default. See `isKnown`.
   _unknown,
-  queryName,
-  queryMultiple,
+  queryCode,
+  batchQuery,
   queryStaticType;
 
   bool get isKnown => this != _unknown;
 }
 
 extension type Query.fromJson(Map<String, Object?> node) implements Object {
-  static Query queryName(QueryName queryName) => Query.fromJson({
-        'type': 'QueryName',
-        'value': queryName,
+  static Query queryCode(QueryCode queryCode) => Query.fromJson({
+        'type': 'QueryCode',
+        'value': queryCode,
       });
-  static Query queryMultiple(QueryMultiple queryMultiple) => Query.fromJson({
-        'type': 'QueryMultiple',
-        'value': queryMultiple,
+  static Query batchQuery(BatchQuery batchQuery) => Query.fromJson({
+        'type': 'BatchQuery',
+        'value': batchQuery,
       });
   static Query queryStaticType(QueryStaticType queryStaticType) =>
       Query.fromJson({
@@ -364,10 +364,10 @@ extension type Query.fromJson(Map<String, Object?> node) implements Object {
       });
   QueryType get type {
     switch (node['type'] as String) {
-      case 'QueryName':
-        return QueryType.queryName;
-      case 'QueryMultiple':
-        return QueryType.queryMultiple;
+      case 'QueryCode':
+        return QueryType.queryCode;
+      case 'BatchQuery':
+        return QueryType.batchQuery;
       case 'QueryStaticType':
         return QueryType.queryStaticType;
       default:
@@ -375,18 +375,18 @@ extension type Query.fromJson(Map<String, Object?> node) implements Object {
     }
   }
 
-  QueryName get asQueryName {
-    if (node['type'] != 'QueryName') {
-      throw StateError('Not a QueryName.');
+  QueryCode get asQueryCode {
+    if (node['type'] != 'QueryCode') {
+      throw StateError('Not a QueryCode.');
     }
-    return QueryName.fromJson(node['value'] as Map<String, Object?>);
+    return QueryCode.fromJson(node['value'] as Map<String, Object?>);
   }
 
-  QueryMultiple get asQueryMultiple {
-    if (node['type'] != 'QueryMultiple') {
-      throw StateError('Not a QueryMultiple.');
+  BatchQuery get asBatchQuery {
+    if (node['type'] != 'BatchQuery') {
+      throw StateError('Not a BatchQuery.');
     }
-    return QueryMultiple.fromJson(node['value'] as Map<String, Object?>);
+    return BatchQuery.fromJson(node['value'] as Map<String, Object?>);
   }
 
   QueryStaticType get asQueryStaticType {
@@ -399,8 +399,8 @@ extension type Query.fromJson(Map<String, Object?> node) implements Object {
 
 /// Query about a Dart element identified by the [target] name.
 /// The returned model will contain the element itself, and, if it introduces a type, its position in the type hierarchy.
-extension type QueryName.fromJson(Map<String, Object?> node) implements Object {
-  QueryName({
+extension type QueryCode.fromJson(Map<String, Object?> node) implements Object {
+  QueryCode({
     QualifiedName? target,
   }) : this.fromJson({
           if (target != null) 'target': target,
@@ -411,9 +411,9 @@ extension type QueryName.fromJson(Map<String, Object?> node) implements Object {
 }
 
 /// Include multiple other queries in a [Query] to query multiple aspects of a corpus of Dart source code at once.
-extension type QueryMultiple.fromJson(Map<String, Object?> node)
+extension type BatchQuery.fromJson(Map<String, Object?> node)
     implements Object {
-  QueryMultiple({
+  BatchQuery({
     List<Query>? queries,
   }) : this.fromJson({
           if (queries != null) 'queries': queries,
@@ -425,7 +425,7 @@ extension type QueryMultiple.fromJson(Map<String, Object?> node)
 
 /// Queries the position a type-defining [target] has in the type hierarchy.
 ///
-/// The returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike [QueryName] however, no information is included about the structure of resolved classes.
+/// The returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike with [QueryCode] however, no information is included about the structure of resolved classes.
 extension type QueryStaticType.fromJson(Map<String, Object?> node)
     implements Object {
   QueryStaticType({
