@@ -107,6 +107,34 @@ void main() {
           expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
               'JsonData']!['members']);
     });
+
+    test('can give the path to Members in buffer backed maps', () {
+      final member = model.uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!.members['_root']!;
+      expect(model.pathToMember(member),
+          '/uris/package:dart_model/dart_model.dart/scopes/JsonData/members/_root');
+    });
+
+    test('can give the path to Members in SDK maps', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!.members['_root']!;
+      expect(copiedModel.pathToMember(member),
+          '/uris/package:dart_model/dart_model.dart/scopes/JsonData/members/_root');
+    });
+
+    test('path to Member returns null for Member in wrong Map', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      final member = model.uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!.members['_root']!;
+      final copiedMember = Member.fromJson(_copyMap(model
+          .uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!
+          .members['_root']!
+          .node));
+      expect(copiedModel.pathToMember(member), null);
+      expect(model.pathToMember(copiedMember), null);
+    });
   });
 
   group(QualifiedName, () {
@@ -121,4 +149,16 @@ void main() {
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').name, 'Foo');
     });
   });
+}
+
+Map<String, Object?> _copyMap(Map<String, Object?> map) {
+  final result = <String, Object?>{};
+  for (final entry in map.entries) {
+    if (entry.value is Map<String, Object?>) {
+      result[entry.key] = _copyMap(entry.value as Map<String, Object?>);
+    } else {
+      result[entry.key] = entry.value;
+    }
+  }
+  return result;
 }

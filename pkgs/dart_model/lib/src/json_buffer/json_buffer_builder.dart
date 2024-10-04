@@ -42,7 +42,7 @@ class JsonBufferBuilder {
   JsonBufferBuilder.deserialize(this._buffer)
       : _allowWrites = false,
         _nextFree = _buffer.length {
-    map = _readGrowableMap<Object?>(0);
+    map = _readGrowableMap<Object?>(0, null);
   }
 
   JsonBufferBuilder()
@@ -63,13 +63,13 @@ class JsonBufferBuilder {
 
   /// Reads the value at [_Pointer], which must have been written with
   /// [_writeAny].
-  Object? _readAny(_Pointer pointer) {
+  Object? _readAny(_Pointer pointer, {Map<String, Object?>? parent}) {
     final type = _readType(pointer);
-    return _read(type, pointer + _typeSize);
+    return _read(type, pointer + _typeSize, parent: parent);
   }
 
   /// Reads the value of type [Type] at [_Pointer].
-  Object? _read(Type type, _Pointer pointer) {
+  Object? _read(Type type, _Pointer pointer, {Map<String, Object?>? parent}) {
     switch (type) {
       case Type.nil:
         return null;
@@ -88,11 +88,11 @@ class JsonBufferBuilder {
       case Type.closedListPointer:
         return _readClosedList(_readPointer(pointer));
       case Type.closedMapPointer:
-        return _readClosedMap(_readPointer(pointer));
+        return _readClosedMap(_readPointer(pointer), parent);
       case Type.growableMapPointer:
-        return _readGrowableMap<Object?>(_readPointer(pointer));
+        return _readGrowableMap<Object?>(_readPointer(pointer), parent);
       case Type.typedMapPointer:
-        return _readTypedMap(_readPointer(pointer));
+        return _readTypedMap(_readPointer(pointer), parent);
     }
   }
 

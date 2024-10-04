@@ -43,7 +43,7 @@ extension GrowableMaps on JsonBufferBuilder {
     // Initially a "growable map" is just a null pointer and zero size, so
     // there is nothing to write.
     _explanations?.pop();
-    return _readGrowableMap<V>(pointer);
+    return _readGrowableMap<V>(pointer, null);
   }
 
   /// Returns the [_Pointer] to [map].
@@ -57,26 +57,32 @@ extension GrowableMaps on JsonBufferBuilder {
 
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkGrowableMapOwnership(_GrowableMap map) {
-    if (map._buffer != this) {
+    if (map.buffer != this) {
       throw UnsupportedError('Maps created with `createGrowableMap` can only '
           'be added to the JsonBufferBuilder instance that created them.');
     }
   }
 
   /// Returns the [_GrowableMap] at [pointer].
-  Map<String, V> _readGrowableMap<V>(_Pointer pointer) {
-    return _GrowableMap<V>(this, pointer);
+  Map<String, V> _readGrowableMap<V>(
+      _Pointer pointer, Map<String, Object?>? parent) {
+    return _GrowableMap<V>(this, pointer, parent);
   }
 }
 
-class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
-  final JsonBufferBuilder _buffer;
+class _GrowableMap<V>
+    with MapMixin<String, V>, _EntryMapMixin<String, V>
+    implements MapInBuffer {
+  @override
+  final JsonBufferBuilder buffer;
   final _Pointer _pointer;
+  @override
+  final Map<String, Object?>? parent;
   int _length;
   _Pointer? _lastPointer;
 
-  _GrowableMap(this._buffer, this._pointer)
-      : _length = _buffer._readLength(_pointer + _pointerSize);
+  _GrowableMap(this.buffer, this._pointer, this.parent)
+      : _length = buffer._readLength(_pointer + _pointerSize);
 
   @override
   int get length => _length;
@@ -94,17 +100,17 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
 
   @override
   late final Iterable<String> keys = _IteratorFunctionIterable(
-      () => _GrowableMapKeyIterator(_buffer, _pointer),
+      () => _GrowableMapKeyIterator(buffer, this, _pointer),
       length: length);
 
   @override
   late final Iterable<V> values = _IteratorFunctionIterable(
-      () => _GrowableMapValueIterator<V>(_buffer, _pointer),
+      () => _GrowableMapValueIterator<V>(buffer, this, _pointer),
       length: length);
 
   @override
   late final Iterable<MapEntry<String, V>> entries = _IteratorFunctionIterable(
-      () => _GrowableMapEntryIterator(_buffer, _pointer),
+      () => _GrowableMapEntryIterator(buffer, this, _pointer),
       length: length);
 
   /// Add [value] to the map with key [key].
@@ -115,11 +121,11 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
   /// iterable.
   @override
   void operator []=(String key, V value) {
-    _buffer._explanations?.push('GrowableMap[]= $key $value');
+    buffer._explanations?.push('GrowableMap[]= $key $value');
 
     // If `_lastPointer` is not set yet, walk the map to find the end of it.
     if (_lastPointer == null) {
-      final iterator = _GrowableMapEntryIterator<V>(_buffer, _pointer);
+      final iterator = _GrowableMapEntryIterator<V>(buffer, this, _pointer);
       _lastPointer = _pointer;
       while (iterator.moveNext()) {
         _lastPointer = iterator._pointer;
@@ -127,20 +133,20 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
     }
 
     // Reserve and write the new node.
-    final pointer = _buffer._reserve(GrowableMaps._entrySize);
+    final pointer = buffer._reserve(GrowableMaps._entrySize);
     final entryPointer = pointer + _pointerSize;
-    _buffer._writePointer(entryPointer, _buffer._pointerToString(key));
-    _buffer._writeAny(entryPointer + _pointerSize, value);
+    buffer._writePointer(entryPointer, buffer._pointerToString(key));
+    buffer._writeAny(entryPointer + _pointerSize, value);
 
     // Point to the new node in the previous node.
-    _buffer._writePointer(_lastPointer!, pointer);
+    buffer._writePointer(_lastPointer!, pointer);
     // Update `_lastPointer` to the new node.
     _lastPointer = pointer;
 
     // Update length.
     ++_length;
-    _buffer._writeLength(_pointer + _pointerSize, length, allowOverwrite: true);
-    _buffer._explanations?.pop();
+    buffer._writeLength(_pointer + _pointerSize, length, allowOverwrite: true);
+    buffer._explanations?.pop();
   }
 
   @override
@@ -152,14 +158,24 @@ class _GrowableMap<V> with MapMixin<String, V>, _EntryMapMixin<String, V> {
   void clear() {
     throw UnsupportedError('JsonBufferBuilder growable maps are append only.');
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _GrowableMap &&
+      other.buffer == buffer &&
+      other._pointer == _pointer;
+
+  @override
+  int get hashCode => buffer.hashCode ^ _pointer.hashCode;
 }
 
 /// `Iterator` that reads a "growable map" in a [JsonBufferBuilder].
 abstract class _GrowableMapIterator<T> implements Iterator<T> {
   final JsonBufferBuilder _buffer;
+  final _GrowableMap _parent;
   _Pointer _pointer;
 
-  _GrowableMapIterator(this._buffer, this._pointer);
+  _GrowableMapIterator(this._buffer, this._parent, this._pointer);
 
   @override
   T get current;
@@ -167,7 +183,8 @@ abstract class _GrowableMapIterator<T> implements Iterator<T> {
   String get _currentKey =>
       _buffer._readString(_buffer._readPointer(_pointer + _pointerSize));
   Object? get _currentValue =>
-      _buffer._readAny(_pointer + _pointerSize + GrowableMaps._keySize);
+      _buffer._readAny(_pointer + _pointerSize + GrowableMaps._keySize,
+          parent: _parent);
 
   @override
   bool moveNext() {
@@ -177,14 +194,14 @@ abstract class _GrowableMapIterator<T> implements Iterator<T> {
 }
 
 class _GrowableMapKeyIterator extends _GrowableMapIterator<String> {
-  _GrowableMapKeyIterator(super._buffer, super._pointer);
+  _GrowableMapKeyIterator(super._buffer, super._parent, super._pointer);
 
   @override
   String get current => _currentKey;
 }
 
 class _GrowableMapValueIterator<V> extends _GrowableMapIterator<V> {
-  _GrowableMapValueIterator(super._buffer, super._pointer);
+  _GrowableMapValueIterator(super._buffer, super._parent, super._pointer);
 
   @override
   V get current => _currentValue as V;
@@ -192,7 +209,7 @@ class _GrowableMapValueIterator<V> extends _GrowableMapIterator<V> {
 
 class _GrowableMapEntryIterator<V>
     extends _GrowableMapIterator<MapEntry<String, V>> {
-  _GrowableMapEntryIterator(super._buffer, super._pointer);
+  _GrowableMapEntryIterator(super._buffer, super._parent, super._pointer);
 
   @override
   MapEntry<String, V> get current => MapEntry(_currentKey, _currentValue as V);

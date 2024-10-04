@@ -54,11 +54,11 @@ enum Type {
       case List():
         return Type.closedListPointer;
       case _TypedMap():
-        return builder == value._buffer
+        return builder == value.buffer
             ? Type.typedMapPointer
             : Type.closedMapPointer;
       case _GrowableMap():
-        return builder == value._buffer
+        return builder == value.buffer
             ? Type.growableMapPointer
             : Type.closedMapPointer;
       case Map():
