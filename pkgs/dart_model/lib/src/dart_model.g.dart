@@ -171,7 +171,7 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
   List<StaticTypeDesc> get optionalPositionalParameters =>
       (node['optionalPositionalParameters'] as List).cast();
 
-  /// The named named parameters of this member, if it has them.
+  /// The named parameters of this member, if it has them.
   List<NamedFunctionTypeParameter> get namedParameters =>
       (node['namedParameters'] as List).cast();
 }

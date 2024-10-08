@@ -157,7 +157,7 @@ static Protocol handshakeProtocol = Protocol(
                       'if it has them.'),
               Property('namedParameters',
                   type: 'List<NamedFunctionTypeParameter>',
-                  description: 'The named named parameters of this member, '
+                  description: 'The named parameters of this member, '
                       'if it has them.'),
             ]),
         Definition.clazz('Model',
