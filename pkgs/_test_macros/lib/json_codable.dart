@@ -3,9 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:dart_model/dart_model.dart';
-import 'package:dart_model/templating.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
+
+import 'templating.dart';
 
 /// A macro which adds a `fromJson(Map<String, Object?> json)` JSON decoding
 /// constructor to a class.
@@ -182,9 +183,4 @@ ${serializers.join('')}
     // TODO(davidmorgan): error reporting.
     throw UnsupportedError('$type');
   }
-}
-
-// TODO(davidmorgan): figure out where this should go.
-extension TemplatingExtension on QualifiedName {
-  String get code => '{{$uri#$name}}';
 }

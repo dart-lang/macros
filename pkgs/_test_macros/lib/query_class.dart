@@ -5,9 +5,10 @@
 import 'dart:convert';
 
 import 'package:dart_model/dart_model.dart';
-import 'package:dart_model/templating.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
+
+import 'templating.dart';
 
 /// Applies a macro which sends an empty query, and outputs an augmentation
 /// that is the query result as a comment.

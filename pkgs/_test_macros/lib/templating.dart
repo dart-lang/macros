@@ -2,12 +2,19 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'src/dart_model.dart';
+import 'package:dart_model/dart_model.dart';
+
+// TODO(davidmorgan): figure out where this should go.
+extension TemplatingExtension on QualifiedName {
+  String get code => '{{$uri#$name}}';
+}
 
 /// Converts [template] to a mix of `Identifier` and `String`.
 ///
 /// References of the form `{{uri#name}}` become [QualifiedName] wrapped in
 /// [Code.qualifiedName], everything else becomes [ResolvedCode].
+///
+/// TODO(davidmorgan): figure out where this should go.
 List<Code> expandTemplate(String template) {
   final result = <Code>[];
   var index = 0;

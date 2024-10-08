@@ -3,9 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:dart_model/dart_model.dart';
-import 'package:dart_model/templating.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
+
+import 'templating.dart';
 
 /// Adds a getter `int get x` to the class.
 class DeclareX {
