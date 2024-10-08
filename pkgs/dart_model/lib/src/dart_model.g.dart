@@ -141,7 +141,6 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
     'requiredPositionalParameters': Type.closedListPointer,
     'optionalPositionalParameters': Type.closedListPointer,
     'namedParameters': Type.closedListPointer,
-    'parameters': Type.typedMapPointer,
   });
   Member({
     Properties? properties,
@@ -149,7 +148,6 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
     List<StaticTypeDesc>? requiredPositionalParameters,
     List<StaticTypeDesc>? optionalPositionalParameters,
     List<NamedFunctionTypeParameter>? namedParameters,
-    Properties? parameters,
   }) : this.fromJson(Scope.createMap(
           _schema,
           properties,
@@ -157,7 +155,6 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
           requiredPositionalParameters,
           optionalPositionalParameters,
           namedParameters,
-          parameters,
         ));
 
   /// The properties of this member.
@@ -174,12 +171,9 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
   List<StaticTypeDesc> get optionalPositionalParameters =>
       (node['optionalPositionalParameters'] as List).cast();
 
-  /// The named positional parameters of this member, if it has them.
+  /// The named named parameters of this member, if it has them.
   List<NamedFunctionTypeParameter> get namedParameters =>
       (node['namedParameters'] as List).cast();
-
-  /// The properties of this member.
-  Properties get parameters => node['parameters'] as Properties;
 }
 
 /// Partial model of a corpus of Dart source code.

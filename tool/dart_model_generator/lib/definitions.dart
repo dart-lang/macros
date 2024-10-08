@@ -143,6 +143,8 @@ static Protocol handshakeProtocol = Protocol(
                 type: 'StaticTypeDesc',
                 description: 'The return type of this member, if it has one.',
               ),
+              // TODO(davidmorgan): base on
+              // https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/api/introspection.dart#L269
               Property('requiredPositionalParameters',
                   type: 'List<StaticTypeDesc>',
                   description:
@@ -155,12 +157,8 @@ static Protocol handshakeProtocol = Protocol(
                       'if it has them.'),
               Property('namedParameters',
                   type: 'List<NamedFunctionTypeParameter>',
-                  description:
-                      'The named positional parameters of this member, '
+                  description: 'The named named parameters of this member, '
                       'if it has them.'),
-              Property('parameters',
-                  type: 'Properties',
-                  description: 'The properties of this member.'),
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',

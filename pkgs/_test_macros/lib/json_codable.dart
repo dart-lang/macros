@@ -44,16 +44,30 @@ class JsonCodableImplementation implements Macro {
   }
 
   Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
-    final result = <Augmentation>[];
-
     final target = request.target;
     final model = await host.query(Query(target: target));
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
 
+    // TODO(davidmorgan): put `extends` information directly in `Interface`.
     MacroScope.current.addModel(model);
+
+    return AugmentResponse(augmentations: [
+      await _generateFromJson(host, model, target, clazz),
+      await _generateToJson(host, model, target, clazz)
+    ]);
+  }
+
+  Future<Augmentation> _generateFromJson(
+    Host host,
+    Model model,
+    QualifiedName target,
+    Interface clazz,
+  ) async {
+    // TODO(davidmorgan): put `extends` information directly in `Interface`.
     final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
 
     var superclassHasFromJson = false;
+    // TODO(davidmorgan): add recommended way to check for core types.
     if (superclassName.asString != 'dart:core#Object') {
       // TODO(davidmorgan): first query could already fetch the super class.
       final supermodel = await host.query(Query(target: superclassName));
@@ -86,10 +100,20 @@ class JsonCodableImplementation implements Macro {
 
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    return Augmentation(code: '''
 augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
-'''));
+''');
+  }
+
+  Future<Augmentation> _generateToJson(
+    Host host,
+    Model model,
+    QualifiedName target,
+    Interface clazz,
+  ) async {
+    // TODO(davidmorgan): put `extends` information directly in `Interface`.
+    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
 
     var superclassHasToJson = false;
     if (superclassName.asString != 'dart:core#Object') {
@@ -135,6 +159,8 @@ ${serializers.join('')}
 
     return AugmentResponse(augmentations: result);
   }
+
+  String _generateFromJson() {}
 
   /// Returns whether [constructor] is a constructor
   /// `fromJson(Map<String, Object?>)`.

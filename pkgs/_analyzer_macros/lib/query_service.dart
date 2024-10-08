@@ -144,27 +144,27 @@ class AnalyzerTypeHierarchy {
 
 extension ExecutableElementExtension on ExecutableElement {
   List<StaticTypeDesc> requiredPositionalParameters(
-      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
-    return parameters
-        .where((p) => p.isRequiredPositional)
-        .map((p) => p.type.acceptWithArgument(translator, context))
-        .toList();
-  }
+          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
+      [
+        for (final parameter in parameters)
+          if (parameter.isRequiredPositional)
+            parameter.type.acceptWithArgument(translator, context)
+      ];
 
   List<StaticTypeDesc> optionalPositionalParameters(
-      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
-    return parameters
-        .where((p) => p.isOptionalPositional)
-        .map((p) => p.type.acceptWithArgument(translator, context))
-        .toList();
-  }
+          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
+      [
+        for (final parameter in parameters)
+          if (parameter.isOptionalPositional)
+            parameter.type.acceptWithArgument(translator, context)
+      ];
 
   List<NamedFunctionTypeParameter> namedParameters(
-      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
-    return parameters
-        .where((p) => p.isNamed)
-        .map((p) => p.type.acceptWithArgument(translator, context))
-        .cast<NamedFunctionTypeParameter>()
-        .toList();
-  }
+          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
+      [
+        for (final parameter in parameters)
+          if (parameter.isNamed)
+            parameter.type.acceptWithArgument(translator, context)
+                as NamedFunctionTypeParameter
+      ];
 }

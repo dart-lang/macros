@@ -134,14 +134,10 @@
         },
         "namedParameters": {
           "type": "array",
-          "description": "The named positional parameters of this member, if it has them.",
+          "description": "The named named parameters of this member, if it has them.",
           "items": {
             "$ref": "#/$defs/NamedFunctionTypeParameter"
           }
-        },
-        "parameters": {
-          "$comment": "The properties of this member.",
-          "$ref": "#/$defs/Properties"
         }
       }
     },
