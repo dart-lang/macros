@@ -4,9 +4,85 @@
       "scopes": {
         "Foo": {
           "members": {
+            "construct": {
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": true,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": false,
+                "isStatic": false
+              },
+              "requiredPositionalParameters": [
+                {
+                  "type": "NamedTypeDesc",
+                  "value": {
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "int"
+                    },
+                    "instantiation": []
+                  }
+                }
+              ],
+              "optionalPositionalParameters": [],
+              "namedParameters": [
+                {
+                  "type": "NamedTypeDesc",
+                  "value": {
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "int"
+                    },
+                    "instantiation": []
+                  }
+                }
+              ]
+            },
+            "construct2": {
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": true,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": false,
+                "isStatic": false
+              },
+              "requiredPositionalParameters": [
+                {
+                  "type": "NamedTypeDesc",
+                  "value": {
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "int"
+                    },
+                    "instantiation": []
+                  }
+                }
+              ],
+              "optionalPositionalParameters": [
+                {
+                  "type": "NullableTypeDesc",
+                  "value": {
+                    "inner": {
+                      "type": "NamedTypeDesc",
+                      "value": {
+                        "name": {
+                          "uri": "dart:core",
+                          "name": "String"
+                        },
+                        "instantiation": []
+                      }
+                    }
+                  }
+                }
+              ],
+              "namedParameters": []
+            },
             "bar": {
               "properties": {
                 "isAbstract": false,
+                "isConstructor": false,
                 "isGetter": false,
                 "isField": true,
                 "isMethod": false,
@@ -22,14 +98,126 @@
                   "instantiation": []
                 }
               }
+            },
+            "method": {
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": false,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": true,
+                "isStatic": false
+              },
+              "returnType": {
+                "type": "VoidTypeDesc"
+              },
+              "requiredPositionalParameters": [
+                {
+                  "type": "NamedTypeDesc",
+                  "value": {
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "int"
+                    },
+                    "instantiation": []
+                  }
+                }
+              ],
+              "optionalPositionalParameters": [],
+              "namedParameters": [
+                {
+                  "type": "NullableTypeDesc",
+                  "value": {
+                    "inner": {
+                      "type": "NamedTypeDesc",
+                      "value": {
+                        "name": {
+                          "uri": "dart:core",
+                          "name": "int"
+                        },
+                        "instantiation": []
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "method2": {
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": false,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": true,
+                "isStatic": false
+              },
+              "returnType": {
+                "type": "NullableTypeDesc",
+                "value": {
+                  "inner": {
+                    "type": "NamedTypeDesc",
+                    "value": {
+                      "name": {
+                        "uri": "package:foo/foo.dart",
+                        "name": "Bar"
+                      },
+                      "instantiation": []
+                    }
+                  }
+                }
+              },
+              "requiredPositionalParameters": [
+                {
+                  "type": "NamedTypeDesc",
+                  "value": {
+                    "name": {
+                      "uri": "dart:core",
+                      "name": "int"
+                    },
+                    "instantiation": []
+                  }
+                }
+              ],
+              "optionalPositionalParameters": [
+                {
+                  "type": "NullableTypeDesc",
+                  "value": {
+                    "inner": {
+                      "type": "NamedTypeDesc",
+                      "value": {
+                        "name": {
+                          "uri": "dart:core",
+                          "name": "String"
+                        },
+                        "instantiation": []
+                      }
+                    }
+                  }
+                }
+              ],
+              "namedParameters": []
             }
           }
         },
         "Bar": {
           "members": {
+            "": {
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": true,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": false,
+                "isStatic": false
+              },
+              "requiredPositionalParameters": [],
+              "optionalPositionalParameters": [],
+              "namedParameters": []
+            },
             "bar": {
               "properties": {
                 "isAbstract": false,
+                "isConstructor": false,
                 "isGetter": false,
                 "isField": true,
                 "isMethod": false,

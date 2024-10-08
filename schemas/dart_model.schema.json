@@ -117,6 +117,31 @@
         "returnType": {
           "$comment": "The return type of this member, if it has one.",
           "$ref": "#/$defs/StaticTypeDesc"
+        },
+        "requiredPositionalParameters": {
+          "type": "array",
+          "description": "The required positional parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "optionalPositionalParameters": {
+          "type": "array",
+          "description": "The optional positional parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "namedParameters": {
+          "type": "array",
+          "description": "The named positional parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/NamedFunctionTypeParameter"
+          }
+        },
+        "parameters": {
+          "$comment": "The properties of this member.",
+          "$ref": "#/$defs/Properties"
         }
       }
     },
@@ -204,6 +229,10 @@
         "isClass": {
           "type": "boolean",
           "description": "Whether the entity is a class."
+        },
+        "isConstructor": {
+          "type": "boolean",
+          "description": "Whether the entity is a constructor."
         },
         "isGetter": {
           "type": "boolean",

@@ -145,11 +145,8 @@ class MacroTool {
   }
 
   /// Returns [source] with lines added by [_addImportAugment] removed.
-  String _removeToolAddedLinesFromSource(String source) => source
-      .split('\n')
-      .where((l) => !l.endsWith(_addedMarker))
-      .map((l) => '$l\n')
-      .join();
+  String _removeToolAddedLinesFromSource(String source) =>
+      source.split('\n').where((l) => !l.endsWith(_addedMarker)).join('\n');
 }
 
 final String _addedMarker = '// added by macro_tool';

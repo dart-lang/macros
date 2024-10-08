@@ -36,16 +36,52 @@ class AnalyzerQueryService implements QueryService {
       ..addInterfaceElement(clazz);
 
     final interface = Interface();
+    for (final constructor in clazz.constructors) {
+      interface.members[constructor.name] = Member(
+          requiredPositionalParameters: constructor
+              .requiredPositionalParameters(types.translator, types.context),
+          optionalPositionalParameters: constructor
+              .optionalPositionalParameters(types.translator, types.context),
+          namedParameters:
+              constructor.namedParameters(types.translator, types.context),
+          properties: Properties(
+            isAbstract: constructor.isAbstract,
+            isConstructor: true,
+            isGetter: false,
+            isField: false,
+            isMethod: false,
+            isStatic: false,
+          ));
+    }
     for (final field in clazz.fields) {
       interface.members[field.name] = Member(
           properties: Properties(
             isAbstract: field.isAbstract,
+            isConstructor: false,
             isGetter: false,
             isField: true,
             isMethod: false,
             isStatic: field.isStatic,
           ),
           returnType: types.addDartType(field.type));
+    }
+    for (final method in clazz.methods) {
+      interface.members[method.name] = Member(
+          requiredPositionalParameters: method.requiredPositionalParameters(
+              types.translator, types.context),
+          optionalPositionalParameters: method.optionalPositionalParameters(
+              types.translator, types.context),
+          namedParameters:
+              method.namedParameters(types.translator, types.context),
+          properties: Properties(
+            isAbstract: method.isAbstract,
+            isConstructor: false,
+            isGetter: false,
+            isField: false,
+            isMethod: true,
+            isStatic: method.isStatic,
+          ),
+          returnType: types.addDartType(method.returnType));
     }
     return Model(types: types.typeHierarchy)
       ..uris[uri] = (Library()..scopes[clazz.name] = interface);
@@ -103,5 +139,32 @@ class AnalyzerTypeHierarchy {
           superType.acceptWithArgument(translator, context).asNamedTypeDesc
       ],
     );
+  }
+}
+
+extension ExecutableElementExtension on ExecutableElement {
+  List<StaticTypeDesc> requiredPositionalParameters(
+      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
+    return parameters
+        .where((p) => p.isRequiredPositional)
+        .map((p) => p.type.acceptWithArgument(translator, context))
+        .toList();
+  }
+
+  List<StaticTypeDesc> optionalPositionalParameters(
+      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
+    return parameters
+        .where((p) => p.isOptionalPositional)
+        .map((p) => p.type.acceptWithArgument(translator, context))
+        .toList();
+  }
+
+  List<NamedFunctionTypeParameter> namedParameters(
+      AnalyzerTypesToMacros translator, TypeTranslationContext context) {
+    return parameters
+        .where((p) => p.isNamed)
+        .map((p) => p.type.acceptWithArgument(translator, context))
+        .cast<NamedFunctionTypeParameter>()
+        .toList();
   }
 }

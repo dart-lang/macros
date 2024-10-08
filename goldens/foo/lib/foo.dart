@@ -7,6 +7,14 @@ import 'package:_test_macros/query_class.dart';
 @QueryClass()
 class Foo {
   final int bar = 3;
+
+  Foo.construct(int x, {required int y});
+  Foo.construct2(int x, [String? y]);
+
+  void method(int x, {int? y}) {}
+  Bar? method2(int x, [String? y]) {
+    return null;
+  }
 }
 
 @QueryClass()

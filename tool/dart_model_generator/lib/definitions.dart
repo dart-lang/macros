@@ -143,6 +143,24 @@ static Protocol handshakeProtocol = Protocol(
                 type: 'StaticTypeDesc',
                 description: 'The return type of this member, if it has one.',
               ),
+              Property('requiredPositionalParameters',
+                  type: 'List<StaticTypeDesc>',
+                  description:
+                      'The required positional parameters of this member, '
+                      'if it has them.'),
+              Property('optionalPositionalParameters',
+                  type: 'List<StaticTypeDesc>',
+                  description:
+                      'The optional positional parameters of this member, '
+                      'if it has them.'),
+              Property('namedParameters',
+                  type: 'List<NamedFunctionTypeParameter>',
+                  description:
+                      'The named positional parameters of this member, '
+                      'if it has them.'),
+              Property('parameters',
+                  type: 'Properties',
+                  description: 'The properties of this member.'),
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',
@@ -201,6 +219,9 @@ static Protocol handshakeProtocol = Protocol(
                       'definition.'),
               Property('isClass',
                   type: 'bool', description: 'Whether the entity is a class.'),
+              Property('isConstructor',
+                  type: 'bool',
+                  description: 'Whether the entity is a constructor.'),
               Property('isGetter',
                   type: 'bool', description: 'Whether the entity is a getter.'),
               Property('isField',

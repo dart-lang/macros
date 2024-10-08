@@ -61,6 +61,14 @@ final class StaticTypeSystem {
     return Scope.none.run(() => _isSubtype(a, b));
   }
 
+  /// Returns the super type of the type referred to by [name], which must be
+  /// part of the model.
+  ///
+  /// TODO(davidmorgan): is this the right place to provide access to supertypes?
+  QualifiedName supertypeOf(QualifiedName name) {
+    return _constructSuperTypes(_lookupNamed(name.asString), []).first.name;
+  }
+
   bool _isSubtype(StaticType a, StaticType b) {
     // This is using `T0` and `T1` names to make the implementation easier to
     // compare with the specification at
