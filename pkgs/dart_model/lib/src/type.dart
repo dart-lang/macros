@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'dart_model.dart';
+import 'type_system.dart';
 
 /// A resolved representation of static type extracted from the [StaticTypeDesc]
 /// protocol models.
@@ -81,6 +82,21 @@ sealed class StaticType {
   /// For types that are unknown to this macro client, e.g. because a new type
   /// representation has been added to the SDK, this method throws an error.
   Ret accept<Arg, Ret>(TypeVisitor<Arg, Ret> visitor, Arg arg);
+
+  /// Returns whether `this` type is a subtype of [other] under the type system
+  /// of the current resolved model.
+  bool isSubtypeOf(StaticType other) {
+    return StaticTypeSystem.current.isSubtype(this, other);
+  }
+
+  /// Returns whether `this` type is semantically equal to [other] under the
+  /// type system of the current resolved model.
+  ///
+  /// Two types are equal if they are subtypes of each other. For instance,
+  /// `Never?` and `Null` are equal types.
+  bool isEqualTo(StaticType other) {
+    return StaticTypeSystem.current.areEqual(this, other);
+  }
 }
 
 /// An unknown type from the schema that doesn't have a known representation.

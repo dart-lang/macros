@@ -1,0 +1,145 @@
+part of 'package:foo/json_codable_test.dart';
+
+import 'dart:core' as prefix0;
+import 'package:foo/json_codable_test.dart' as prefix1;
+
+augment class A {
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external A.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json);
+// external prefix0.Map<prefix0.String, prefix0.Object?> toJson();
+   
+augment A.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json) :
+boolField = json[r'boolField'] as prefix0.bool,
+stringField = json[r'stringField'] as prefix0.String,
+intField = json[r'intField'] as prefix0.int,
+doubleField = json[r'doubleField'] as prefix0.double,
+numField = json[r'numField'] as prefix0.num,
+listOfSerializableField =  [for (final item in json[r'listOfSerializableField'] as prefix0.List<prefix0.Object?>)  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)],
+setOfSerializableField =  {for (final item in json[r'setOfSerializableField'] as prefix0.List<prefix0.Object?>)  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)},
+mapOfSerializableField =  {for (final prefix0.MapEntry(:key, :value) in (json[r'mapOfSerializableField'] as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key:  prefix1.C.fromJson(value as prefix0.Map<prefix0.String, prefix0.Object?>)};
+
+augment prefix0.Map<prefix0.String, prefix0.Object?> toJson() {
+  final json = <prefix0.String, prefix0.Object?>{};
+json[r'boolField'] = boolField;
+json[r'stringField'] = stringField;
+json[r'intField'] = intField;
+json[r'doubleField'] = doubleField;
+json[r'numField'] = numField;
+json[r'listOfSerializableField'] =  [for (final item in listOfSerializableField)  item.toJson()];
+json[r'setOfSerializableField'] =  [for (final item in setOfSerializableField)  item.toJson()];
+json[r'mapOfSerializableField'] =  {for (final prefix0.MapEntry(:key, :value) in mapOfSerializableField.entries) key:  value.toJson()};
+
+  return json;
+}
+
+}
+augment class B {
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external B.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json);
+// external prefix0.Map<prefix0.String, prefix0.Object?> toJson();
+   
+augment B.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json) :
+nullableBoolField = json[r'nullableBoolField'] as prefix0.bool?,
+nullableStringField = json[r'nullableStringField'] as prefix0.String?,
+nullableIntField = json[r'nullableIntField'] as prefix0.int?,
+nullableDoubleField = json[r'nullableDoubleField'] as prefix0.double?,
+nullableNumField = json[r'nullableNumField'] as prefix0.num?,
+nullableListOfSerializableField = json[r'nullableListOfSerializableField'] == null ? null :  [for (final item in json[r'nullableListOfSerializableField'] as prefix0.List<prefix0.Object?>)  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)],
+nullableSetOfSerializableField = json[r'nullableSetOfSerializableField'] == null ? null :  {for (final item in json[r'nullableSetOfSerializableField'] as prefix0.List<prefix0.Object?>)  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)},
+nullableMapOfSerializableField = json[r'nullableMapOfSerializableField'] == null ? null :  {for (final prefix0.MapEntry(:key, :value) in (json[r'nullableMapOfSerializableField'] as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key:  prefix1.C.fromJson(value as prefix0.Map<prefix0.String, prefix0.Object?>)};
+
+augment prefix0.Map<prefix0.String, prefix0.Object?> toJson() {
+  final json = <prefix0.String, prefix0.Object?>{};
+if (nullableBoolField != null) {
+json[r'nullableBoolField'] = nullableBoolField;
+}
+if (nullableStringField != null) {
+json[r'nullableStringField'] = nullableStringField;
+}
+if (nullableIntField != null) {
+json[r'nullableIntField'] = nullableIntField;
+}
+if (nullableDoubleField != null) {
+json[r'nullableDoubleField'] = nullableDoubleField;
+}
+if (nullableNumField != null) {
+json[r'nullableNumField'] = nullableNumField;
+}
+if (nullableListOfSerializableField != null) {
+json[r'nullableListOfSerializableField'] = nullableListOfSerializableField == null ? null :  [for (final item in nullableListOfSerializableField!)  item.toJson()];
+}
+if (nullableSetOfSerializableField != null) {
+json[r'nullableSetOfSerializableField'] = nullableSetOfSerializableField == null ? null :  [for (final item in nullableSetOfSerializableField!)  item.toJson()];
+}
+if (nullableMapOfSerializableField != null) {
+json[r'nullableMapOfSerializableField'] = nullableMapOfSerializableField == null ? null :  {for (final prefix0.MapEntry(:key, :value) in nullableMapOfSerializableField!.entries) key:  value.toJson()};
+}
+
+  return json;
+}
+
+}
+augment class C {
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external C.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json);
+// external prefix0.Map<prefix0.String, prefix0.Object?> toJson();
+   
+augment C.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json) :
+x = json[r'x'] as prefix0.int;
+
+augment prefix0.Map<prefix0.String, prefix0.Object?> toJson() {
+  final json = <prefix0.String, prefix0.Object?>{};
+json[r'x'] = x;
+
+  return json;
+}
+
+}
+augment class E {
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external E.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json);
+// external prefix0.Map<prefix0.String, prefix0.Object?> toJson();
+   
+augment E.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json) :
+listOfNullableInts =  [for (final item in json[r'listOfNullableInts'] as prefix0.List<prefix0.Object?>) item as prefix0.int?],
+listOfNullableSerializables =  [for (final item in json[r'listOfNullableSerializables'] as prefix0.List<prefix0.Object?>) item == null ? null :  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)],
+listOfNullableMapsOfNullableInts =  [for (final item in json[r'listOfNullableMapsOfNullableInts'] as prefix0.List<prefix0.Object?>) item == null ? null :  {for (final prefix0.MapEntry(:key, :value) in (item as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key: value as prefix0.int?}],
+setOfNullableInts =  {for (final item in json[r'setOfNullableInts'] as prefix0.List<prefix0.Object?>) item as prefix0.int?},
+setOfNullableSerializables =  {for (final item in json[r'setOfNullableSerializables'] as prefix0.List<prefix0.Object?>) item == null ? null :  prefix1.C.fromJson(item as prefix0.Map<prefix0.String, prefix0.Object?>)},
+setOfNullableMapsOfNullableInts =  {for (final item in json[r'setOfNullableMapsOfNullableInts'] as prefix0.List<prefix0.Object?>) item == null ? null :  {for (final prefix0.MapEntry(:key, :value) in (item as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key: value as prefix0.int?}},
+mapOfNullableInts =  {for (final prefix0.MapEntry(:key, :value) in (json[r'mapOfNullableInts'] as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key: value as prefix0.int?},
+mapOfNullableSerializables =  {for (final prefix0.MapEntry(:key, :value) in (json[r'mapOfNullableSerializables'] as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key: value == null ? null :  prefix1.C.fromJson(value as prefix0.Map<prefix0.String, prefix0.Object?>)},
+mapOfNullableSetsOfNullableInts =  {for (final prefix0.MapEntry(:key, :value) in (json[r'mapOfNullableSetsOfNullableInts'] as prefix0.Map<prefix0.String, prefix0.Object?>).entries) key: value == null ? null :  {for (final item in value as prefix0.List<prefix0.Object?>) item as prefix0.int?}};
+
+augment prefix0.Map<prefix0.String, prefix0.Object?> toJson() {
+  final json = <prefix0.String, prefix0.Object?>{};
+json[r'listOfNullableInts'] =  [for (final item in listOfNullableInts) item];
+json[r'listOfNullableSerializables'] =  [for (final item in listOfNullableSerializables) item == null ? null :  item.toJson()];
+json[r'listOfNullableMapsOfNullableInts'] =  [for (final item in listOfNullableMapsOfNullableInts) item == null ? null :  {for (final prefix0.MapEntry(:key, :value) in item!.entries) key: value}];
+json[r'setOfNullableInts'] =  [for (final item in setOfNullableInts) item];
+json[r'setOfNullableSerializables'] =  [for (final item in setOfNullableSerializables) item == null ? null :  item.toJson()];
+json[r'setOfNullableMapsOfNullableInts'] =  [for (final item in setOfNullableMapsOfNullableInts) item == null ? null :  {for (final prefix0.MapEntry(:key, :value) in item!.entries) key: value}];
+json[r'mapOfNullableInts'] =  {for (final prefix0.MapEntry(:key, :value) in mapOfNullableInts.entries) key: value};
+json[r'mapOfNullableSerializables'] =  {for (final prefix0.MapEntry(:key, :value) in mapOfNullableSerializables.entries) key: value == null ? null :  value.toJson()};
+json[r'mapOfNullableSetsOfNullableInts'] =  {for (final prefix0.MapEntry(:key, :value) in mapOfNullableSetsOfNullableInts.entries) key: value == null ? null :  [for (final item in value!) item]};
+
+  return json;
+}
+
+}
+augment class F {
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external F.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json);
+// external prefix0.Map<prefix0.String, prefix0.Object?> toJson();
+   
+augment F.fromJson(prefix0.Map<prefix0.String, prefix0.Object?> json) :
+fieldWithDollarSign$ = json[r'fieldWithDollarSign$'] as prefix0.int;
+
+augment prefix0.Map<prefix0.String, prefix0.Object?> toJson() {
+  final json = <prefix0.String, prefix0.Object?>{};
+json[r'fieldWithDollarSign$'] = fieldWithDollarSign$;
+
+  return json;
+}
+
+}

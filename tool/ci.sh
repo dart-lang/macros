@@ -67,7 +67,11 @@ for PKG in ${PKGS}; do
         echo 'dart analyze --fatal-infos .'
         dart analyze --fatal-infos . || EXIT_CODE=$?
         ;;
-      command)
+      command_0)
+        echo '../../tool/run_e2e_tests.sh'
+        ../../tool/run_e2e_tests.sh || EXIT_CODE=$?
+        ;;
+      command_1)
         echo 'dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source'
         dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source || EXIT_CODE=$?
         ;;

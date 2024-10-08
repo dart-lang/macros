@@ -1,0 +1,7 @@
+sdk:
+- dev
+- pubspec
+
+stages:
+- unit_test:
+  - command: ../../tool/run_e2e_tests.sh
