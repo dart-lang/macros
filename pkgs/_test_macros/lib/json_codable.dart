@@ -49,11 +49,11 @@ class JsonCodableImplementation implements Macro {
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
 
     // TODO(davidmorgan): put `extends` information directly in `Interface`.
-    MacroScope.current.addModel(model);
+    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
 
     return AugmentResponse(augmentations: [
-      await _generateFromJson(host, model, target, clazz),
-      await _generateToJson(host, model, target, clazz)
+      await _generateFromJson(host, model, target, superclassName, clazz),
+      await _generateToJson(host, model, target, superclassName, clazz)
     ]);
   }
 
@@ -61,11 +61,9 @@ class JsonCodableImplementation implements Macro {
     Host host,
     Model model,
     QualifiedName target,
+    QualifiedName superclassName,
     Interface clazz,
   ) async {
-    // TODO(davidmorgan): put `extends` information directly in `Interface`.
-    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
-
     var superclassHasFromJson = false;
     // TODO(davidmorgan): add recommended way to check for core types.
     if (superclassName.asString != 'dart:core#Object') {
@@ -110,11 +108,9 @@ ${initializers.join(',\n')};
     Host host,
     Model model,
     QualifiedName target,
+    QualifiedName superclassName,
     Interface clazz,
   ) async {
-    // TODO(davidmorgan): put `extends` information directly in `Interface`.
-    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
-
     var superclassHasToJson = false;
     if (superclassName.asString != 'dart:core#Object') {
       // TODO(davidmorgan): first query could already fetch the super class.
@@ -149,18 +145,14 @@ ${initializers.join(',\n')};
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     final jsonInitializer =
         superclassHasToJson ? 'super.toJson()' : '$_jsonMapTypeForLiteral{}';
-    result.add(Augmentation(code: '''
+    return Augmentation(code: '''
 augment $_jsonMapType toJson() {
   final json = $jsonInitializer;
 ${serializers.join('')}
   return json;
 }
-'''));
-
-    return AugmentResponse(augmentations: result);
+''');
   }
-
-  String _generateFromJson() {}
 
   /// Returns whether [constructor] is a constructor
   /// `fromJson(Map<String, Object?>)`.
