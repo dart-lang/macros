@@ -8,3 +8,7 @@ import 'package:_test_macros/declare_x_macro.dart';
 class Foo {}
 
 void main() => print(Foo().x);
+
+
+
+
