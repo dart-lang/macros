@@ -14,14 +14,19 @@ extension QualifiedNameExtension on QualifiedName {
 }
 
 extension ModelExtension on Model {
-  /// Returns the path in the model to [member], or `null` if [member] is not in this `Model`.
+  /// Returns the path in the model to [member], or `null` if [member] is not
+  /// in this [Model].
   ///
-  /// TODO(davidmorgan): this works for any node, but it's not clear yet which types of
-  /// node we want this functionality exposed for.
-  /// TODO(davidmorgan): a list of path segments is probably more useful than `String`.
+  /// Comparison is by identity, not by value, so the exact instance must be in
+  /// this [Model].
+  ///
+  /// TODO(davidmorgan): this works for any node, but it's not clear yet which
+  /// types of node we want this functionality exposed for.
+  /// TODO(davidmorgan): a list of path segments is probably more useful than
+  /// `String`.
   String? pathToMember(Member member) => _pathTo(member.node);
 
-  /// Returns the path in the model to [node], or `null` if [node] is not in this `Model`.
+  /// Returns the path in the model to [node], or `null` if [node] is not in this [Model].
   String? _pathTo(Map<String, Object?> node) {
     if (node == this.node) return '';
     final parent = _getParent(node);
@@ -29,7 +34,7 @@ extension ModelExtension on Model {
     for (final entry in parent.entries) {
       if (entry.value == node) {
         final parentPath = _pathTo(parent);
-        return parentPath == null ? null : '${_pathTo(parent)}/${entry.key}';
+        return parentPath == null ? null : '$parentPath/${entry.key}';
       }
     }
     return null;
@@ -39,19 +44,19 @@ extension ModelExtension on Model {
   Map<String, Object?>? _getParent(Map<String, Object?> node) {
     // If both maps are in the same `JsonBufferBuilder` then the parent is
     // immediately available.
-    if (this is MapInBuffer && node is MapInBuffer) {
-      final thisMapInBuffer = this as MapInBuffer;
-      final thatMapInBuffer = node as MapInBuffer;
-      if (thisMapInBuffer.buffer == thatMapInBuffer.buffer) {
-        return thatMapInBuffer.parent;
+    if (this case MapInBuffer thisMapInBuffer) {
+      if (node case MapInBuffer thatMapInBuffer) {
+        if (thisMapInBuffer.buffer == thatMapInBuffer.buffer) {
+          return thatMapInBuffer.parent;
+        }
       }
     }
     // Otherwise, build a `Map` of references to parents and use that.
-    return _parentsMap[node];
+    return _lazyParentsMap[node];
   }
 
   /// Gets a `Map` from values to parent `Map`s.
-  Map<Map<String, Object?>, Map<String, Object?>> get _parentsMap {
+  Map<Map<String, Object?>, Map<String, Object?>> get _lazyParentsMap {
     var result = _parentsMaps[this];
     if (result == null) {
       result =
@@ -65,12 +70,16 @@ extension ModelExtension on Model {
   static void _buildParentsMap(Map<String, Object?> parent,
       Map<Map<String, Object?>, Map<String, Object?>> result) {
     for (final child in parent.values.whereType<Map<String, Object?>>()) {
-      result[child] = parent;
-      _buildParentsMap(child, result);
+      if (result.containsKey(child)) {
+        throw StateError(
+            'Same node found twice.\n\nChild:\n$child\n\nParent:\n$parent');
+      } else {
+        result[child] = parent;
+        _buildParentsMap(child, result);
+      }
     }
   }
 }
 
 /// Expando storing a `Map` from values to parent `Map`s.
-final Expando<Map<Map<String, Object?>, Map<String, Object?>>> _parentsMaps =
-    Expando();
+final _parentsMaps = Expando<Map<Map<String, Object?>, Map<String, Object?>>>();

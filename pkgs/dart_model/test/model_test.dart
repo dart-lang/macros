@@ -123,6 +123,25 @@ void main() {
           '/uris/package:dart_model/dart_model.dart/scopes/JsonData/members/_root');
     });
 
+    test('path to Members throws on cycle', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      // Add an invalid link creating a loop in the map structure.
+      (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
+      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!.members['_root']!;
+      expect(() => copiedModel.pathToMember(member), throwsStateError);
+    });
+
+    test('path to Members throws on reused node', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      // Reuse a node.
+      copiedModel.uris['duplicate'] =
+          copiedModel.uris['package:dart_model/dart_model.dart']!;
+      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
+          .scopes['JsonData']!.members['_root']!;
+      expect(() => copiedModel.pathToMember(member), throwsStateError);
+    });
+
     test('path to Member returns null for Member in wrong Map', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = model.uris['package:dart_model/dart_model.dart']!

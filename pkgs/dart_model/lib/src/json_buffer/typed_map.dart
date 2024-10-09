@@ -359,7 +359,7 @@ class _TypedMap
       other._pointer == _pointer;
 
   @override
-  int get hashCode => buffer.hashCode ^ _pointer.hashCode;
+  int get hashCode => Object.hash(buffer, _pointer);
 }
 
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder].

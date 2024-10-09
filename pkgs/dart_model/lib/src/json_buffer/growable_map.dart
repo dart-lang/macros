@@ -166,7 +166,7 @@ class _GrowableMap<V>
       other._pointer == _pointer;
 
   @override
-  int get hashCode => buffer.hashCode ^ _pointer.hashCode;
+  int get hashCode => Object.hash(buffer, _pointer);
 }
 
 /// `Iterator` that reads a "growable map" in a [JsonBufferBuilder].
