@@ -131,7 +131,7 @@ class MacroClient {
                             'Unexpected phase ${augmentRequest.phase}, '
                             'expected 1, 2, or 3.')
                       } ??
-                      AugmentResponse(),
+                      AugmentResponse(augmentations: []),
                   requestId: hostRequest.id)));
         }
       default:
