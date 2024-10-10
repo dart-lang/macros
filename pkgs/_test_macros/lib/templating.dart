@@ -12,7 +12,7 @@ extension TemplatingExtension on QualifiedName {
 /// Converts [template] to a mix of `Identifier` and `String`.
 ///
 /// References of the form `{{uri#name}}` become [QualifiedName] wrapped in
-/// [Code.qualifiedName], everything else becomes [ResolvedCode].
+/// [Code.qualifiedName], everything else becomes `String`.
 ///
 /// TODO(davidmorgan): figure out where this should go.
 List<Code> expandTemplate(String template) {
@@ -21,12 +21,10 @@ List<Code> expandTemplate(String template) {
   while (index < template.length) {
     final start = template.indexOf('{{', index);
     if (start == -1) {
-      result.add(
-          Code.resolvedCode(ResolvedCode(code: template.substring(index))));
+      result.add(Code.string(template.substring(index)));
       break;
     }
-    result.add(Code.resolvedCode(
-        ResolvedCode(code: template.substring(index, start))));
+    result.add(Code.string(template.substring(index, start)));
     final end = template.indexOf('}}', start);
     if (end == -1) {
       throw ArgumentError('Unmatched opening brace: $template');

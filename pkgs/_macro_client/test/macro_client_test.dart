@@ -131,8 +131,8 @@ void main() {
               {
                 'code': [
                   {
-                    'type': 'ResolvedCode',
-                    'value': {'code': 'int get x => 3;'}
+                    'type': 'String',
+                    'value': 'int get x => 3;',
                   }
                 ]
               }
@@ -214,11 +214,9 @@ void main() {
                 {
                   'code': [
                     {
-                      'type': 'ResolvedCode',
-                      'value': {
-                        'code':
-                            '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'
-                      }
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'
                     }
                   ]
                 }
@@ -293,11 +291,9 @@ void main() {
                 {
                   'code': [
                     {
-                      'type': 'ResolvedCode',
-                      'value': {
-                        'code':
-                            '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}'
-                      }
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}'
                     }
                   ]
                 }
@@ -316,11 +312,9 @@ void main() {
                 {
                   'code': [
                     {
-                      'type': 'ResolvedCode',
-                      'value': {
-                        'code':
-                            '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}'
-                      }
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}'
                     }
                   ]
                 }

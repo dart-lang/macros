@@ -27,7 +27,7 @@ enum CodeType {
   // Private so switches must have a default. See `isKnown`.
   _unknown,
   qualifiedName,
-  resolvedCode;
+  string;
 
   bool get isKnown => this != _unknown;
 }
@@ -43,18 +43,17 @@ extension type Code.fromJson(Map<String, Object?> node) implements Object {
         'QualifiedName',
         qualifiedName,
       ));
-  static Code resolvedCode(ResolvedCode resolvedCode) =>
-      Code.fromJson(Scope.createMap(
+  static Code string(String string) => Code.fromJson(Scope.createMap(
         _schema,
-        'ResolvedCode',
-        resolvedCode,
+        'String',
+        string,
       ));
   CodeType get type {
     switch (node['type'] as String) {
       case 'QualifiedName':
         return CodeType.qualifiedName;
-      case 'ResolvedCode':
-        return CodeType.resolvedCode;
+      case 'String':
+        return CodeType.string;
       default:
         return CodeType._unknown;
     }
@@ -67,11 +66,11 @@ extension type Code.fromJson(Map<String, Object?> node) implements Object {
     return QualifiedName.fromJson(node['value'] as Map<String, Object?>);
   }
 
-  ResolvedCode get asResolvedCode {
-    if (node['type'] != 'ResolvedCode') {
-      throw StateError('Not a ResolvedCode.');
+  String get asString {
+    if (node['type'] != 'String') {
+      throw StateError('Not a String.');
     }
-    return ResolvedCode.fromJson(node['value'] as Map<String, Object?>);
+    return node['value'] as String;
   }
 }
 
@@ -419,19 +418,6 @@ extension type RecordTypeDesc.fromJson(Map<String, Object?> node)
         ));
   List<StaticTypeDesc> get positional => (node['positional'] as List).cast();
   List<NamedRecordField> get named => (node['named'] as List).cast();
-}
-
-/// Code that is part of an augmentation applied to Dart code.
-extension type ResolvedCode.fromJson(Map<String, Object?> node)
-    implements Object {
-  ResolvedCode({
-    String? code,
-  }) : this.fromJson({
-          if (code != null) 'code': code,
-        });
-
-  /// The code.
-  String get code => node['code'] as String;
 }
 
 enum StaticTypeDescType {

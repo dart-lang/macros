@@ -32,7 +32,7 @@
               "$ref": "#/$defs/QualifiedName"
             },
             {
-              "$ref": "#/$defs/ResolvedCode"
+              "type": "string"
             }
           ]
         },
@@ -288,16 +288,6 @@
           "items": {
             "$ref": "#/$defs/NamedRecordField"
           }
-        }
-      }
-    },
-    "ResolvedCode": {
-      "type": "object",
-      "description": "Code that is part of an augmentation applied to Dart code.",
-      "properties": {
-        "code": {
-          "type": "string",
-          "description": "The code."
         }
       }
     },

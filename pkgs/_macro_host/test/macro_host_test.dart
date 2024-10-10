@@ -35,9 +35,7 @@ void main() {
         expect(
             await host.augment(macroAnnotation, AugmentRequest(phase: 2)),
             Scope.macro.run(() => AugmentResponse(augmentations: [
-                  Augmentation(code: [
-                    Code.resolvedCode(ResolvedCode(code: 'int get x => 3;'))
-                  ])
+                  Augmentation(code: [Code.string('int get x => 3;')])
                 ])));
       });
 
@@ -66,9 +64,8 @@ void main() {
                         uri: 'package:foo/foo.dart', name: 'Foo'))),
             Scope.macro.run(() => AugmentResponse(augmentations: [
                   Augmentation(code: [
-                    Code.resolvedCode(ResolvedCode(
-                        code:
-                            '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'))
+                    Code.string(
+                        '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}')
                   ])
                 ])));
       });
