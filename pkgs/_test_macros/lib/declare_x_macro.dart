@@ -13,7 +13,7 @@ class DeclareX {
   const DeclareX();
 }
 
-class DeclareXImplementation implements Macro {
+class DeclareXImplementation implements ClassDeclarationsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
@@ -22,7 +22,8 @@ class DeclareXImplementation implements Macro {
       runsInPhases: [2]);
 
   @override
-  Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> buildDeclarationsForClass(
+      Host host, AugmentRequest request) async {
     // TODO(davidmorgan): make the host only run in the phases requested so
     // that this is not needed.
     if (request.phase != 2) return AugmentResponse(augmentations: []);

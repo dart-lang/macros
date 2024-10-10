@@ -9,6 +9,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'src/execute_macro.dart';
+
 /// Local macro client which runs macros as directed by requests from a remote
 /// macro host.
 ///
@@ -109,9 +111,17 @@ class MacroClient {
                   error: 'No macro for annotation: '
                       '${hostRequest.macroAnnotation.asString}')));
         } else {
-          await Scope.macro.runAsync(() async => _sendResponse(
-              Response.augmentResponse(
-                  await macro.augment(_host, hostRequest.asAugmentRequest),
+          final augmentRequest = hostRequest.asAugmentRequest;
+          await Scope.macro
+              .runAsync(() async => _sendResponse(Response.augmentResponse(
+                  await switch (augmentRequest.phase) {
+                    1 => executeTypesMacro(macro, _host, augmentRequest),
+                    2 => executeDeclarationsMacro(macro, _host, augmentRequest),
+                    3 => executeDefinitionMacro(macro, _host, augmentRequest),
+                    _ => throw StateError(
+                        'Unexpected phase ${augmentRequest.phase}, '
+                        'expected 1, 2, or 3.')
+                  },
                   requestId: hostRequest.id)));
         }
       default:

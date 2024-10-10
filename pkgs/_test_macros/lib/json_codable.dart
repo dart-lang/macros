@@ -18,7 +18,8 @@ final _jsonMapTypeForLiteral = '<{{dart:core#String}}, {{dart:core#Object}}?>';
 final _jsonMapType = '{{dart:core#Map}}$_jsonMapTypeForLiteral';
 final _mapEntryType = '{{dart:core#MapEntry}}';
 
-class JsonCodableImplementation implements Macro {
+class JsonCodableImplementation
+    implements ClassDeclarationsMacro, ClassDefinitionMacro {
   @override
   MacroDescription get description => MacroDescription(
       annotation: QualifiedName(
@@ -26,15 +27,8 @@ class JsonCodableImplementation implements Macro {
       runsInPhases: [2, 3]);
 
   @override
-  Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
-    return switch (request.phase) {
-      2 => phase2(host, request),
-      3 => phase3(host, request),
-      _ => AugmentResponse(augmentations: []),
-    };
-  }
-
-  Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
+  Future<AugmentResponse> buildDeclarationsForClass(
+      Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
       Augmentation(code: expandTemplate('''
@@ -45,7 +39,9 @@ class JsonCodableImplementation implements Macro {
     ]);
   }
 
-  Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
+  @override
+  Future<AugmentResponse> buildDefinitionForClass(
+      Host host, AugmentRequest request) async {
     final target = request.target;
     final model = await host.query(Query(target: target));
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
