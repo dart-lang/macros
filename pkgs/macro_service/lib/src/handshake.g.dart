@@ -2,6 +2,8 @@
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 // ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:dart_model/src/deep_cast_map.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/scopes.dart';

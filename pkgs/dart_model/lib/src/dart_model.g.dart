@@ -2,6 +2,8 @@
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 // ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:dart_model/src/deep_cast_map.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/scopes.dart';
@@ -109,7 +111,8 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
       (node['metadataAnnotations'] as List).cast();
 
   /// Map of members by name.
-  Map<String, Member> get members => (node['members'] as Map).cast();
+  Map<String, Member> get members =>
+      (node['members'] as Map).cast<String, Member>();
 
   /// The type of the expression `this` when used in this interface.
   NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
@@ -130,7 +133,8 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
         ));
 
   /// Scopes by name.
-  Map<String, Interface> get scopes => (node['scopes'] as Map).cast();
+  Map<String, Interface> get scopes =>
+      (node['scopes'] as Map).cast<String, Interface>();
 }
 
 /// Member of a scope.
@@ -170,7 +174,8 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
         ));
 
   /// Libraries by URI.
-  Map<String, Library> get uris => (node['uris'] as Map).cast();
+  Map<String, Library> get uris =>
+      (node['uris'] as Map).cast<String, Library>();
 
   /// The resolved static type hierarchy.
   TypeHierarchy get types => node['types'] as TypeHierarchy;
@@ -552,7 +557,8 @@ extension type TypeHierarchy.fromJson(Map<String, Object?> node)
         ));
 
   /// Map of qualified interface names to their resolved named type.
-  Map<String, TypeHierarchyEntry> get named => (node['named'] as Map).cast();
+  Map<String, TypeHierarchyEntry> get named =>
+      (node['named'] as Map).cast<String, TypeHierarchyEntry>();
 }
 
 /// Entry of an interface in Dart's type hierarchy, along with supertypes.
