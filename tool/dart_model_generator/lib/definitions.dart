@@ -360,9 +360,52 @@ static QualifiedName parse(String string) {
                 "Macro's response to an [AugmentRequest]: the resulting "
                 'augmentations.',
             properties: [
-              Property('augmentations',
+              Property('enumValueAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any augmentations to enum values that should be applied '
+                      'to an enum as a result of executing a macro, indexed by '
+                      'the name of the enum.',
+                  nullable: true),
+              Property('extendsTypeAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any extends clauses that should be added to types as a '
+                      'result of executing a macro, indexed by the name '
+                      'of the augmented type declaration.',
+                  nullable: true),
+              Property('interfaceAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any interfaces that should be added to types as a '
+                      'result of executing a macro, indexed by the name '
+                      'of the augmented type declaration.',
+                  nullable: true),
+              Property('libraryAugmentations',
                   type: 'List<Augmentation>',
-                  description: 'The augmentations.'),
+                  description:
+                      'Any augmentations that should be applied to the library '
+                      'as a result of executing a macro.',
+                  nullable: true),
+              Property('mixinAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any mixins that should be added to types as a result of '
+                      'executing a macro, indexed by the name of the '
+                      'augmented type declaration.',
+                  nullable: true),
+              Property('newTypeNames',
+                  type: 'List<String>',
+                  description: 'The names of any new types declared in '
+                      '[libraryAugmentations].',
+                  nullable: true),
+              Property('typeAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any augmentations that should be applied to a class as '
+                      'a result of executing a macro, indexed by the '
+                      'name of the class.',
+                  nullable: true),
             ]),
         Definition.clazz('ErrorResponse',
             description: 'Request could not be handled.',
