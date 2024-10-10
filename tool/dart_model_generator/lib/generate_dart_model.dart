@@ -66,6 +66,7 @@ class GenerationContext {
     }.nonNulls;
     return ([
       "import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';",
+      "import 'package:dart_model/src/deep_cast_map.dart';",
       "import 'package:dart_model/src/scopes.dart';",
       for (final schema in schemas)
         if (schema != currentSchema)
@@ -275,19 +276,8 @@ class Property {
 
   /// Dart code for a getter for this property.
   String get getterCode {
-    final nullAwareCast = nullable ? '?.cast()' : '.cast()';
-
-    if (type.isMap) {
-      final representationType = nullable ? 'Map?' : 'Map';
-      return _describe('${_type()} get $name => '
-          "(node['$name'] as $representationType)$nullAwareCast;");
-    } else if (type.isList) {
-      final representationType = nullable ? 'List?' : 'List';
-      return _describe('${_type()} get $name => '
-          "(node['$name'] as $representationType)$nullAwareCast;");
-    } else {
-      return _describe("${_type()} get $name => node['$name'] as ${_type()};");
-    }
+    return _describe('${_type()} get $name => '
+        '${type.castExpression("node['$name']", nullable: nullable)};');
   }
 
   /// Dart code for entry in  `TypedMapSchema`.
@@ -301,13 +291,6 @@ class Property {
   String _type({bool nullable = false}) {
     return '${type.dartType}${(nullable || this.nullable) ? '?' : ''}';
   }
-
-  /// The names of all types referenced by this property.
-  Set<String> get allTypeNames {
-    if (type.isMap) return {'Map', type.elementType!};
-    if (type.isList) return {'List', type.elementType!};
-    return {type.name};
-  }
 }
 
 /// A reference to a type.
@@ -319,13 +302,13 @@ class Property {
 /// has one parameter because keys are always `String` in JSON.
 class TypeReference {
   static final RegExp _simpleRegexp = RegExp(r'^[A-Za-z]+$');
-  static final RegExp _mapRegexp = RegExp(r'^Map<([A-Za-z]+)>$');
-  static final RegExp _listRegexp = RegExp(r'^List<([A-Za-z]+)>$');
+  static final RegExp _mapRegexp = RegExp(r'^Map<([A-Za-z<>]+)>$');
+  static final RegExp _listRegexp = RegExp(r'^List<([A-Za-z<>]+)>$');
 
   String name;
   late final bool isMap;
   late final bool isList;
-  late final String? elementType;
+  late final TypeReference? elementType;
 
   TypeReference(this.name) {
     if (_simpleRegexp.hasMatch(name)) {
@@ -335,19 +318,52 @@ class TypeReference {
     } else if (_mapRegexp.hasMatch(name)) {
       isMap = true;
       isList = false;
-      elementType = _mapRegexp.firstMatch(name)!.group(1);
+      elementType = TypeReference(_mapRegexp.firstMatch(name)!.group(1)!);
     } else if (_listRegexp.hasMatch(name)) {
       isMap = false;
       isList = true;
-      elementType = _listRegexp.firstMatch(name)!.group(1);
+      elementType = TypeReference(_listRegexp.firstMatch(name)!.group(1)!);
     } else {
       throw ArgumentError('Invalid type name: $name');
     }
   }
 
+  /// The names of all types referenced by this type.
+  Set<String> get allTypeNames {
+    return {name, ...?elementType?.allTypeNames};
+  }
+
+  /// Returns a piece of code which will cast an expression represented by
+  /// [value] to the type of `this`.
+  ///
+  /// If [nullable] is true, it will handle the [value] expression being
+  /// nullable, otherwise it won't.
+  String castExpression(String value, {bool nullable = false}) {
+    final q = nullable ? '?' : '';
+    final representationName = isMap
+        ? 'Map'
+        : isList
+            ? 'List'
+            : name;
+    final rawCast = '$value as $representationName$q';
+    if (isMap) {
+      if (elementType!.elementType == null) {
+        return '($rawCast)$q.cast<String, ${elementType!.dartType}>()';
+      }
+      return '($rawCast)$q.deepCast<String, ${elementType!.dartType}>('
+          '(v) => ${elementType!.castExpression('v')})';
+    } else if (isList) {
+      if (elementType!.elementType == null) return '($rawCast).cast()';
+      throw UnsupportedError('Deep casting for lists isn\'t yet supported.');
+    } else {
+      return rawCast;
+    }
+  }
+
   /// The Dart type name of this type.
   String get dartType {
-    if (isMap) return 'Map<String, $elementType>';
+    if (isMap) return 'Map<String, ${elementType!.dartType}>';
+    if (isList) return 'List<${elementType!.dartType}>';
     return name;
   }
 
@@ -382,14 +398,13 @@ class TypeReference {
       return {
         'type': 'array',
         if (description != null) 'description': description,
-        'items': TypeReference(elementType!).generateSchema(context),
+        'items': elementType!.generateSchema(context),
       };
     } else if (isMap) {
       return {
         'type': 'object',
         if (description != null) 'description': description,
-        'additionalProperties':
-            TypeReference(elementType!).generateSchema(context),
+        'additionalProperties': elementType!.generateSchema(context),
       };
     } else if (name == 'String') {
       return {
@@ -466,6 +481,7 @@ class ClassTypeDefinition implements Definition {
       result.writeln('  $name() : ');
     } else {
       result.writeln('  $name({');
+      // TODO: Why are we excluding Map properties?
       for (final property in propertiesExceptMap) {
         result.writeln(property.parameterCode);
       }
@@ -487,7 +503,7 @@ class ClassTypeDefinition implements Definition {
       result.writeln('{');
       for (final property in properties) {
         if (property.type.isMap) {
-          result.writeln('${property.name}: {},');
+          result.writeln("'${property.name}': {},");
         } else {
           result.writeln(property.namedArgumentCode);
         }
@@ -509,7 +525,7 @@ class ClassTypeDefinition implements Definition {
 
   @override
   Set<String> get allTypeNames =>
-      properties.expand((f) => f.allTypeNames).toSet();
+      properties.expand((f) => f.type.allTypeNames).toSet();
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
@@ -663,7 +679,7 @@ class UnionTypeDefinition implements Definition {
 
   @override
   Set<String> get allTypeNames =>
-      {...types, ...properties.expand((f) => f.allTypeNames)};
+      {...types, ...properties.expand((f) => f.type.allTypeNames)};
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
