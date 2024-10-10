@@ -6,6 +6,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'templating.dart';
+
 /// Adds a getter `int get x` to the class.
 class DeclareX {
   const DeclareX();
@@ -27,6 +29,6 @@ class DeclareXImplementation implements Macro {
 
     // TODO(davidmorgan): still need to pass through the augment target.
     return AugmentResponse(
-        augmentations: [Augmentation(code: 'int get x => 3;')]);
+        augmentations: [Augmentation(code: expandTemplate('int get x => 3;'))]);
   }
 }

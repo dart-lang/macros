@@ -8,12 +8,38 @@
   "$defs": {
     "Augmentation": {
       "type": "object",
-      "description": "An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.",
+      "description": "An augmentation to Dart code.",
       "properties": {
         "code": {
-          "type": "string",
-          "description": "Augmentation code."
+          "type": "array",
+          "description": "Augmentation code.",
+          "items": {
+            "$ref": "#/$defs/Code"
+          }
         }
+      }
+    },
+    "Code": {
+      "type": "object",
+      "description": "Code that is part of augmentations to Dart code.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/QualifiedName"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
       }
     },
     "DynamicTypeDesc": {

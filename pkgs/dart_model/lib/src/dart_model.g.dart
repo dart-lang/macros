@@ -6,21 +6,72 @@ import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/scopes.dart';
 
-/// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
+/// An augmentation to Dart code.
 extension type Augmentation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'code': Type.stringPointer,
+    'code': Type.closedListPointer,
   });
   Augmentation({
-    String? code,
+    List<Code>? code,
   }) : this.fromJson(Scope.createMap(
           _schema,
           code,
         ));
 
   /// Augmentation code.
-  String get code => node['code'] as String;
+  List<Code> get code => (node['code'] as List).cast();
+}
+
+enum CodeType {
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
+  qualifiedName,
+  string;
+
+  bool get isKnown => this != _unknown;
+}
+
+extension type Code.fromJson(Map<String, Object?> node) implements Object {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'type': Type.stringPointer,
+    'value': Type.anyPointer,
+  });
+  static Code qualifiedName(QualifiedName qualifiedName) =>
+      Code.fromJson(Scope.createMap(
+        _schema,
+        'QualifiedName',
+        qualifiedName,
+      ));
+  static Code string(String string) => Code.fromJson(Scope.createMap(
+        _schema,
+        'String',
+        string,
+      ));
+  CodeType get type {
+    switch (node['type'] as String) {
+      case 'QualifiedName':
+        return CodeType.qualifiedName;
+      case 'String':
+        return CodeType.string;
+      default:
+        return CodeType._unknown;
+    }
+  }
+
+  QualifiedName get asQualifiedName {
+    if (node['type'] != 'QualifiedName') {
+      throw StateError('Not a QualifiedName.');
+    }
+    return QualifiedName.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  String get asString {
+    if (node['type'] != 'String') {
+      throw StateError('Not a String.');
+    }
+    return node['value'] as String;
+  }
 }
 
 /// The type-hierarchy representation of the type `dynamic`.

@@ -6,6 +6,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'templating.dart';
+
 /// A macro which adds a `fromJson(Map<String, Object?> json)` JSON decoding
 /// constructor to a class.
 class JsonCodable {
@@ -35,11 +37,11 @@ class JsonCodableImplementation implements Macro {
   Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
-      Augmentation(code: '''
+      Augmentation(code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external ${target.name}.fromJson($_jsonMapType json);
 // external $_jsonMapType toJson();
-   '''),
+   '''))
     ]);
   }
 
@@ -61,10 +63,10 @@ class JsonCodableImplementation implements Macro {
 
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    result.add(Augmentation(code: expandTemplate('''
 augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
-'''));
+''')));
 
     final serializers = <String>[];
     for (final field
@@ -80,13 +82,13 @@ ${initializers.join(',\n')};
 
     // TODO(davidmorgan): helper for augmenting methods.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    result.add(Augmentation(code: expandTemplate('''
 augment $_jsonMapType toJson() {
   final json = $_jsonMapTypeForLiteral{};
 ${serializers.join('')}
   return json;
 }
-'''));
+''')));
 
     return AugmentResponse(augmentations: result);
   }
@@ -181,9 +183,4 @@ ${serializers.join('')}
     // TODO(davidmorgan): error reporting.
     throw UnsupportedError('$type');
   }
-}
-
-// TODO(davidmorgan): figure out where this should go.
-extension TemplatingExtension on QualifiedName {
-  String get code => '{{$uri#$name}}';
 }
