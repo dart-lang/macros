@@ -14,6 +14,8 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final target = QualifiedName.parse('package:a/a.dart#A');
+
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
     Protocol(
@@ -38,6 +40,29 @@ void main() {
             .send(socket.add, HandshakeResponse(protocol: protocol).node);
 
         return result;
+      }
+
+      void answerTargetQuery(MacroRequest targetQuery, Socket socket) {
+        expect(
+          targetQuery,
+          {
+            'id': targetQuery.id,
+            'type': 'QueryRequest',
+            'value': {
+              'query': {'target': target}
+            },
+          },
+        );
+        Scope.query.run(() => protocol.send(
+            socket.add,
+            Response.queryResponse(
+                    QueryResponse(
+                        model: Model()
+                          ..uris[target.uri] = (Library()
+                            ..scopes[target.name] = Interface(
+                                properties: (Properties(isClass: true))))),
+                    requestId: targetQuery.id)
+                .node));
       }
 
       test('connects to service', () async {
@@ -87,7 +112,7 @@ void main() {
         });
       });
 
-      test('sends augmentation requests to macros, sends reponse', () async {
+      test('sends augmentation requests to macros, sends response', () async {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
@@ -120,8 +145,10 @@ void main() {
                     macroAnnotation: QualifiedName(
                         uri: 'package:_test_macros/declare_x_macro.dart',
                         name: 'DeclareX'),
-                    AugmentRequest(phase: 2))
+                    AugmentRequest(phase: 2, target: target))
                 .node);
+        answerTargetQuery(MacroRequest.fromJson(await responses.next), socket);
+
         final augmentResponse = await responses.next;
         expect(augmentResponse, {
           'requestId': requestId,
@@ -174,11 +201,10 @@ void main() {
               macroAnnotation: QualifiedName(
                   uri: 'package:_test_macros/query_class.dart',
                   name: 'QueryClass'),
-              AugmentRequest(
-                  phase: 3,
-                  target:
-                      QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo')),
+              AugmentRequest(phase: 3, target: target),
             ).node);
+        answerTargetQuery(MacroRequest.fromJson(await responses.next), socket);
+
         final queryRequest = await responses.next;
         final queryRequestId = MacroRequest.fromJson(queryRequest).id;
         expect(
@@ -187,9 +213,7 @@ void main() {
             'id': queryRequestId,
             'type': 'QueryRequest',
             'value': {
-              'query': {
-                'target': {'uri': 'package:foo/foo.dart', 'name': 'Foo'}
-              }
+              'query': {'target': target}
             },
           },
         );
@@ -197,9 +221,7 @@ void main() {
         Scope.query.run(() => protocol.send(
             socket.add,
             Response.queryResponse(
-                    QueryResponse(
-                        model: Model()
-                          ..uris['package:foo/foo.dart'] = Library()),
+                    QueryResponse(model: Model()..uris[target.uri] = Library()),
                     requestId: queryRequestId)
                 .node));
 
@@ -215,8 +237,7 @@ void main() {
                   'code': [
                     {
                       'type': 'String',
-                      'value':
-                          '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'
+                      'value': '// {"uris":{"${target.uri}":{"scopes":{}}}}'
                     }
                   ]
                 }
@@ -249,11 +270,10 @@ void main() {
                 macroAnnotation: QualifiedName(
                     uri: 'package:_test_macros/query_class.dart',
                     name: 'QueryClass'),
-                AugmentRequest(
-                    phase: 3,
-                    target: QualifiedName(
-                        uri: 'package:foo/foo.dart', name: 'Foo')),
+                AugmentRequest(phase: 3, target: target),
               ).node);
+          unawaited(responses.next.then((response) =>
+              answerTargetQuery(MacroRequest.fromJson(response), socket)));
         }
 
         final queryRequest1 = await responses.next;

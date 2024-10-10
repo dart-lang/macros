@@ -45,7 +45,7 @@ class CfeQueryService implements QueryService {
     if (classBuilder == null) throw StateError('Not found $target');
     final fieldIterator =
         classBuilder.fullMemberIterator<cfe.SourceFieldBuilder>();
-    final interface = Interface();
+    final interface = Interface(properties: Properties(isClass: true));
     while (fieldIterator.moveNext()) {
       final current = fieldIterator.current;
       interface.members[current.name] = Member(
