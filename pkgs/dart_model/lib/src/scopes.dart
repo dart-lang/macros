@@ -114,6 +114,12 @@ enum Scope {
     return buffer.serialize();
   }
 
+  static String? get hostRequestContext => _currentOrNull?.hostRequestContext;
+
+  static set hostRequestContext(String? value) {
+    _currentOrNull?.hostRequestContext = value;
+  }
+
   static const _symbol = #_dartModelScope;
   static _ScopeData? get _currentOrNull => Zone.current[_symbol] as _ScopeData?;
 }
@@ -125,6 +131,10 @@ class _ScopeData {
   final Scope type;
   final JsonBufferBuilder? buffer;
   final MacroScope? macro;
+
+  /// For macro scopes, the context token from the host request used to
+  /// authenticate requests for this particular macro.
+  String? hostRequestContext;
 
   _ScopeData._(this.type, this.buffer, [this.macro]);
 }

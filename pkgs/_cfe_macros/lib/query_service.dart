@@ -25,9 +25,9 @@ cfe.SourceLoader get sourceLoader =>
 
 class CfeQueryService implements QueryService {
   @override
-  Future<QueryResponse> handle(QueryRequest request) async {
+  Future<QueryResponse> handle(List<Query> request) async {
     final model = _PendingCfeModel();
-    for (final query in request.query.expandBatches()) {
+    for (final query in request) {
       switch (query.type) {
         case QueryType.queryCode:
           await _evaluateCodeQuery(model, query.asQueryCode.target);

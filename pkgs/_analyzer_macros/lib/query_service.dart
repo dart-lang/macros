@@ -24,10 +24,10 @@ analyzer.LinkedElementFactory get _elementFactory =>
 
 class AnalyzerQueryService implements QueryService {
   @override
-  Future<QueryResponse> handle(QueryRequest request) async {
+  Future<QueryResponse> handle(List<Query> request) async {
     final result = _PendingAnalyzerModel();
 
-    for (final entry in request.query.expandBatches()) {
+    for (final entry in request) {
       switch (entry.type) {
         case QueryType.queryCode:
           _evaluateQueryCode(entry.asQueryCode.target, result);

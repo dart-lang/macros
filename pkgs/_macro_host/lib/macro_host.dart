@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:_macro_builder/macro_builder.dart';
 import 'package:_macro_runner/macro_runner.dart';
@@ -61,9 +62,21 @@ class MacroHost {
   Future<AugmentResponse> augment(
       QualifiedName annotation, AugmentRequest request) async {
     await _ensureRunning(annotation);
-    final response = await macroServer.sendToMacro(HostRequest.augmentRequest(
-        macroAnnotation: annotation, request, id: nextRequestId));
-    return response.asAugmentResponse;
+
+    final context = _ActiveHostRequest();
+    final hostRequest = context.request = HostRequest.augmentRequest(
+        macroAnnotation: annotation,
+        request,
+        id: nextRequestId,
+        context: context.token);
+
+    try {
+      _hostService._activeRequests[context.token] = context;
+      final response = await macroServer.sendToMacro(hostRequest);
+      return response.asAugmentResponse;
+    } finally {
+      _hostService._activeRequests.remove(context.token);
+    }
   }
 
   /// If the macro triggered by [annotation] is not running, builds it and
@@ -96,6 +109,9 @@ class _HostService implements HostService {
   /// Macro state by its annotation [QualifiedName] string representation.
   final Map<String, _MacroState> _macroState = {};
 
+  /// Active request contexts, identified by their [_ActiveHostRequest.token].
+  final Map<String, _ActiveHostRequest> _activeRequests = {};
+
   _HostService(this.queryService);
 
   /// Handle requests that are for the host.
@@ -111,8 +127,32 @@ class _HostService implements HostService {
         return Response.macroStartedResponse(MacroStartedResponse(),
             requestId: request.id);
       case MacroRequestType.queryRequest:
+        final context = _activeRequests[request.context];
+        if (context == null) {
+          return Response.errorResponse(ErrorResponse(error: 'Invalid token'),
+              requestId: request.id);
+        }
+        final originalRequest = context.request;
+        if (originalRequest?.type != HostRequestType.augmentRequest) {
+          return Response.errorResponse(
+              ErrorResponse(error: 'Must happen within augment request'),
+              requestId: request.id);
+        }
+
+        final queryComponents = <Query>[];
+        for (final entry in request.asQueryRequest.query.expandBatches()) {
+          if (!QueryService._isValid(
+              entry, originalRequest!.asAugmentRequest)) {
+            return Response.errorResponse(
+                ErrorResponse(error: 'Illegal query for phase.'),
+                requestId: request.id);
+          }
+
+          queryComponents.add(entry);
+        }
+
         return Response.queryResponse(
-            await queryService.handle(request.asQueryRequest),
+            await queryService.handle(queryComponents),
             requestId: request.id);
       default:
         return Response.errorResponse(ErrorResponse(error: 'unsupported'),
@@ -123,7 +163,22 @@ class _HostService implements HostService {
 
 /// Service provided by the frontend the host integrates with.
 abstract interface class QueryService {
-  Future<QueryResponse> handle(QueryRequest request);
+  /// Handle a validated query request consisisting of the given [queries].
+  ///
+  /// [BatchQuery] instances in the requests are expanded at this point and not
+  /// part of [queries].
+  Future<QueryResponse> handle(List<Query> queries);
+
+  /// Whether a macro is allowed to send [query] to answer the pending
+  /// [augmentRequest].
+  static bool _isValid(Query query, AugmentRequest augmentRequest) {
+    if (query.type == QueryType.queryStaticType && augmentRequest.phase < 2) {
+      return false;
+    }
+
+    // TODO: Investigate which other verification steps are necessary.
+    return true;
+  }
 }
 
 class _MacroState {
@@ -131,4 +186,35 @@ class _MacroState {
   // with its phases, so this value is expected as soon as the macro runs.
   final Completer<Set<int>> _phasesCompleter = Completer();
   Future<Set<int>> get phases => _phasesCompleter.future;
+}
+
+/// An active request sent to the macro for which a response has not yet been
+/// received.
+///
+/// While e.g. a augmention request is active, the macro is allowed to send back
+/// introspection queries. The exact set of queries depends on the running
+/// augmentation request (and in particular its phase), so we need a way for a
+/// macro to verify that a query is sent within the context of a known
+/// augmentation. We use randomly-generated tokens for this purpose.
+final class _ActiveHostRequest {
+  final String token;
+  HostRequest? request;
+
+  _ActiveHostRequest() : token = generateToken();
+
+  static String generateToken() {
+    const length = 64;
+    const characters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    final random = Random.secure();
+    final tokenBuffer = StringBuffer();
+
+    for (var i = 0; i < length; i++) {
+      tokenBuffer.writeCharCode(
+          characters.codeUnitAt(random.nextInt(characters.length)));
+    }
+
+    return tokenBuffer.toString();
+  }
 }

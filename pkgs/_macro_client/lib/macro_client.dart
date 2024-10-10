@@ -109,10 +109,12 @@ class MacroClient {
                   error: 'No macro for annotation: '
                       '${hostRequest.macroAnnotation.asString}')));
         } else {
-          await Scope.macro.runAsync(() async => _sendResponse(
-              Response.augmentResponse(
-                  await macro.augment(_host, hostRequest.asAugmentRequest),
-                  requestId: hostRequest.id)));
+          await Scope.macro.runAsync(() async {
+            Scope.hostRequestContext = hostRequest.context;
+            _sendResponse(Response.augmentResponse(
+                await macro.augment(_host, hostRequest.asAugmentRequest),
+                requestId: hostRequest.id));
+          });
         }
       default:
       // Ignore unknown request.
@@ -148,11 +150,13 @@ class RemoteMacroHost implements Host {
 
   @override
   Future<Model> query(Query query) async {
+    final context = Scope.hostRequestContext;
+
     // The macro scope is used to accumulate augment results, drop into
     // "none" scope to avoid clashing with those when sending the query.
     final model = (await Scope.none.runAsync(() async => _client._sendRequest(
             MacroRequest.queryRequest(QueryRequest(query: query),
-                id: nextRequestId))))
+                id: nextRequestId, context: context))))
         .asQueryResponse
         .model;
     MacroScope.current.addModel(model);

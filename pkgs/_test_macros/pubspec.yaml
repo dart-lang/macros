@@ -21,3 +21,4 @@ dev_dependencies:
 # macro lib/declare_x_macro.dart#DeclareX package:_test_macros/declare_x_macro.dart#DeclareXImplementation
 # macro lib/json_codable.dart#JsonCodable package:_test_macros/json_codable.dart#JsonCodableImplementation
 # macro lib/query_class.dart#QueryClass package:_test_macros/query_class.dart#QueryClassImplementation
+# macro lib/misbehaving_macro.dart#AttemptToIssueTypeQueryInPhase1 package:_test_macros/misbehaving_macro.dart#AttemptToIssueTypeQueryInPhase1Implementation
