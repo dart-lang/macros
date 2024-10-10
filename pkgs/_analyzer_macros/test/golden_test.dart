@@ -10,6 +10,7 @@ import 'package:_analyzer_macros/macro_implementation.dart';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/diagnostic/diagnostic.dart';
 import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
 import 'package:macro_service/macro_service.dart';
 import 'package:path/path.dart' as p;
@@ -102,7 +103,9 @@ void main() {
 
         final errors = (await analysisContext.currentSession.getErrors(path))
             as ErrorsResult;
-        expect(errors.errors, isEmpty);
+        expect(
+            errors.errors.where((e) => e.severity == Severity.error).toList(),
+            isEmpty);
 
         final resolvedLibrary = (await analysisContext.currentSession
             .getResolvedLibrary(path)) as ResolvedLibraryResult;

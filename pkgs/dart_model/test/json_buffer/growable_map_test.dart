@@ -20,6 +20,22 @@ void main() {
       printOnFailure(builder.toString());
     });
 
+    test('equality and hashing is by identity', () {
+      final growableMap1 = builder.createGrowableMap<int>();
+      final growableMap2 = builder.createGrowableMap<int>();
+
+      // Different maps with the same contents are not equal, have different hash codes.
+      // Can't use default `expect` equality check as it special-cases `Map`.
+      expect(growableMap1 == growableMap2, false);
+      expect(growableMap1.hashCode, isNot(growableMap2.hashCode));
+
+      // Map is equal to a reference to itself, has same hash code.
+      builder.map['a'] = growableMap1;
+      final growableMap1Reference = builder.map['a'] as Map<String, Object?>;
+      expect(growableMap1 == growableMap1Reference, true);
+      expect(growableMap1.hashCode, growableMap1Reference.hashCode);
+    });
+
     test('can be written and read if empty', () {
       final value = builder.createGrowableMap<int>();
       builder.map['value'] = value;

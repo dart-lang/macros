@@ -659,11 +659,17 @@ class UnionTypeDefinition implements Definition {
       result
         ..writeln('$type get as$type {')
         ..writeln("if (node['type'] != '$type') "
-            "{ throw StateError('Not a $type.'); }")
-        ..writeln('return $type.fromJson'
+            "{ throw StateError('Not a $type.'); }");
+      // TODO(davidmorgan): this special case allows `String` to be in a union
+      // type, see if there is a nice way to generalize to other primitives.
+      if (type == 'String') {
+        result.writeln("return node['value'] as String;");
+      } else {
+        result.writeln('return $type.fromJson'
             "(node['value'] as "
-            '${context.lookupDefinition(type).representationTypeName});')
-        ..writeln('}');
+            '${context.lookupDefinition(type).representationTypeName});');
+      }
+      result.writeln('}');
     }
 
     for (final property in properties) {

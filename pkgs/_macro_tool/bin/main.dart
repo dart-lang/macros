@@ -9,6 +9,8 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
 final argParser = ArgParser()
+  ..addOption('host',
+      defaultsTo: 'analyzer', help: 'The macro host: "analyzer" or "cfe".')
   ..addOption('workspace', help: 'Path to workspace.')
   ..addOption('packageConfig', help: 'Path to package config.')
   ..addOption('script', help: 'Path to script.')
@@ -16,11 +18,16 @@ final argParser = ArgParser()
 
 Future<void> main(List<String> arguments) async {
   final args = argParser.parse(arguments);
+
+  final host = HostOption.forString(args['host'] as String?);
   final workspace = args['workspace'] as String?;
   final packageConfig = args['packageConfig'] as String?;
   final script = args['script'] as String?;
 
-  if (workspace == null || packageConfig == null || script == null) {
+  if (host == null ||
+      workspace == null ||
+      packageConfig == null ||
+      script == null) {
     print('''
 Runs a Dart script with `dart_model` macros.
 
@@ -29,6 +36,7 @@ ${argParser.usage}''');
   }
 
   final tool = MacroTool(
+      host: host,
       workspacePath: p.canonicalize(workspace),
       packageConfigPath: p.canonicalize(packageConfig),
       scriptPath: p.canonicalize(script),

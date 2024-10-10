@@ -6,21 +6,72 @@ import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/scopes.dart';
 
-/// An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.
+/// An augmentation to Dart code.
 extension type Augmentation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'code': Type.stringPointer,
+    'code': Type.closedListPointer,
   });
   Augmentation({
-    String? code,
+    List<Code>? code,
   }) : this.fromJson(Scope.createMap(
           _schema,
           code,
         ));
 
   /// Augmentation code.
-  String get code => node['code'] as String;
+  List<Code> get code => (node['code'] as List).cast();
+}
+
+enum CodeType {
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
+  qualifiedName,
+  string;
+
+  bool get isKnown => this != _unknown;
+}
+
+extension type Code.fromJson(Map<String, Object?> node) implements Object {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'type': Type.stringPointer,
+    'value': Type.anyPointer,
+  });
+  static Code qualifiedName(QualifiedName qualifiedName) =>
+      Code.fromJson(Scope.createMap(
+        _schema,
+        'QualifiedName',
+        qualifiedName,
+      ));
+  static Code string(String string) => Code.fromJson(Scope.createMap(
+        _schema,
+        'String',
+        string,
+      ));
+  CodeType get type {
+    switch (node['type'] as String) {
+      case 'QualifiedName':
+        return CodeType.qualifiedName;
+      case 'String':
+        return CodeType.string;
+      default:
+        return CodeType._unknown;
+    }
+  }
+
+  QualifiedName get asQualifiedName {
+    if (node['type'] != 'QualifiedName') {
+      throw StateError('Not a QualifiedName.');
+    }
+    return QualifiedName.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  String get asString {
+    if (node['type'] != 'String') {
+      throw StateError('Not a String.');
+    }
+    return node['value'] as String;
+  }
 }
 
 /// The type-hierarchy representation of the type `dynamic`.
@@ -138,14 +189,23 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'properties': Type.typedMapPointer,
     'returnType': Type.typedMapPointer,
+    'requiredPositionalParameters': Type.closedListPointer,
+    'optionalPositionalParameters': Type.closedListPointer,
+    'namedParameters': Type.closedListPointer,
   });
   Member({
     Properties? properties,
     StaticTypeDesc? returnType,
+    List<StaticTypeDesc>? requiredPositionalParameters,
+    List<StaticTypeDesc>? optionalPositionalParameters,
+    List<NamedFunctionTypeParameter>? namedParameters,
   }) : this.fromJson(Scope.createMap(
           _schema,
           properties,
           returnType,
+          requiredPositionalParameters,
+          optionalPositionalParameters,
+          namedParameters,
         ));
 
   /// The properties of this member.
@@ -153,6 +213,18 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
 
   /// The return type of this member, if it has one.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
+
+  /// The required positional parameters of this member, if it has them.
+  List<StaticTypeDesc> get requiredPositionalParameters =>
+      (node['requiredPositionalParameters'] as List).cast();
+
+  /// The optional positional parameters of this member, if it has them.
+  List<StaticTypeDesc> get optionalPositionalParameters =>
+      (node['optionalPositionalParameters'] as List).cast();
+
+  /// The named parameters of this member, if it has them.
+  List<NamedFunctionTypeParameter> get namedParameters =>
+      (node['namedParameters'] as List).cast();
 }
 
 /// Partial model of a corpus of Dart source code.
@@ -266,6 +338,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'isAbstract': Type.boolean,
     'isClass': Type.boolean,
+    'isConstructor': Type.boolean,
     'isGetter': Type.boolean,
     'isField': Type.boolean,
     'isMethod': Type.boolean,
@@ -274,6 +347,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
   Properties({
     bool? isAbstract,
     bool? isClass,
+    bool? isConstructor,
     bool? isGetter,
     bool? isField,
     bool? isMethod,
@@ -282,6 +356,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
           _schema,
           isAbstract,
           isClass,
+          isConstructor,
           isGetter,
           isField,
           isMethod,
@@ -293,6 +368,9 @@ extension type Properties.fromJson(Map<String, Object?> node)
 
   /// Whether the entity is a class.
   bool get isClass => node['isClass'] as bool;
+
+  /// Whether the entity is a constructor.
+  bool get isConstructor => node['isConstructor'] as bool;
 
   /// Whether the entity is a getter.
   bool get isGetter => node['isGetter'] as bool;

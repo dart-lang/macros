@@ -128,9 +128,16 @@ void main() {
           'type': 'AugmentResponse',
           'value': {
             'augmentations': [
-              {'code': 'int get x => 3;'}
+              {
+                'code': [
+                  {
+                    'type': 'String',
+                    'value': 'int get x => 3;',
+                  }
+                ]
+              }
             ]
-          }
+          },
         });
       });
 
@@ -205,10 +212,16 @@ void main() {
             'value': {
               'augmentations': [
                 {
-                  'code': '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}',
+                  'code': [
+                    {
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}'
+                    }
+                  ]
                 }
               ]
-            }
+            },
           },
         );
       });
@@ -276,10 +289,16 @@ void main() {
             'value': {
               'augmentations': [
                 {
-                  'code': '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}',
+                  'code': [
+                    {
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}'
+                    }
+                  ]
                 }
               ]
-            }
+            },
           },
         );
 
@@ -291,10 +310,16 @@ void main() {
             'value': {
               'augmentations': [
                 {
-                  'code': '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}',
+                  'code': [
+                    {
+                      'type': 'String',
+                      'value':
+                          '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}'
+                    }
+                  ]
                 }
               ]
-            }
+            },
           },
         );
       });

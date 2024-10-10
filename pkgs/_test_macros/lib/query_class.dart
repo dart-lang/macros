@@ -8,6 +8,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'templating.dart';
+
 /// Applies a macro which sends an empty query, and outputs an augmentation
 /// that is the query result as a comment.
 class QueryClass {
@@ -31,7 +33,8 @@ class QueryClassImplementation implements Macro {
     final model = await host.query(Query.queryCode(QueryCode(
       target: request.target,
     )));
-    return AugmentResponse(
-        augmentations: [Augmentation(code: '// ${json.encode(model)}')]);
+    return AugmentResponse(augmentations: [
+      Augmentation(code: expandTemplate('// ${json.encode(model)}'))
+    ]);
   }
 }

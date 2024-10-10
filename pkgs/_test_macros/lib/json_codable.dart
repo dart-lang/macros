@@ -6,6 +6,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'templating.dart';
+
 /// A macro which adds a `fromJson(Map<String, Object?> json)` JSON decoding
 /// constructor to a class.
 class JsonCodable {
@@ -35,20 +37,54 @@ class JsonCodableImplementation implements Macro {
   Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
-      Augmentation(code: '''
-external ${target.name}.fromJson($_jsonMapType json);
-external $_jsonMapType toJson();
-   '''),
+      Augmentation(code: expandTemplate('''
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
+// external ${target.name}.fromJson($_jsonMapType json);
+// external $_jsonMapType toJson();
+   '''))
     ]);
   }
 
   Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
-    final result = <Augmentation>[];
-
     final target = request.target;
     final model = await host.query(Query.queryCode(QueryCode(target: target)));
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
-    // TODO(davidmorgan): check for super `fromJson`.
+
+    // TODO(davidmorgan): put `extends` information directly in `Interface`.
+    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
+
+    return AugmentResponse(augmentations: [
+      await _generateFromJson(host, model, target, superclassName, clazz),
+      await _generateToJson(host, model, target, superclassName, clazz)
+    ]);
+  }
+
+  Future<Augmentation> _generateFromJson(
+    Host host,
+    Model model,
+    QualifiedName target,
+    QualifiedName superclassName,
+    Interface clazz,
+  ) async {
+    var superclassHasFromJson = false;
+    // TODO(davidmorgan): add recommended way to check for core types.
+    if (superclassName.asString != 'dart:core#Object') {
+      // TODO(davidmorgan): first query could already fetch the super class.
+      final supermodel = await host.query(Query(target: superclassName));
+      final superclass =
+          supermodel.uris[superclassName.uri]!.scopes[superclassName.name]!;
+      final constructor = superclass.members['fromJson'];
+      if (constructor != null && _isValidFromJsonConstructor(constructor)) {
+        superclassHasFromJson = true;
+      } else {
+        // TODO(davidmorgan): report as a diagnostic.
+        throw ArgumentError(
+            'Serialization of classes that extend other classes is only '
+            'supported if those classes have a valid '
+            '`fromJson(Map<String, Object?> json)` constructor.');
+      }
+    }
+
     final initializers = <String>[];
     for (final field
         in clazz.members.entries.where((m) => m.value.properties.isField)) {
@@ -58,33 +94,99 @@ external $_jsonMapType toJson();
           .add('$name = ${_convertTypeFromJson("json[r'$name']", type)}');
     }
 
+    if (superclassHasFromJson) {
+      initializers.add('super.fromJson(json)');
+    }
+
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    return Augmentation(code: expandTemplate('''
 augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
 '''));
+  }
+
+  Future<Augmentation> _generateToJson(
+    Host host,
+    Model model,
+    QualifiedName target,
+    QualifiedName superclassName,
+    Interface clazz,
+  ) async {
+    var superclassHasToJson = false;
+    if (superclassName.asString != 'dart:core#Object') {
+      // TODO(davidmorgan): first query could already fetch the super class.
+      final supermodel = await host.query(Query(target: superclassName));
+      final superclass =
+          supermodel.uris[superclassName.uri]!.scopes[superclassName.name]!;
+      final method = superclass.members['toJson'];
+      if (method != null && _isValidToJsonMethod(method)) {
+        superclassHasToJson = true;
+      } else {
+        // TODO(davidmorgan): report as a diagnostic.
+        throw ArgumentError(
+            'Serialization of classes that extend other classes is only '
+            'supported if those classes have a valid '
+            '`Map<String, Object?> json toJson()` method.');
+      }
+    }
 
     final serializers = <String>[];
     for (final field
         in clazz.members.entries.where((m) => m.value.properties.isField)) {
       final name = field.key;
       final type = field.value.returnType;
-      serializers.add("json[r'$name'] = ${_convertTypeToJson(name, type)}");
+      var serializer = "json[r'$name'] = ${_convertTypeToJson(name, type)};\n";
+      if (type.type == StaticTypeDescType.nullableTypeDesc) {
+        serializer = 'if ($name != null) {\n$serializer}\n';
+      }
+      serializers.add(serializer);
     }
 
     // TODO(davidmorgan): helper for augmenting methods.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    result.add(Augmentation(code: '''
+    final jsonInitializer =
+        superclassHasToJson ? 'super.toJson()' : '$_jsonMapTypeForLiteral{}';
+    return Augmentation(code: expandTemplate('''
 augment $_jsonMapType toJson() {
-  final json = $_jsonMapTypeForLiteral{};
-${serializers.map((s) => '$s;\n').join('')}
+  final json = $jsonInitializer;
+${serializers.join('')}
   return json;
 }
 '''));
-
-    return AugmentResponse(augmentations: result);
   }
+
+  /// Returns whether [constructor] is a constructor
+  /// `fromJson(Map<String, Object?>)`.
+  bool _isValidFromJsonConstructor(Member constructor) =>
+      constructor.properties.isConstructor &&
+      constructor.optionalPositionalParameters.isEmpty &&
+      constructor.namedParameters.isEmpty &&
+      constructor.requiredPositionalParameters.length == 1 &&
+      constructor.requiredPositionalParameters[0].type ==
+          StaticTypeDescType.namedTypeDesc &&
+      _isJsonMapType(
+          constructor.requiredPositionalParameters[0].asNamedTypeDesc);
+
+  /// Returns whether [method] is a method
+  /// `toJson(Map<String, Object?>)`.
+  bool _isValidToJsonMethod(Member method) =>
+      method.properties.isMethod &&
+      !method.properties.isStatic &&
+      method.requiredPositionalParameters.isEmpty &&
+      method.optionalPositionalParameters.isEmpty &&
+      method.namedParameters.isEmpty &&
+      _isJsonMapType(method.returnType.asNamedTypeDesc);
+
+  /// Returns whether [type] is a type `Map<String, Object?>)`.
+  bool _isJsonMapType(NamedTypeDesc type) =>
+      type.name.asString == 'dart:core#Map' &&
+      type.instantiation[0].asNamedTypeDesc.name.asString ==
+          'dart:core#String' &&
+      type.instantiation[1].type == StaticTypeDescType.nullableTypeDesc &&
+      type.instantiation[1].asNullableTypeDesc.inner.asNamedTypeDesc.name
+              .asString ==
+          'dart:core#Object';
 
   String _convertTypeFromJson(String reference, StaticTypeDesc type) {
     // TODO(davidmorgan): _checkNamedType equivalent.
@@ -117,7 +219,7 @@ ${serializers.map((s) => '$s;\n').join('')}
           case 'Set':
             final type = namedType.instantiation.single;
             return '$nullCheck {for (final item in $reference '
-                'as {{dart:core#Set}}<{{dart:core#Object}}?>) '
+                'as {{dart:core#List}}<{{dart:core#Object}}?>) '
                 '${_convertTypeFromJson('item', type)}'
                 '}';
           case 'Map':
@@ -176,9 +278,4 @@ ${serializers.map((s) => '$s;\n').join('')}
     // TODO(davidmorgan): error reporting.
     throw UnsupportedError('$type');
   }
-}
-
-// TODO(davidmorgan): figure out where this should go.
-extension TemplatingExtension on QualifiedName {
-  String get code => '{{$uri#$name}}';
 }

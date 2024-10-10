@@ -20,6 +20,24 @@ void main() {
       printOnFailure(builder.toString());
     });
 
+    test('equality and hashing is by identity', () {
+      builder.map['a'] = <String, Object?>{};
+      final closedMap1 = builder.map['a'] as Map<String, Object?>;
+      builder.map['b'] = <String, Object?>{};
+      final closedMap2 = builder.map['b'] as Map<String, Object?>;
+
+      // Different maps with the same contents are not equal, have different hash codes.
+      // Can't use default `expect` equality check as it special-cases `Map`.
+      expect(closedMap1 == closedMap2, false);
+      expect(closedMap1.hashCode, isNot(closedMap2.hashCode));
+
+      // Map is equal to a reference to itself, has same hash code.
+      builder.map['a'] = closedMap1;
+      final closedMap1Reference = builder.map['a'] as Map<String, Object?>;
+      expect(closedMap1 == closedMap1Reference, true);
+      expect(closedMap1.hashCode, closedMap1Reference.hashCode);
+    });
+
     test('simple write and read', () {
       final value = {'a': 1, 'b': 2};
       builder.map['value'] = value;

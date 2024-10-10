@@ -66,11 +66,18 @@ static Protocol handshakeProtocol = Protocol(
         Definition.clazz(
           'Augmentation',
           createInBuffer: true,
-          description: 'An augmentation to Dart code. '
-              'TODO(davidmorgan): this is a placeholder.',
+          description: 'An augmentation to Dart code.',
           properties: [
-            Property('code', type: 'String', description: 'Augmentation code.'),
+            Property('code',
+                type: 'List<Code>', description: 'Augmentation code.'),
           ],
+        ),
+        Definition.union(
+          'Code',
+          createInBuffer: true,
+          description: 'Code that is part of augmentations to Dart code.',
+          types: ['QualifiedName', 'String'],
+          properties: [],
         ),
         Definition.nullTypedef('DynamicTypeDesc',
             description:
@@ -143,6 +150,22 @@ static Protocol handshakeProtocol = Protocol(
                 type: 'StaticTypeDesc',
                 description: 'The return type of this member, if it has one.',
               ),
+              // TODO(davidmorgan): base on
+              // https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/api/introspection.dart#L269
+              Property('requiredPositionalParameters',
+                  type: 'List<StaticTypeDesc>',
+                  description:
+                      'The required positional parameters of this member, '
+                      'if it has them.'),
+              Property('optionalPositionalParameters',
+                  type: 'List<StaticTypeDesc>',
+                  description:
+                      'The optional positional parameters of this member, '
+                      'if it has them.'),
+              Property('namedParameters',
+                  type: 'List<NamedFunctionTypeParameter>',
+                  description: 'The named parameters of this member, '
+                      'if it has them.'),
             ]),
         Definition.clazz('Model',
             description: 'Partial model of a corpus of Dart source code.',
@@ -201,6 +224,9 @@ static Protocol handshakeProtocol = Protocol(
                       'definition.'),
               Property('isClass',
                   type: 'bool', description: 'Whether the entity is a class.'),
+              Property('isConstructor',
+                  type: 'bool',
+                  description: 'Whether the entity is a constructor.'),
               Property('isGetter',
                   type: 'bool', description: 'Whether the entity is a getter.'),
               Property('isField',

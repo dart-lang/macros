@@ -9,9 +9,9 @@ import 'package:analyzer/src/summary2/macro_declarations.dart' as analyzer;
 import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
-import 'package:macros/macros.dart';
+import 'package:macros/macros.dart' as macros_api_v1;
 // ignore: implementation_imports
-import 'package:macros/src/executor.dart' as injected;
+import 'package:macros/src/executor.dart' as macros_api_v1;
 
 import 'query_service.dart';
 
@@ -83,11 +83,12 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
-      MacroTarget target,
-      DeclarationPhaseIntrospector declarationsPhaseIntrospector) async {
+      macros_api_v1.MacroTarget target,
+      macros_api_v1.DeclarationPhaseIntrospector
+          declarationsPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = declarationsPhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.expandTemplates(
+    return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 2, target: target.qualifiedName)));
@@ -95,11 +96,12 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDefinitionsPhase(
-      MacroTarget target,
-      DefinitionPhaseIntrospector definitionPhaseIntrospector) async {
+      macros_api_v1.MacroTarget target,
+      macros_api_v1.DefinitionPhaseIntrospector
+          definitionPhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = definitionPhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.expandTemplates(
+    return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 3, target: target.qualifiedName)));
@@ -107,63 +109,71 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
 
   @override
   Future<AnalyzerMacroExecutionResult> executeTypesPhase(
-      MacroTarget target, TypePhaseIntrospector typePhaseIntrospector) async {
+      macros_api_v1.MacroTarget target,
+      macros_api_v1.TypePhaseIntrospector typePhaseIntrospector) async {
     // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
     introspector = typePhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.expandTemplates(
+    return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
             name, AugmentRequest(phase: 1, target: target.qualifiedName)));
   }
 }
 
-/// Converts [AugmentResponse] to [injected.MacroExecutionResult].
+/// Converts [AugmentResponse] to [macros_api_v1.MacroExecutionResult].
 ///
 /// TODO(davidmorgan): add to `AugmentationResponse` to cover all the
 /// functionality of `MacroExecutionResult`.
-class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
-  final MacroTarget target;
+class AnalyzerMacroExecutionResult
+    implements macros_api_v1.MacroExecutionResult {
+  final macros_api_v1.MacroTarget target;
   @override
-  final Map<Identifier, Iterable<DeclarationCode>> typeAugmentations;
+  final Map<macros_api_v1.Identifier, Iterable<macros_api_v1.DeclarationCode>>
+      typeAugmentations;
 
   AnalyzerMacroExecutionResult(
-      this.target, Iterable<DeclarationCode> declarations)
+      this.target, Iterable<macros_api_v1.DeclarationCode> declarations)
       // TODO(davidmorgan): this assumes augmentations are for the macro
       // application target. Instead, it should be explicit in
       // `AugmentResponse`.
-      : typeAugmentations = {(target as Declaration).identifier: declarations};
+      : typeAugmentations = {
+          (target as macros_api_v1.Declaration).identifier: declarations
+        };
 
-  static Future<AnalyzerMacroExecutionResult> expandTemplates(
-      MacroTarget target, AugmentResponse augmentResponse) async {
-    final declarations = <DeclarationCode>[];
+  static Future<AnalyzerMacroExecutionResult> dartModelToInjected(
+      macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
+    final declarations = <macros_api_v1.DeclarationCode>[];
     for (final augmentation in augmentResponse.augmentations) {
-      declarations.add(
-          DeclarationCode.fromParts(await _expandTemplates(augmentation.code)));
+      declarations.add(macros_api_v1.DeclarationCode.fromParts(
+          await _resolveNames(augmentation.code)));
     }
     return AnalyzerMacroExecutionResult(target, declarations);
   }
 
   @override
-  List<Diagnostic> get diagnostics => [];
+  List<macros_api_v1.Diagnostic> get diagnostics => [];
 
   @override
-  Map<Identifier, Iterable<DeclarationCode>> get enumValueAugmentations => {};
+  Map<macros_api_v1.Identifier, Iterable<macros_api_v1.DeclarationCode>>
+      get enumValueAugmentations => {};
 
   @override
-  MacroException? get exception => null;
+  macros_api_v1.MacroException? get exception => null;
 
   @override
-  Map<Identifier, NamedTypeAnnotationCode> get extendsTypeAugmentations => {};
+  Map<macros_api_v1.Identifier, macros_api_v1.NamedTypeAnnotationCode>
+      get extendsTypeAugmentations => {};
 
   @override
-  Map<Identifier, Iterable<TypeAnnotationCode>> get interfaceAugmentations =>
-      {};
+  Map<macros_api_v1.Identifier, Iterable<macros_api_v1.TypeAnnotationCode>>
+      get interfaceAugmentations => {};
 
   @override
-  Iterable<DeclarationCode> get libraryAugmentations => {};
+  Iterable<macros_api_v1.DeclarationCode> get libraryAugmentations => {};
 
   @override
-  Map<Identifier, Iterable<TypeAnnotationCode>> get mixinAugmentations => {};
+  Map<macros_api_v1.Identifier, Iterable<macros_api_v1.TypeAnnotationCode>>
+      get mixinAugmentations => {};
 
   @override
   Iterable<String> get newTypeNames => [];
@@ -172,46 +182,49 @@ class AnalyzerMacroExecutionResult implements injected.MacroExecutionResult {
   void serialize(Object serializer) => throw UnimplementedError();
 }
 
-extension MacroTargetExtension on MacroTarget {
+extension MacroTargetExtension on macros_api_v1.MacroTarget {
   QualifiedName get qualifiedName {
-    final element =
-        ((this as Declaration).identifier as analyzer.IdentifierImpl).element!;
+    final element = ((this as macros_api_v1.Declaration).identifier
+            as analyzer.IdentifierImpl)
+        .element!;
     return QualifiedName(
         uri: '${element.library!.definingCompilationUnit.source.uri}',
         name: element.displayName);
   }
 }
 
-/// Converts [code] to a mix of `Identifier` and `String`.
-///
-/// Looks up references of the form `{{uri#name}}` using `resolveIdentifier`.
-///
-/// TODO(davidmorgan): move to the client side.
-Future<List<Object>> _expandTemplates(String code) async {
-  final result = <Object>[];
-  var index = 0;
-  while (index < code.length) {
-    final start = code.indexOf('{{', index);
-    if (start == -1) {
-      result.add(code.substring(index));
-      break;
+/// Converts [codes] to a list of `String` and `Identifier`.
+Future<List<Object>> _resolveNames(List<Code> codes) async {
+  // Find the set of unique [QualifiedName]s used.
+  final qualifiedNameStrings = <String>{};
+  for (final code in codes) {
+    if (code.type == CodeType.qualifiedName) {
+      qualifiedNameStrings.add(code.asQualifiedName.asString);
     }
-    result.add(code.substring(index, start));
-    final end = code.indexOf('}}', start);
-    if (end == -1) {
-      throw ArgumentError('Unmatched opening brace: $code');
-    }
-    final name = code.substring(start + 2, end);
-    final parts = name.split('#');
-    if (parts.length != 2) {
-      throw ArgumentError('Expected "uri#name" in: $name');
-    }
-    final uri = Uri.parse(parts[0]);
-    final identifier = await (introspector as TypePhaseIntrospector)
+  }
+
+  // Create futures looking up their [Identifier]s, then `await` in parallel.
+  final qualifiedNamesList =
+      qualifiedNameStrings.map(QualifiedName.parse).toList();
+  final identifierFutures = <Future<macros_api_v1.Identifier>>[];
+  for (final qualifiedName in qualifiedNamesList) {
+    identifierFutures.add((introspector as macros_api_v1.TypePhaseIntrospector)
         // ignore: deprecated_member_use
-        .resolveIdentifier(uri, parts[1]);
-    result.add(identifier);
-    index = end + 2;
+        .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name));
+  }
+  final identifiers = await Future.wait(identifierFutures);
+
+  // Build the result using the looked up [Identifier]s.
+  final identifiersByQualifiedNameStrings =
+      Map.fromIterables(qualifiedNameStrings, identifiers);
+  final result = <Object>[];
+  for (final code in codes) {
+    if (code.type == CodeType.string) {
+      result.add(code.asString);
+    } else if (code.type == CodeType.qualifiedName) {
+      final qualifiedName = code.asQualifiedName;
+      result.add(identifiersByQualifiedNameStrings[qualifiedName.asString]!);
+    }
   }
   return result;
 }

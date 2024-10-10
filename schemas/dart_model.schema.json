@@ -8,12 +8,38 @@
   "$defs": {
     "Augmentation": {
       "type": "object",
-      "description": "An augmentation to Dart code. TODO(davidmorgan): this is a placeholder.",
+      "description": "An augmentation to Dart code.",
       "properties": {
         "code": {
-          "type": "string",
-          "description": "Augmentation code."
+          "type": "array",
+          "description": "Augmentation code.",
+          "items": {
+            "$ref": "#/$defs/Code"
+          }
         }
+      }
+    },
+    "Code": {
+      "type": "object",
+      "description": "Code that is part of augmentations to Dart code.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/QualifiedName"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
       }
     },
     "DynamicTypeDesc": {
@@ -117,6 +143,27 @@
         "returnType": {
           "$comment": "The return type of this member, if it has one.",
           "$ref": "#/$defs/StaticTypeDesc"
+        },
+        "requiredPositionalParameters": {
+          "type": "array",
+          "description": "The required positional parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "optionalPositionalParameters": {
+          "type": "array",
+          "description": "The optional positional parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/StaticTypeDesc"
+          }
+        },
+        "namedParameters": {
+          "type": "array",
+          "description": "The named parameters of this member, if it has them.",
+          "items": {
+            "$ref": "#/$defs/NamedFunctionTypeParameter"
+          }
         }
       }
     },
@@ -204,6 +251,10 @@
         "isClass": {
           "type": "boolean",
           "description": "Whether the entity is a class."
+        },
+        "isConstructor": {
+          "type": "boolean",
+          "description": "Whether the entity is a constructor."
         },
         "isGetter": {
           "type": "boolean",
