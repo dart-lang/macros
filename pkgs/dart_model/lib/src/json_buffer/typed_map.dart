@@ -224,7 +224,7 @@ extension TypedMaps on JsonBufferBuilder {
     }
 
     _explanations?.pop();
-    return _TypedMap(this, pointer);
+    return _TypedMap(this, pointer, null);
   }
 
   /// Returns the [_Pointer] to [map].
@@ -237,23 +237,27 @@ extension TypedMaps on JsonBufferBuilder {
 
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkTypedMapOwnership(_TypedMap map) {
-    if (map._buffer != this) {
+    if (map.buffer != this) {
       throw UnsupportedError('Maps created with `createTypedMap` can only '
           'be added to the JsonBufferBuilder instance that created them.');
     }
   }
 
   /// Returns the [_TypedMap] at [pointer].
-  Map<String, Object?> _readTypedMap(_Pointer pointer) {
-    return _TypedMap(this, pointer);
+  Map<String, Object?> _readTypedMap(
+      _Pointer pointer, Map<String, Object?>? parent) {
+    return _TypedMap(this, pointer, parent);
   }
 }
 
 class _TypedMap
     with MapMixin<String, Object?>, _EntryMapMixin
-    implements Map<String, Object?> {
-  final JsonBufferBuilder _buffer;
+    implements Map<String, Object?>, MapInBuffer {
+  @override
+  final JsonBufferBuilder buffer;
   final _Pointer _pointer;
+  @override
+  final Map<String, Object?>? parent;
 
   // If a `TypedMap` is created then immediately added to another `Map` then
   // these values are never needed, just the `_pointer`. Use `late` so they are
@@ -261,17 +265,17 @@ class _TypedMap
 
   late final _Pointer _schemaPointer =
       // The high byte of the schema pointer indicates "filled", omit it.
-      _buffer._readPointer(_pointer) & 0x7fffffff;
+      buffer._readPointer(_pointer) & 0x7fffffff;
 
   /// The schema of this "typed map" giving its field names and types.
   late final TypedMapSchema _schema =
-      _buffer._schemasByPointer[_schemaPointer] ??=
-          TypedMapSchema(_buffer._readClosedMap(_schemaPointer).cast());
+      buffer._schemasByPointer[_schemaPointer] ??=
+          TypedMapSchema(buffer._readClosedMap(_schemaPointer, null).cast());
 
   /// Whether all fields are present, meaning no explicit field set was written.
-  late final bool filled = (_buffer._readPointer(_pointer) & 0x80000000) != 0;
+  late final bool filled = (buffer._readPointer(_pointer) & 0x80000000) != 0;
 
-  _TypedMap(this._buffer, this._pointer);
+  _TypedMap(this.buffer, this._pointer, this.parent);
 
   /// Whether the field at [index] is present.
   bool _hasField(int index) {
@@ -282,7 +286,7 @@ class _TypedMap
     if (filled) return true;
     final byte = index ~/ 8;
     final bit = index % 8;
-    return _buffer._readBit(_pointer + _pointerSize + byte, bit);
+    return buffer._readBit(_pointer + _pointerSize + byte, bit);
   }
 
   @override
@@ -347,6 +351,15 @@ class _TypedMap
     throw UnsupportedError(
         'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _TypedMap &&
+      other.buffer == buffer &&
+      other._pointer == _pointer;
+
+  @override
+  int get hashCode => Object.hash(buffer, _pointer);
 }
 
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder].
@@ -363,7 +376,7 @@ abstract class _PartialTypedMapIterator<T> implements Iterator<T> {
   int _offset = -1;
 
   _PartialTypedMapIterator(this._map)
-      : _buffer = _map._buffer,
+      : _buffer = _map.buffer,
         _schema = _map._schema,
         _valuesPointer = _map._pointer +
             _pointerSize +
@@ -374,7 +387,8 @@ abstract class _PartialTypedMapIterator<T> implements Iterator<T> {
 
   String get _currentKey => _schema._keys[_index];
   Object? get _currentValue =>
-      _buffer._read(_schema._valueTypes[_index], _valuesPointer + _offset);
+      _buffer._read(_schema._valueTypes[_index], _valuesPointer + _offset,
+          parent: _map);
 
   @override
   bool moveNext() {
@@ -436,7 +450,7 @@ abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
   int _bitOffset = 7;
 
   _AllBoolsTypedMapIterator(this._map)
-      : _buffer = _map._buffer,
+      : _buffer = _map.buffer,
         _schema = _map._schema,
         _valuesPointer = _map._pointer +
             _pointerSize +

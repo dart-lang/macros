@@ -20,6 +20,23 @@ void main() {
       printOnFailure(builder.toString());
     });
 
+    test('equality and hashing is by identity', () {
+      final schema = TypedMapSchema({});
+      final typedMap1 = builder.createTypedMap(schema);
+      final typedMap2 = builder.createTypedMap(schema);
+
+      // Different maps with the same contents are not equal, have different hash codes.
+      // Can't use default `expect` equality check as it special-cases `Map`.
+      expect(typedMap1 == typedMap2, false);
+      expect(typedMap1.hashCode, isNot(typedMap2.hashCode));
+
+      // Map is equal to a reference to itself, has same hash code.
+      builder.map['a'] = typedMap1;
+      final typedMap1Reference = builder.map['a'] as Map<String, Object?>;
+      expect(typedMap1 == typedMap1Reference, true);
+      expect(typedMap1.hashCode, typedMap1Reference.hashCode);
+    });
+
     test('with some values missing can be written and read', () {
       final schema = TypedMapSchema({
         'a': Type.stringPointer,

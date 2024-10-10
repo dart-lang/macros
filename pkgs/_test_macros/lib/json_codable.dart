@@ -6,6 +6,8 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import 'templating.dart';
+
 /// A macro which adds a `fromJson(Map<String, Object?> json)` JSON decoding
 /// constructor to a class.
 class JsonCodable {
@@ -35,11 +37,11 @@ class JsonCodableImplementation implements Macro {
   Future<AugmentResponse> phase2(Host host, AugmentRequest request) async {
     final target = request.target;
     return AugmentResponse(augmentations: [
-      Augmentation(code: '''
+      Augmentation(code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external ${target.name}.fromJson($_jsonMapType json);
 // external $_jsonMapType toJson();
-   '''),
+   '''))
     ]);
   }
 
@@ -98,10 +100,10 @@ class JsonCodableImplementation implements Macro {
 
     // TODO(davidmorgan): helper for augmenting initializers.
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    return Augmentation(code: '''
+    return Augmentation(code: expandTemplate('''
 augment ${target.name}.fromJson($_jsonMapType json) :
 ${initializers.join(',\n')};
-''');
+'''));
   }
 
   Future<Augmentation> _generateToJson(
@@ -145,13 +147,13 @@ ${initializers.join(',\n')};
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     final jsonInitializer =
         superclassHasToJson ? 'super.toJson()' : '$_jsonMapTypeForLiteral{}';
-    return Augmentation(code: '''
+    return Augmentation(code: expandTemplate('''
 augment $_jsonMapType toJson() {
   final json = $jsonInitializer;
 ${serializers.join('')}
   return json;
 }
-''');
+'''));
   }
 
   /// Returns whether [constructor] is a constructor
@@ -276,9 +278,4 @@ ${serializers.join('')}
     // TODO(davidmorgan): error reporting.
     throw UnsupportedError('$type');
   }
-}
-
-// TODO(davidmorgan): figure out where this should go.
-extension TemplatingExtension on QualifiedName {
-  String get code => '{{$uri#$name}}';
 }

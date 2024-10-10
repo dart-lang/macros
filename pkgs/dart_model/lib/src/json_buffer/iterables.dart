@@ -39,3 +39,13 @@ class _IteratorFunctionIterable<T> extends Iterable<T> {
   @override
   Iterator<T> get iterator => _function();
 }
+
+/// A `Map` in a `JsonBufferBuilder`.
+abstract interface class MapInBuffer {
+  /// The buffer backing this `Map`.
+  JsonBufferBuilder get buffer;
+
+  /// The `Map` that contains this value, or `null` if this value has not been
+  /// added to a `Map` or is itself the root `Map`.
+  Map<String, Object?>? get parent;
+}

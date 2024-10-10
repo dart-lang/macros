@@ -4,35 +4,51 @@
 
 import 'dart:io';
 
-import 'package:_analyzer_macros/macro_implementation.dart';
-import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
-import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/src/summary2/macro_injected_impl.dart' as injected;
-import 'package:macro_service/macro_service.dart';
 import 'package:path/path.dart' as p;
 
+import 'analyzer_macro_tool.dart';
+import 'cfe_macro_tool.dart';
+
 /// Runs a Dart script with `dart_model` macros.
-class MacroTool {
+abstract class MacroTool {
   String workspacePath;
   String packageConfigPath;
   String scriptPath;
   bool skipCleanup;
 
-  MacroTool(
+  MacroTool.internal(
       {required this.workspacePath,
       required this.packageConfigPath,
       required this.scriptPath,
       required this.skipCleanup});
 
+  factory MacroTool(
+          {required HostOption host,
+          required String workspacePath,
+          required String packageConfigPath,
+          required String scriptPath,
+          required bool skipCleanup}) =>
+      host == HostOption.analyzer
+          ? AnalyzerMacroTool(
+              workspacePath: workspacePath,
+              packageConfigPath: packageConfigPath,
+              scriptPath: scriptPath,
+              skipCleanup: skipCleanup)
+          : CfeMacroTool(
+              workspacePath: workspacePath,
+              packageConfigPath: packageConfigPath,
+              scriptPath: scriptPath,
+              skipCleanup: skipCleanup);
+
   Future<void> run() async {
-    print('Running ${p.basename(scriptPath)} with macros.');
+    print('Running ${p.basename(scriptPath)} with macros on $this.');
     print('~~~');
     print('Package config: $packageConfigPath');
     print('Workspace: $workspacePath');
     print('Script: $scriptPath');
 
     // TODO(davidmorgan): make it an option to run with the CFE instead.
-    if (!await _augmentUsingAnalyzer()) {
+    if (!await augment()) {
       print('No augmentation was generated, nothing to do, exiting.');
       exit(1);
     }
@@ -71,53 +87,19 @@ class MacroTool {
   }
 
   /// The path where macro-generated augmentations will be written.
-  String get _augmentationFilePath => '$scriptPath.macro_tool_output';
+  String get augmentationFilePath => '$scriptPath.macro_tool_output';
 
-  /// Runs macros in [scriptFile].
+  /// Runs macros in [scriptFile] on the analyzer.
   ///
-  /// Writes any augmentation to [_augmentationFilePath].
+  /// Writes any augmentation to [augmentationFilePath].
   ///
   /// Returns whether an augmentation file was written.
-  Future<bool> _augmentUsingAnalyzer() async {
-    final contextCollection =
-        AnalysisContextCollection(includedPaths: [workspacePath]);
-    final analysisContext = contextCollection.contexts.first;
-    injected.macroImplementation = await AnalyzerMacroImplementation.start(
-        protocol: Protocol(
-            encoding: ProtocolEncoding.binary,
-            version: ProtocolVersion.macros1),
-        packageConfig: Uri.file(packageConfigPath));
-
-    final resolvedLibrary = (await analysisContext.currentSession
-        .getResolvedLibrary(scriptPath)) as ResolvedLibraryResult;
-
-    final errors = (await analysisContext.currentSession.getErrors(scriptPath))
-        as ErrorsResult;
-    if (errors.errors.isNotEmpty) {
-      print('Errors: ${errors.errors}');
-    }
-
-    final augmentationUnits =
-        resolvedLibrary.units.where((u) => u.isMacroPart).toList();
-    if (augmentationUnits.isEmpty) {
-      return false;
-    }
-
-    print('Macro output (patched to use augment library): '
-        '$_augmentationFilePath');
-    File(_augmentationFilePath).writeAsStringSync(augmentationUnits
-        .single.content
-        // The analyzer produces augmentations in parts, but the CFE still
-        // wants them in augmentation libraries. Adjust the output accordingly.
-        .replaceAll('part of', 'augment library'));
-
-    return true;
-  }
+  Future<bool> augment();
 
   /// Deletes the augmentation file created by this tool.
   void _removeAugmentations() {
-    print('Deleting: $_augmentationFilePath');
-    File(_augmentationFilePath).deleteSync();
+    print('Deleting: $augmentationFilePath');
+    File(augmentationFilePath).deleteSync();
   }
 
   /// Adds `import augment` of the augmentation file.
@@ -128,7 +110,7 @@ class MacroTool {
     print('Patching to import augmentations: $scriptPath');
 
     // Add the `import augment` statement at the start of the file.
-    final partName = p.basename(_augmentationFilePath);
+    final partName = p.basename(augmentationFilePath);
     final line = "import augment '$partName'; $_addedMarker\n";
 
     final file = File(scriptPath);
@@ -150,3 +132,14 @@ class MacroTool {
 }
 
 final String _addedMarker = '// added by macro_tool';
+
+enum HostOption {
+  analyzer,
+  cfe;
+
+  static HostOption? forString(String? option) => switch (option) {
+        'analyzer' => HostOption.analyzer,
+        'cfe' => HostOption.cfe,
+        _ => null,
+      };
+}
