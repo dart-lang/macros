@@ -35,7 +35,7 @@ class AnalyzerQueryService implements QueryService {
     final types = AnalyzerTypeHierarchy(library.typeProvider)
       ..addInterfaceElement(clazz);
 
-    final interface = Interface();
+    final interface = Interface(properties: Properties(isClass: true));
     for (final constructor in clazz.constructors) {
       interface.members[constructor.name] = Member(
           requiredPositionalParameters: constructor

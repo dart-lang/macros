@@ -114,14 +114,24 @@ class MacroClient {
           final augmentRequest = hostRequest.asAugmentRequest;
           await Scope.macro
               .runAsync(() async => _sendResponse(Response.augmentResponse(
-                  await switch (augmentRequest.phase) {
-                    1 => executeTypesMacro(macro, _host, augmentRequest),
-                    2 => executeDeclarationsMacro(macro, _host, augmentRequest),
-                    3 => executeDefinitionMacro(macro, _host, augmentRequest),
-                    _ => throw StateError(
-                        'Unexpected phase ${augmentRequest.phase}, '
-                        'expected 1, 2, or 3.')
-                  },
+                  switch (augmentRequest.phase) {
+                        1 => macro.description.runsInPhases.contains(1)
+                            ? await executeTypesMacro(
+                                macro, _host, augmentRequest)
+                            : null,
+                        2 => macro.description.runsInPhases.contains(2)
+                            ? await executeDeclarationsMacro(
+                                macro, _host, augmentRequest)
+                            : null,
+                        3 => macro.description.runsInPhases.contains(3)
+                            ? await executeDefinitionMacro(
+                                macro, _host, augmentRequest)
+                            : null,
+                        _ => throw StateError(
+                            'Unexpected phase ${augmentRequest.phase}, '
+                            'expected 1, 2, or 3.')
+                      } ??
+                      AugmentResponse(),
                   requestId: hostRequest.id)));
         }
       default:
