@@ -61,6 +61,15 @@ final class StaticTypeSystem {
     return Scope.none.run(() => _isSubtype(a, b));
   }
 
+  /// Returns the super type of the type referred to by [name], which must be
+  /// part of the model.
+  ///
+  /// TODO(davidmorgan): this is a hack to check "extends" but is not correct,
+  /// see https://github.com/dart-lang/macros/pull/89#discussion_r1791855869
+  QualifiedName supertypeOf(QualifiedName name) {
+    return _constructSuperTypes(_lookupNamed(name.asString), []).first.name;
+  }
+
   bool _isSubtype(StaticType a, StaticType b) {
     // This is using `T0` and `T1` names to make the implementation easier to
     // compare with the specification at

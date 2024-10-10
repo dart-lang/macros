@@ -106,7 +106,6 @@ void main() {
       expect(b.toJson(), isEmpty);
     });
 
-    /* TODO(davidmorgan): make this test work.
     test('class hierarchies', () {
       var json = {
         'x': 1,
@@ -118,7 +117,6 @@ void main() {
 
       expect(d.toJson(), equals(json));
     });
-    */
 
     test('collections of nullable objects', () {
       var json = {
@@ -266,7 +264,6 @@ class C {
   final int x;
 }
 
-/*
 @JsonCodable()
 class D extends C {
   // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
@@ -275,7 +272,6 @@ class D extends C {
 
   final String y;
 }
-*/
 
 @JsonCodable()
 class E {

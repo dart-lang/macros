@@ -189,14 +189,23 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'properties': Type.typedMapPointer,
     'returnType': Type.typedMapPointer,
+    'requiredPositionalParameters': Type.closedListPointer,
+    'optionalPositionalParameters': Type.closedListPointer,
+    'namedParameters': Type.closedListPointer,
   });
   Member({
     Properties? properties,
     StaticTypeDesc? returnType,
+    List<StaticTypeDesc>? requiredPositionalParameters,
+    List<StaticTypeDesc>? optionalPositionalParameters,
+    List<NamedFunctionTypeParameter>? namedParameters,
   }) : this.fromJson(Scope.createMap(
           _schema,
           properties,
           returnType,
+          requiredPositionalParameters,
+          optionalPositionalParameters,
+          namedParameters,
         ));
 
   /// The properties of this member.
@@ -204,6 +213,18 @@ extension type Member.fromJson(Map<String, Object?> node) implements Object {
 
   /// The return type of this member, if it has one.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
+
+  /// The required positional parameters of this member, if it has them.
+  List<StaticTypeDesc> get requiredPositionalParameters =>
+      (node['requiredPositionalParameters'] as List).cast();
+
+  /// The optional positional parameters of this member, if it has them.
+  List<StaticTypeDesc> get optionalPositionalParameters =>
+      (node['optionalPositionalParameters'] as List).cast();
+
+  /// The named parameters of this member, if it has them.
+  List<NamedFunctionTypeParameter> get namedParameters =>
+      (node['namedParameters'] as List).cast();
 }
 
 /// Partial model of a corpus of Dart source code.
@@ -317,6 +338,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'isAbstract': Type.boolean,
     'isClass': Type.boolean,
+    'isConstructor': Type.boolean,
     'isGetter': Type.boolean,
     'isField': Type.boolean,
     'isMethod': Type.boolean,
@@ -325,6 +347,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
   Properties({
     bool? isAbstract,
     bool? isClass,
+    bool? isConstructor,
     bool? isGetter,
     bool? isField,
     bool? isMethod,
@@ -333,6 +356,7 @@ extension type Properties.fromJson(Map<String, Object?> node)
           _schema,
           isAbstract,
           isClass,
+          isConstructor,
           isGetter,
           isField,
           isMethod,
@@ -344,6 +368,9 @@ extension type Properties.fromJson(Map<String, Object?> node)
 
   /// Whether the entity is a class.
   bool get isClass => node['isClass'] as bool;
+
+  /// Whether the entity is a constructor.
+  bool get isConstructor => node['isConstructor'] as bool;
 
   /// Whether the entity is a getter.
   bool get isGetter => node['isGetter'] as bool;
