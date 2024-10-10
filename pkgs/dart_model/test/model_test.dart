@@ -111,16 +111,16 @@ void main() {
     test('can give the path to Members in buffer backed maps', () {
       final member = model.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(model.pathToMember(member),
-          '/uris/package:dart_model/dart_model.dart/scopes/JsonData/members/_root');
+      expect(model.qualifiedNameOfMember(member)!.asString,
+          'package:dart_model/dart_model.dart#JsonData');
     });
 
     test('can give the path to Members in SDK maps', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(copiedModel.pathToMember(member),
-          '/uris/package:dart_model/dart_model.dart/scopes/JsonData/members/_root');
+      expect(copiedModel.qualifiedNameOfMember(member)!.asString,
+          'package:dart_model/dart_model.dart#JsonData');
     });
 
     test('path to Members throws on cycle', () {
@@ -129,7 +129,7 @@ void main() {
       (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.pathToMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
     });
 
     test('path to Members throws on reused node', () {
@@ -139,7 +139,7 @@ void main() {
           copiedModel.uris['package:dart_model/dart_model.dart']!;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.pathToMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
     });
 
     test('path to Member returns null for Member in wrong Map', () {
@@ -151,8 +151,8 @@ void main() {
           .scopes['JsonData']!
           .members['_root']!
           .node));
-      expect(copiedModel.pathToMember(member), null);
-      expect(model.pathToMember(copiedMember), null);
+      expect(copiedModel.qualifiedNameOfMember(member), null);
+      expect(model.qualifiedNameOfMember(copiedMember), null);
     });
   });
 

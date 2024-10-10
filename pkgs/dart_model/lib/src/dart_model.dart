@@ -24,20 +24,36 @@ extension ModelExtension on Model {
   /// types of node we want this functionality exposed for.
   /// TODO(davidmorgan): a list of path segments is probably more useful than
   /// `String`.
-  String? pathToMember(Member member) => _pathTo(member.node);
+  QualifiedName? qualifiedNameOfMember(Member member) =>
+      _qualifiedNameOf(member.node);
 
-  /// Returns the path in the model to [node], or `null` if [node] is not in this [Model].
-  String? _pathTo(Map<String, Object?> node) {
-    if (node == this.node) return '';
-    final parent = _getParent(node);
-    if (parent == null) return null;
-    for (final entry in parent.entries) {
-      if (entry.value == node) {
-        final parentPath = _pathTo(parent);
-        return parentPath == null ? null : '$parentPath/${entry.key}';
-      }
+  /// Returns the [QualifiedName] in the model to [node], or `null` if [node] is not in this [Model].
+  QualifiedName? _qualifiedNameOf(Map<String, Object?> node) {
+    final members = _getParent(node);
+    if (members == null) return null;
+    final interface = _getParent(members);
+    if (interface == null) return null;
+    final scopes = _getParent(interface);
+    if (scopes == null) return null;
+    final library = _getParent(scopes);
+    if (library == null) return null;
+    final libraries = _getParent(library);
+    if (libraries == null) return null;
+
+    final uri = _keyOf(library, libraries);
+    final name = _keyOf(interface, scopes);
+
+    return QualifiedName(uri: uri, name: name);
+  }
+
+  /// Returns the key of [value] in [map].
+  ///
+  /// Throws if [value] is not in [map].
+  String _keyOf(Object value, Map<String, Object?> map) {
+    for (final entry in map.entries) {
+      if (entry.value == value) return entry.key;
     }
-    return null;
+    throw ArgumentError('Value not in map: $value, $map');
   }
 
   /// Gets the `Map` that contains [node], or `null` if there isn't one.
