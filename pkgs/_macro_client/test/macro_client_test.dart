@@ -14,6 +14,8 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final target = QualifiedName.parse('package:a/a.dart#A');
+
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
     Protocol(
@@ -112,7 +114,29 @@ void main() {
           }
         });
 
-        final requestId = nextRequestId;
+        final requestId = nextRequestId;final queryRequest = await responses.next;
+        final queryRequestId = MacroRequest.fromJson(queryRequest).id;
+        expect(
+          queryRequest,
+          {
+            'id': queryRequestId,
+            'type': 'QueryRequest',
+            'value': {
+              'query': {
+                'target': {'uri': 'package:foo/foo.dart', 'name': 'Foo'}
+              }
+            },
+          },
+        );
+
+        Scope.query.run(() => protocol.send(
+            socket.add,
+            Response.queryResponse(
+                    QueryResponse(
+                        model: Model()
+                          ..uris['package:foo/foo.dart'] = Library()),
+                    requestId: queryRequestId)
+                .node));
         protocol.send(
             socket.add,
             HostRequest.augmentRequest(
@@ -120,7 +144,7 @@ void main() {
                     macroAnnotation: QualifiedName(
                         uri: 'package:_test_macros/declare_x_macro.dart',
                         name: 'DeclareX'),
-                    AugmentRequest(phase: 2))
+                    AugmentRequest(phase: 2, target: target))
                 .node);
         final augmentResponse = await responses.next;
         expect(augmentResponse, {
