@@ -19,7 +19,7 @@ final _jsonMapType = '{{dart:core#Map}}$_jsonMapTypeForLiteral';
 final _mapEntryType = '{{dart:core#MapEntry}}';
 
 class JsonCodableImplementation
-    implements ClassDeclarationsMacro, ClassDefinitionMacro {
+    implements ClassDeclarationsMacro, ClassDefinitionsMacro {
   @override
   MacroDescription get description => MacroDescription(
       annotation: QualifiedName(
@@ -40,7 +40,7 @@ class JsonCodableImplementation
   }
 
   @override
-  Future<AugmentResponse> buildDefinitionForClass(
+  Future<AugmentResponse> buildDefinitionsForClass(
       Host host, AugmentRequest request) async {
     final target = request.target;
     final model = await host.query(Query(target: target));

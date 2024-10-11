@@ -40,8 +40,8 @@ abstract interface class LibraryDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to a library directive, and
 /// want to provide definitions for declarations in the library.
-abstract interface class LibraryDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForLibrary(
+abstract interface class LibraryDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForLibrary(
       Host host, AugmentRequest request);
 }
 
@@ -64,8 +64,8 @@ abstract interface class FunctionDeclarationsMacro implements Macro {
 /// The interface for [Macro]s that can be applied to any top level function,
 /// instance method, or static method, and want to augment the function
 /// definition.
-abstract interface class FunctionDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForFunction(
+abstract interface class FunctionDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForFunction(
       Host host, AugmentRequest request);
 }
 
@@ -87,8 +87,8 @@ abstract interface class VariableDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any top level variable
 /// or instance field, and want to augment the variable definition.
-abstract interface class VariableDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForVariable(
+abstract interface class VariableDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForVariable(
       Host host, AugmentRequest request);
 }
 
@@ -108,8 +108,8 @@ abstract interface class ClassDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any class, and want to
 /// augment the definitions of the members of that class.
-abstract interface class ClassDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForClass(
+abstract interface class ClassDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForClass(
       Host host, AugmentRequest request);
 }
 
@@ -129,8 +129,8 @@ abstract interface class EnumDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any enum, and want to
 /// augment the definitions of members or values of that enum.
-abstract interface class EnumDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForEnum(
+abstract interface class EnumDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForEnum(
       Host host, AugmentRequest request);
 }
 
@@ -150,8 +150,8 @@ abstract interface class EnumValueDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any enum, and want to
 /// augment the definitions of members or values of that enum.
-abstract interface class EnumValueDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForEnumValue(
+abstract interface class EnumValueDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForEnumValue(
       Host host, AugmentRequest request);
 }
 
@@ -171,8 +171,8 @@ abstract interface class FieldDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any field, and want to
 /// augment the field definition.
-abstract interface class FieldDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForField(
+abstract interface class FieldDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForField(
       Host host, AugmentRequest request);
 }
 
@@ -192,8 +192,8 @@ abstract interface class MethodDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any method, and want to
 /// augment the function definition.
-abstract interface class MethodDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForMethod(
+abstract interface class MethodDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForMethod(
       Host host, AugmentRequest request);
 }
 
@@ -213,8 +213,8 @@ abstract interface class ConstructorDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any constructor, and want
 /// to augment the function definition.
-abstract interface class ConstructorDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForConstructor(
+abstract interface class ConstructorDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForConstructor(
       Host host, AugmentRequest request);
 }
 
@@ -234,8 +234,8 @@ abstract interface class MixinDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any mixin declaration, and
 /// want to augment the definitions of the members of that mixin.
-abstract interface class MixinDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForMixin(
+abstract interface class MixinDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForMixin(
       Host host, AugmentRequest request);
 }
 
@@ -255,8 +255,8 @@ abstract interface class ExtensionDeclarationsMacro implements Macro {
 
 /// The interface for [Macro]s that can be applied to any extension declaration,
 /// and want to augment the definitions of the members of that extension.
-abstract interface class ExtensionDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForExtension(
+abstract interface class ExtensionDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForExtension(
       Host host, AugmentRequest request);
 }
 
@@ -278,8 +278,8 @@ abstract interface class ExtensionTypeDeclarationsMacro implements Macro {
 /// The interface for [Macro]s that can be applied to any extension type
 /// declaration, and want to augment the definitions of the members of that
 /// extension.
-abstract interface class ExtensionTypeDefinitionMacro implements Macro {
-  FutureOr<AugmentResponse> buildDefinitionForExtensionType(
+abstract interface class ExtensionTypeDefinitionsMacro implements Macro {
+  FutureOr<AugmentResponse> buildDefinitionsForExtensionType(
       Host host, AugmentRequest request);
 }
 

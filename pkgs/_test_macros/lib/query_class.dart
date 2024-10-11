@@ -16,7 +16,7 @@ class QueryClass {
   const QueryClass();
 }
 
-class QueryClassImplementation implements ClassDefinitionMacro {
+class QueryClassImplementation implements ClassDefinitionsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
@@ -25,7 +25,7 @@ class QueryClassImplementation implements ClassDefinitionMacro {
       runsInPhases: [3]);
 
   @override
-  Future<AugmentResponse> buildDefinitionForClass(
+  Future<AugmentResponse> buildDefinitionsForClass(
       Host host, AugmentRequest request) async {
     final model = await host.query(Query(
       target: request.target,

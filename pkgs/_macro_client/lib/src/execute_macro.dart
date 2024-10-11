@@ -76,19 +76,19 @@ Future<AugmentResponse> executeDefinitionMacro(
       queryResult.uris[target.uri]!.scopes[target.name]!.properties;
 
   switch ((properties, macro)) {
-    case (Properties(isClass: true), ClassDefinitionMacro macro):
-      return await macro.buildDefinitionForClass(host, request);
-    case (_, LibraryDefinitionMacro()):
-    case (_, EnumDefinitionMacro()):
-    case (_, ExtensionDefinitionMacro()):
-    case (_, ExtensionTypeDefinitionMacro()):
-    case (_, MixinDefinitionMacro()):
-    case (_, EnumValueDefinitionMacro()):
-    case (_, ConstructorDefinitionMacro()):
-    case (_, MethodDefinitionMacro()):
-    case (_, FieldDefinitionMacro()):
-    case (_, FunctionDefinitionMacro()):
-    case (_, VariableDefinitionMacro()):
+    case (Properties(isClass: true), ClassDefinitionsMacro macro):
+      return await macro.buildDefinitionsForClass(host, request);
+    case (_, LibraryDefinitionsMacro()):
+    case (_, EnumDefinitionsMacro()):
+    case (_, ExtensionDefinitionsMacro()):
+    case (_, ExtensionTypeDefinitionsMacro()):
+    case (_, MixinDefinitionsMacro()):
+    case (_, EnumValueDefinitionsMacro()):
+    case (_, ConstructorDefinitionsMacro()):
+    case (_, MethodDefinitionsMacro()):
+    case (_, FieldDefinitionsMacro()):
+    case (_, FunctionDefinitionsMacro()):
+    case (_, VariableDefinitionsMacro()):
       throw UnimplementedError('Unimplemented macro target');
     default:
       throw UnsupportedError('Unsupported macro type or invalid target:\n'

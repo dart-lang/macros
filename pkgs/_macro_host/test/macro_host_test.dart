@@ -33,7 +33,12 @@ void main() {
             await host.queryMacroPhases(packageConfig, macroAnnotation), {2});
 
         expect(
-            await host.augment(macroAnnotation, AugmentRequest(phase: 2)),
+            await host.augment(
+                macroAnnotation,
+                AugmentRequest(
+                    phase: 2,
+                    target: QualifiedName(
+                        name: 'Foo', uri: 'package:foo/foo.dart'))),
             Scope.macro.run(() => AugmentResponse(augmentations: [
                   Augmentation(code: [Code.string('int get x => 3;')])
                 ])));
@@ -65,7 +70,8 @@ void main() {
             Scope.macro.run(() => AugmentResponse(augmentations: [
                   Augmentation(code: [
                     Code.string(
-                        '// {"uris":{"package:foo/foo.dart":{"scopes":{}}}}')
+                        '// {"uris":{"package:foo/foo.dart":{"scopes":{"Foo":{'
+                        '"members":{},"properties":{"isClass":true}}}}}}')
                   ])
                 ])));
       });
@@ -102,6 +108,9 @@ class TestQueryService implements QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(
-        model: Model()..uris['package:foo/foo.dart'] = Library());
+        model: Model()
+          ..uris[request.query.target.uri] = (Library()
+            ..scopes[request.query.target.name] =
+                Interface(properties: Properties(isClass: true))));
   }
 }
