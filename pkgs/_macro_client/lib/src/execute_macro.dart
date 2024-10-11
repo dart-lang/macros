@@ -8,7 +8,7 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
-/// Runs [macro] in the types phase and returns a  [AugmentResponse].
+/// Runs [macro] in the types phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeTypesMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
@@ -38,7 +38,7 @@ Future<AugmentResponse> executeTypesMacro(
   }
 }
 
-/// Runs [macro] in the declaration phase and returns a  [AugmentResponse].
+/// Runs [macro] in the declarations phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeDeclarationsMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
@@ -69,8 +69,8 @@ Future<AugmentResponse> executeDeclarationsMacro(
   }
 }
 
-/// Runs [macro] in the definition phase and returns a  [AugmentResponse].
-Future<AugmentResponse> executeDefinitionMacro(
+/// Runs [macro] in the definitions phase and returns an [AugmentResponse].
+Future<AugmentResponse> executeDefinitionsMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
   // TODO: https://github.com/dart-lang/macros/issues/100.

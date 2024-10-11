@@ -124,7 +124,7 @@ class MacroClient {
                                 macro, _host, augmentRequest)
                             : null,
                         3 => macro.description.runsInPhases.contains(3)
-                            ? await executeDefinitionMacro(
+                            ? await executeDefinitionsMacro(
                                 macro, _host, augmentRequest)
                             : null,
                         _ => throw StateError(
