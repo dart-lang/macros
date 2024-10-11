@@ -241,6 +241,13 @@ abstract class Definition {
 
   /// The Dart type name of the wire representation of this type.
   String get representationTypeName;
+
+  /// Generates a (potentially multi-line) documentation comment for
+  /// [description].
+  static String docComment(String description) {
+    final lines = const LineSplitter().convert(description);
+    return lines.map((line) => '/// $line').join('\n');
+  }
 }
 
 /// A property in a declaration.
@@ -285,8 +292,13 @@ class Property {
     return "'$name':${type.typedMapSchemaType(context)},";
   }
 
-  String _describe(String code) =>
-      description == null ? code : '/// $description\n$code';
+  String _describe(String code) {
+    if (description case final description?) {
+      return '${Definition.docComment(description)}\n$code';
+    }
+
+    return code;
+  }
 
   String _type({bool nullable = false}) {
     return '${type.dartType}${(nullable || this.nullable) ? '?' : ''}';
@@ -463,7 +475,7 @@ class ClassTypeDefinition implements Definition {
   String generateCode(GenerationContext context) {
     final result = StringBuffer();
 
-    result.writeln('/// $description');
+    result.writeln(Definition.docComment(description));
     result.write('extension type $name.fromJson(Map<String, Object?> node)'
         ' implements Object {');
 
@@ -711,7 +723,7 @@ class EnumTypeDefinition implements Definition {
   String generateCode(GenerationContext context) {
     final result = StringBuffer();
 
-    result.writeln('/// $description');
+    result.writeln(Definition.docComment(description));
     result.write('extension type const $name.fromJson(String string)'
         ' implements Object {');
     for (final value in values) {
@@ -743,7 +755,7 @@ class StringTypedefDefinition implements Definition {
 
   @override
   String generateCode(GenerationContext context) {
-    return '/// $description\n'
+    return '${Definition.docComment(description)}\n'
         'extension type $name.fromJson(String string) implements Object {'
         '$name(String string) : this.fromJson(string);'
         '}';
@@ -772,7 +784,7 @@ class NullTypedefDefinition implements Definition {
 
   @override
   String generateCode(GenerationContext context) {
-    return '/// $description\n'
+    return '${Definition.docComment(description)}\n'
         'extension type $name.fromJson(Null _) {'
         '$name() : this.fromJson(null);'
         '}';

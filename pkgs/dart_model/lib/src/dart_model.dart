@@ -97,5 +97,18 @@ extension ModelExtension on Model {
   }
 }
 
+extension QueryExtension on Query {
+  /// Recursively replaces [BatchQuery] queries with their inner queries.
+  Iterable<Query> expandBatches() sync* {
+    if (type == QueryType.batchQuery) {
+      for (final entry in asBatchQuery.queries) {
+        yield* entry.expandBatches();
+      }
+    } else {
+      yield this;
+    }
+  }
+}
+
 /// Expando storing a `Map` from values to parent `Map`s.
 final _parentsMaps = Expando<Map<Map<String, Object?>, Map<String, Object?>>>();

@@ -421,15 +421,103 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
   String get name => node['name'] as String;
 }
 
-/// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
+enum QueryType {
+  // Private so switches must have a default. See `isKnown`.
+  _unknown,
+  queryCode,
+  batchQuery,
+  queryStaticType;
+
+  bool get isKnown => this != _unknown;
+}
+
 extension type Query.fromJson(Map<String, Object?> node) implements Object {
-  Query({
+  static Query queryCode(QueryCode queryCode) => Query.fromJson({
+        'type': 'QueryCode',
+        'value': queryCode,
+      });
+  static Query batchQuery(BatchQuery batchQuery) => Query.fromJson({
+        'type': 'BatchQuery',
+        'value': batchQuery,
+      });
+  static Query queryStaticType(QueryStaticType queryStaticType) =>
+      Query.fromJson({
+        'type': 'QueryStaticType',
+        'value': queryStaticType,
+      });
+  QueryType get type {
+    switch (node['type'] as String) {
+      case 'QueryCode':
+        return QueryType.queryCode;
+      case 'BatchQuery':
+        return QueryType.batchQuery;
+      case 'QueryStaticType':
+        return QueryType.queryStaticType;
+      default:
+        return QueryType._unknown;
+    }
+  }
+
+  QueryCode get asQueryCode {
+    if (node['type'] != 'QueryCode') {
+      throw StateError('Not a QueryCode.');
+    }
+    return QueryCode.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  BatchQuery get asBatchQuery {
+    if (node['type'] != 'BatchQuery') {
+      throw StateError('Not a BatchQuery.');
+    }
+    return BatchQuery.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  QueryStaticType get asQueryStaticType {
+    if (node['type'] != 'QueryStaticType') {
+      throw StateError('Not a QueryStaticType.');
+    }
+    return QueryStaticType.fromJson(node['value'] as Map<String, Object?>);
+  }
+}
+
+/// Query about a Dart element identified by the [target] name.
+/// The returned model will contain the element itself, and, if it introduces a type, its position in the type hierarchy.
+extension type QueryCode.fromJson(Map<String, Object?> node) implements Object {
+  QueryCode({
     QualifiedName? target,
   }) : this.fromJson({
           if (target != null) 'target': target,
         });
 
   /// The class to query about.
+  QualifiedName get target => node['target'] as QualifiedName;
+}
+
+/// Include multiple other queries in a [Query] to query multiple aspects of a corpus of Dart source code at once.
+extension type BatchQuery.fromJson(Map<String, Object?> node)
+    implements Object {
+  BatchQuery({
+    List<Query>? queries,
+  }) : this.fromJson({
+          if (queries != null) 'queries': queries,
+        });
+
+  /// The inner queries.
+  List<Query> get queries => (node['queries'] as List).cast();
+}
+
+/// Queries the position a type-defining [target] has in the type hierarchy.
+///
+/// The returned model will contain [Model.types] for the queried class, as well as all superclasses. Unlike with [QueryCode] however, no information is included about the structure of resolved classes.
+extension type QueryStaticType.fromJson(Map<String, Object?> node)
+    implements Object {
+  QueryStaticType({
+    QualifiedName? target,
+  }) : this.fromJson({
+          if (target != null) 'target': target,
+        });
+
+  /// The class for which type information is queried.
   QualifiedName get target => node['target'] as QualifiedName;
 }
 

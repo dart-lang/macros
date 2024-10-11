@@ -94,13 +94,42 @@ void main() {
                       QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo')));
         }
       });
+
+      test('validates queries against the current phase', () async {
+        final macroAnnotation = QualifiedName(
+            uri: 'package:_test_macros/misbehaving_macro.dart',
+            name: 'AttemptToIssueTypeQueryInPhase1');
+
+        final queryService = TestQueryService();
+        final host = await MacroHost.serve(
+            protocol: protocol,
+            packageConfig: Isolate.packageConfigSync!,
+            queryService: queryService);
+
+        final packageConfig = Isolate.packageConfigSync!;
+
+        expect(host.isMacro(macroAnnotation), true);
+        expect(
+            await host.queryMacroPhases(packageConfig, macroAnnotation), {1});
+
+        expect(
+            await host.augment(
+                macroAnnotation,
+                AugmentRequest(
+                    phase: 1,
+                    target: QualifiedName(
+                        uri: 'package:foo/foo.dart', name: 'Foo'))),
+            Scope.macro.run(() => AugmentResponse(augmentations: [
+                  Augmentation(code: [Code.string('// Could not query')])
+                ])));
+      });
     });
   }
 }
 
 class TestQueryService implements QueryService {
   @override
-  Future<QueryResponse> handle(QueryRequest request) async {
+  Future<QueryResponse> handle(List<Query> request) async {
     return QueryResponse(
         model: Model()..uris['package:foo/foo.dart'] = Library());
   }

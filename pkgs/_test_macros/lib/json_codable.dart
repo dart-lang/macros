@@ -47,7 +47,7 @@ class JsonCodableImplementation implements Macro {
 
   Future<AugmentResponse> phase3(Host host, AugmentRequest request) async {
     final target = request.target;
-    final model = await host.query(Query(target: target));
+    final model = await host.query(Query.queryCode(QueryCode(target: target)));
     final clazz = model.uris[target.uri]!.scopes[target.name]!;
 
     // TODO(davidmorgan): put `extends` information directly in `Interface`.
