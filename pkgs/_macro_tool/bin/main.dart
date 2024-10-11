@@ -14,7 +14,9 @@ final argParser = ArgParser()
   ..addOption('workspace', help: 'Path to workspace.')
   ..addOption('packageConfig', help: 'Path to package config.')
   ..addOption('script', help: 'Path to script.')
-  ..addFlag('skip-cleanup');
+  ..addFlag('skip-cleanup',
+      help: 'Whether to skip delete of augmentations and revert of script.')
+  ..addFlag('watch', help: 'Whether to watch for changes.');
 
 Future<void> main(List<String> arguments) async {
   final args = argParser.parse(arguments);
@@ -40,6 +42,7 @@ ${argParser.usage}''');
       workspacePath: p.canonicalize(workspace),
       packageConfigPath: p.canonicalize(packageConfig),
       scriptPath: p.canonicalize(script),
-      skipCleanup: args['skip-cleanup'] as bool);
+      skipCleanup: args['skip-cleanup'] as bool,
+      watch: args['watch'] as bool);
   await tool.run();
 }
