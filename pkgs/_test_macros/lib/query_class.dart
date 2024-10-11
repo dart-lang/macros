@@ -16,7 +16,7 @@ class QueryClass {
   const QueryClass();
 }
 
-class QueryClassImplementation implements Macro {
+class QueryClassImplementation implements ClassDefinitionsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
@@ -25,11 +25,8 @@ class QueryClassImplementation implements Macro {
       runsInPhases: [3]);
 
   @override
-  Future<AugmentResponse> augment(Host host, AugmentRequest request) async {
-    // TODO(davidmorgan): make the host only run in the phases requested so
-    // that this is not needed.
-    if (request.phase != 3) return AugmentResponse(augmentations: []);
-
+  Future<AugmentResponse> buildDefinitionsForClass(
+      Host host, AugmentRequest request) async {
     final model = await host.query(Query(
       target: request.target,
     ));

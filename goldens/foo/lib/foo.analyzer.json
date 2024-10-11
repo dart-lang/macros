@@ -197,6 +197,9 @@
               ],
               "namedParameters": []
             }
+          },
+          "properties": {
+            "isClass": true
           }
         },
         "Bar": {
@@ -234,6 +237,9 @@
                 }
               }
             }
+          },
+          "properties": {
+            "isClass": true
           }
         }
       }
