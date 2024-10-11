@@ -456,9 +456,21 @@ class ClassTypeDefinition implements Definition {
         }
       };
 
+  // `Map` fields are handled differently, see `generateCode` comment.
   List<Property> get propertiesExceptMap =>
       properties.where((p) => !p.type.isMap).toList();
 
+  /// Generates a "class".
+  ///
+  /// It's an extension type over `Map<String, Object?>`, which is the
+  /// JSON representation. The extension type constructor is called `fromJson`.
+  ///
+  /// An unnamed constructor is generated that accepts optional named
+  /// parameters for most fields.
+  ///
+  /// `Map` fields are handled differently: they are instantiated as empty
+  /// mutable maps that must be populated afterwards. This is to prevent the
+  /// creation of temporary maps that would have to be copied.
   @override
   String generateCode(GenerationContext context) {
     final result = StringBuffer();
@@ -481,7 +493,6 @@ class ClassTypeDefinition implements Definition {
       result.writeln('  $name() : ');
     } else {
       result.writeln('  $name({');
-      // TODO: Why are we excluding Map properties?
       for (final property in propertiesExceptMap) {
         result.writeln(property.parameterCode);
       }
