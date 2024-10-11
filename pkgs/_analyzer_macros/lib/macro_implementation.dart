@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:_macro_host/macro_host.dart';
+import 'package:analyzer/dart/element/element.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/summary2/macro_declarations.dart' as analyzer;
 // ignore: implementation_imports
@@ -187,9 +188,29 @@ extension MacroTargetExtension on macros_api_v1.MacroTarget {
     final element = ((this as macros_api_v1.Declaration).identifier
             as analyzer.IdentifierImpl)
         .element!;
+    return element.qualifiedName;
+  }
+}
+
+extension QualifiedNameForElement on Element {
+  QualifiedName get qualifiedName {
+    final uri = '${library!.definingCompilationUnit.source.uri}';
+    final enclosingElement = enclosingElement3;
+    if (enclosingElement == null) {
+      throw UnsupportedError('Library macro targets are not yet supported');
+    }
+    final scope = enclosingElement is LibraryElement
+        ? null
+        : enclosingElement.displayName;
+    final isStatic = scope == null
+        ? null
+        : switch (this) {
+            ClassMemberElement self => self.isStatic,
+            _ => throw UnimplementedError(
+                'Cannot create a QualifiedName for $runtimeType'),
+          };
     return QualifiedName(
-        uri: '${element.library!.definingCompilationUnit.source.uri}',
-        name: element.displayName);
+        uri: uri, name: displayName, scope: scope, isStatic: isStatic);
   }
 }
 
