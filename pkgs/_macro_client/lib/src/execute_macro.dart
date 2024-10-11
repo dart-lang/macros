@@ -12,6 +12,7 @@ import 'package:macro_service/macro_service.dart';
 Future<AugmentResponse> executeTypesMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
+  // TODO: https://github.com/dart-lang/macros/issues/100.
   final queryResult = await host.query(Query(target: target));
   final properties =
       queryResult.uris[target.uri]!.scopes[target.name]!.properties;
@@ -41,6 +42,7 @@ Future<AugmentResponse> executeTypesMacro(
 Future<AugmentResponse> executeDeclarationsMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
+  // TODO: https://github.com/dart-lang/macros/issues/100.
   final queryResult = await host.query(Query(target: target));
   final properties =
       queryResult.uris[target.uri]!.scopes[target.name]!.properties;
@@ -71,6 +73,7 @@ Future<AugmentResponse> executeDeclarationsMacro(
 Future<AugmentResponse> executeDefinitionMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
+  // TODO: https://github.com/dart-lang/macros/issues/100.
   final queryResult = await host.query(Query(target: target));
   final properties =
       queryResult.uris[target.uri]!.scopes[target.name]!.properties;
