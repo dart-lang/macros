@@ -8,6 +8,8 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/type_visitor.dart';
 import 'package:dart_model/dart_model.dart' as model;
 
+import '../macro_implementation.dart';
+
 final class TypeTranslationContext {
   final Map<TypeParameterElement, int> _typeParameterIds = {};
 
@@ -78,8 +80,7 @@ final class AnalyzerTypesToMacros extends UnifyingTypeVisitorWithArgument<
       InterfaceType type, TypeTranslationContext argument) {
     final element = type.element;
     return model.StaticTypeDesc.namedTypeDesc(model.NamedTypeDesc(
-      name: model.QualifiedName(
-          uri: '${element.librarySource.uri}', name: element.name),
+      name: element.qualifiedName,
       instantiation: [
         for (final arg in type.typeArguments)
           arg.acceptWithArgument(this, argument),

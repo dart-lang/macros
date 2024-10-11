@@ -390,35 +390,70 @@ extension type Properties.fromJson(Map<String, Object?> node)
   bool get isStatic => node['isStatic'] as bool;
 }
 
-/// A URI combined with a name.
+/// A URI combined with a name and scope referring to a declaration. The name and scope are looked up in the export scope of the URI.
 extension type QualifiedName.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'uri': Type.stringPointer,
+    'scope': Type.stringPointer,
     'name': Type.stringPointer,
+    'isStatic': Type.boolean,
   });
   QualifiedName({
     String? uri,
+    String? scope,
     String? name,
+    bool? isStatic,
   }) : this.fromJson(Scope.createMap(
           _schema,
           uri,
+          scope,
           name,
+          isStatic,
         ));
 
-  /// Parses [string] of the form `uri#name`.
+  /// Parses [string] of the form `uri#[scope.|scope::]name`.
+  ///
+  /// No scope indicates a top level declaration in the library.
+  ///
+  /// If the scope and name are separated with a `.` that indicates the
+  /// instance scope, and a `::` indicates the static scope.
   static QualifiedName parse(String string) {
     final index = string.indexOf('#');
     if (index == -1) throw ArgumentError('Expected `#` in string: $string');
+    final nameAndScope = string.substring(index + 1);
+    late final String name;
+    late final String? scope;
+    late final bool? isStatic;
+    if (nameAndScope.contains('::')) {
+      [scope, name] = nameAndScope.split('::');
+      isStatic = true;
+    } else if (nameAndScope.contains('.')) {
+      [scope, name] = nameAndScope.split('.');
+      isStatic = false;
+    } else {
+      name = nameAndScope;
+      scope = null;
+      isStatic = null;
+    }
     return QualifiedName(
-        uri: string.substring(0, index), name: string.substring(index + 1));
+        uri: string.substring(0, index),
+        name: name,
+        scope: scope,
+        isStatic: isStatic);
   }
 
   /// The URI of the file containing the name.
   String get uri => node['uri'] as String;
 
-  /// The name.
+  /// The optional scope to look up the name in.
+  String? get scope => node['scope'] as String?;
+
+  /// The name of the declaration to look up.
   String get name => node['name'] as String;
+
+  /// Whether the name refers to something in the static scope as opposed to the instance scope of `scope`. Will be `null` if `scope` is `null`.
+  bool? get isStatic => node['isStatic'] as bool?;
 }
 
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.

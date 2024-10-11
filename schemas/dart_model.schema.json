@@ -276,15 +276,23 @@
     },
     "QualifiedName": {
       "type": "object",
-      "description": "A URI combined with a name.",
+      "description": "A URI combined with a name and scope referring to a declaration. The name and scope are looked up in the export scope of the URI.",
       "properties": {
         "uri": {
           "type": "string",
           "description": "The URI of the file containing the name."
         },
+        "scope": {
+          "type": "string",
+          "description": "The optional scope to look up the name in."
+        },
         "name": {
           "type": "string",
-          "description": "The name."
+          "description": "The name of the declaration to look up."
+        },
+        "isStatic": {
+          "type": "boolean",
+          "description": "Whether the name refers to something in the static scope as opposed to the instance scope of `scope`. Will be `null` if `scope` is `null`."
         }
       }
     },

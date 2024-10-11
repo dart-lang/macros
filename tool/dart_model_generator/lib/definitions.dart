@@ -237,21 +237,59 @@ static Protocol handshakeProtocol = Protocol(
                   type: 'bool', description: 'Whether the entity is static.'),
             ]),
         Definition.clazz('QualifiedName',
-            description: 'A URI combined with a name.',
+            description: 'A URI combined with a name and scope referring to a '
+                'declaration. The name and scope are looked up in the export '
+                'scope of the URI.',
             createInBuffer: true,
             properties: [
               Property('uri',
                   type: 'String',
                   description: 'The URI of the file containing the name.'),
-              Property('name', type: 'String', description: 'The name.'),
+              Property('scope',
+                  type: 'String',
+                  description: 'The optional scope to look up the name in.',
+                  nullable: true),
+              Property('name',
+                  type: 'String',
+                  description: 'The name of the declaration to look up.'),
+              Property('isStatic',
+                  type: 'bool',
+                  description:
+                      'Whether the name refers to something in the static '
+                      'scope as opposed to the instance scope of `scope`. '
+                      'Will be `null` if `scope` is `null`.',
+                  nullable: true)
             ],
             extraCode: r'''
-/// Parses [string] of the form `uri#name`.
+/// Parses [string] of the form `uri#[scope.|scope::]name`.
+///
+/// No scope indicates a top level declaration in the library.
+///
+/// If the scope and name are separated with a `.` that indicates the
+/// instance scope, and a `::` indicates the static scope.
 static QualifiedName parse(String string) {
   final index = string.indexOf('#');
   if (index == -1) throw ArgumentError('Expected `#` in string: $string');
+  final nameAndScope = string.substring(index + 1);
+  late final String name;
+  late final String? scope;
+  late final bool? isStatic;
+  if (nameAndScope.contains('::')) {
+    [scope, name] = nameAndScope.split('::');
+    isStatic = true;
+  } else if (nameAndScope.contains('.')) {
+    [scope, name] = nameAndScope.split('.');
+    isStatic = false;
+  } else {
+    name = nameAndScope;
+    scope = null;
+    isStatic = null;
+  }
   return QualifiedName(
-    uri: string.substring(0, index), name: string.substring(index + 1));
+      uri: string.substring(0, index),
+      name: name,
+      scope: scope,
+      isStatic: isStatic);
 }
 '''),
         Definition.clazz('Query',

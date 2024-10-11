@@ -8,9 +8,14 @@ import 'json_buffer/json_buffer_builder.dart';
 export 'dart_model.g.dart';
 
 extension QualifiedNameExtension on QualifiedName {
-  String get asString => '$uri#$name';
+  String get asString =>
+      '$uri#${scope == null ? '' : '$scope${isStatic! ? '::' : '.'}'}$name';
 
-  bool equals(QualifiedName other) => other.uri == uri && other.name == name;
+  bool equals(QualifiedName other) =>
+      other.uri == uri &&
+      other.name == name &&
+      other.scope == scope &&
+      other.isStatic == isStatic;
 }
 
 extension ModelExtension on Model {
