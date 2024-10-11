@@ -17,7 +17,8 @@ class CfeMacroTool extends MacroTool {
       {required super.workspacePath,
       required super.packageConfigPath,
       required super.scriptPath,
-      required super.skipCleanup})
+      required super.skipCleanup,
+      required super.watch})
       : super.internal();
 
   /// Runs macros in [scriptFile] using the CFE.
@@ -27,6 +28,8 @@ class CfeMacroTool extends MacroTool {
   /// Returns whether an augmentation file was written.
   @override
   Future<bool> augment() async {
+    if (watch) throw UnimplementedError('--watch not implemented for CFE.');
+
     // TODO(davidmorgan): this dill comes from the Dart SDK running the test,
     // but `package:frontend_server` and `package:front_end` are used as a
     // library, so we will see version skew breakage. Find a better way.

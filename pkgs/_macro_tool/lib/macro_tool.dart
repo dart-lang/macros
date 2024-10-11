@@ -15,30 +15,35 @@ abstract class MacroTool {
   String packageConfigPath;
   String scriptPath;
   bool skipCleanup;
+  bool watch;
 
   MacroTool.internal(
       {required this.workspacePath,
       required this.packageConfigPath,
       required this.scriptPath,
-      required this.skipCleanup});
+      required this.skipCleanup,
+      required this.watch});
 
   factory MacroTool(
           {required HostOption host,
           required String workspacePath,
           required String packageConfigPath,
           required String scriptPath,
-          required bool skipCleanup}) =>
+          required bool skipCleanup,
+          required bool watch}) =>
       host == HostOption.analyzer
           ? AnalyzerMacroTool(
               workspacePath: workspacePath,
               packageConfigPath: packageConfigPath,
               scriptPath: scriptPath,
-              skipCleanup: skipCleanup)
+              skipCleanup: skipCleanup,
+              watch: watch)
           : CfeMacroTool(
               workspacePath: workspacePath,
               packageConfigPath: packageConfigPath,
               scriptPath: scriptPath,
-              skipCleanup: skipCleanup);
+              skipCleanup: skipCleanup,
+              watch: watch);
 
   Future<void> run() async {
     print('Running ${p.basename(scriptPath)} with macros on $this.');
