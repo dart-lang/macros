@@ -199,7 +199,8 @@ extension QualifiedNameForElement on Element {
     if (enclosingElement == null) {
       throw UnsupportedError('Library macro targets are not yet supported');
     }
-    final scope = enclosingElement is LibraryElement
+    final scope = (enclosingElement is LibraryElement ||
+            enclosingElement is CompilationUnitElement)
         ? null
         : enclosingElement.displayName;
     final isStatic = scope == null
