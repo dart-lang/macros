@@ -109,15 +109,26 @@ static Protocol handshakeProtocol = Protocol(
                   type: 'QualifiedName',
                   description: 'The type of the annotation.'),
             ]),
+        Definition.clazz('Declaration',
+            description: 'Base type for all declarations',
+            createInBuffer: true,
+            properties: [
+              Property('metadataAnnotations',
+                  type: 'List<MetadataAnnotation>',
+                  description:
+                      'The metadata annotations attached to this declaration.'),
+              Property('properties',
+                  type: 'Properties',
+                  description: 'The properties of this declaration.'),
+            ]),
         Definition.clazz(
           'Interface',
           description: 'An interface.',
           createInBuffer: true,
+          implements: [
+            'Declaration',
+          ],
           properties: [
-            Property('metadataAnnotations',
-                type: 'List<MetadataAnnotation>',
-                description:
-                    'The metadata annotations attached to this interface.'),
             Property('members',
                 type: 'Map<Member>', description: 'Map of members by name.'),
             Property('thisType',
@@ -125,9 +136,6 @@ static Protocol handshakeProtocol = Protocol(
                 description:
                     'The type of the expression `this` when used in this '
                     'interface.'),
-            Property('properties',
-                type: 'Properties',
-                description: 'The properties of this interface.'),
           ],
         ),
         Definition.clazz('Library',
@@ -141,10 +149,10 @@ static Protocol handshakeProtocol = Protocol(
         Definition.clazz('Member',
             description: 'Member of a scope.',
             createInBuffer: true,
+            implements: [
+              'Declaration',
+            ],
             properties: [
-              Property('properties',
-                  type: 'Properties',
-                  description: 'The properties of this member.'),
               Property(
                 'returnType',
                 type: 'StaticTypeDesc',

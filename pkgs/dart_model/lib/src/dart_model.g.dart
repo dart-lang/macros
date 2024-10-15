@@ -137,29 +137,50 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
   QualifiedName get type => node['type'] as QualifiedName;
 }
 
-/// An interface.
-extension type Interface.fromJson(Map<String, Object?> node) implements Object {
+/// Base type for all declarations
+extension type Declaration.fromJson(Map<String, Object?> node)
+    implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'metadataAnnotations': Type.closedListPointer,
-    'members': Type.growableMapPointer,
-    'thisType': Type.typedMapPointer,
     'properties': Type.typedMapPointer,
   });
-  Interface({
+  Declaration({
     List<MetadataAnnotation>? metadataAnnotations,
-    NamedTypeDesc? thisType,
     Properties? properties,
   }) : this.fromJson(Scope.createMap(
           _schema,
           metadataAnnotations,
-          Scope.createGrowableMap(),
-          thisType,
           properties,
         ));
 
-  /// The metadata annotations attached to this interface.
+  /// The metadata annotations attached to this declaration.
   List<MetadataAnnotation> get metadataAnnotations =>
       (node['metadataAnnotations'] as List).cast();
+
+  /// The properties of this declaration.
+  Properties get properties => node['properties'] as Properties;
+}
+
+/// An interface.
+extension type Interface.fromJson(Map<String, Object?> node)
+    implements Declaration {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'members': Type.growableMapPointer,
+    'thisType': Type.typedMapPointer,
+    'metadataAnnotations': Type.closedListPointer,
+    'properties': Type.typedMapPointer,
+  });
+  Interface({
+    NamedTypeDesc? thisType,
+    List<MetadataAnnotation>? metadataAnnotations,
+    Properties? properties,
+  }) : this.fromJson(Scope.createMap(
+          _schema,
+          Scope.createGrowableMap(),
+          thisType,
+          metadataAnnotations,
+          properties,
+        ));
 
   /// Map of members by name.
   Map<String, Member> get members =>
@@ -167,9 +188,6 @@ extension type Interface.fromJson(Map<String, Object?> node) implements Object {
 
   /// The type of the expression `this` when used in this interface.
   NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
-
-  /// The properties of this interface.
-  Properties get properties => node['properties'] as Properties;
 }
 
 /// Library.
@@ -189,31 +207,32 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
 }
 
 /// Member of a scope.
-extension type Member.fromJson(Map<String, Object?> node) implements Object {
+extension type Member.fromJson(Map<String, Object?> node)
+    implements Declaration {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'properties': Type.typedMapPointer,
     'returnType': Type.typedMapPointer,
     'requiredPositionalParameters': Type.closedListPointer,
     'optionalPositionalParameters': Type.closedListPointer,
     'namedParameters': Type.closedListPointer,
+    'metadataAnnotations': Type.closedListPointer,
+    'properties': Type.typedMapPointer,
   });
   Member({
-    Properties? properties,
     StaticTypeDesc? returnType,
     List<StaticTypeDesc>? requiredPositionalParameters,
     List<StaticTypeDesc>? optionalPositionalParameters,
     List<NamedFunctionTypeParameter>? namedParameters,
+    List<MetadataAnnotation>? metadataAnnotations,
+    Properties? properties,
   }) : this.fromJson(Scope.createMap(
           _schema,
-          properties,
           returnType,
           requiredPositionalParameters,
           optionalPositionalParameters,
           namedParameters,
+          metadataAnnotations,
+          properties,
         ));
-
-  /// The properties of this member.
-  Properties get properties => node['properties'] as Properties;
 
   /// The return type of this member, if it has one.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
