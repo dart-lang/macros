@@ -23,6 +23,9 @@ class MacroHost {
   final MacroBuilder macroBuilder = MacroBuilder();
   final MacroRunner macroRunner = MacroRunner();
 
+  /// We only want to expose the public interface and not the private impl.
+  HostService get hostService => _hostService;
+
   MacroHost._(this.macroPackageConfig, this.macroServer, this._hostService);
 
   /// Starts a macro host with introspection queries handled by [queryService].

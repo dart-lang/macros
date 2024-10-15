@@ -14,11 +14,13 @@ import 'package:dart_model/src/scopes.dart';
 extension type AugmentRequest.fromJson(Map<String, Object?> node)
     implements Object {
   AugmentRequest({
-    int? phase,
-    QualifiedName? target,
+    required int phase,
+    required QualifiedName target,
+    required Model model,
   }) : this.fromJson({
-          if (phase != null) 'phase': phase,
-          if (target != null) 'target': target,
+          'phase': phase,
+          'target': target,
+          'model': model,
         });
 
   /// Which phase to run: 1, 2 or 3.
@@ -26,6 +28,9 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
 
   /// The class to augment. TODO(davidmorgan): expand to more types of target.
   QualifiedName get target => node['target'] as QualifiedName;
+
+  /// A pre-computed query result for the target.
+  Model get model => node['model'] as Model;
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.

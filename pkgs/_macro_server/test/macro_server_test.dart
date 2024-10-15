@@ -13,6 +13,11 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final fooTarget = QualifiedName(name: 'Foo', uri: 'package:foo/foo.dart');
+  final fooModel = Scope.query.run(() => Model()
+    ..uris[fooTarget.uri] = (Library()
+      ..scopes['Foo'] = Interface(properties: Properties(isClass: true))));
+
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
     Protocol(
@@ -37,7 +42,8 @@ void main() {
         final server =
             await MacroServer.serve(protocol: protocol, service: service);
         expect(
-            server.sendToMacro(HostRequest.augmentRequest(AugmentRequest(),
+            server.sendToMacro(HostRequest.augmentRequest(
+                AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
                 id: 1,
                 macroAnnotation: QualifiedName(
                     uri: 'package:_test_macros/test_macros.dart',
@@ -58,7 +64,7 @@ void main() {
           macroAnnotation: QualifiedName(
               uri: 'package:_test_macros/declare_x_macro.dart',
               name: 'DeclareX'),
-          AugmentRequest(phase: 1),
+          AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
         ));
       });
 
@@ -80,14 +86,14 @@ void main() {
             macroAnnotation: QualifiedName(
                 uri: 'package:_test_macros/declare_x_macro.dart',
                 name: 'DeclareX'),
-            AugmentRequest(phase: 1),
+            AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
           )),
           server.sendToMacro(HostRequest.augmentRequest(
               id: 2,
               macroAnnotation: QualifiedName(
                   uri: 'package:_test_macros/query_class.dart',
                   name: 'QueryClass'),
-              AugmentRequest(phase: 1)))
+              AugmentRequest(phase: 1, target: fooTarget, model: fooModel)))
         ]);
       });
 
@@ -108,14 +114,14 @@ void main() {
             macroAnnotation: QualifiedName(
                 uri: 'package:_test_macros/declare_x_macro.dart',
                 name: 'DeclareX'),
-            AugmentRequest(phase: 1),
+            AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
           )),
           server.sendToMacro(HostRequest.augmentRequest(
             id: 2,
             macroAnnotation: QualifiedName(
                 uri: 'package:_test_macros/query_class.dart',
                 name: 'QueryClass'),
-            AugmentRequest(phase: 1),
+            AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
           ))
         ]);
       });
