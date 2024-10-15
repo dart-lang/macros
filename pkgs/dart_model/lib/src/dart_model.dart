@@ -25,23 +25,26 @@ extension ModelExtension on Model {
   QualifiedName? qualifiedNameOf(Map<String, Object?> node) =>
       _qualifiedNameOf(node);
 
-  /// Returns the [QualifiedName] in the model to [node], or `null` if [node] is not in this [Model].
+  /// Returns the [QualifiedName] in the model to [node], or `null` if [node]
+  /// is not in this [Model].
   QualifiedName? _qualifiedNameOf(Map<String, Object?> node) {
-    final members = _getParent(node);
-    if (members == null) return null;
-    final interface = _getParent(members);
-    if (interface == null) return null;
-    final scopes = _getParent(interface);
-    if (scopes == null) return null;
-    final library = _getParent(scopes);
-    if (library == null) return null;
-    final libraries = _getParent(library);
-    if (libraries == null) return null;
+    var parent = _getParent(node);
+    if (parent == null) return null;
+    final path = <String>[];
+    path.add(_keyOf(node, parent));
+    var previousParent = parent;
+    while ((parent = _getParent(previousParent)) != this.node) {
+      if (parent == null) return null;
+      path.insert(0, _keyOf(previousParent, parent));
+      previousParent = parent;
+    }
 
-    final uri = _keyOf(library, libraries);
-    final name = _keyOf(interface, scopes);
-
-    return QualifiedName(uri: uri, name: name);
+    if (path case [String uri, 'scopes', String name]) {
+      return QualifiedName(uri: uri, name: name);
+    }
+    throw UnsupportedError(
+        'Unsupported node type for `qualifiedNameOf`, only top level members '
+        'are supported for now. $path');
   }
 
   /// Returns the key of [value] in [map].

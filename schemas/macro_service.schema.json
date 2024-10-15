@@ -23,6 +23,10 @@
         "target": {
           "$comment": "The class to augment. TODO(davidmorgan): expand to more types of target.",
           "$ref": "file:dart_model.schema.json#/$defs/QualifiedName"
+        },
+        "model": {
+          "$comment": "A pre-computed query result for the target.",
+          "$ref": "file:dart_model.schema.json#/$defs/Model"
         }
       }
     },

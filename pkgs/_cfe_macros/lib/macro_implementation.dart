@@ -81,6 +81,16 @@ class CfeRunningMacro implements injected.RunningMacro {
     return CfeRunningMacro._(impl, name, implementation);
   }
 
+  /// Queries for [target] and returns the [Model] representing the result.
+  ///
+  /// TODO: Make this a more limited query which doesn't fetch members.
+  Future<Model> _queryTarget(QualifiedName target) async =>
+      (await _impl._host.hostService.handle(MacroRequest.queryRequest(
+              QueryRequest(query: Query(target: target)),
+              id: nextRequestId)))
+          .asQueryResponse
+          .model;
+
   @override
   Future<CfeMacroExecutionResult> executeDeclarationsPhase(
       macros_api_v1.MacroTarget target,
@@ -91,7 +101,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 2,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -104,7 +118,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 3,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -116,7 +134,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 1,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 }
 
