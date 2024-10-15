@@ -14,18 +14,16 @@ extension QualifiedNameExtension on QualifiedName {
 }
 
 extension ModelExtension on Model {
-  /// Returns the path in the model to [member], or `null` if [member] is not
-  /// in this [Model].
+  /// Returns the path in the model to [node], or `null` if
+  /// [node] is not in this [Model].
   ///
   /// Comparison is by identity, not by value, so the exact instance must be in
   /// this [Model].
   ///
-  /// TODO(davidmorgan): this works for any node, but it's not clear yet which
-  /// types of node we want this functionality exposed for.
-  /// TODO(davidmorgan): a list of path segments is probably more useful than
-  /// `String`.
-  QualifiedName? qualifiedNameOfMember(Member member) =>
-      _qualifiedNameOf(member.node);
+  /// TODO: Should we create a base type called `Declaration` which is
+  /// implemented by the types which are valid to pass here?
+  QualifiedName? qualifiedNameOf(Map<String, Object?> node) =>
+      _qualifiedNameOf(node);
 
   /// Returns the [QualifiedName] in the model to [node], or `null` if [node] is not in this [Model].
   QualifiedName? _qualifiedNameOf(Map<String, Object?> node) {

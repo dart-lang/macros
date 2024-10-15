@@ -111,7 +111,7 @@ void main() {
     test('can give the path to Members in buffer backed maps', () {
       final member = model.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(model.qualifiedNameOfMember(member)!.asString,
+      expect(model.qualifiedNameOf(member.node)!.asString,
           'package:dart_model/dart_model.dart#JsonData');
     });
 
@@ -119,7 +119,7 @@ void main() {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(copiedModel.qualifiedNameOfMember(member)!.asString,
+      expect(copiedModel.qualifiedNameOf(member.node)!.asString,
           'package:dart_model/dart_model.dart#JsonData');
     });
 
@@ -129,7 +129,7 @@ void main() {
       (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
     });
 
     test('path to Members throws on reused node', () {
@@ -139,7 +139,7 @@ void main() {
           copiedModel.uris['package:dart_model/dart_model.dart']!;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
     });
 
     test('path to Member returns null for Member in wrong Map', () {
@@ -151,8 +151,8 @@ void main() {
           .scopes['JsonData']!
           .members['_root']!
           .node));
-      expect(copiedModel.qualifiedNameOfMember(member), null);
-      expect(model.qualifiedNameOfMember(copiedMember), null);
+      expect(copiedModel.qualifiedNameOf(member.node), null);
+      expect(model.qualifiedNameOf(copiedMember.node), null);
     });
   });
 
