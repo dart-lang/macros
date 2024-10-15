@@ -108,10 +108,26 @@ void main() {
               'JsonData']!['members']);
     });
 
+    test('can give the path to Interfaces in buffer backed maps', () {
+      final interface =
+          model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
+      expect(model.qualifiedNameOf(interface.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData');
+    });
+
     test('can give the path to Members in buffer backed maps', () {
       final member = model.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(model.qualifiedNameOf(member.node)!.asString,
+      expect(() => model.qualifiedNameOf(member.node)!.asString,
+          throwsUnsupportedError,
+          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
+    });
+
+    test('can give the path to Interfaces in SDK maps', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      final interface = copiedModel
+          .uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
+      expect(copiedModel.qualifiedNameOf(interface.node)!.asString,
           'package:dart_model/dart_model.dart#JsonData');
     });
 
@@ -119,8 +135,9 @@ void main() {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(copiedModel.qualifiedNameOf(member.node)!.asString,
-          'package:dart_model/dart_model.dart#JsonData');
+      expect(() => copiedModel.qualifiedNameOf(member.node)!.asString,
+          throwsUnsupportedError,
+          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
     });
 
     test('path to Members throws on cycle', () {

@@ -39,7 +39,7 @@ extension ModelExtension on Model {
       previousParent = parent;
     }
 
-    if (path case [String uri, 'scopes', String name]) {
+    if (path case [final uri, 'scopes', final name]) {
       return QualifiedName(uri: uri, name: name);
     }
     throw UnsupportedError(
