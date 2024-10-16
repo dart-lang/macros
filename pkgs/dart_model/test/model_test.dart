@@ -123,6 +123,28 @@ void main() {
           'package:dart_model/dart_model.dart#JsonData');
     });
 
+    test('can give the path to Members in merged maps', () {
+      Scope.macro.run(() {
+        final rootMember = model.uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!.members['_root']!;
+
+        final fooMember = Member();
+        final otherModel = Model()
+          ..uris['package:dart_model/dart_model.dart'] = (Library()
+            ..scopes['JsonData'] = (Interface()..members['foo'] = fooMember));
+        final mergedModel = model.mergeWith(otherModel);
+
+        // TODO: Once QualifiedName works better, this will be a better test.
+        expect(mergedModel.qualifiedNameOfMember(rootMember)!.asString,
+            'package:dart_model/dart_model.dart#JsonData');
+        expect(mergedModel.qualifiedNameOfMember(fooMember)!.asString,
+            'package:dart_model/dart_model.dart#JsonData');
+
+        expect(model.qualifiedNameOfMember(fooMember), null);
+        expect(otherModel.qualifiedNameOfMember(rootMember), null);
+      });
+    });
+
     test('path to Members throws on cycle', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       // Add an invalid link creating a loop in the map structure.
