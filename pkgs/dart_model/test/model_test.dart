@@ -8,7 +8,7 @@ import 'package:dart_model/dart_model.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(Model, () {
+  group('Model', () {
     late Model model;
 
     setUp(() {
