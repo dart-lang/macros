@@ -4,6 +4,7 @@
 
 import 'dart_model.g.dart';
 import 'json_buffer/json_buffer_builder.dart';
+import 'lazy_merged_map.dart';
 
 export 'dart_model.g.dart';
 
@@ -56,12 +57,25 @@ extension ModelExtension on Model {
     throw ArgumentError('Value not in map: $value, $map');
   }
 
-  /// Gets the `Map` that contains [node], or `null` if there isn't one.
-  Map<String, Object?>? _getParent(Map<String, Object?> node) {
+  /// Gets the `Map` that contains [child], or `null` if there isn't one.
+  Map<String, Object?>? _getParent(Map<String, Object?> child) {
+    // All the MapInBuffer maps for `map`, checking for the left and right maps
+    // of lazy merged maps recursively.
+    Iterable<MapInBuffer> bufferMaps(Map<String, Object?> map) sync* {
+      switch (map) {
+        case LazyMergedMapView map:
+          yield* bufferMaps(map.left);
+          yield* bufferMaps(map.right);
+        case MapInBuffer map:
+          yield map;
+      }
+    }
+
     // If both maps are in the same `JsonBufferBuilder` then the parent is
     // immediately available.
-    if (this case MapInBuffer thisMapInBuffer) {
-      if (node case MapInBuffer thatMapInBuffer) {
+    final childBufferMaps = bufferMaps(child);
+    for (final thisMapInBuffer in bufferMaps(node)) {
+      for (final thatMapInBuffer in childBufferMaps) {
         if (thisMapInBuffer.buffer == thatMapInBuffer.buffer) {
           return thatMapInBuffer.parent;
         }
