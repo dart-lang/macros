@@ -39,9 +39,10 @@ void main() {
                     phase: 2,
                     target: QualifiedName(
                         name: 'Foo', uri: 'package:foo/foo.dart'))),
-            Scope.macro.run(() => AugmentResponse(augmentations: [
-                  Augmentation(code: [Code.string('int get x => 3;')])
-                ])));
+            Scope.macro.run(() => AugmentResponse()
+              ..typeAugmentations!['Foo'] = [
+                Augmentation(code: [Code.string('int get x => 3;')])
+              ]));
       });
 
       test('hosts a macro, responds to queries', () async {
@@ -67,13 +68,14 @@ void main() {
                     phase: 3,
                     target: QualifiedName(
                         uri: 'package:foo/foo.dart', name: 'Foo'))),
-            Scope.macro.run(() => AugmentResponse(augmentations: [
-                  Augmentation(code: [
-                    Code.string(
-                        '// {"uris":{"package:foo/foo.dart":{"scopes":{"Foo":{'
-                        '"members":{},"properties":{"isClass":true}}}}}}')
-                  ])
-                ])));
+            Scope.macro.run(() => AugmentResponse()
+              ..typeAugmentations!['Foo'] = [
+                Augmentation(code: [
+                  Code.string(
+                      '// {"uris":{"package:foo/foo.dart":{"scopes":{"Foo":{'
+                      '"members":{},"properties":{"isClass":true}}}}}}')
+                ])
+              ]));
       });
 
       test('hosts two macros', () async {
