@@ -81,6 +81,17 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return AnalyzerRunningMacro._(impl, name, implementation);
   }
 
+  /// Queries for [target] and returns the [Model] representing the result.
+  ///
+  /// TODO: Make this a more limited query which doesn't fetch members.
+  Future<Model> _queryTarget(QualifiedName target) =>
+      Scope.query.run(() async => (await _impl._host.hostService.handle(
+              MacroRequest.queryRequest(
+                  QueryRequest(query: Query(target: target)),
+                  id: nextRequestId)))
+          .asQueryResponse
+          .model);
+
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
       macros_api_v1.MacroTarget target,
@@ -91,7 +102,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 2,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -104,7 +119,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 3,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -116,7 +135,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 1,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 }
 

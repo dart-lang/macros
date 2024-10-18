@@ -57,8 +57,13 @@ class CfeQueryService implements QueryService {
         isStatic: current.isStatic,
       ));
     }
-
-    return Model(types: _buildTypeHierarchy({classBuilder.actualCls}))
+    TypeHierarchy? types;
+    try {
+      types = _buildTypeHierarchy({classBuilder.actualCls});
+    } catch (_) {
+      // TODO: Fails in types phase, implement fine grained queries.
+    }
+    return Model(types: types)
       ..uris[uri] = (Library()
         ..
             // TODO(davidmorgan): return more than just fields.

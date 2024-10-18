@@ -349,11 +349,18 @@ static QualifiedName parse(String string) {
             description: 'A request to a macro to augment some code.',
             properties: [
               Property('phase',
-                  type: 'int', description: 'Which phase to run: 1, 2 or 3.'),
+                  type: 'int',
+                  required: true,
+                  description: 'Which phase to run: 1, 2 or 3.'),
               Property('target',
                   type: 'QualifiedName',
+                  required: true,
                   description: 'The class to augment. '
                       'TODO(davidmorgan): expand to more types of target.'),
+              Property('model',
+                  type: 'Model',
+                  required: true,
+                  description: 'A pre-computed query result for the target.'),
             ]),
         Definition.clazz('AugmentResponse',
             description:
