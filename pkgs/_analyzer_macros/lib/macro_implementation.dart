@@ -84,12 +84,13 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
   /// Queries for [target] and returns the [Model] representing the result.
   ///
   /// TODO: Make this a more limited query which doesn't fetch members.
-  Future<Model> _queryTarget(QualifiedName target) async =>
-      (await _impl._host.hostService.handle(MacroRequest.queryRequest(
-              QueryRequest(query: Query(target: target)),
-              id: nextRequestId)))
+  Future<Model> _queryTarget(QualifiedName target) =>
+      Scope.query.run(() async => (await _impl._host.hostService.handle(
+              MacroRequest.queryRequest(
+                  QueryRequest(query: Query(target: target)),
+                  id: nextRequestId)))
           .asQueryResponse
-          .model;
+          .model);
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
