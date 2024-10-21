@@ -168,10 +168,34 @@ class CfeMacroExecutionResult implements macros_api_v1.MacroExecutionResult {
   static Future<CfeMacroExecutionResult> dartModelToInjected(
       macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
-    for (final augmentation in augmentResponse.augmentations) {
-      declarations.add(macros_api_v1.DeclarationCode.fromParts(
-          await _resolveNames(augmentation.code)));
+    if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
+      // TODO: Handle multiple type augmentations, or augmentations where the
+      // target is itself a member of a type and not the type.
+      final entry = augmentResponse.typeAugmentations!.entries.single;
+      if (entry.key != target.qualifiedName.name) {
+        throw UnimplementedError(
+            'Type augmentations are only implemented when the type is the '
+            'target of the augmentation.');
+      }
+      for (final augmentation in entry.value) {
+        declarations.add(macros_api_v1.DeclarationCode.fromParts(
+            await _resolveNames(augmentation.code)));
+      }
     }
+
+    if (augmentResponse.enumValueAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Enum value augmentations are not implemented');
+    }
+    if (augmentResponse.extendsTypeAugmentations?.isNotEmpty == true ||
+        augmentResponse.interfaceAugmentations?.isNotEmpty == true ||
+        augmentResponse.mixinAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Type augmentations are not implemented');
+    }
+    if (augmentResponse.libraryAugmentations?.isNotEmpty == true ||
+        augmentResponse.newTypeNames?.isNotEmpty == true) {
+      throw UnimplementedError('Library augmentations are not implemented');
+    }
+
     return CfeMacroExecutionResult(target, declarations);
   }
 

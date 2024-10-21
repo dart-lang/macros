@@ -30,13 +30,14 @@ class JsonCodableImplementation
   Future<AugmentResponse> buildDeclarationsForClass(
       Interface target, Model model, Host host) async {
     final qualifiedName = model.qualifiedNameOf(target.node)!;
-    return AugmentResponse(augmentations: [
-      Augmentation(code: expandTemplate('''
+    return AugmentResponse()
+      ..typeAugmentations![qualifiedName.name] = [
+        Augmentation(code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external ${qualifiedName.name}.fromJson($_jsonMapType json);
 // external $_jsonMapType toJson();
    '''))
-    ]);
+      ];
   }
 
   @override
@@ -47,11 +48,13 @@ class JsonCodableImplementation
     final superclassName =
         MacroScope.current.typeSystem.supertypeOf(qualifiedName);
 
-    return AugmentResponse(augmentations: [
-      await _generateFromJson(
-          host, model, qualifiedName, superclassName, target),
-      await _generateToJson(host, model, qualifiedName, superclassName, target)
-    ]);
+    return AugmentResponse()
+      ..typeAugmentations![qualifiedName.name] = [
+        await _generateFromJson(
+            host, model, qualifiedName, superclassName, target),
+        await _generateToJson(
+            host, model, qualifiedName, superclassName, target),
+      ];
   }
 
   Future<Augmentation> _generateFromJson(
