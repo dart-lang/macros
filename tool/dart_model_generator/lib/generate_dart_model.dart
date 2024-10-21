@@ -493,7 +493,6 @@ class ClassTypeDefinition implements Definition {
       result.writeln('  $name() : ');
     } else {
       result.writeln('  $name({');
-      // TODO: Why are we excluding Map properties?
       for (final property in propertiesExceptMap) {
         result.writeln(property.parameterCode);
       }
