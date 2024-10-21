@@ -114,27 +114,29 @@ class MacroClient {
                       '${hostRequest.macroAnnotation.asString}')));
         } else {
           final augmentRequest = hostRequest.asAugmentRequest;
-          await Scope.macro
-              .runAsync(() async => _sendResponse(Response.augmentResponse(
-                  switch (augmentRequest.phase) {
-                        1 => macro.description.runsInPhases.contains(1)
-                            ? await executeTypesMacro(
-                                macro, _host, augmentRequest)
-                            : null,
-                        2 => macro.description.runsInPhases.contains(2)
-                            ? await executeDeclarationsMacro(
-                                macro, _host, augmentRequest)
-                            : null,
-                        3 => macro.description.runsInPhases.contains(3)
-                            ? await executeDefinitionsMacro(
-                                macro, _host, augmentRequest)
-                            : null,
-                        _ => throw StateError(
-                            'Unexpected phase ${augmentRequest.phase}, '
-                            'expected 1, 2, or 3.')
-                      } ??
-                      AugmentResponse(),
-                  requestId: hostRequest.id)));
+          await Scope.macro.runAsync(() async {
+            MacroScope.current.addModel(augmentRequest.model);
+            return _sendResponse(Response.augmentResponse(
+                switch (augmentRequest.phase) {
+                      1 => macro.description.runsInPhases.contains(1)
+                          ? await executeTypesMacro(
+                              macro, _host, augmentRequest)
+                          : null,
+                      2 => macro.description.runsInPhases.contains(2)
+                          ? await executeDeclarationsMacro(
+                              macro, _host, augmentRequest)
+                          : null,
+                      3 => macro.description.runsInPhases.contains(3)
+                          ? await executeDefinitionsMacro(
+                              macro, _host, augmentRequest)
+                          : null,
+                      _ => throw StateError(
+                          'Unexpected phase ${augmentRequest.phase}, '
+                          'expected 1, 2, or 3.')
+                    } ??
+                    AugmentResponse(),
+                requestId: hostRequest.id));
+          });
         }
       default:
       // Ignore unknown request.

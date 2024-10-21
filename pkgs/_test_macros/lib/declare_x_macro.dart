@@ -23,14 +23,9 @@ class DeclareXImplementation implements ClassDeclarationsMacro {
 
   @override
   Future<AugmentResponse> buildDeclarationsForClass(
-      Host host, AugmentRequest request) async {
-    // TODO(davidmorgan): make the host only run in the phases requested so
-    // that this is not needed.
-    if (request.phase != 2) return AugmentResponse();
-
-    // TODO(davidmorgan): still need to pass through the augment target.
+      Interface target, Model model, Host host) async {
     return AugmentResponse()
-      ..typeAugmentations![request.target.name] = [
+      ..typeAugmentations![model.qualifiedNameOf(target.node)!.name] = [
         Augmentation(code: expandTemplate('int get x => 3;'))
       ];
   }

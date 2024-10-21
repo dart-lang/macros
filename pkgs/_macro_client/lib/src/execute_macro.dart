@@ -12,13 +12,12 @@ import 'package:macro_service/macro_service.dart';
 Future<AugmentResponse> executeTypesMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
-  // TODO: https://github.com/dart-lang/macros/issues/100.
-  final queryResult = await host.query(Query(target: target));
-  final properties =
-      queryResult.uris[target.uri]!.scopes[target.name]!.properties;
-  switch ((properties, macro)) {
+  final model = request.model;
+  final interface = model.uris[target.uri]!.scopes[target.name]!;
+
+  switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassTypesMacro macro):
-      return await macro.buildTypesForClass(host, request);
+      return await macro.buildTypesForClass(interface, model, host);
     case (_, LibraryTypesMacro()):
     case (_, ConstructorTypesMacro()):
     case (_, MethodTypesMacro()):
@@ -42,14 +41,12 @@ Future<AugmentResponse> executeTypesMacro(
 Future<AugmentResponse> executeDeclarationsMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
-  // TODO: https://github.com/dart-lang/macros/issues/100.
-  final queryResult = await host.query(Query(target: target));
-  final properties =
-      queryResult.uris[target.uri]!.scopes[target.name]!.properties;
+  final model = request.model;
+  final interface = model.uris[target.uri]!.scopes[target.name]!;
 
-  switch ((properties, macro)) {
+  switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassDeclarationsMacro macro):
-      return await macro.buildDeclarationsForClass(host, request);
+      return await macro.buildDeclarationsForClass(interface, model, host);
     case (_, LibraryDeclarationsMacro()):
     case (_, EnumDeclarationsMacro()):
     case (_, ExtensionDeclarationsMacro()):
@@ -73,14 +70,12 @@ Future<AugmentResponse> executeDeclarationsMacro(
 Future<AugmentResponse> executeDefinitionsMacro(
     Macro macro, Host host, AugmentRequest request) async {
   final target = request.target;
-  // TODO: https://github.com/dart-lang/macros/issues/100.
-  final queryResult = await host.query(Query(target: target));
-  final properties =
-      queryResult.uris[target.uri]!.scopes[target.name]!.properties;
+  final model = request.model;
+  final interface = model.uris[target.uri]!.scopes[target.name]!;
 
-  switch ((properties, macro)) {
+  switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassDefinitionsMacro macro):
-      return await macro.buildDefinitionsForClass(host, request);
+      return await macro.buildDefinitionsForClass(interface, model, host);
     case (_, LibraryDefinitionsMacro()):
     case (_, EnumDefinitionsMacro()):
     case (_, ExtensionDefinitionsMacro()):

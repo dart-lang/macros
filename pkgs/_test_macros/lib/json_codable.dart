@@ -28,13 +28,13 @@ class JsonCodableImplementation
 
   @override
   Future<AugmentResponse> buildDeclarationsForClass(
-      Host host, AugmentRequest request) async {
-    final target = request.target;
+      Interface target, Model model, Host host) async {
+    final qualifiedName = model.qualifiedNameOf(target.node)!;
     return AugmentResponse()
-      ..typeAugmentations![request.target.name] = [
+      ..typeAugmentations![qualifiedName.name] = [
         Augmentation(code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
-// external ${target.name}.fromJson($_jsonMapType json);
+// external ${qualifiedName.name}.fromJson($_jsonMapType json);
 // external $_jsonMapType toJson();
    '''))
       ];
@@ -42,18 +42,18 @@ class JsonCodableImplementation
 
   @override
   Future<AugmentResponse> buildDefinitionsForClass(
-      Host host, AugmentRequest request) async {
-    final target = request.target;
-    final model = await host.query(Query(target: target));
-    final clazz = model.uris[target.uri]!.scopes[target.name]!;
-
+      Interface target, Model model, Host host) async {
+    final qualifiedName = model.qualifiedNameOf(target.node)!;
     // TODO(davidmorgan): put `extends` information directly in `Interface`.
-    final superclassName = MacroScope.current.typeSystem.supertypeOf(target);
+    final superclassName =
+        MacroScope.current.typeSystem.supertypeOf(qualifiedName);
 
     return AugmentResponse()
-      ..typeAugmentations![request.target.name] = [
-        await _generateFromJson(host, model, target, superclassName, clazz),
-        await _generateToJson(host, model, target, superclassName, clazz)
+      ..typeAugmentations![qualifiedName.name] = [
+        await _generateFromJson(
+            host, model, qualifiedName, superclassName, target),
+        await _generateToJson(
+            host, model, qualifiedName, superclassName, target),
       ];
   }
 
