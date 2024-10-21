@@ -30,8 +30,9 @@ class QueryClassImplementation implements ClassDefinitionsMacro {
     final model = await host.query(Query(
       target: request.target,
     ));
-    return AugmentResponse(augmentations: [
-      Augmentation(code: expandTemplate('// ${json.encode(model)}'))
-    ]);
+    return AugmentResponse()
+      ..typeAugmentations![request.target.name] = [
+        Augmentation(code: expandTemplate('// ${json.encode(model)}'))
+      ];
   }
 }

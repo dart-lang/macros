@@ -30,11 +30,68 @@
       "type": "object",
       "description": "Macro's response to an [AugmentRequest]: the resulting augmentations.",
       "properties": {
-        "augmentations": {
+        "enumValueAugmentations": {
+          "type": "object",
+          "description": "Any augmentations to enum values that should be applied to an enum as a result of executing a macro, indexed by the name of the enum.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+            }
+          }
+        },
+        "extendsTypeAugmentations": {
+          "type": "object",
+          "description": "Any extends clauses that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+            }
+          }
+        },
+        "interfaceAugmentations": {
+          "type": "object",
+          "description": "Any interfaces that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+            }
+          }
+        },
+        "libraryAugmentations": {
           "type": "array",
-          "description": "The augmentations.",
+          "description": "Any augmentations that should be applied to the library as a result of executing a macro.",
           "items": {
             "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+          }
+        },
+        "mixinAugmentations": {
+          "type": "object",
+          "description": "Any mixins that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+            }
+          }
+        },
+        "newTypeNames": {
+          "type": "array",
+          "description": "The names of any new types declared in [libraryAugmentations].",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typeAugmentations": {
+          "type": "object",
+          "description": "Any augmentations that should be applied to a class as a result of executing a macro, indexed by the name of the class.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "file:dart_model.schema.json#/$defs/Augmentation"
+            }
           }
         }
       }
