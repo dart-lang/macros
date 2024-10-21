@@ -154,10 +154,10 @@ void main() {
           'requestId': requestId,
           'type': 'AugmentResponse',
           'value': {
-            'enumValueAugmentations': {},
-            'extendsTypeAugmentations': {},
-            'interfaceAugmentations': {},
-            'mixinAugmentations': {},
+            'enumValueAugmentations': <String, Object?>{},
+            'extendsTypeAugmentations': <String, Object?>{},
+            'interfaceAugmentations': <String, Object?>{},
+            'mixinAugmentations': <String, Object?>{},
             'typeAugmentations': {
               'A': [
                 {
