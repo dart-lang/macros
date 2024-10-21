@@ -152,13 +152,13 @@ void main() {
         final mergedModel = model.mergeWith(otherModel);
 
         // TODO: Once QualifiedName works better, this will be a better test.
-        expect(mergedModel.qualifiedNameOfMember(rootMember)!.asString,
+        expect(mergedModel.qualifiedNameOf(rootMember.node)!.asString,
             'package:dart_model/dart_model.dart#JsonData');
-        expect(mergedModel.qualifiedNameOfMember(fooMember)!.asString,
+        expect(mergedModel.qualifiedNameOf(fooMember.node)!.asString,
             'package:dart_model/dart_model.dart#JsonData');
 
-        expect(model.qualifiedNameOfMember(fooMember), null);
-        expect(otherModel.qualifiedNameOfMember(rootMember), null);
+        expect(model.qualifiedNameOf(fooMember.node), null);
+        expect(otherModel.qualifiedNameOf(rootMember.node), null);
       });
     });
 
