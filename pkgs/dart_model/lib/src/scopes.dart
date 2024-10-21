@@ -157,10 +157,12 @@ class MacroScope {
 
   /// Merges a new partial [model] into the scope's accumulated model spanning
   /// multiple queries.
-  // TODO: Actually accumulate instead of replacing the model
   void addModel(Model model) {
-    _accumulatedModel = model;
-    _typeSystem = null;
+    if (_accumulatedModel case var accumulated?) {
+      accumulated.mergeWith(model);
+    } else {
+      _accumulatedModel = model;
+    }
   }
 
   static MacroScope get current {
