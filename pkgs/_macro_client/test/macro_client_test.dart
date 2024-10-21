@@ -154,16 +154,22 @@ void main() {
           'requestId': requestId,
           'type': 'AugmentResponse',
           'value': {
-            'augmentations': [
-              {
-                'code': [
-                  {
-                    'type': 'String',
-                    'value': 'int get x => 3;',
-                  }
-                ]
-              }
-            ]
+            'enumValueAugmentations': {},
+            'extendsTypeAugmentations': {},
+            'interfaceAugmentations': {},
+            'mixinAugmentations': {},
+            'typeAugmentations': {
+              'A': [
+                {
+                  'code': [
+                    {
+                      'type': 'String',
+                      'value': 'int get x => 3;',
+                    },
+                  ],
+                },
+              ],
+            },
           },
         });
       });
@@ -232,16 +238,22 @@ void main() {
             'requestId': requestId,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value': '// {"uris":{"${target.uri}":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'A': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value': '// {"uris":{"${target.uri}":{"scopes":{}}}}'
+                      }
+                    ]
+                  }
+                ]
+              }
             },
           },
         );
@@ -307,17 +319,23 @@ void main() {
             'requestId': requestId1,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value':
-                          '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'A': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value':
+                            '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}',
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         );
@@ -328,17 +346,23 @@ void main() {
             'requestId': requestId2,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value':
-                          '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'A': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value':
+                            '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}',
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         );
