@@ -30,6 +30,7 @@ class LazyMergedMapView extends MapBase<String, Object?> {
 
   @override
   Object? operator [](Object? key) {
+    // TODO: Can we do better? These lookups can each be linear for buffer maps.
     var leftValue = left[key];
     var rightValue = right[key];
     if (leftValue != null) {

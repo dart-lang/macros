@@ -49,7 +49,7 @@ void main() {
     expect(() => properties.isConstructor, throwsA(isA<TypeError>()));
   });
 
-  test('Errors if identical keys are not equal', () async {
+  test('Errors if maps have same the key with different values', () async {
     final interfaceA1 = Interface(properties: Properties(isClass: true));
     final interfaceA2 = Interface(properties: Properties(isClass: false));
     final a = Model()
