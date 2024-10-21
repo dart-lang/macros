@@ -33,20 +33,49 @@ extension ModelExtension on Model {
 
   /// Returns the [QualifiedName] in the model to [node], or `null` if [node]
   /// is not in this [Model].
-  QualifiedName? _qualifiedNameOf(Map<String, Object?> node) {
-    var parent = _getParent(node);
+  QualifiedName? _qualifiedNameOf(Map<String, Object?> model) {
+    var parent = _getParent(model);
     if (parent == null) return null;
     final path = <String>[];
-    path.add(_keyOf(node, parent));
+    path.add(_keyOf(model, parent));
     var previousParent = parent;
-    while ((parent = _getParent(previousParent)) != this.node) {
+
+    // Checks if any merged map of `left` == any merged map of `right.
+    bool isEqualNested(Map<String, Object?> left, Map<String, Object?> right) {
+      if (left == right) return true;
+      if (left case final LazyMergedMapView merged) {
+        if (merged.expand.any((map) => isEqualNested(right, map))) {
+          return true;
+        }
+      }
+      if (right case final LazyMergedMapView merged) {
+        if (merged.expand.any((map) => isEqualNested(left, map))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    while (true) {
+      parent = _getParent(previousParent);
       if (parent == null) return null;
+
+      /// We reached this models node, stop searching higher.
+      if (isEqualNested(parent, node)) break;
+
       path.insert(0, _keyOf(previousParent, parent));
       previousParent = parent;
     }
 
     if (path case [final uri, 'scopes', final name]) {
       return QualifiedName(uri: uri, name: name);
+    } else if (path
+        case [final uri, 'scopes', final scope, 'members', final name]) {
+      return QualifiedName(
+          uri: uri,
+          scope: scope,
+          name: name,
+          isStatic: Member.fromJson(model).properties.isStatic);
     }
     throw UnsupportedError(
         'Unsupported node type for `qualifiedNameOf`, only top level members '
@@ -65,22 +94,11 @@ extension ModelExtension on Model {
 
   /// Gets the `Map` that contains [child], or `null` if there isn't one.
   Map<String, Object?>? _getParent(Map<String, Object?> child) {
-    // All the MapInBuffer maps for `map`, checking for the left and right maps
-    // of lazy merged maps recursively.
-    Iterable<MapInBuffer> bufferMaps(Map<String, Object?> map) sync* {
-      switch (map) {
-        case LazyMergedMapView map:
-          yield* bufferMaps(map.left);
-          yield* bufferMaps(map.right);
-        case MapInBuffer map:
-          yield map;
-      }
-    }
-
     // If both maps are in the same `JsonBufferBuilder` then the parent is
     // immediately available.
-    final childBufferMaps = bufferMaps(child);
-    for (final thisMapInBuffer in bufferMaps(node)) {
+    final childMaps = child.expand;
+    final childBufferMaps = childMaps.whereType<MapInBuffer>();
+    for (final thisMapInBuffer in node.expand.whereType<MapInBuffer>()) {
       for (final thatMapInBuffer in childBufferMaps) {
         if (thisMapInBuffer.buffer == thatMapInBuffer.buffer) {
           return thatMapInBuffer.parent;
@@ -88,7 +106,7 @@ extension ModelExtension on Model {
       }
     }
     // Otherwise, build a `Map` of references to parents and use that.
-    return _lazyParentsMap[node];
+    return _lazyParentsMap[child];
   }
 
   /// Gets a `Map` from values to parent `Map`s.

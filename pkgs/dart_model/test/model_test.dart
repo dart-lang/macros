@@ -24,7 +24,7 @@ void main() {
                           name: 'SomeAnnotation'))
                 ])
               ..members['_root'] = Member(
-                properties: Properties(isField: true),
+                properties: Properties(isField: true, isStatic: false),
               )));
       });
     });
@@ -44,7 +44,7 @@ void main() {
               ],
               'members': {
                 '_root': {
-                  'properties': {'isField': true}
+                  'properties': {'isField': true, 'isStatic': false}
                 }
               },
               'properties': {'isClass': true}
@@ -118,9 +118,8 @@ void main() {
     test('can give the path to Members in buffer backed maps', () {
       final member = model.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => model.qualifiedNameOf(member.node)!.asString,
-          throwsUnsupportedError,
-          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
+      expect(model.qualifiedNameOf(member.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData._root');
     });
 
     test('can give the path to Interfaces in SDK maps', () {
@@ -135,27 +134,35 @@ void main() {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOf(member.node)!.asString,
-          throwsUnsupportedError,
-          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
+      expect(copiedModel.qualifiedNameOf(member.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData._root');
     });
 
     test('can give the path to Members in merged maps', () {
+      late final Member fooMember;
+      late final Model otherModel;
+
+      /// Create one model in a different scope so it gets a different buffer.
+      Scope.query.run(() {
+        otherModel = Model()
+          ..uris['package:dart_model/dart_model.dart'] = (Library()
+            ..scopes['JsonData'] = (Interface()
+              ..members['foo'] =
+                  Member(properties: Properties(isStatic: true))));
+        fooMember = otherModel.uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!.members['foo']!;
+      });
+
       Scope.macro.run(() {
         final rootMember = model.uris['package:dart_model/dart_model.dart']!
             .scopes['JsonData']!.members['_root']!;
 
-        final fooMember = Member();
-        final otherModel = Model()
-          ..uris['package:dart_model/dart_model.dart'] = (Library()
-            ..scopes['JsonData'] = (Interface()..members['foo'] = fooMember));
         final mergedModel = model.mergeWith(otherModel);
 
-        // TODO: Once QualifiedName works better, this will be a better test.
         expect(mergedModel.qualifiedNameOf(rootMember.node)!.asString,
-            'package:dart_model/dart_model.dart#JsonData');
+            'package:dart_model/dart_model.dart#JsonData._root');
         expect(mergedModel.qualifiedNameOf(fooMember.node)!.asString,
-            'package:dart_model/dart_model.dart#JsonData');
+            'package:dart_model/dart_model.dart#JsonData::foo');
 
         expect(model.qualifiedNameOf(fooMember.node), null);
         expect(otherModel.qualifiedNameOf(rootMember.node), null);

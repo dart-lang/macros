@@ -72,6 +72,18 @@ class LazyMergedMapView extends MapBase<String, Object?> {
       throw UnsupportedError('Merged maps are read only');
 }
 
+extension AllMaps on Map<String, Object?> {
+  /// All the maps merged into this map, recursively expanded.
+  Iterable<Map<String, Object?>> get expand sync* {
+    if (this case final LazyMergedMapView self) {
+      yield* self.left.expand;
+      yield* self.right.expand;
+    } else {
+      yield this;
+    }
+  }
+}
+
 extension MergeModels on Model {
   /// Creates a lazy merged view of `this` with [other].
   Model mergeWith(Model other) =>
