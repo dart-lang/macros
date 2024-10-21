@@ -30,12 +30,7 @@ List<Code> expandTemplate(String template) {
       throw ArgumentError('Unmatched opening brace: $template');
     }
     final name = template.substring(start + 2, end);
-    final parts = name.split('#');
-    if (parts.length != 2) {
-      throw ArgumentError('Expected "uri#name" in: $name');
-    }
-    result
-        .add(Code.qualifiedName(QualifiedName(uri: parts[0], name: parts[1])));
+    result.add(Code.qualifiedName(QualifiedName.parse(name)));
     index = end + 2;
   }
   return result;

@@ -173,16 +173,40 @@ void main() {
     });
   });
 
-  group(QualifiedName, () {
+  group('QualifiedName', () {
     test('asString', () {
       expect(QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo').asString,
           'package:foo/foo.dart#Foo');
+      expect(
+          QualifiedName(
+                  uri: 'package:foo/foo.dart',
+                  name: 'bar',
+                  scope: 'Foo',
+                  isStatic: false)
+              .asString,
+          'package:foo/foo.dart#Foo.bar');
+      expect(
+          QualifiedName(
+                  uri: 'package:foo/foo.dart',
+                  name: 'baz',
+                  scope: 'Foo',
+                  isStatic: true)
+              .asString,
+          'package:foo/foo.dart#Foo::baz');
     });
 
     test('parse', () {
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').uri,
           'package:foo/foo.dart');
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').name, 'Foo');
+      final fooBar = QualifiedName.parse('package:foo/foo.dart#Foo.bar');
+      expect(fooBar.name, 'bar');
+      expect(fooBar.scope, 'Foo');
+      expect(fooBar.isStatic, false);
+      final fooBaz = QualifiedName.parse('package:foo/foo.dart#Foo::baz');
+      expect(fooBaz.name, 'baz');
+      expect(fooBaz.scope, 'Foo');
+      expect(fooBaz.isStatic, true);
     });
   });
 }

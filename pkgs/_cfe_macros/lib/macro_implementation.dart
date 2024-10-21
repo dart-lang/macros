@@ -236,7 +236,21 @@ extension MacroTargetExtension on macros_api_v1.MacroTarget {
     final identifier =
         ((this as macros_api_v1.Declaration).identifier as cfe.IdentifierImpl)
             .resolveIdentifier();
-    return QualifiedName(uri: '${identifier.uri}', name: identifier.name);
+    return QualifiedName(
+        uri: '${identifier.uri}',
+        name: identifier.name,
+        scope: switch (identifier.kind) {
+          macros_api_v1.IdentifierKind.local ||
+          macros_api_v1.IdentifierKind.topLevelMember =>
+            null,
+          macros_api_v1.IdentifierKind.instanceMember =>
+            throw UnimplementedError(
+                'We dont have access to the parent scope for instance '
+                'members in the CFE yet'),
+          macros_api_v1.IdentifierKind.staticInstanceMember =>
+            identifier.staticScope!,
+        },
+        isStatic: identifier.staticScope != null);
   }
 }
 
