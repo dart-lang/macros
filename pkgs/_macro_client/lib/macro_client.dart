@@ -28,6 +28,8 @@ class MacroClient {
   final Map<int, Completer<Response>> _responseCompleters = {};
 
   MacroClient._(this.macros, this.socket) {
+    // Nagle's algorithm slows us down >100x, disable it.
+    socket.setOption(SocketOption.tcpNoDelay, true);
     _host = RemoteMacroHost(this);
     _start();
   }
