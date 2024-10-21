@@ -108,10 +108,26 @@ void main() {
               'JsonData']!['members']);
     });
 
+    test('can give the path to Interfaces in buffer backed maps', () {
+      final interface =
+          model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
+      expect(model.qualifiedNameOf(interface.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData');
+    });
+
     test('can give the path to Members in buffer backed maps', () {
       final member = model.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(model.qualifiedNameOfMember(member)!.asString,
+      expect(() => model.qualifiedNameOf(member.node)!.asString,
+          throwsUnsupportedError,
+          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
+    });
+
+    test('can give the path to Interfaces in SDK maps', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      final interface = copiedModel
+          .uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
+      expect(copiedModel.qualifiedNameOf(interface.node)!.asString,
           'package:dart_model/dart_model.dart#JsonData');
     });
 
@@ -119,8 +135,9 @@ void main() {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(copiedModel.qualifiedNameOfMember(member)!.asString,
-          'package:dart_model/dart_model.dart#JsonData');
+      expect(() => copiedModel.qualifiedNameOf(member.node)!.asString,
+          throwsUnsupportedError,
+          reason: 'Requires https://github.com/dart-lang/macros/pull/101');
     });
 
     test('can give the path to Members in merged maps', () {
@@ -151,7 +168,7 @@ void main() {
       (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
     });
 
     test('path to Members throws on reused node', () {
@@ -161,7 +178,7 @@ void main() {
           copiedModel.uris['package:dart_model/dart_model.dart']!;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOfMember(member), throwsStateError);
+      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
     });
 
     test('path to Member returns null for Member in wrong Map', () {
@@ -173,21 +190,45 @@ void main() {
           .scopes['JsonData']!
           .members['_root']!
           .node));
-      expect(copiedModel.qualifiedNameOfMember(member), null);
-      expect(model.qualifiedNameOfMember(copiedMember), null);
+      expect(copiedModel.qualifiedNameOf(member.node), null);
+      expect(model.qualifiedNameOf(copiedMember.node), null);
     });
   });
 
-  group(QualifiedName, () {
+  group('QualifiedName', () {
     test('asString', () {
       expect(QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo').asString,
           'package:foo/foo.dart#Foo');
+      expect(
+          QualifiedName(
+                  uri: 'package:foo/foo.dart',
+                  name: 'bar',
+                  scope: 'Foo',
+                  isStatic: false)
+              .asString,
+          'package:foo/foo.dart#Foo.bar');
+      expect(
+          QualifiedName(
+                  uri: 'package:foo/foo.dart',
+                  name: 'baz',
+                  scope: 'Foo',
+                  isStatic: true)
+              .asString,
+          'package:foo/foo.dart#Foo::baz');
     });
 
     test('parse', () {
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').uri,
           'package:foo/foo.dart');
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').name, 'Foo');
+      final fooBar = QualifiedName.parse('package:foo/foo.dart#Foo.bar');
+      expect(fooBar.name, 'bar');
+      expect(fooBar.scope, 'Foo');
+      expect(fooBar.isStatic, false);
+      final fooBaz = QualifiedName.parse('package:foo/foo.dart#Foo::baz');
+      expect(fooBaz.name, 'baz');
+      expect(fooBaz.scope, 'Foo');
+      expect(fooBaz.isStatic, true);
     });
   });
 }

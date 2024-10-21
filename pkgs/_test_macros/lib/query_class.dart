@@ -26,12 +26,14 @@ class QueryClassImplementation implements ClassDefinitionsMacro {
 
   @override
   Future<AugmentResponse> buildDefinitionsForClass(
-      Host host, AugmentRequest request) async {
-    final model = await host.query(Query(
-      target: request.target,
+      Interface target, Model model, Host host) async {
+    final qualifiedName = model.qualifiedNameOf(target.node)!;
+    final result = await host.query(Query(
+      target: model.qualifiedNameOf(target.node),
     ));
-    return AugmentResponse(augmentations: [
-      Augmentation(code: expandTemplate('// ${json.encode(model)}'))
-    ]);
+    return AugmentResponse()
+      ..typeAugmentations![qualifiedName.name] = [
+        Augmentation(code: expandTemplate('// ${json.encode(result)}'))
+      ];
   }
 }

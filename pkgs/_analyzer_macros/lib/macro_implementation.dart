@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:_macro_host/macro_host.dart';
+import 'package:analyzer/dart/element/element.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/summary2/macro_declarations.dart' as analyzer;
 // ignore: implementation_imports
@@ -81,6 +82,17 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return AnalyzerRunningMacro._(impl, name, implementation);
   }
 
+  /// Queries for [target] and returns the [Model] representing the result.
+  ///
+  /// TODO: Make this a more limited query which doesn't fetch members.
+  Future<Model> _queryTarget(QualifiedName target) =>
+      Scope.query.run(() async => (await _impl._host.hostService.handle(
+              MacroRequest.queryRequest(
+                  QueryRequest(query: Query(target: target)),
+                  id: nextRequestId)))
+          .asQueryResponse
+          .model);
+
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
       macros_api_v1.MacroTarget target,
@@ -91,7 +103,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 2,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -104,7 +120,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 3,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -116,7 +136,11 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
     return await AnalyzerMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 1,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 }
 
@@ -143,10 +167,34 @@ class AnalyzerMacroExecutionResult
   static Future<AnalyzerMacroExecutionResult> dartModelToInjected(
       macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
-    for (final augmentation in augmentResponse.augmentations) {
-      declarations.add(macros_api_v1.DeclarationCode.fromParts(
-          await _resolveNames(augmentation.code)));
+    if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
+      // TODO: Handle multiple type augmentations, or augmentations where the
+      // target is itself a member of a type and not the type.
+      final entry = augmentResponse.typeAugmentations!.entries.single;
+      if (entry.key != target.qualifiedName.name) {
+        throw UnimplementedError(
+            'Type augmentations are only implemented when the type is the '
+            'target of the augmentation.');
+      }
+      for (final augmentation in entry.value) {
+        declarations.add(macros_api_v1.DeclarationCode.fromParts(
+            await _resolveNames(augmentation.code)));
+      }
     }
+
+    if (augmentResponse.enumValueAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Enum value augmentations are not implemented');
+    }
+    if (augmentResponse.extendsTypeAugmentations?.isNotEmpty == true ||
+        augmentResponse.interfaceAugmentations?.isNotEmpty == true ||
+        augmentResponse.mixinAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Type augmentations are not implemented');
+    }
+    if (augmentResponse.libraryAugmentations?.isNotEmpty == true ||
+        augmentResponse.newTypeNames?.isNotEmpty == true) {
+      throw UnimplementedError('Library augmentations are not implemented');
+    }
+
     return AnalyzerMacroExecutionResult(target, declarations);
   }
 
@@ -187,9 +235,30 @@ extension MacroTargetExtension on macros_api_v1.MacroTarget {
     final element = ((this as macros_api_v1.Declaration).identifier
             as analyzer.IdentifierImpl)
         .element!;
+    return element.qualifiedName;
+  }
+}
+
+extension QualifiedNameForElement on Element {
+  QualifiedName get qualifiedName {
+    final uri = '${library!.definingCompilationUnit.source.uri}';
+    final enclosingElement = enclosingElement3;
+    if (enclosingElement == null) {
+      throw UnsupportedError('Library macro targets are not yet supported');
+    }
+    final scope = (enclosingElement is LibraryElement ||
+            enclosingElement is CompilationUnitElement)
+        ? null
+        : enclosingElement.displayName;
+    final isStatic = scope == null
+        ? null
+        : switch (this) {
+            ClassMemberElement self => self.isStatic,
+            _ => throw UnimplementedError(
+                'Cannot create a QualifiedName for $runtimeType'),
+          };
     return QualifiedName(
-        uri: '${element.library!.definingCompilationUnit.source.uri}',
-        name: element.displayName);
+        uri: uri, name: displayName, scope: scope, isStatic: isStatic);
   }
 }
 

@@ -81,6 +81,17 @@ class CfeRunningMacro implements injected.RunningMacro {
     return CfeRunningMacro._(impl, name, implementation);
   }
 
+  /// Queries for [target] and returns the [Model] representing the result.
+  ///
+  /// TODO: Make this a more limited query which doesn't fetch members.
+  Future<Model> _queryTarget(QualifiedName target) =>
+      Scope.query.run(() async => (await _impl._host.hostService.handle(
+              MacroRequest.queryRequest(
+                  QueryRequest(query: Query(target: target)),
+                  id: nextRequestId)))
+          .asQueryResponse
+          .model);
+
   @override
   Future<CfeMacroExecutionResult> executeDeclarationsPhase(
       macros_api_v1.MacroTarget target,
@@ -91,7 +102,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 2, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 2,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -104,7 +119,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 3, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 3,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 
   @override
@@ -116,7 +135,11 @@ class CfeRunningMacro implements injected.RunningMacro {
     return await CfeMacroExecutionResult.dartModelToInjected(
         target,
         await _impl._host.augment(
-            name, AugmentRequest(phase: 1, target: target.qualifiedName)));
+            name,
+            AugmentRequest(
+                phase: 1,
+                target: target.qualifiedName,
+                model: await _queryTarget(target.qualifiedName))));
   }
 }
 
@@ -145,10 +168,34 @@ class CfeMacroExecutionResult implements macros_api_v1.MacroExecutionResult {
   static Future<CfeMacroExecutionResult> dartModelToInjected(
       macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
-    for (final augmentation in augmentResponse.augmentations) {
-      declarations.add(macros_api_v1.DeclarationCode.fromParts(
-          await _resolveNames(augmentation.code)));
+    if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
+      // TODO: Handle multiple type augmentations, or augmentations where the
+      // target is itself a member of a type and not the type.
+      final entry = augmentResponse.typeAugmentations!.entries.single;
+      if (entry.key != target.qualifiedName.name) {
+        throw UnimplementedError(
+            'Type augmentations are only implemented when the type is the '
+            'target of the augmentation.');
+      }
+      for (final augmentation in entry.value) {
+        declarations.add(macros_api_v1.DeclarationCode.fromParts(
+            await _resolveNames(augmentation.code)));
+      }
     }
+
+    if (augmentResponse.enumValueAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Enum value augmentations are not implemented');
+    }
+    if (augmentResponse.extendsTypeAugmentations?.isNotEmpty == true ||
+        augmentResponse.interfaceAugmentations?.isNotEmpty == true ||
+        augmentResponse.mixinAugmentations?.isNotEmpty == true) {
+      throw UnimplementedError('Type augmentations are not implemented');
+    }
+    if (augmentResponse.libraryAugmentations?.isNotEmpty == true ||
+        augmentResponse.newTypeNames?.isNotEmpty == true) {
+      throw UnimplementedError('Library augmentations are not implemented');
+    }
+
     return CfeMacroExecutionResult(target, declarations);
   }
 
@@ -189,7 +236,21 @@ extension MacroTargetExtension on macros_api_v1.MacroTarget {
     final identifier =
         ((this as macros_api_v1.Declaration).identifier as cfe.IdentifierImpl)
             .resolveIdentifier();
-    return QualifiedName(uri: '${identifier.uri}', name: identifier.name);
+    return QualifiedName(
+        uri: '${identifier.uri}',
+        name: identifier.name,
+        scope: switch (identifier.kind) {
+          macros_api_v1.IdentifierKind.local ||
+          macros_api_v1.IdentifierKind.topLevelMember =>
+            null,
+          macros_api_v1.IdentifierKind.instanceMember =>
+            throw UnimplementedError(
+                'We dont have access to the parent scope for instance '
+                'members in the CFE yet'),
+          macros_api_v1.IdentifierKind.staticInstanceMember =>
+            identifier.staticScope!,
+        },
+        isStatic: identifier.staticScope != null);
   }
 }
 

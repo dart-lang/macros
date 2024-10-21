@@ -14,11 +14,13 @@ import 'package:dart_model/src/scopes.dart';
 extension type AugmentRequest.fromJson(Map<String, Object?> node)
     implements Object {
   AugmentRequest({
-    int? phase,
-    QualifiedName? target,
+    required int phase,
+    required QualifiedName target,
+    required Model model,
   }) : this.fromJson({
-          if (phase != null) 'phase': phase,
-          if (target != null) 'target': target,
+          'phase': phase,
+          'target': target,
+          'model': model,
         });
 
   /// Which phase to run: 1, 2 or 3.
@@ -26,20 +28,59 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
 
   /// The class to augment. TODO(davidmorgan): expand to more types of target.
   QualifiedName get target => node['target'] as QualifiedName;
+
+  /// A pre-computed query result for the target.
+  Model get model => node['model'] as Model;
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
 extension type AugmentResponse.fromJson(Map<String, Object?> node)
     implements Object {
   AugmentResponse({
-    List<Augmentation>? augmentations,
+    List<Augmentation>? libraryAugmentations,
+    List<String>? newTypeNames,
   }) : this.fromJson({
-          if (augmentations != null) 'augmentations': augmentations,
+          'enumValueAugmentations': <String, Object?>{},
+          'extendsTypeAugmentations': <String, Object?>{},
+          'interfaceAugmentations': <String, Object?>{},
+          if (libraryAugmentations != null)
+            'libraryAugmentations': libraryAugmentations,
+          'mixinAugmentations': <String, Object?>{},
+          if (newTypeNames != null) 'newTypeNames': newTypeNames,
+          'typeAugmentations': <String, Object?>{},
         });
 
-  /// The augmentations.
-  List<Augmentation> get augmentations =>
-      (node['augmentations'] as List).cast();
+  /// Any augmentations to enum values that should be applied to an enum as a result of executing a macro, indexed by the name of the enum.
+  Map<String, List<Augmentation>>? get enumValueAugmentations =>
+      (node['enumValueAugmentations'] as Map?)
+          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+
+  /// Any extends clauses that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
+  Map<String, List<Augmentation>>? get extendsTypeAugmentations =>
+      (node['extendsTypeAugmentations'] as Map?)
+          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+
+  /// Any interfaces that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
+  Map<String, List<Augmentation>>? get interfaceAugmentations =>
+      (node['interfaceAugmentations'] as Map?)
+          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+
+  /// Any augmentations that should be applied to the library as a result of executing a macro.
+  List<Augmentation>? get libraryAugmentations =>
+      (node['libraryAugmentations'] as List?)?.cast();
+
+  /// Any mixins that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
+  Map<String, List<Augmentation>>? get mixinAugmentations =>
+      (node['mixinAugmentations'] as Map?)
+          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+
+  /// The names of any new types declared in [libraryAugmentations].
+  List<String>? get newTypeNames => (node['newTypeNames'] as List?)?.cast();
+
+  /// Any augmentations that should be applied to a class as a result of executing a macro, indexed by the name of the class.
+  Map<String, List<Augmentation>>? get typeAugmentations =>
+      (node['typeAugmentations'] as Map?)
+          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
 }
 
 /// Request could not be handled.

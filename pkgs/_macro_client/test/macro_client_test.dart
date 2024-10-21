@@ -14,7 +14,10 @@ import 'package:macro_service/macro_service.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final target = QualifiedName.parse('package:a/a.dart#A');
+  final fooTarget = QualifiedName(name: 'Foo', uri: 'package:foo/foo.dart');
+  final fooModel = Scope.query.run(() => Model()
+    ..uris[fooTarget.uri] = (Library()
+      ..scopes['Foo'] = Interface(properties: Properties(isClass: true))));
 
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
@@ -40,29 +43,6 @@ void main() {
             .send(socket.add, HandshakeResponse(protocol: protocol).node);
 
         return result;
-      }
-
-      void answerTargetQuery(MacroRequest targetQuery, Socket socket) {
-        expect(
-          targetQuery,
-          {
-            'id': targetQuery.id,
-            'type': 'QueryRequest',
-            'value': {
-              'query': {'target': target}
-            },
-          },
-        );
-        Scope.query.run(() => protocol.send(
-            socket.add,
-            Response.queryResponse(
-                    QueryResponse(
-                        model: Model()
-                          ..uris[target.uri] = (Library()
-                            ..scopes[target.name] = Interface(
-                                properties: (Properties(isClass: true))))),
-                    requestId: targetQuery.id)
-                .node));
       }
 
       test('connects to service', () async {
@@ -98,7 +78,8 @@ void main() {
                     macroAnnotation: QualifiedName(
                         uri: 'package:_test_macros/declare_x_macro.dart',
                         name: 'DeclareX'),
-                    AugmentRequest(phase: 2))
+                    AugmentRequest(
+                        phase: 2, target: fooTarget, model: fooModel))
                 .node);
 
         final augmentResponse = await responses.next;
@@ -145,25 +126,31 @@ void main() {
                     macroAnnotation: QualifiedName(
                         uri: 'package:_test_macros/declare_x_macro.dart',
                         name: 'DeclareX'),
-                    AugmentRequest(phase: 2, target: target))
+                    AugmentRequest(
+                        phase: 2, target: fooTarget, model: fooModel))
                 .node);
-        answerTargetQuery(MacroRequest.fromJson(await responses.next), socket);
 
         final augmentResponse = await responses.next;
         expect(augmentResponse, {
           'requestId': requestId,
           'type': 'AugmentResponse',
           'value': {
-            'augmentations': [
-              {
-                'code': [
-                  {
-                    'type': 'String',
-                    'value': 'int get x => 3;',
-                  }
-                ]
-              }
-            ]
+            'enumValueAugmentations': <String, Object?>{},
+            'extendsTypeAugmentations': <String, Object?>{},
+            'interfaceAugmentations': <String, Object?>{},
+            'mixinAugmentations': <String, Object?>{},
+            'typeAugmentations': {
+              'Foo': [
+                {
+                  'code': [
+                    {
+                      'type': 'String',
+                      'value': 'int get x => 3;',
+                    },
+                  ],
+                },
+              ],
+            },
           },
         });
       });
@@ -201,9 +188,8 @@ void main() {
               macroAnnotation: QualifiedName(
                   uri: 'package:_test_macros/query_class.dart',
                   name: 'QueryClass'),
-              AugmentRequest(phase: 3, target: target),
+              AugmentRequest(phase: 3, target: fooTarget, model: fooModel),
             ).node);
-        answerTargetQuery(MacroRequest.fromJson(await responses.next), socket);
 
         final queryRequest = await responses.next;
         final queryRequestId = MacroRequest.fromJson(queryRequest).id;
@@ -213,15 +199,14 @@ void main() {
             'id': queryRequestId,
             'type': 'QueryRequest',
             'value': {
-              'query': {'target': target}
+              'query': {'target': fooTarget}
             },
           },
         );
 
         Scope.query.run(() => protocol.send(
             socket.add,
-            Response.queryResponse(
-                    QueryResponse(model: Model()..uris[target.uri] = Library()),
+            Response.queryResponse(QueryResponse(model: fooModel),
                     requestId: queryRequestId)
                 .node));
 
@@ -232,16 +217,23 @@ void main() {
             'requestId': requestId,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value': '// {"uris":{"${target.uri}":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'Foo': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value': '// {"uris":{"${fooTarget.uri}":{"scopes":{"Foo":'
+                            '{"members":{},"properties":{"isClass":true}}}}}}',
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         );
@@ -270,10 +262,8 @@ void main() {
                 macroAnnotation: QualifiedName(
                     uri: 'package:_test_macros/query_class.dart',
                     name: 'QueryClass'),
-                AugmentRequest(phase: 3, target: target),
+                AugmentRequest(phase: 3, target: fooTarget, model: fooModel),
               ).node);
-          unawaited(responses.next.then((response) =>
-              answerTargetQuery(MacroRequest.fromJson(response), socket)));
         }
 
         final queryRequest1 = await responses.next;
@@ -307,17 +297,23 @@ void main() {
             'requestId': requestId1,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value':
-                          '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'Foo': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value':
+                            '// {"uris":{"package:foo/foo1.dart":{"scopes":{}}}}',
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         );
@@ -328,17 +324,23 @@ void main() {
             'requestId': requestId2,
             'type': 'AugmentResponse',
             'value': {
-              'augmentations': [
-                {
-                  'code': [
-                    {
-                      'type': 'String',
-                      'value':
-                          '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}'
-                    }
-                  ]
-                }
-              ]
+              'enumValueAugmentations': <String, Object?>{},
+              'extendsTypeAugmentations': <String, Object?>{},
+              'interfaceAugmentations': <String, Object?>{},
+              'mixinAugmentations': <String, Object?>{},
+              'typeAugmentations': {
+                'Foo': [
+                  {
+                    'code': [
+                      {
+                        'type': 'String',
+                        'value':
+                            '// {"uris":{"package:foo/foo2.dart":{"scopes":{}}}}',
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         );

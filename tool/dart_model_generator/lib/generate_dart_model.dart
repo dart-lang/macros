@@ -353,7 +353,7 @@ class TypeReference {
       return '($rawCast)$q.deepCast<String, ${elementType!.dartType}>('
           '(v) => ${elementType!.castExpression('v')})';
     } else if (isList) {
-      if (elementType!.elementType == null) return '($rawCast).cast()';
+      if (elementType!.elementType == null) return '($rawCast)$q.cast()';
       throw UnsupportedError('Deep casting for lists isn\'t yet supported.');
     } else {
       return rawCast;
@@ -514,7 +514,7 @@ class ClassTypeDefinition implements Definition {
       result.writeln('{');
       for (final property in properties) {
         if (property.type.isMap) {
-          result.writeln("'${property.name}': {},");
+          result.writeln("'${property.name}': <String, Object?>{},");
         } else {
           result.writeln(property.namedArgumentCode);
         }

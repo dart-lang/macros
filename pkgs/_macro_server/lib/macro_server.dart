@@ -121,7 +121,10 @@ class _Connection {
   /// Responses to query requests from the macro.
   Stream<Response> get responses => _responsesController.stream;
 
-  _Connection(this.socket);
+  _Connection(this.socket) {
+    // Nagle's algorithm slows us down >100x, disable it.
+    socket.setOption(SocketOption.tcpNoDelay, true);
+  }
 
   @override
   String toString() => '_Connection($descriptions)';

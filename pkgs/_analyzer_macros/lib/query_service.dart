@@ -36,52 +36,56 @@ class AnalyzerQueryService implements QueryService {
       ..addInterfaceElement(clazz);
 
     final interface = Interface(properties: Properties(isClass: true));
-    for (final constructor in clazz.constructors) {
-      interface.members[constructor.name] = Member(
-          requiredPositionalParameters: constructor
-              .requiredPositionalParameters(types.translator, types.context),
-          optionalPositionalParameters: constructor
-              .optionalPositionalParameters(types.translator, types.context),
-          namedParameters:
-              constructor.namedParameters(types.translator, types.context),
-          properties: Properties(
-            isAbstract: constructor.isAbstract,
-            isConstructor: true,
-            isGetter: false,
-            isField: false,
-            isMethod: false,
-            isStatic: false,
-          ));
-    }
-    for (final field in clazz.fields) {
-      interface.members[field.name] = Member(
-          properties: Properties(
-            isAbstract: field.isAbstract,
-            isConstructor: false,
-            isGetter: false,
-            isField: true,
-            isMethod: false,
-            isStatic: field.isStatic,
-          ),
-          returnType: types.addDartType(field.type));
-    }
-    for (final method in clazz.methods) {
-      interface.members[method.name] = Member(
-          requiredPositionalParameters: method.requiredPositionalParameters(
-              types.translator, types.context),
-          optionalPositionalParameters: method.optionalPositionalParameters(
-              types.translator, types.context),
-          namedParameters:
-              method.namedParameters(types.translator, types.context),
-          properties: Properties(
-            isAbstract: method.isAbstract,
-            isConstructor: false,
-            isGetter: false,
-            isField: false,
-            isMethod: true,
-            isStatic: method.isStatic,
-          ),
-          returnType: types.addDartType(method.returnType));
+    try {
+      for (final constructor in clazz.constructors) {
+        interface.members[constructor.name] = Member(
+            requiredPositionalParameters: constructor
+                .requiredPositionalParameters(types.translator, types.context),
+            optionalPositionalParameters: constructor
+                .optionalPositionalParameters(types.translator, types.context),
+            namedParameters:
+                constructor.namedParameters(types.translator, types.context),
+            properties: Properties(
+              isAbstract: constructor.isAbstract,
+              isConstructor: true,
+              isGetter: false,
+              isField: false,
+              isMethod: false,
+              isStatic: false,
+            ));
+      }
+      for (final field in clazz.fields) {
+        interface.members[field.name] = Member(
+            properties: Properties(
+              isAbstract: field.isAbstract,
+              isConstructor: false,
+              isGetter: false,
+              isField: true,
+              isMethod: false,
+              isStatic: field.isStatic,
+            ),
+            returnType: types.addDartType(field.type));
+      }
+      for (final method in clazz.methods) {
+        interface.members[method.name] = Member(
+            requiredPositionalParameters: method.requiredPositionalParameters(
+                types.translator, types.context),
+            optionalPositionalParameters: method.optionalPositionalParameters(
+                types.translator, types.context),
+            namedParameters:
+                method.namedParameters(types.translator, types.context),
+            properties: Properties(
+              isAbstract: method.isAbstract,
+              isConstructor: false,
+              isGetter: false,
+              isField: false,
+              isMethod: true,
+              isStatic: method.isStatic,
+            ),
+            returnType: types.addDartType(method.returnType));
+      }
+    } catch (_) {
+      // TODO: Fails in types phase, implement fine grained queries.
     }
     return Model(types: types.typeHierarchy)
       ..uris[uri] = (Library()..scopes[clazz.name] = interface);

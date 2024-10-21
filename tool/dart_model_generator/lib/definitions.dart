@@ -237,21 +237,59 @@ static Protocol handshakeProtocol = Protocol(
                   type: 'bool', description: 'Whether the entity is static.'),
             ]),
         Definition.clazz('QualifiedName',
-            description: 'A URI combined with a name.',
+            description: 'A URI combined with a name and scope referring to a '
+                'declaration. The name and scope are looked up in the export '
+                'scope of the URI.',
             createInBuffer: true,
             properties: [
               Property('uri',
                   type: 'String',
                   description: 'The URI of the file containing the name.'),
-              Property('name', type: 'String', description: 'The name.'),
+              Property('scope',
+                  type: 'String',
+                  description: 'The optional scope to look up the name in.',
+                  nullable: true),
+              Property('name',
+                  type: 'String',
+                  description: 'The name of the declaration to look up.'),
+              Property('isStatic',
+                  type: 'bool',
+                  description:
+                      'Whether the name refers to something in the static '
+                      'scope as opposed to the instance scope of `scope`. '
+                      'Will be `null` if `scope` is `null`.',
+                  nullable: true)
             ],
             extraCode: r'''
-/// Parses [string] of the form `uri#name`.
+/// Parses [string] of the form `uri#[scope.|scope::]name`.
+///
+/// No scope indicates a top level declaration in the library.
+///
+/// If the scope and name are separated with a `.` that indicates the
+/// instance scope, and a `::` indicates the static scope.
 static QualifiedName parse(String string) {
   final index = string.indexOf('#');
   if (index == -1) throw ArgumentError('Expected `#` in string: $string');
+  final nameAndScope = string.substring(index + 1);
+  late final String name;
+  late final String? scope;
+  late final bool? isStatic;
+  if (nameAndScope.contains('::')) {
+    [scope, name] = nameAndScope.split('::');
+    isStatic = true;
+  } else if (nameAndScope.contains('.')) {
+    [scope, name] = nameAndScope.split('.');
+    isStatic = false;
+  } else {
+    name = nameAndScope;
+    scope = null;
+    isStatic = null;
+  }
   return QualifiedName(
-    uri: string.substring(0, index), name: string.substring(index + 1));
+      uri: string.substring(0, index),
+      name: name,
+      scope: scope,
+      isStatic: isStatic);
 }
 '''),
         Definition.clazz('Query',
@@ -349,20 +387,70 @@ static QualifiedName parse(String string) {
             description: 'A request to a macro to augment some code.',
             properties: [
               Property('phase',
-                  type: 'int', description: 'Which phase to run: 1, 2 or 3.'),
+                  type: 'int',
+                  required: true,
+                  description: 'Which phase to run: 1, 2 or 3.'),
               Property('target',
                   type: 'QualifiedName',
+                  required: true,
                   description: 'The class to augment. '
                       'TODO(davidmorgan): expand to more types of target.'),
+              Property('model',
+                  type: 'Model',
+                  required: true,
+                  description: 'A pre-computed query result for the target.'),
             ]),
         Definition.clazz('AugmentResponse',
             description:
                 "Macro's response to an [AugmentRequest]: the resulting "
                 'augmentations.',
             properties: [
-              Property('augmentations',
+              Property('enumValueAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any augmentations to enum values that should be applied '
+                      'to an enum as a result of executing a macro, indexed by '
+                      'the name of the enum.',
+                  nullable: true),
+              Property('extendsTypeAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any extends clauses that should be added to types as a '
+                      'result of executing a macro, indexed by the name '
+                      'of the augmented type declaration.',
+                  nullable: true),
+              Property('interfaceAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any interfaces that should be added to types as a '
+                      'result of executing a macro, indexed by the name '
+                      'of the augmented type declaration.',
+                  nullable: true),
+              Property('libraryAugmentations',
                   type: 'List<Augmentation>',
-                  description: 'The augmentations.'),
+                  description:
+                      'Any augmentations that should be applied to the library '
+                      'as a result of executing a macro.',
+                  nullable: true),
+              Property('mixinAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any mixins that should be added to types as a result of '
+                      'executing a macro, indexed by the name of the '
+                      'augmented type declaration.',
+                  nullable: true),
+              Property('newTypeNames',
+                  type: 'List<String>',
+                  description: 'The names of any new types declared in '
+                      '[libraryAugmentations].',
+                  nullable: true),
+              Property('typeAugmentations',
+                  type: 'Map<List<Augmentation>>',
+                  description:
+                      'Any augmentations that should be applied to a class as '
+                      'a result of executing a macro, indexed by the '
+                      'name of the class.',
+                  nullable: true),
             ]),
         Definition.clazz('ErrorResponse',
             description: 'Request could not be handled.',

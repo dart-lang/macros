@@ -9,42 +9,48 @@ import 'lazy_merged_map.dart';
 export 'dart_model.g.dart';
 
 extension QualifiedNameExtension on QualifiedName {
-  String get asString => '$uri#$name';
+  String get asString =>
+      '$uri#${scope == null ? '' : '$scope${isStatic! ? '::' : '.'}'}$name';
 
-  bool equals(QualifiedName other) => other.uri == uri && other.name == name;
+  bool equals(QualifiedName other) =>
+      other.uri == uri &&
+      other.name == name &&
+      other.scope == scope &&
+      other.isStatic == isStatic;
 }
 
 extension ModelExtension on Model {
-  /// Returns the path in the model to [member], or `null` if [member] is not
-  /// in this [Model].
+  /// Returns the path in the model to [node], or `null` if
+  /// [node] is not in this [Model].
   ///
   /// Comparison is by identity, not by value, so the exact instance must be in
   /// this [Model].
   ///
-  /// TODO(davidmorgan): this works for any node, but it's not clear yet which
-  /// types of node we want this functionality exposed for.
-  /// TODO(davidmorgan): a list of path segments is probably more useful than
-  /// `String`.
-  QualifiedName? qualifiedNameOfMember(Member member) =>
-      _qualifiedNameOf(member.node);
+  /// TODO: Should we create a base type called `Declaration` which is
+  /// implemented by the types which are valid to pass here?
+  QualifiedName? qualifiedNameOf(Map<String, Object?> node) =>
+      _qualifiedNameOf(node);
 
-  /// Returns the [QualifiedName] in the model to [node], or `null` if [node] is not in this [Model].
+  /// Returns the [QualifiedName] in the model to [node], or `null` if [node]
+  /// is not in this [Model].
   QualifiedName? _qualifiedNameOf(Map<String, Object?> node) {
-    final members = _getParent(node);
-    if (members == null) return null;
-    final interface = _getParent(members);
-    if (interface == null) return null;
-    final scopes = _getParent(interface);
-    if (scopes == null) return null;
-    final library = _getParent(scopes);
-    if (library == null) return null;
-    final libraries = _getParent(library);
-    if (libraries == null) return null;
+    var parent = _getParent(node);
+    if (parent == null) return null;
+    final path = <String>[];
+    path.add(_keyOf(node, parent));
+    var previousParent = parent;
+    while ((parent = _getParent(previousParent)) != this.node) {
+      if (parent == null) return null;
+      path.insert(0, _keyOf(previousParent, parent));
+      previousParent = parent;
+    }
 
-    final uri = _keyOf(library, libraries);
-    final name = _keyOf(interface, scopes);
-
-    return QualifiedName(uri: uri, name: name);
+    if (path case [final uri, 'scopes', final name]) {
+      return QualifiedName(uri: uri, name: name);
+    }
+    throw UnsupportedError(
+        'Unsupported node type for `qualifiedNameOf`, only top level members '
+        'are supported for now. $path');
   }
 
   /// Returns the key of [value] in [map].
