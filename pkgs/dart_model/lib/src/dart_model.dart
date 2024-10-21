@@ -43,17 +43,7 @@ extension ModelExtension on Model {
     // Checks if any merged map of `left` == any merged map of `right.
     bool isEqualNested(Map<String, Object?> left, Map<String, Object?> right) {
       if (left == right) return true;
-      if (left case final LazyMergedMapView merged) {
-        if (merged.expand.any((map) => isEqualNested(right, map))) {
-          return true;
-        }
-      }
-      if (right case final LazyMergedMapView merged) {
-        if (merged.expand.any((map) => isEqualNested(left, map))) {
-          return true;
-        }
-      }
-      return false;
+      return left.expand.any((l) => right.expand.contains(l));
     }
 
     while (true) {
