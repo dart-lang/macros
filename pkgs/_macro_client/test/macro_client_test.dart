@@ -140,7 +140,7 @@ void main() {
             'interfaceAugmentations': <String, Object?>{},
             'mixinAugmentations': <String, Object?>{},
             'typeAugmentations': {
-              'A': [
+              'Foo': [
                 {
                   'code': [
                     {
@@ -222,7 +222,7 @@ void main() {
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
               'typeAugmentations': {
-                'A': [
+                'Foo': [
                   {
                     'code': [
                       {
@@ -302,7 +302,7 @@ void main() {
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
               'typeAugmentations': {
-                'A': [
+                'Foo': [
                   {
                     'code': [
                       {
@@ -329,7 +329,7 @@ void main() {
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
               'typeAugmentations': {
-                'A': [
+                'Foo': [
                   {
                     'code': [
                       {
