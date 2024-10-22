@@ -159,11 +159,16 @@ class MacroScope {
   /// multiple queries.
   void addModel(Model model) {
     if (_accumulatedModel case var accumulated?) {
-      accumulated.mergeWith(model);
+      _accumulatedModel = accumulated.mergeWith(model);
     } else {
       _accumulatedModel = model;
     }
   }
+
+  /// The current accumulated model for this macro scope.
+  ///
+  /// This is only safe to use after [addModel] has been called at least once.
+  Model get model => _accumulatedModel!;
 
   static MacroScope get current {
     final scope = Scope._currentOrNull;
