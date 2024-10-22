@@ -7,7 +7,7 @@ import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(Scope, () {
+  group('Scope', () {
     for (final scope in [Scope.none, Scope.macro, Scope.query]) {
       test('create maps and serialize work in $scope', () {
         expect(scope.run(() => Scope.createMap(TypedMapSchema({}))),
@@ -32,6 +32,24 @@ void main() {
     test('none scope can be nested in macro or query scopes', () {
       Scope.macro.run(() => Scope.none.run(() {}));
       Scope.query.run(() => Scope.none.run(() {}));
+    });
+
+    test('addModel merges the model with the previous', () {
+      late Model initial;
+      late Model firstQuery;
+      Scope.query.run(() {
+        initial = Model()..uris['a'] = (Library()..scopes['A'] = Interface());
+        firstQuery = Model()
+          ..uris['a'] = (Library()..scopes['B'] = Interface());
+      });
+      Scope.macro.run(() {
+        MacroScope.current.addModel(initial);
+        expect(MacroScope.current.model.uris['a']!.scopes['A'], isNot(null));
+        expect(MacroScope.current.model.uris['a']!.scopes['B'], null);
+        MacroScope.current.addModel(firstQuery);
+        expect(MacroScope.current.model.uris['a']!.scopes['A'], isNot(null));
+        expect(MacroScope.current.model.uris['a']!.scopes['B'], isNot(null));
+      });
     });
   });
 }
