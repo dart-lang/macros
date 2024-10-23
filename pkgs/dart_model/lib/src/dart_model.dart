@@ -23,7 +23,7 @@ extension QualifiedNameExtension on QualifiedName {
 extension ParentInterface on Member {
   QualifiedName get parentInterface {
     final self = MacroScope.current.model.qualifiedNameOf(node)!;
-    return QualifiedName(uri: self.uri, name: self.name);
+    return QualifiedName(uri: self.uri, name: self.scope);
   }
 }
 

@@ -170,15 +170,17 @@ class AnalyzerMacroExecutionResult
     if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
       // TODO: Handle multiple type augmentations, or augmentations where the
       // target is itself a member of a type and not the type.
-      final entry = augmentResponse.typeAugmentations!.entries.single;
-      if (entry.key != target.qualifiedName.name) {
-        throw UnimplementedError(
-            'Type augmentations are only implemented when the type is the '
-            'target of the augmentation.');
-      }
-      for (final augmentation in entry.value) {
-        declarations.add(macros_api_v1.DeclarationCode.fromParts(
-            await _resolveNames(augmentation.code)));
+      for (final entry in augmentResponse.typeAugmentations!.entries) {
+        if (entry.key != target.qualifiedName.name) {
+          throw UnimplementedError(
+              'Type augmentations are only implemented when the type is the '
+              'target of the augmentation, expected '
+              '${target.qualifiedName.name} but got ${entry.key}');
+        }
+        for (final augmentation in entry.value) {
+          declarations.add(macros_api_v1.DeclarationCode.fromParts(
+              await _resolveNames(augmentation.code)));
+        }
       }
     }
 

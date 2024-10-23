@@ -322,14 +322,15 @@ Augmentation _buildFunctionAugmentation(
       ';'
     else ...[
       ' ',
-      body,
+      ...body.code,
     ]
   ];
   return Augmentation(code: [
     for (var part in parts)
       switch (part) {
-        Code() => part,
         String() => Code.string(part),
+        // TODO: All maps will pass this check...
+        Code() => part,
         _ => throw StateError('Unexpected code kind $part'),
       },
   ]);
