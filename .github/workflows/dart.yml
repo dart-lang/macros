@@ -38,23 +38,23 @@ jobs:
       - name: mono_repo self validate
         run: dart pub global run mono_repo generate --validate
   job_002:
-    name: "analyze_and_format; linux; Dart 3.6.0-300.0.dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_macro_tool, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
+    name: "analyze_and_format; linux; Dart 3.7.0-39.0.dev; PKGS: pkgs/_analyzer_macros, pkgs/_cfe_macros, pkgs/_macro_builder, pkgs/_macro_client, pkgs/_macro_host, pkgs/_macro_runner, pkgs/_macro_server, pkgs/_macro_tool, pkgs/_test_macros, pkgs/dart_model, pkgs/macro, pkgs/macro_service, tool/dart_model_generator; `dart analyze --fatal-infos .`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator;commands:analyze"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_analyzer_macros-pkgs/_cfe_macros-pkgs/_macro_builder-pkgs/_macro_client-pkgs/_macro_host-pkgs/_macro_runner-pkgs/_macro_server-pkgs/_macro_tool-pkgs/_test_macros-pkgs/dart_model-pkgs/macro-pkgs/macro_service-tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -443,23 +443,23 @@ jobs:
         if: "always() && steps.tool_dart_model_generator_pub_upgrade.conclusion == 'success'"
         working-directory: tool/dart_model_generator
   job_005:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: goldens/foo; `../../tool/run_e2e_tests.sh`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: goldens/foo; `../../tool/run_e2e_tests.sh`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:goldens/foo;commands:command_0"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:goldens/foo;commands:command_0"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:goldens/foo
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:goldens/foo
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -478,23 +478,23 @@ jobs:
       - job_003
       - job_004
   job_006:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_analyzer_macros;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_analyzer_macros;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_analyzer_macros
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_analyzer_macros
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -513,23 +513,23 @@ jobs:
       - job_003
       - job_004
   job_007:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_cfe_macros;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_cfe_macros;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_cfe_macros
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_cfe_macros
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -548,23 +548,23 @@ jobs:
       - job_003
       - job_004
   job_008:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_builder;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_builder;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_builder
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_builder
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -583,23 +583,23 @@ jobs:
       - job_003
       - job_004
   job_009:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_client;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_client;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_client
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_client
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -618,23 +618,23 @@ jobs:
       - job_003
       - job_004
   job_010:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_host;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_host;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_host
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_host
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -653,23 +653,23 @@ jobs:
       - job_003
       - job_004
   job_011:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_runner;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_runner;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_runner
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_runner
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -688,23 +688,23 @@ jobs:
       - job_003
       - job_004
   job_012:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_server;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_server;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/_macro_server
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/_macro_server
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -723,23 +723,23 @@ jobs:
       - job_003
       - job_004
   job_013:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/macro_service;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/macro_service;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/macro_service
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/macro_service
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -758,23 +758,23 @@ jobs:
       - job_003
       - job_004
   job_014:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:tool/dart_model_generator;commands:test"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:tool/dart_model_generator;commands:test"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:tool/dart_model_generator
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:tool/dart_model_generator
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -793,23 +793,23 @@ jobs:
       - job_003
       - job_004
   job_015:
-    name: "unit_test; linux; Dart 3.6.0-300.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; linux; Dart 3.7.0-39.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: ubuntu-latest
     steps:
       - name: Cache Pub hosted dependencies
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: "~/.pub-cache/hosted"
-          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/dart_model;commands:command_1"
+          key: "os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/dart_model;commands:command_1"
           restore-keys: |
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev;packages:pkgs/dart_model
-            os:ubuntu-latest;pub-cache-hosted;sdk:3.6.0-300.0.dev
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev;packages:pkgs/dart_model
+            os:ubuntu-latest;pub-cache-hosted;sdk:3.7.0-39.0.dev
             os:ubuntu-latest;pub-cache-hosted
             os:ubuntu-latest
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1178,13 +1178,13 @@ jobs:
       - job_003
       - job_004
   job_026:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_analyzer_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1203,13 +1203,13 @@ jobs:
       - job_003
       - job_004
   job_027:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_cfe_macros; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1228,13 +1228,13 @@ jobs:
       - job_003
       - job_004
   job_028:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_builder; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1253,13 +1253,13 @@ jobs:
       - job_003
       - job_004
   job_029:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_client; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1278,13 +1278,13 @@ jobs:
       - job_003
       - job_004
   job_030:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_host; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1303,13 +1303,13 @@ jobs:
       - job_003
       - job_004
   job_031:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_runner; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1328,13 +1328,13 @@ jobs:
       - job_003
       - job_004
   job_032:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/_macro_server; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1353,13 +1353,13 @@ jobs:
       - job_003
       - job_004
   job_033:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/macro_service; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1378,13 +1378,13 @@ jobs:
       - job_003
       - job_004
   job_034:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: tool/dart_model_generator; `dart test --test-randomize-ordering-seed=random`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
@@ -1403,13 +1403,13 @@ jobs:
       - job_003
       - job_004
   job_035:
-    name: "unit_test; windows; Dart 3.6.0-300.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
+    name: "unit_test; windows; Dart 3.7.0-39.0.dev; PKG: pkgs/dart_model; `dart -Ddebug_json_buffer=true test --test-randomize-ordering-seed=random -c source`"
     runs-on: windows-latest
     steps:
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
         with:
-          sdk: "3.6.0-300.0.dev"
+          sdk: "3.7.0-39.0.dev"
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
