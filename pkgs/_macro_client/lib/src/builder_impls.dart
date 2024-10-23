@@ -32,9 +32,9 @@ abstract base class TypesBuilderBase extends BuilderBase
   TypesBuilderBase.nested(super.host, super.response) : super.nested();
 
   @override
-  void declareType(String name, Code typeDeclaration) {
+  void declareType(String name, Augmentation typeDeclaration) {
     response.newTypeNames!.add(name);
-    response.libraryAugmentations!.add(Augmentation(code: [typeDeclaration]));
+    response.libraryAugmentations!.add(typeDeclaration);
   }
 }
 
@@ -44,15 +44,14 @@ base mixin ExtendsClauseBuilderImpl on TypesBuilderBase
   ///
   /// The type must not already have an `extends` clause.
   @override
-  void extendsType(Code superclass) {
-    final augmentation = Augmentation(code: [superclass]);
+  void extendsType(Augmentation superclass) {
     response.extendsTypeAugmentations!.update(
       model.qualifiedNameOf(target.node)!.name,
       // TODO: This should only ever have one thing, but we don't have setters
       // so a list is a hack for lazily adding this field. We should probably
       // throw though if we see more than one.
-      (value) => value..add(augmentation),
-      ifAbsent: () => [augmentation],
+      (value) => value..add(superclass),
+      ifAbsent: () => [superclass],
     );
   }
 }
@@ -61,12 +60,11 @@ base mixin ImplementsClauseBuilderImpl on TypesBuilderBase
     implements ImplementsClauseBuilder {
   /// Appends [interfaces] to the list of interfaces for this type.
   @override
-  void appendInterfaces(Iterable<Code> interfaces) {
-    final augmentation = Augmentation(code: interfaces.toList());
+  void appendInterfaces(Iterable<Augmentation> interfaces) {
     response.interfaceAugmentations!.update(
       model.qualifiedNameOf(target.node)!.name,
-      (value) => value..add(augmentation),
-      ifAbsent: () => [augmentation],
+      (value) => value..addAll(interfaces),
+      ifAbsent: () => [...interfaces],
     );
   }
 }
@@ -75,12 +73,11 @@ base mixin WithClauseBuilderImpl on TypesBuilderBase
     implements WithClauseBuilder {
   /// Appends [mixins] to the list of mixins for this type.
   @override
-  void appendMixins(Iterable<Code> mixins) {
-    final augmentation = Augmentation(code: mixins.toList());
+  void appendMixins(Iterable<Augmentation> mixins) {
     response.mixinAugmentations!.update(
       model.qualifiedNameOf(target.node)!.name,
-      (value) => value..add(augmentation),
-      ifAbsent: () => [augmentation],
+      (value) => value..addAll(mixins),
+      ifAbsent: () => [...mixins],
     );
   }
 }
@@ -107,8 +104,8 @@ abstract base class DeclarationsBuilderBase extends BuilderBase
   DeclarationsBuilderBase.nested(super.host, super.response) : super.nested();
 
   @override
-  void declareInLibrary(Code declaration) {
-    response.libraryAugmentations!.add(Augmentation(code: [declaration]));
+  void declareInLibrary(Augmentation declaration) {
+    response.libraryAugmentations!.add(declaration);
   }
 }
 
@@ -120,12 +117,11 @@ abstract base class MemberDeclarationsBuilderBase
       : super.nested();
 
   @override
-  void declareInType(Code declaration) {
-    final augmentation = Augmentation(code: [declaration]);
+  void declareInType(Augmentation declaration) {
     response.typeAugmentations!.update(
       model.qualifiedNameOf(target.node)!.name,
-      (value) => value..add(augmentation),
-      ifAbsent: () => [augmentation],
+      (value) => value..add(declaration),
+      ifAbsent: () => [declaration],
     );
   }
 }
@@ -141,10 +137,55 @@ final class ClassDeclarationsBuilderImpl extends MemberDeclarationsBuilderBase
       : super.nested();
 }
 
-abstract base class InterfaceDefinitionBuilderBase extends BuilderBase {
-  InterfaceDefinitionBuilderBase(super.host);
+final class MethodDefinitionsBuilderImpl extends BuilderBase
+    implements MethodDefinitionsBuilder {
+  @override
+  final Member target;
 
-  InterfaceDefinitionBuilderBase.nested(super.host, super.response)
+  MethodDefinitionsBuilderImpl(this.target, super.host);
+
+  MethodDefinitionsBuilderImpl.nested(this.target, super.host, super.response)
+      : super.nested();
+
+  @override
+  void augment({Augmentation? body, Augmentation? docCommentsAndMetadata}) {
+    final augmentation = _buildFunctionAugmentation(body, target, model,
+        docComments: docCommentsAndMetadata);
+    response.typeAugmentations!.update(
+        target.parentInterface.name, (value) => value..add(augmentation),
+        ifAbsent: () => [augmentation]);
+  }
+}
+
+final class ConstructorDefinitionsBuilderImpl extends BuilderBase
+    implements ConstructorDefinitionsBuilder {
+  @override
+  final Member target;
+
+  ConstructorDefinitionsBuilderImpl(this.target, super.host);
+
+  ConstructorDefinitionsBuilderImpl.nested(
+      this.target, super.host, super.response)
+      : super.nested();
+
+  @override
+  void augment(
+      {Augmentation? body,
+      List<Augmentation>? initializers,
+      Augmentation? docCommentsAndMetadata}) {
+    final augmentation = _buildFunctionAugmentation(body, target, model,
+        initializers: initializers, docComments: docCommentsAndMetadata);
+    response.typeAugmentations!.update(
+        target.parentInterface.name, (value) => value..add(augmentation),
+        ifAbsent: () => [augmentation]);
+  }
+}
+
+abstract base class InterfaceDefinitionsBuilderBase extends BuilderBase
+    implements InterfaceDefinitionsBuilder {
+  InterfaceDefinitionsBuilderBase(super.host);
+
+  InterfaceDefinitionsBuilderBase.nested(super.host, super.response)
       : super.nested();
 
   /// Retrieve a [FieldDefinitionsBuilder] for a field with [name] in
@@ -152,6 +193,7 @@ abstract base class InterfaceDefinitionBuilderBase extends BuilderBase {
   ///
   /// Throws if [name] does not refer to a field in the [target] interface
   /// declaration.
+  @override
   FieldDefinitionsBuilder buildField(QualifiedName name) =>
       throw UnimplementedError();
 
@@ -160,19 +202,23 @@ abstract base class InterfaceDefinitionBuilderBase extends BuilderBase {
   ///
   /// Throws if [name] does not refer to a method in the [target] interface
   /// declaration.
+  @override
   MethodDefinitionsBuilder buildMethod(QualifiedName name) =>
-      throw UnimplementedError();
+      MethodDefinitionsBuilderImpl.nested(
+          Member.fromJson(model.lookup(name)!), host, response);
 
   /// Retrieve a [ConstructorDefinitionsBuilder] for a constructor with [name]
   /// in [target].
   ///
   /// Throws if [name] does not refer to a constructor in the [target]
   /// interface declaration.
+  @override
   ConstructorDefinitionsBuilder buildConstructor(QualifiedName name) =>
-      throw UnimplementedError();
+      ConstructorDefinitionsBuilderImpl.nested(
+          Member.fromJson(model.lookup(name)!), host, response);
 }
 
-final class ClassDefinitionsBuilderImpl extends InterfaceDefinitionBuilderBase
+final class ClassDefinitionsBuilderImpl extends InterfaceDefinitionsBuilderBase
     implements ClassDefinitionsBuilder {
   @override
   final Interface target;
@@ -181,4 +227,110 @@ final class ClassDefinitionsBuilderImpl extends InterfaceDefinitionBuilderBase
 
   ClassDefinitionsBuilderImpl.nested(this.target, super.host, super.response)
       : super.nested();
+}
+
+/// Builds the code to augment a function, method, or constructor with a new
+/// body.
+///
+/// The [initializers] parameter can only be used if [declaration] is a
+/// constructor.
+Augmentation _buildFunctionAugmentation(
+    Augmentation? body, Member declaration, Model model,
+    {List<Augmentation>? initializers, Augmentation? docComments}) {
+  assert(initializers == null || declaration.properties.isConstructor);
+  final properties = declaration.properties;
+  final qualifiedName = model.qualifiedNameOf(declaration.node)!;
+  final parts = <Object?>[
+    if (docComments != null) ...[docComments, '\n'],
+    if (declaration.properties.isMethod) '  ',
+    'augment ',
+    if (properties.isConstructor) ...[
+      // TODO: Uncomment once we have `isConst`.
+      // if (properties.isConst) 'const ',
+      // TODO: Uncomment once we have `isFactory`.
+      // if (properties.isFactory) 'factory ',
+      declaration.parentInterface.name,
+      if (qualifiedName.name.isNotEmpty) '.',
+    ] else ...[
+      if (properties.isMethod && properties.isStatic) 'static ',
+      // TODO: Uncomment once we have support for converting types into code.
+      // declaration.returnType.code,
+      ' ',
+      // TODO: Uncomment once we have `isOperator`.
+      // if (properties.isOperator) 'operator ',
+    ],
+    if (properties.isGetter) 'get ',
+    // TODO: Uncomment once we have `isSetter`.
+    if (properties.isGetter) 'set ',
+    qualifiedName.name,
+    if (!properties.isGetter) ...[
+      // TODO: Uncomment once we have `typeParameters`.
+      // if (declaration.typeParameters.isNotEmpty) ...[
+      //   '<',
+      //   for (TypeParameterDeclaration typeParam
+      //       in declaration.typeParameters) ...[
+      //     typeParam.identifier.name,
+      //     if (typeParam.bound != null) ...[' extends ', typeParam.bound!.code],
+      //     if (typeParam != declaration.typeParameters.last) ', ',
+      //   ],
+      //   '>',
+      // ],
+      '(',
+      // TODO: Extreme hack alert!!! Parameters only expose their types today
+      // which isn't enough, this assumes we are a fromJson method :D.
+      if (declaration.requiredPositionalParameters.length == 1)
+        'json'
+      else if (declaration.requiredPositionalParameters.isNotEmpty)
+        throw UnimplementedError(),
+      // for (var positionalRequired
+      //     in declaration.requiredPositionalParameters) ...[
+      //   positionalRequired.code,
+      //   ', ',
+      // ],
+      if (declaration.optionalPositionalParameters.isNotEmpty) ...[
+        // TODO: Implement this.
+        throw UnimplementedError(),
+        // '[',
+        // for (var positionalOptional
+        //     in declaration.optionalPositionalParameters) ...[
+        //   positionalOptional.code,
+        //   ', ',
+        // ],
+        // ']',
+      ],
+      if (declaration.namedParameters.isNotEmpty) ...[
+        // TODO: Implement this.
+        throw UnimplementedError(),
+        // '{',
+        // for (var named in declaration.namedParameters) ...[
+        //   named.code,
+        //   ', ',
+        // ],
+        // '}',
+      ],
+      ')',
+    ],
+    if (initializers != null && initializers.isNotEmpty) ...[
+      '\n      : ',
+      ...initializers.first.code,
+      for (var initializer in initializers.skip(1)) ...[
+        ',\n        ',
+        ...initializer.code,
+      ],
+    ],
+    if (body == null)
+      ';'
+    else ...[
+      ' ',
+      body,
+    ]
+  ];
+  return Augmentation(code: [
+    for (var part in parts)
+      switch (part) {
+        Code() => part,
+        String() => Code.string(part),
+        _ => throw StateError('Unexpected code kind $part'),
+      },
+  ]);
 }

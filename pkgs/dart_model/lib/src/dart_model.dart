@@ -5,6 +5,7 @@
 import 'dart_model.g.dart';
 import 'json_buffer/json_buffer_builder.dart';
 import 'lazy_merged_map.dart';
+import 'scopes.dart';
 
 export 'dart_model.g.dart';
 
@@ -19,7 +20,32 @@ extension QualifiedNameExtension on QualifiedName {
       other.isStatic == isStatic;
 }
 
+extension ParentInterface on Member {
+  QualifiedName get parentInterface {
+    final self = MacroScope.current.model.qualifiedNameOf(node)!;
+    return QualifiedName(uri: self.uri, name: self.name);
+  }
+}
+
 extension ModelExtension on Model {
+  /// Looks up [name] in `this`.
+  ///
+  /// It is on the user to cast this to a proper extension type.
+  ///
+  /// Returns null if it is not present.
+  // TODO: return a `Declaration` interface?
+  Map<String, Object?>? lookup(QualifiedName name) {
+    final library = uris[name.uri];
+    if (library == null) return null;
+    if (name.scope == null) {
+      throw UnsupportedError(
+          'Can only look up names in nested scopes for now.');
+    }
+    final scope = library.scopes[name.scope!];
+    if (scope == null) return null;
+    return scope.members[name.name]?.node;
+  }
+
   /// Returns the path in the model to [node], or `null` if
   /// [node] is not in this [Model].
   ///

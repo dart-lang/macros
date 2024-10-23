@@ -34,7 +34,7 @@ abstract interface class TypesBuilder implements Builder {
   void declareType(
       String name,
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Code typeDeclaration);
+      Augmentation typeDeclaration);
 }
 
 /// The API used by macros in the type phase to add interfaces to [target]s
@@ -46,7 +46,7 @@ abstract interface class ImplementsClauseBuilder implements TypesBuilder {
   /// Appends [interfaces] to the `implements` clause on [target].
   void appendInterfaces(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Iterable<Code> interfaces);
+      Iterable<Augmentation> interfaces);
 }
 
 /// The API used by macros in the type phase to add mixins to the [target]s
@@ -58,7 +58,7 @@ abstract interface class WithClauseBuilder implements TypesBuilder {
   /// Appends [mixins] to the `with` clause on [target].
   void appendMixins(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Iterable<Code> mixins);
+      Iterable<Augmentation> mixins);
 }
 
 /// The API used by macros in the type phase to set the `extends` clause
@@ -72,7 +72,7 @@ abstract interface class ExtendsClauseBuilder implements TypesBuilder {
   /// The [target] type must not already have an `extends` clause.
   void extendsType(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Code supertype);
+      Augmentation supertype);
 }
 
 /// The builder API for [LibraryTypesMacro]s.
@@ -187,7 +187,7 @@ abstract interface class DeclarationsBuilder implements Builder {
   /// Note that type declarations are not supported.
   void declareInLibrary(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Code declaration);
+      Augmentation declaration);
 }
 
 /// The builder API for [LibraryDeclarationsMacro]s.
@@ -251,7 +251,7 @@ abstract interface class MemberDeclarationsBuilder
   /// Adds a new declaration to the [target] interface.
   void declareInType(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Code declaration);
+      Augmentation declaration);
 }
 
 /// The builder API for [ClassDeclarationsMacro]s.
@@ -272,7 +272,7 @@ abstract interface class EnumDeclarationsBuilder
   /// Adds a new enum value declaration to the [target] enum.
   void declareEnumValue(
       // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-      Code declaration);
+      Augmentation declaration);
 }
 
 /// The builder API for [EnumValueDeclarationsMacro]s.
@@ -365,9 +365,9 @@ abstract interface class FunctionDefinitionsBuilder
   /// TODO: Link the library augmentations proposal to describe the semantics.
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? body,
+    Augmentation? body,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? docCommentsAndMetadata,
+    Augmentation? docCommentsAndMetadata,
   });
 }
 
@@ -400,11 +400,11 @@ abstract interface class ConstructorDefinitionsBuilder
   /// TODO: Link the library augmentations proposal to describe the semantics.
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? body,
+    Augmentation? body,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    List<Code>? initializers,
+    List<Augmentation>? initializers,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? docCommentsAndMetadata,
+    Augmentation? docCommentsAndMetadata,
   });
 }
 
@@ -421,7 +421,7 @@ abstract interface class VariableDefinitionsBuilder
   /// provided, minus the `augment` keyword (which will be implicitly added).
   ///
   /// To provide doc comments or metadata for [getter] or [setter], just include
-  /// them in the [Code] object for those.
+  /// them in the [Augmentation] object for those.
   ///
   /// If [docCommentsAndMetadata] or [initializer] are supplied they will be
   /// attached to a standard variable augmentation. If only
@@ -431,13 +431,13 @@ abstract interface class VariableDefinitionsBuilder
   /// TODO: Link the library augmentations proposal to describe the semantics.
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? getter,
+    Augmentation? getter,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? setter,
+    Augmentation? setter,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? initializer,
+    Augmentation? initializer,
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? docCommentsAndMetadata,
+    Augmentation? docCommentsAndMetadata,
   });
 }
 
@@ -514,7 +514,7 @@ abstract interface class EnumValueDefinitionsBuilder
   /// augment declaration.
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Code? docCommentsAndMetadata,
+    Augmentation? docCommentsAndMetadata,
   });
 }
 

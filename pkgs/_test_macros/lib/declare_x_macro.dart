@@ -22,11 +22,8 @@ class DeclareXImplementation implements ClassDeclarationsMacro {
       runsInPhases: [2]);
 
   @override
-  Future<AugmentResponse> buildDeclarationsForClass(
-      Interface target, Model model, Host host) async {
-    return AugmentResponse()
-      ..typeAugmentations![model.qualifiedNameOf(target.node)!.name] = [
-        Augmentation(code: expandTemplate('int get x => 3;'))
-      ];
+  void buildDeclarationsForClass(ClassDeclarationsBuilder builder) {
+    builder
+        .declareInType(Augmentation(code: expandTemplate('int get x => 3;')));
   }
 }

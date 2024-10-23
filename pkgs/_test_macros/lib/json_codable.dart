@@ -27,48 +27,40 @@ class JsonCodableImplementation
       runsInPhases: [2, 3]);
 
   @override
-  Future<AugmentResponse> buildDeclarationsForClass(
-      Interface target, Model model, Host host) async {
-    final qualifiedName = model.qualifiedNameOf(target.node)!;
-    return AugmentResponse()
-      ..typeAugmentations![qualifiedName.name] = [
-        Augmentation(code: expandTemplate('''
+  void buildDeclarationsForClass(ClassDeclarationsBuilder builder) {
+    final name = builder.model.qualifiedNameOf(builder.target.node)!.name;
+    builder
+      ..declareInType(Augmentation(code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
-// external ${qualifiedName.name}.fromJson($_jsonMapType json);
+// external $name.fromJson($_jsonMapType json);
+   ''')))
+      ..declareInType(Augmentation(code: expandTemplate('''
+// TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external $_jsonMapType toJson();
-   '''))
-      ];
+   ''')));
   }
 
   @override
-  Future<AugmentResponse> buildDefinitionsForClass(
-      Interface target, Model model, Host host) async {
-    final qualifiedName = model.qualifiedNameOf(target.node)!;
+  void buildDefinitionsForClass(ClassDefinitionsBuilder builder) async {
+    final qualifiedName = builder.model.qualifiedNameOf(builder.target.node)!;
     // TODO(davidmorgan): put `extends` information directly in `Interface`.
     final superclassName =
         MacroScope.current.typeSystem.supertypeOf(qualifiedName);
 
-    return AugmentResponse()
-      ..typeAugmentations![qualifiedName.name] = [
-        await _generateFromJson(
-            host, model, qualifiedName, superclassName, target),
-        await _generateToJson(
-            host, model, qualifiedName, superclassName, target),
-      ];
+    await _generateFromJson(builder, qualifiedName, superclassName);
+    await _generateToJson(builder, qualifiedName, superclassName);
   }
 
-  Future<Augmentation> _generateFromJson(
-    Host host,
-    Model model,
+  Future<void> _generateFromJson(
+    InterfaceDefinitionsBuilder builder,
     QualifiedName target,
     QualifiedName superclassName,
-    Interface clazz,
   ) async {
     var superclassHasFromJson = false;
     // TODO(davidmorgan): add recommended way to check for core types.
     if (superclassName.asString != 'dart:core#Object') {
       // TODO(davidmorgan): first query could already fetch the super class.
-      final supermodel = await host.query(Query(target: superclassName));
+      final supermodel = await builder.query(Query(target: superclassName));
       final superclass =
           supermodel.uris[superclassName.uri]!.scopes[superclassName.name]!;
       final constructor = superclass.members['fromJson'];
@@ -84,8 +76,8 @@ class JsonCodableImplementation
     }
 
     final initializers = <String>[];
-    for (final field
-        in clazz.members.entries.where((m) => m.value.properties.isField)) {
+    for (final field in builder.target.members.entries
+        .where((m) => m.value.properties.isField)) {
       final name = field.key;
       final type = field.value.returnType;
       initializers
@@ -96,25 +88,24 @@ class JsonCodableImplementation
       initializers.add('super.fromJson(json)');
     }
 
-    // TODO(davidmorgan): helper for augmenting initializers.
-    // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
-    return Augmentation(code: expandTemplate('''
-augment ${target.name}.fromJson($_jsonMapType json) :
-${initializers.join(',\n')};
-'''));
+    builder
+        .buildConstructor(builder.model
+            .qualifiedNameOf(builder.target.members['fromJson']!.node)!)
+        .augment(initializers: [
+      for (var initializer in initializers)
+        Augmentation(code: expandTemplate(initializer)),
+    ]);
   }
 
-  Future<Augmentation> _generateToJson(
-    Host host,
-    Model model,
+  Future<void> _generateToJson(
+    InterfaceDefinitionsBuilder builder,
     QualifiedName target,
     QualifiedName superclassName,
-    Interface clazz,
   ) async {
     var superclassHasToJson = false;
     if (superclassName.asString != 'dart:core#Object') {
       // TODO(davidmorgan): first query could already fetch the super class.
-      final supermodel = await host.query(Query(target: superclassName));
+      final supermodel = await builder.query(Query(target: superclassName));
       final superclass =
           supermodel.uris[superclassName.uri]!.scopes[superclassName.name]!;
       final method = superclass.members['toJson'];
@@ -130,8 +121,8 @@ ${initializers.join(',\n')};
     }
 
     final serializers = <String>[];
-    for (final field
-        in clazz.members.entries.where((m) => m.value.properties.isField)) {
+    for (final field in builder.target.members.entries
+        .where((m) => m.value.properties.isField)) {
       final name = field.key;
       final type = field.value.returnType;
       var serializer = "json[r'$name'] = ${_convertTypeToJson(name, type)};\n";
@@ -145,13 +136,16 @@ ${initializers.join(',\n')};
     // See: https://github.com/dart-lang/sdk/blob/main/pkg/_macros/lib/src/executor/builder_impls.dart#L500
     final jsonInitializer =
         superclassHasToJson ? 'super.toJson()' : '$_jsonMapTypeForLiteral{}';
-    return Augmentation(code: expandTemplate('''
-augment $_jsonMapType toJson() {
+    builder
+        .buildMethod(builder.model
+            .qualifiedNameOf(builder.target.members['toJson']!.node)!)
+        .augment(body: Augmentation(code: expandTemplate('''
+{
   final json = $jsonInitializer;
 ${serializers.join('')}
   return json;
 }
-'''));
+''')));
   }
 
   /// Returns whether [constructor] is a constructor
