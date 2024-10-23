@@ -155,6 +155,11 @@ class MacroClient {
   }
 }
 
+/// Interface for the remote Host API for macros to query against.
+abstract class Host {
+  Future<Model> query(Query query);
+}
+
 /// [Host] that is connected to a remote macro host.
 ///
 /// Wraps `MacroClient` exposing just what should be available to the macro.

@@ -329,21 +329,21 @@ abstract interface class LibraryDefinitionsBuilder
   ///
   /// Throws if [name] does not refer to an interface declaration in the
   /// [target] library.
-  Future<InterfaceDefinitionsBuilder> buildInterface(QualifiedName name);
+  InterfaceDefinitionsBuilder buildInterface(QualifiedName name);
 
   /// Retrieve a [FunctionDefinitionsBuilder] for a function declaration with
   /// [name] in [target].
   ///
   /// Throws if [name] does not refer to a top level function declaration in the
   /// [target] library.
-  Future<FunctionDefinitionsBuilder> buildFunction(QualifiedName name);
+  FunctionDefinitionsBuilder buildFunction(QualifiedName name);
 
   /// Retrieve a [VariableDefinitionsBuilder] for a variable declaration with
   /// [name] in [target].
   ///
   /// Throws if [name] does not refer to a top level variable declaration in the
   /// [target] library.
-  Future<VariableDefinitionsBuilder> buildVariable(QualifiedName name);
+  VariableDefinitionsBuilder buildVariable(QualifiedName name);
 }
 
 /// The builder API for [FunctionDefinitionsMacro]s.
@@ -461,21 +461,21 @@ abstract interface class InterfaceDefinitionsBuilder
   ///
   /// Throws if [name] does not refer to a field in the [target] interface
   /// declaration.
-  Future<FieldDefinitionsBuilder> buildField(QualifiedName name);
+  FieldDefinitionsBuilder buildField(QualifiedName name);
 
   /// Retrieve a [MethodDefinitionsBuilder] for a method with [name] in
   /// [target].
   ///
   /// Throws if [name] does not refer to a method in the [target] interface
   /// declaration.
-  Future<MethodDefinitionsBuilder> buildMethod(QualifiedName name);
+  MethodDefinitionsBuilder buildMethod(QualifiedName name);
 
   /// Retrieve a [ConstructorDefinitionsBuilder] for a constructor with [name]
   /// in [target].
   ///
   /// Throws if [name] does not refer to a constructor in the [target]
   /// interface declaration.
-  Future<ConstructorDefinitionsBuilder> buildConstructor(QualifiedName name);
+  ConstructorDefinitionsBuilder buildConstructor(QualifiedName name);
 }
 
 /// The builder API for [ClassDefinitionsMacro]s.
@@ -498,7 +498,7 @@ abstract interface class EnumDefinitionsBuilder
   ///
   /// Throws if [name] does not refer to an entry on the [target] enum
   /// declaration.
-  Future<EnumValueDefinitionsBuilder> buildEnumValue(QualifiedName name);
+  EnumValueDefinitionsBuilder buildEnumValue(QualifiedName name);
 }
 
 /// The builder API for [EnumValueDefinitionsMacro]s.
