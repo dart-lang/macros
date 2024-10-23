@@ -270,7 +270,10 @@ Augmentation _buildFunctionAugmentation(
       //   for (TypeParameterDeclaration typeParam
       //       in declaration.typeParameters) ...[
       //     typeParam.identifier.name,
-      //     if (typeParam.bound != null) ...[' extends ', typeParam.bound!.code],
+      //     if (typeParam.bound != null) ...[
+      //       ' extends ',
+      //       typeParam.bound!.code,
+      //     ],
       //     if (typeParam != declaration.typeParameters.last) ', ',
       //   ],
       //   '>',
