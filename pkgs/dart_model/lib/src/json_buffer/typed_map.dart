@@ -71,15 +71,24 @@ class TypedMapSchema {
   /// [Type#_sizeInBytes] for all present values.
   ///
   /// Additionally returns a [bool]: whether the map is filled.
-  (int, bool) _valueSizeOf(
-      [Object? v0,
-      Object? v1,
-      Object? v2,
-      Object? v3,
-      Object? v4,
-      Object? v5,
-      Object? v6,
-      Object? v7]) {
+  (int, bool) _valueSizeOf([
+    Object? v0,
+    Object? v1,
+    Object? v2,
+    Object? v3,
+    Object? v4,
+    Object? v5,
+    Object? v6,
+    Object? v7,
+    Object? v8,
+    Object? v9,
+    Object? v10,
+    Object? v11,
+    Object? v12,
+    Object? v13,
+    Object? v14,
+    Object? v15,
+  ]) {
     if (_isAllBooleans) {
       // All fields take up one bit, count then compute how many bytes.
       var bits = 0;
@@ -91,6 +100,14 @@ class TypedMapSchema {
       if (v5 != null) ++bits;
       if (v6 != null) ++bits;
       if (v7 != null) ++bits;
+      if (v8 != null) ++bits;
+      if (v9 != null) ++bits;
+      if (v10 != null) ++bits;
+      if (v11 != null) ++bits;
+      if (v12 != null) ++bits;
+      if (v13 != null) ++bits;
+      if (v14 != null) ++bits;
+      if (v15 != null) ++bits;
       return ((bits + 7) ~/ 8, bits == length);
     } else {
       // Sum the sizes of present values.
@@ -103,6 +120,14 @@ class TypedMapSchema {
       if (v5 != null) result += _valueTypes[5]._sizeInBytes;
       if (v6 != null) result += _valueTypes[6]._sizeInBytes;
       if (v7 != null) result += _valueTypes[7]._sizeInBytes;
+      if (v8 != null) result += _valueTypes[8]._sizeInBytes;
+      if (v9 != null) result += _valueTypes[9]._sizeInBytes;
+      if (v10 != null) result += _valueTypes[10]._sizeInBytes;
+      if (v11 != null) result += _valueTypes[11]._sizeInBytes;
+      if (v12 != null) result += _valueTypes[12]._sizeInBytes;
+      if (v13 != null) result += _valueTypes[13]._sizeInBytes;
+      if (v14 != null) result += _valueTypes[14]._sizeInBytes;
+      if (v15 != null) result += _valueTypes[15]._sizeInBytes;
       return (result, result == _filledValueSize);
     }
   }
@@ -134,22 +159,32 @@ extension TypedMaps on JsonBufferBuilder {
   /// createdTypedMap2, etc) are not faster in the JIT VM but they are about
   /// 5-10% faster in the AOT VM, consider adding specialized methods. This
   /// will presumably matter more when if larger schemas are supported.
-  Map<String, Object?> createTypedMap(TypedMapSchema schema,
-      [Object? v0,
-      Object? v1,
-      Object? v2,
-      Object? v3,
-      Object? v4,
-      Object? v5,
-      Object? v6,
-      Object? v7]) {
+  Map<String, Object?> createTypedMap(
+    TypedMapSchema schema, [
+    Object? v0,
+    Object? v1,
+    Object? v2,
+    Object? v3,
+    Object? v4,
+    Object? v5,
+    Object? v6,
+    Object? v7,
+    Object? v8,
+    Object? v9,
+    Object? v10,
+    Object? v11,
+    Object? v12,
+    Object? v13,
+    Object? v14,
+    Object? v15,
+  ]) {
     _explanations?.push('addTypedMap $schema');
 
     // Compute how much space the values need, and whether the map is filled.
     // If the map is filled this is marked with the high bit of the schema
     // pointer, then the field set is omitted.
-    final (valuesSize, filled) =
-        schema._valueSizeOf(v0, v1, v2, v3, v4, v5, v6, v7);
+    final (valuesSize, filled) = schema._valueSizeOf(
+        v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
 
     // Layout is: pointer to schema, field set (unless filled!), values.
     final pointer = _reserve(
@@ -165,16 +200,30 @@ extension TypedMaps on JsonBufferBuilder {
     // If not filled, write the field set: a bit vector indicating which fields
     // are present.
     if (!filled) {
-      _setByte(
-          pointer + _pointerSize,
-          (v0 == null ? 0 : 0x01) +
-              (v1 == null ? 0 : 0x02) +
-              (v2 == null ? 0 : 0x04) +
-              (v3 == null ? 0 : 0x08) +
-              (v4 == null ? 0 : 0x10) +
-              (v5 == null ? 0 : 0x20) +
-              (v6 == null ? 0 : 0x40) +
-              (v7 == null ? 0 : 0x80));
+      if (schema._fieldSetSize >= 1) {
+        _setByte(
+            pointer + _pointerSize,
+            (v0 == null ? 0 : 0x01) +
+                (v1 == null ? 0 : 0x02) +
+                (v2 == null ? 0 : 0x04) +
+                (v3 == null ? 0 : 0x08) +
+                (v4 == null ? 0 : 0x10) +
+                (v5 == null ? 0 : 0x20) +
+                (v6 == null ? 0 : 0x40) +
+                (v7 == null ? 0 : 0x80));
+      }
+      if (schema._fieldSetSize >= 2) {
+        _setByte(
+            pointer + _pointerSize + 1,
+            (v8 == null ? 0 : 0x01) +
+                (v9 == null ? 0 : 0x02) +
+                (v10 == null ? 0 : 0x04) +
+                (v11 == null ? 0 : 0x08) +
+                (v12 == null ? 0 : 0x10) +
+                (v13 == null ? 0 : 0x20) +
+                (v14 == null ? 0 : 0x40) +
+                (v15 == null ? 0 : 0x80));
+      }
     }
 
     // Write the values.
@@ -187,6 +236,13 @@ extension TypedMaps on JsonBufferBuilder {
       void addBit(bool bit) {
         if (bit) byte += bitmask;
         bitmask <<= 1;
+
+        if (bitmask == 0x100) {
+          _setByte(valuePointer, byte);
+          byte = 0;
+          bitmask = 0x01;
+          ++valuePointer;
+        }
       }
 
       if (v0 != null) addBit(v0 == true);
@@ -197,6 +253,14 @@ extension TypedMaps on JsonBufferBuilder {
       if (v5 != null) addBit(v5 == true);
       if (v6 != null) addBit(v6 == true);
       if (v7 != null) addBit(v7 == true);
+      if (v8 != null) addBit(v8 == true);
+      if (v9 != null) addBit(v9 == true);
+      if (v10 != null) addBit(v10 == true);
+      if (v11 != null) addBit(v11 == true);
+      if (v12 != null) addBit(v12 == true);
+      if (v13 != null) addBit(v13 == true);
+      if (v14 != null) addBit(v14 == true);
+      if (v15 != null) addBit(v15 == true);
 
       // Only write the byte if at least one bit was written.
       if (bitmask != 0x01) {
@@ -221,6 +285,14 @@ extension TypedMaps on JsonBufferBuilder {
       if (v5 != null) addValue(5, v5);
       if (v6 != null) addValue(6, v6);
       if (v7 != null) addValue(7, v7);
+      if (v8 != null) addValue(8, v8);
+      if (v9 != null) addValue(9, v9);
+      if (v10 != null) addValue(10, v10);
+      if (v11 != null) addValue(11, v11);
+      if (v12 != null) addValue(12, v12);
+      if (v13 != null) addValue(13, v13);
+      if (v14 != null) addValue(14, v14);
+      if (v15 != null) addValue(15, v15);
     }
 
     _explanations?.pop();

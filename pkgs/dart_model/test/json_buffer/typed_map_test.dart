@@ -213,5 +213,115 @@ void main() {
         'g': growableMap
       });
     });
+
+    test('value with sixteen booleans', () {
+      final schema = TypedMapSchema({
+        for (var i = 0; i != 16; ++i) 'k$i': Type.boolean,
+      });
+
+      final map = builder.createTypedMap(
+        schema,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      );
+
+      expectFullyEquivalentMaps(map, {
+        for (var i = 0; i != 16; ++i) 'k$i': i.isEven,
+      });
+
+      final mapWithNulls = builder.createTypedMap(
+        schema,
+        true,
+        false,
+        null,
+        true,
+        false,
+        null,
+        true,
+        false,
+        null,
+        true,
+        false,
+        null,
+        true,
+        false,
+        null,
+        true,
+      );
+
+      expectFullyEquivalentMaps(mapWithNulls, {
+        for (var i = 0; i != 16; ++i)
+          if (i % 3 != 2) 'k$i': i % 3 == 0,
+      });
+    });
+
+    test('value with sixteen mixed fields', () {
+      final schema = TypedMapSchema({
+        for (var i = 0; i != 16; ++i) 'k$i': Type.stringPointer,
+      });
+
+      final map = builder.createTypedMap(
+        schema,
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+      );
+
+      expectFullyEquivalentMaps(map, {
+        for (var i = 0; i != 16; ++i) 'k$i': '$i',
+      });
+
+      final mapWithNulls = builder.createTypedMap(
+        schema,
+        null,
+        '1',
+        '2',
+        '3',
+        '4',
+        null,
+        '6',
+        '7',
+        '8',
+        '9',
+        null,
+        '11',
+        '12',
+        '13',
+        '14',
+        null,
+      );
+
+      expectFullyEquivalentMaps(mapWithNulls, {
+        for (var i = 0; i != 15; ++i)
+          if (i % 5 != 0) 'k$i': '$i',
+      });
+    });
   });
 }
