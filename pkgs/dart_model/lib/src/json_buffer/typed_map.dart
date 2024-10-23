@@ -237,6 +237,8 @@ extension TypedMaps on JsonBufferBuilder {
         if (bit) byte += bitmask;
         bitmask <<= 1;
 
+        // On reaching bit 9 of `byte`, write the byte and reset `byte` and
+        // `bitmask`.
         if (bitmask == 0x100) {
           _setByte(valuePointer, byte);
           byte = 0;
