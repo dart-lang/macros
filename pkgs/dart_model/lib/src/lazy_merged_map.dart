@@ -57,6 +57,13 @@ class LazyMergedMapView extends MapBase<String, Object?> {
       throw UnsupportedError('Merged maps are read only');
 
   @override
+  bool operator ==(Object other) =>
+      other is LazyMergedMapView && other.left == left && other.right == right;
+
+  @override
+  int get hashCode => Object.hash(left, right);
+
+  @override
   void clear() => throw UnsupportedError('Merged maps are read only');
 
   @override
@@ -76,6 +83,18 @@ extension AllMaps on Map<String, Object?> {
   /// All the maps merged into this map, recursively expanded.
   Iterable<Map<String, Object?>> get expand sync* {
     if (this case final LazyMergedMapView self) {
+      yield* self.left.expand;
+      yield* self.right.expand;
+    } else {
+      yield this;
+    }
+  }
+
+  /// All the maps merged into this map, recursively expanded, including the
+  /// merged map objects themselves.
+  Iterable<Map<String, Object?>> get expandWithMerged sync* {
+    if (this case final LazyMergedMapView self) {
+      yield self;
       yield* self.left.expand;
       yield* self.right.expand;
     } else {

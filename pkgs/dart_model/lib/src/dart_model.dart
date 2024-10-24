@@ -102,7 +102,7 @@ extension ModelExtension on Model {
   ///
   /// Throws if [value] is not in [map].
   String _keyOf(Object value, Map<String, Object?> map) {
-    for (final entry in map.entries) {
+    for (final entry in map.expandWithMerged.expand((map) => map.entries)) {
       if (entry.value == value) return entry.key;
     }
     throw ArgumentError('Value not in map: $value, $map');
@@ -140,11 +140,9 @@ extension ModelExtension on Model {
   static void _buildParentsMap(Map<String, Object?> parent,
       Map<Map<String, Object?>, Map<String, Object?>> result) {
     for (final child in parent.values.whereType<Map<String, Object?>>()) {
-      if (result.containsKey(child)) {
-        throw StateError(
-            'Same node found twice.\n\nChild:\n$child\n\nParent:\n$parent');
-      } else {
-        result[child] = parent;
+      for (final map in child.expandWithMerged) {
+        if (result.containsKey(map)) continue;
+        result[map] = parent;
         _buildParentsMap(child, result);
       }
     }
