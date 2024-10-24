@@ -168,8 +168,8 @@ class AnalyzerMacroExecutionResult
       macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
     if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
-      // TODO: Handle multiple type augmentations, or augmentations where the
-      // target is itself a member of a type and not the type.
+      // TODO: Handle targets that are not interfaces, or test that this works
+      // already.
       for (final entry in augmentResponse.typeAugmentations!.entries) {
         if (entry.key != target.qualifiedName.name) {
           throw UnimplementedError(
