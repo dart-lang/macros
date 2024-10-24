@@ -251,7 +251,16 @@ abstract interface class TypeAliasDeclarationsBuilder<
 /// The base builder API for [Macro]s which run in the definitions phase.
 abstract interface class DefinitionsBuilder<
     // TODO: Change to Declaration https://github.com/dart-lang/macros/issues/10
-    T extends Object> implements Builder<T> {}
+    T extends Object> implements Builder<T> {
+  /// Augments an existing declaration.
+  ///
+  /// If [docCommentsAndMetadata] are supplied, they will be added above this
+  /// augment declaration.
+  void augment({
+    // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
+    Augmentation? docCommentsAndMetadata,
+  });
+}
 
 /// The builder API for [LibraryDefinitionsMacro]s.
 abstract interface class LibraryDefinitionsBuilder<T extends Library>
@@ -284,14 +293,12 @@ abstract interface class FunctionDefinitionsBuilder<
     T extends Object> implements DefinitionsBuilder<T> {
   /// Augments an existing function.
   ///
-  /// If [docCommentsAndMetadata] are supplied, they will be added above this
-  /// augment declaration.
-  ///
   /// If [body] is supplied it will be used as the body for the augmenting
   /// declaration, otherwise no body will be provided (which will leave the
   /// existing body in tact).
   ///
   /// TODO: Link the library augmentations proposal to describe the semantics.
+  @override
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
     Augmentation? body,
@@ -317,10 +324,8 @@ abstract interface class ConstructorDefinitionsBuilder<
   /// The [initializers] should not contain trailing or preceding commas, but
   /// may include doc comments.
   ///
-  /// If [docCommentsAndMetadata] are supplied, they will be added above this
-  /// augment declaration.
-  ///
   /// TODO: Link the library augmentations proposal to describe the semantics.
+  @override
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
     Augmentation? body,
@@ -343,12 +348,12 @@ abstract interface class VariableDefinitionsBuilder<
   /// To provide doc comments or metadata for [getter] or [setter], just include
   /// them in the [Augmentation] object for those.
   ///
-  /// If [docCommentsAndMetadata] or [initializer] are supplied they will be
-  /// attached to a standard variable augmentation. If only
-  /// [docCommentsAndMetadata] is provided, there will be no augmenting
-  /// initializer (which leaves the existing initializer in tact).
+  /// If [docCommentsAndMetadata] is provided but [initializer] is not, there
+  /// will be no augmenting initializer (which leaves the existing initializer
+  /// in tact).
   ///
   /// TODO: Link the library augmentations proposal to describe the semantics.
+  @override
   void augment({
     // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
     Augmentation? getter,
@@ -412,16 +417,7 @@ abstract interface class EnumDefinitionsBuilder<
 /// The builder API for [EnumValueDefinitionsMacro]s.
 abstract interface class EnumValueDefinitionsBuilder<
     // TODO: Change to EnumValue https://github.com/dart-lang/macros/issues/10
-    T extends Member> implements DefinitionsBuilder<T> {
-  /// Augments an existing enum value entry.
-  ///
-  /// If [docCommentsAndMetadata] are supplied, they will be added above this
-  /// augment declaration.
-  void augment({
-    // TODO: Tighten this type https://github.com/dart-lang/macros/issues/111
-    Augmentation? docCommentsAndMetadata,
-  });
-}
+    T extends Member> implements DefinitionsBuilder<T> {}
 
 /// The builder API for [ExtensionDefinitionsMacro]s.
 abstract interface class ExtensionDefinitionsBuilder<

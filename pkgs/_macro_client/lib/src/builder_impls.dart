@@ -221,6 +221,16 @@ final class ClassDefinitionsBuilderImpl<T extends Interface>
 
   ClassDefinitionsBuilderImpl.nested(super.target, super.host, super.response)
       : super.nested();
+
+  @override
+  void augment({Augmentation? docCommentsAndMetadata}) {
+    if (docCommentsAndMetadata == null) return;
+    response.typeAugmentations!.update(
+      model.qualifiedNameOf(target.node)!.name,
+      (value) => value..add(docCommentsAndMetadata),
+      ifAbsent: () => [docCommentsAndMetadata],
+    );
+  }
 }
 
 /// Builds the code to augment a function, method, or constructor with a new

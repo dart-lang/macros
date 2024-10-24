@@ -16,7 +16,7 @@ class QueryClass {
   const QueryClass();
 }
 
-class QueryClassImplementation implements ClassTypesMacro {
+class QueryClassImplementation implements ClassDefinitionsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
@@ -25,12 +25,11 @@ class QueryClassImplementation implements ClassTypesMacro {
       runsInPhases: [3]);
 
   @override
-  Future<void> buildTypesForClass(ClassTypesBuilder builder) async {
+  Future<void> buildDefinitionsForClass(ClassDefinitionsBuilder builder) async {
     final qualifiedName = builder.model.qualifiedNameOf(builder.target.node)!;
     final result = await builder.query(Query(target: qualifiedName));
-    builder.declareType(
-        'A',
-        Augmentation(
-            code: expandTemplate('// ${json.encode(result)}\nClass A {}')));
+    builder.augment(
+        docCommentsAndMetadata:
+            Augmentation(code: expandTemplate('// ${json.encode(result)}')));
   }
 }

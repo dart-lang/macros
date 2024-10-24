@@ -184,6 +184,12 @@ class AnalyzerMacroExecutionResult
       }
     }
 
+    for (final augmentation
+        in augmentResponse.libraryAugmentations ?? const <Augmentation>[]) {
+      declarations.add(macros_api_v1.DeclarationCode.fromParts(
+          await _resolveNames(augmentation.code)));
+    }
+
     if (augmentResponse.enumValueAugmentations?.isNotEmpty == true) {
       throw UnimplementedError('Enum value augmentations are not implemented');
     }
@@ -191,10 +197,6 @@ class AnalyzerMacroExecutionResult
         augmentResponse.interfaceAugmentations?.isNotEmpty == true ||
         augmentResponse.mixinAugmentations?.isNotEmpty == true) {
       throw UnimplementedError('Type augmentations are not implemented');
-    }
-    if (augmentResponse.libraryAugmentations?.isNotEmpty == true ||
-        augmentResponse.newTypeNames?.isNotEmpty == true) {
-      throw UnimplementedError('Library augmentations are not implemented');
     }
 
     return AnalyzerMacroExecutionResult(target, declarations);
