@@ -1,0 +1,16 @@
+sdk:
+# Only "pubspec" for when using SDK via a hash reference for latest
+# `_fe_analyzer_shared`.
+- pubspec
+
+stages:
+- analyze_and_format:
+  - analyze: --fatal-infos .
+  - format:
+    sdk:
+    - dev
+- unit_test:
+  - test: --test-randomize-ordering-seed=random
+    os:
+    - linux
+    - windows

@@ -1,0 +1,86 @@
+#!/bin/bash --
+#
+# Generates converter -->dart_model from `_fe_analyzer_shared` code.
+#
+# TODO(davidmorgan): this is intended to be single use code: delete if we don't
+# need it again, convert to Dart if we do.
+#
+# mkdir /tmp/inputs
+# cp ~/git/dart-sdk/sdk/pkg/_fe_analyzer_shared/lib/src/metadata/* /tmp/inputs
+# rm /tmp/inputs/proto.dart /tmp/inputs/parser.dart /tmp/inputs/scope.dart
+# tool/generate_converter /tmp/inputs
+
+path="$1"
+source=$(find $path -name \*.dart | xargs cat)
+IFS=$'\n'
+
+# Unions.
+for union in $(
+  echo "$source" \
+  | grep 'sealed class' \
+  | sed -e s'#sealed class ##' \
+  | sed -e 's# {##' \
+  | sort); do
+  echo "dart_model.$union? convertTo$union(Object? object) => switch (object) {"
+  for type in $(echo "$source" \
+    | grep "extends $union" \
+    | sed -e 's#abstract ##' \
+    | sed -e 's#class ##' \
+    | sed -e 's# extends .*##'); do
+    lower_first_type=${type,}
+    echo "    front_end.$type o => dart_model.$union.$lower_first_type(convert<dart_model.$type>(o)!),"
+  done
+  echo "null => null,"
+  echo "_ => throw ArgumentError(object),"
+  echo "};";
+done
+
+echo "T? convert<T>(Object? object) => switch (object) {"
+
+# Enums.
+for type in $(echo "$source" \
+  | egrep '^enum [A-Z]' \
+  | sed -e 's#enum ##' \
+  | sed -e 's# .*##' \
+  | sort); do
+  echo "front_end.$type o => o.name as T,"
+done
+
+# Classes.
+for type in $(echo "$source" \
+  | egrep '^[a-z ]*class ' \
+  | grep -v 'sealed' \
+  | sed -e 's#abstract ##' \
+  | sed -e 's#class ##' \
+  | sed -e 's# extends .*##' \
+  | sed -e 's# {##' \
+  | sort); do
+  echo "front_end.$type o => dart_model.$type("
+  for line in $(echo "$source" \
+    | grep -A1000000 "class $type extends" \
+    | tail -n +2); do
+    if echo "$line" | grep -q '  final'; then
+      field_name=$(echo $line | sed -e 's#  final ##' | sed -e 's#.* ##' | sed -e 's#;##')
+      if test "$field_name" == "unresolved"; then
+        continue
+      fi
+      field_type=$(echo $line | sed -e 's#  final ##' | sed -e 's# .*##')
+      if echo "$field_type" | egrep -q '^(Argument|Element|Expression|RecordField|Reference|StringLiteralPart)$'; then
+        echo "    $field_name: convertTo$field_type(o.$field_name),"
+      else
+        echo "    $field_name: convert(o.$field_name),"
+      fi
+    else
+      break
+    fi
+  done
+  echo ") as T,"
+done
+echo "String o => o as T,"
+echo "int o => o as T,"
+echo "bool o => o as T,"
+echo "double o => o as T,"
+echo "List o => o.map((i) => convert<Map<String, Object?>>(i)!).toList() as T,"
+echo "null => null,"
+echo "_ => throw ArgumentError(object),"
+echo "};"

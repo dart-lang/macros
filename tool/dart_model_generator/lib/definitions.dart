@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'generate_dart_model.dart';
+import 'macro_metadata_definitions.dart' as macro_metadata;
 
 final schemas = Schemas([
   Schema(
@@ -54,6 +55,13 @@ static Protocol handshakeProtocol = Protocol(
           description: 'The protocol version.',
           values: ['handshake', 'macros1']),
     ],
+  ),
+  Schema(
+    schemaPath: 'macro_metadata.schema.json',
+    codePackage: 'dart_model',
+    codePath: 'src/macro_metadata.g.dart',
+    rootTypes: [],
+    declarations: macro_metadata.definitions,
   ),
   Schema(
       schemaPath: 'dart_model.schema.json',
