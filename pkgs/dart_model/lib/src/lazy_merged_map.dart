@@ -39,7 +39,14 @@ class LazyMergedMapView extends MapBase<String, Object?> {
             rightValue is Map<String, Object?>) {
           return LazyMergedMapView(leftValue, rightValue);
         }
-        if (leftValue != rightValue) {
+        if (leftValue is List<Object?> && rightValue is List<Object?>) {
+          if (leftValue.length != rightValue.length) {
+            throw StateError('Cannot merge lists of different lengths, '
+                'got $leftValue and $rightValue');
+          }
+          // TODO: Something better for lists, it isn't clear how to merge them.
+          return leftValue;
+        } else if (leftValue != rightValue) {
           throw StateError('Cannot merge maps with different values, and '
               '$leftValue != $rightValue');
         }
@@ -55,6 +62,13 @@ class LazyMergedMapView extends MapBase<String, Object?> {
   @override
   void operator []=(String key, Object? value) =>
       throw UnsupportedError('Merged maps are read only');
+
+  @override
+  bool operator ==(Object other) =>
+      other is LazyMergedMapView && other.left == left && other.right == right;
+
+  @override
+  int get hashCode => Object.hash(left, right);
 
   @override
   void clear() => throw UnsupportedError('Merged maps are read only');
@@ -76,6 +90,18 @@ extension AllMaps on Map<String, Object?> {
   /// All the maps merged into this map, recursively expanded.
   Iterable<Map<String, Object?>> get expand sync* {
     if (this case final LazyMergedMapView self) {
+      yield* self.left.expand;
+      yield* self.right.expand;
+    } else {
+      yield this;
+    }
+  }
+
+  /// All the maps merged into this map, recursively expanded, including the
+  /// merged map objects themselves.
+  Iterable<Map<String, Object?>> get expandWithMerged sync* {
+    if (this case final LazyMergedMapView self) {
+      yield self;
       yield* self.left.expand;
       yield* self.right.expand;
     } else {

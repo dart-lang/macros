@@ -8,6 +8,9 @@ import 'package:dart_model/dart_model.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
+import '../macro_client.dart';
+import 'builder_impls.dart';
+
 /// Runs [macro] in the types phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeTypesMacro(
     Macro macro, Host host, AugmentRequest request) async {
@@ -17,7 +20,9 @@ Future<AugmentResponse> executeTypesMacro(
 
   switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassTypesMacro macro):
-      return await macro.buildTypesForClass(interface, model, host);
+      final builder = ClassTypesBuilderImpl(interface, host);
+      await macro.buildTypesForClass(builder);
+      return builder.response;
     case (_, LibraryTypesMacro()):
     case (_, ConstructorTypesMacro()):
     case (_, MethodTypesMacro()):
@@ -46,7 +51,9 @@ Future<AugmentResponse> executeDeclarationsMacro(
 
   switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassDeclarationsMacro macro):
-      return await macro.buildDeclarationsForClass(interface, model, host);
+      final builder = ClassDeclarationsBuilderImpl(interface, host);
+      await macro.buildDeclarationsForClass(builder);
+      return builder.response;
     case (_, LibraryDeclarationsMacro()):
     case (_, EnumDeclarationsMacro()):
     case (_, ExtensionDeclarationsMacro()):
@@ -75,7 +82,9 @@ Future<AugmentResponse> executeDefinitionsMacro(
 
   switch ((interface.properties, macro)) {
     case (Properties(isClass: true), ClassDefinitionsMacro macro):
-      return await macro.buildDefinitionsForClass(interface, model, host);
+      final builder = ClassDefinitionsBuilderImpl(interface, host);
+      await macro.buildDefinitionsForClass(builder);
+      return builder.response;
     case (_, LibraryDefinitionsMacro()):
     case (_, EnumDefinitionsMacro()):
     case (_, ExtensionDefinitionsMacro()):

@@ -40,12 +40,13 @@ void main() {
         expect(
             await host.augment(macroAnnotation,
                 AugmentRequest(phase: 2, target: fooTarget, model: fooModel)),
-            Scope.macro.run(() => AugmentResponse()
-              ..typeAugmentations!['Foo'] = [
-                Augmentation(code: [
-                  Code.string('int get x => 3;'),
-                ]),
-              ]));
+            Scope.macro.run(() =>
+                AugmentResponse(libraryAugmentations: [], newTypeNames: [])
+                  ..typeAugmentations!['Foo'] = [
+                    Augmentation(code: [
+                      Code.string('int get x => 3;'),
+                    ]),
+                  ]));
       });
 
       test('hosts a macro, responds to queries', () async {
@@ -67,14 +68,15 @@ void main() {
         expect(
             await host.augment(macroAnnotation,
                 AugmentRequest(phase: 3, target: fooTarget, model: fooModel)),
-            Scope.macro.run(() => AugmentResponse()
-              ..typeAugmentations!['Foo'] = [
-                Augmentation(code: [
-                  Code.string(
-                      '// {"uris":{"package:foo/foo.dart":{"scopes":{"Foo":{'
-                      '"members":{},"properties":{"isClass":true}}}}}}'),
-                ]),
-              ]));
+            Scope.macro.run(() =>
+                AugmentResponse(libraryAugmentations: [], newTypeNames: [])
+                  ..typeAugmentations!['Foo'] = [
+                    Augmentation(code: [
+                      Code.string(
+                          '// {"uris":{"package:foo/foo.dart":{"scopes":{"Foo":{'
+                          '"members":{},"properties":{"isClass":true}}}}}}'),
+                    ]),
+                  ]));
       });
 
       test('hosts two macros', () async {
