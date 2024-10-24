@@ -8,28 +8,32 @@ import 'package:macro_service/macro_service.dart';
 
 import '../macro_client.dart';
 
-abstract base class BuilderBase implements Builder {
+abstract base class BuilderBase<T extends Object> implements Builder<T> {
   @override
-  Model get model => MacroScope.current.model;
-
-  final AugmentResponse response;
+  final T target;
 
   final Host host;
 
-  BuilderBase(this.host)
+  final AugmentResponse response;
+
+  @override
+  Model get model => MacroScope.current.model;
+
+  BuilderBase(this.target, this.host)
       : response = AugmentResponse(libraryAugmentations: [], newTypeNames: []);
 
-  BuilderBase.nested(this.host, this.response);
+  BuilderBase.nested(this.target, this.host, this.response);
 
   @override
   Future<Model> query(Query query) => host.query(query);
 }
 
-abstract base class TypesBuilderBase extends BuilderBase
-    implements TypesBuilder {
-  TypesBuilderBase(super.host);
+abstract base class TypesBuilderBase<T extends Object> extends BuilderBase<T>
+    implements TypesBuilder<T> {
+  TypesBuilderBase(super.target, super.host);
 
-  TypesBuilderBase.nested(super.host, super.response) : super.nested();
+  TypesBuilderBase.nested(super.target, super.host, super.response)
+      : super.nested();
 
   @override
   void declareType(String name, Augmentation typeDeclaration) {
@@ -38,8 +42,8 @@ abstract base class TypesBuilderBase extends BuilderBase
   }
 }
 
-base mixin ExtendsClauseBuilderImpl on TypesBuilderBase
-    implements ExtendsClauseBuilder {
+base mixin ExtendsClauseBuilderImpl<T extends Interface> on TypesBuilderBase<T>
+    implements ExtendsClauseBuilder<T> {
   /// Sets the `extends` clause to [superclass].
   ///
   /// The type must not already have an `extends` clause.
@@ -56,8 +60,8 @@ base mixin ExtendsClauseBuilderImpl on TypesBuilderBase
   }
 }
 
-base mixin ImplementsClauseBuilderImpl on TypesBuilderBase
-    implements ImplementsClauseBuilder {
+base mixin ImplementsClauseBuilderImpl<T extends Interface>
+    on TypesBuilderBase<T> implements ImplementsClauseBuilder<T> {
   /// Appends [interfaces] to the list of interfaces for this type.
   @override
   void appendInterfaces(Iterable<Augmentation> interfaces) {
@@ -69,8 +73,8 @@ base mixin ImplementsClauseBuilderImpl on TypesBuilderBase
   }
 }
 
-base mixin WithClauseBuilderImpl on TypesBuilderBase
-    implements WithClauseBuilder {
+base mixin WithClauseBuilderImpl<T extends Interface> on TypesBuilderBase<T>
+    implements WithClauseBuilder<T> {
   /// Appends [mixins] to the list of mixins for this type.
   @override
   void appendMixins(Iterable<Augmentation> mixins) {
@@ -82,26 +86,25 @@ base mixin WithClauseBuilderImpl on TypesBuilderBase
   }
 }
 
-final class ClassTypesBuilderImpl extends TypesBuilderBase
+final class ClassTypesBuilderImpl<T extends Interface>
+    extends TypesBuilderBase<T>
     with
-        WithClauseBuilderImpl,
-        ImplementsClauseBuilderImpl,
-        ExtendsClauseBuilderImpl
-    implements ClassTypesBuilder {
-  @override
-  final Interface target;
+        WithClauseBuilderImpl<T>,
+        ImplementsClauseBuilderImpl<T>,
+        ExtendsClauseBuilderImpl<T>
+    implements ClassTypesBuilder<T> {
+  ClassTypesBuilderImpl(super.target, super.host);
 
-  ClassTypesBuilderImpl(this.target, super.host);
-
-  ClassTypesBuilderImpl.nested(this.target, super.host, super.response)
+  ClassTypesBuilderImpl.nested(super.target, super.host, super.response)
       : super.nested();
 }
 
-abstract base class DeclarationsBuilderBase extends BuilderBase
-    implements DeclarationsBuilder {
-  DeclarationsBuilderBase(super.host);
+abstract base class DeclarationsBuilderBase<T extends Object>
+    extends BuilderBase<T> implements DeclarationsBuilder<T> {
+  DeclarationsBuilderBase(super.target, super.host);
 
-  DeclarationsBuilderBase.nested(super.host, super.response) : super.nested();
+  DeclarationsBuilderBase.nested(super.target, super.host, super.response)
+      : super.nested();
 
   @override
   void declareInLibrary(Augmentation declaration) {
@@ -109,11 +112,11 @@ abstract base class DeclarationsBuilderBase extends BuilderBase
   }
 }
 
-abstract base class MemberDeclarationsBuilderBase
-    extends DeclarationsBuilderBase implements MemberDeclarationsBuilder {
-  MemberDeclarationsBuilderBase(super.host);
+abstract base class MemberDeclarationsBuilderBase<T extends Interface>
+    extends DeclarationsBuilderBase<T> implements MemberDeclarationsBuilder<T> {
+  MemberDeclarationsBuilderBase(super.target, super.host);
 
-  MemberDeclarationsBuilderBase.nested(super.host, super.response)
+  MemberDeclarationsBuilderBase.nested(super.target, super.host, super.response)
       : super.nested();
 
   @override
@@ -126,25 +129,20 @@ abstract base class MemberDeclarationsBuilderBase
   }
 }
 
-final class ClassDeclarationsBuilderImpl extends MemberDeclarationsBuilderBase
-    implements ClassDeclarationsBuilder {
-  @override
-  final Interface target;
+final class ClassDeclarationsBuilderImpl<T extends Interface>
+    extends MemberDeclarationsBuilderBase<T>
+    implements ClassDeclarationsBuilder<T> {
+  ClassDeclarationsBuilderImpl(super.target, super.host);
 
-  ClassDeclarationsBuilderImpl(this.target, super.host);
-
-  ClassDeclarationsBuilderImpl.nested(this.target, super.host, super.response)
+  ClassDeclarationsBuilderImpl.nested(super.target, super.host, super.response)
       : super.nested();
 }
 
-final class MethodDefinitionsBuilderImpl extends BuilderBase
-    implements MethodDefinitionsBuilder {
-  @override
-  final Member target;
+final class MethodDefinitionsBuilderImpl<T extends Member>
+    extends BuilderBase<T> implements MethodDefinitionsBuilder<T> {
+  MethodDefinitionsBuilderImpl(super.target, super.host);
 
-  MethodDefinitionsBuilderImpl(this.target, super.host);
-
-  MethodDefinitionsBuilderImpl.nested(this.target, super.host, super.response)
+  MethodDefinitionsBuilderImpl.nested(super.target, super.host, super.response)
       : super.nested();
 
   @override
@@ -157,15 +155,12 @@ final class MethodDefinitionsBuilderImpl extends BuilderBase
   }
 }
 
-final class ConstructorDefinitionsBuilderImpl extends BuilderBase
-    implements ConstructorDefinitionsBuilder {
-  @override
-  final Member target;
-
-  ConstructorDefinitionsBuilderImpl(this.target, super.host);
+final class ConstructorDefinitionsBuilderImpl<T extends Member>
+    extends BuilderBase<T> implements ConstructorDefinitionsBuilder<T> {
+  ConstructorDefinitionsBuilderImpl(super.target, super.host);
 
   ConstructorDefinitionsBuilderImpl.nested(
-      this.target, super.host, super.response)
+      super.target, super.host, super.response)
       : super.nested();
 
   @override
@@ -181,11 +176,12 @@ final class ConstructorDefinitionsBuilderImpl extends BuilderBase
   }
 }
 
-abstract base class InterfaceDefinitionsBuilderBase extends BuilderBase
-    implements InterfaceDefinitionsBuilder {
-  InterfaceDefinitionsBuilderBase(super.host);
+abstract base class InterfaceDefinitionsBuilderBase<T extends Interface>
+    extends BuilderBase<T> implements InterfaceDefinitionsBuilder<T> {
+  InterfaceDefinitionsBuilderBase(super.target, super.host);
 
-  InterfaceDefinitionsBuilderBase.nested(super.host, super.response)
+  InterfaceDefinitionsBuilderBase.nested(
+      super.target, super.host, super.response)
       : super.nested();
 
   /// Retrieve a [FieldDefinitionsBuilder] for a field with [name] in
@@ -218,14 +214,12 @@ abstract base class InterfaceDefinitionsBuilderBase extends BuilderBase
           Member.fromJson(model.lookup(name)!), host, response);
 }
 
-final class ClassDefinitionsBuilderImpl extends InterfaceDefinitionsBuilderBase
-    implements ClassDefinitionsBuilder {
-  @override
-  final Interface target;
+final class ClassDefinitionsBuilderImpl<T extends Interface>
+    extends InterfaceDefinitionsBuilderBase<T>
+    implements ClassDefinitionsBuilder<T> {
+  ClassDefinitionsBuilderImpl(super.target, super.host);
 
-  ClassDefinitionsBuilderImpl(this.target, super.host);
-
-  ClassDefinitionsBuilderImpl.nested(this.target, super.host, super.response)
+  ClassDefinitionsBuilderImpl.nested(super.target, super.host, super.response)
       : super.nested();
 }
 
