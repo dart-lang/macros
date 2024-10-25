@@ -139,6 +139,8 @@ void main() {
             'extendsTypeAugmentations': <String, Object?>{},
             'interfaceAugmentations': <String, Object?>{},
             'mixinAugmentations': <String, Object?>{},
+            'libraryAugmentations': <Object?>[],
+            'newTypeNames': <String>[],
             'typeAugmentations': {
               'Foo': [
                 {
@@ -155,7 +157,7 @@ void main() {
         });
       });
 
-      test('sends query requests to host, sends reponse', () async {
+      test('sends query requests to host, sends response', () async {
         final serverSocket = await ServerSocket.bind('localhost', 0);
 
         unawaited(MacroClient.run(
@@ -221,6 +223,8 @@ void main() {
               'extendsTypeAugmentations': <String, Object?>{},
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
+              'libraryAugmentations': <Object?>[],
+              'newTypeNames': <String>[],
               'typeAugmentations': {
                 'Foo': [
                   {
@@ -301,6 +305,8 @@ void main() {
               'extendsTypeAugmentations': <String, Object?>{},
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
+              'libraryAugmentations': <Object?>[],
+              'newTypeNames': <String>[],
               'typeAugmentations': {
                 'Foo': [
                   {
@@ -328,6 +334,8 @@ void main() {
               'extendsTypeAugmentations': <String, Object?>{},
               'interfaceAugmentations': <String, Object?>{},
               'mixinAugmentations': <String, Object?>{},
+              'libraryAugmentations': <Object?>[],
+              'newTypeNames': <String>[],
               'typeAugmentations': {
                 'Foo': [
                   {

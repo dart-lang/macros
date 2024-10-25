@@ -169,23 +169,37 @@ void main() {
       });
     });
 
-    test('path to Members throws on cycle', () {
+    test('path to Members works for cycles', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       // Add an invalid link creating a loop in the map structure.
       (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
+      expect(
+          copiedModel.qualifiedNameOf(member.node),
+          QualifiedName(
+            uri: 'package:dart_model/dart_model.dart',
+            scope: 'JsonData',
+            name: '_root',
+            isStatic: false,
+          ));
     });
 
-    test('path to Members throws on reused node', () {
+    test('path to Members works for reused node', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       // Reuse a node.
       copiedModel.uris['duplicate'] =
           copiedModel.uris['package:dart_model/dart_model.dart']!;
       final member = copiedModel.uris['package:dart_model/dart_model.dart']!
           .scopes['JsonData']!.members['_root']!;
-      expect(() => copiedModel.qualifiedNameOf(member.node), throwsStateError);
+      expect(
+          copiedModel.qualifiedNameOf(member.node),
+          QualifiedName(
+            uri: 'package:dart_model/dart_model.dart',
+            scope: 'JsonData',
+            name: '_root',
+            isStatic: false,
+          ));
     });
 
     test('path to Member returns null for Member in wrong Map', () {

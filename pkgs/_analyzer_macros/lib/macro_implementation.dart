@@ -168,18 +168,26 @@ class AnalyzerMacroExecutionResult
       macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
     if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
-      // TODO: Handle multiple type augmentations, or augmentations where the
-      // target is itself a member of a type and not the type.
-      final entry = augmentResponse.typeAugmentations!.entries.single;
-      if (entry.key != target.qualifiedName.name) {
-        throw UnimplementedError(
-            'Type augmentations are only implemented when the type is the '
-            'target of the augmentation.');
+      // TODO: Handle targets that are not interfaces, or test that this works
+      // already.
+      for (final entry in augmentResponse.typeAugmentations!.entries) {
+        if (entry.key != target.qualifiedName.name) {
+          throw UnimplementedError(
+              'Type augmentations are only implemented when the type is the '
+              'target of the augmentation, expected '
+              '${target.qualifiedName.name} but got ${entry.key}');
+        }
+        for (final augmentation in entry.value) {
+          declarations.add(macros_api_v1.DeclarationCode.fromParts(
+              await _resolveNames(augmentation.code)));
+        }
       }
-      for (final augmentation in entry.value) {
-        declarations.add(macros_api_v1.DeclarationCode.fromParts(
-            await _resolveNames(augmentation.code)));
-      }
+    }
+
+    for (final augmentation
+        in augmentResponse.libraryAugmentations ?? const <Augmentation>[]) {
+      declarations.add(macros_api_v1.DeclarationCode.fromParts(
+          await _resolveNames(augmentation.code)));
     }
 
     if (augmentResponse.enumValueAugmentations?.isNotEmpty == true) {
@@ -189,10 +197,6 @@ class AnalyzerMacroExecutionResult
         augmentResponse.interfaceAugmentations?.isNotEmpty == true ||
         augmentResponse.mixinAugmentations?.isNotEmpty == true) {
       throw UnimplementedError('Type augmentations are not implemented');
-    }
-    if (augmentResponse.libraryAugmentations?.isNotEmpty == true ||
-        augmentResponse.newTypeNames?.isNotEmpty == true) {
-      throw UnimplementedError('Library augmentations are not implemented');
     }
 
     return AnalyzerMacroExecutionResult(target, declarations);
