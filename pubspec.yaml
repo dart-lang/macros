@@ -6,6 +6,7 @@ dev_dependencies:
 publish_to: none
 workspace:
   - goldens/foo
+  - pkgs/_analyzer_cfe_macros
   - pkgs/_analyzer_macros
   - pkgs/_analyzer_macros/test/package_under_test
   - pkgs/_cfe_macros

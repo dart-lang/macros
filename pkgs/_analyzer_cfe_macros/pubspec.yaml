@@ -1,0 +1,15 @@
+name: _analyzer_cfe_macros
+publish-to: none
+description: Macro support for the analyzer and CFE.
+resolution: workspace
+
+environment:
+  sdk: ^3.7.0-39.0.dev
+
+dependencies:
+  _fe_analyzer_shared: any
+  dart_model: any
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.0.0
+  test: ^1.25.0

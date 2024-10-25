@@ -1,0 +1,1120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [],
+  "$defs": {
+    "Argument": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/PositionalArgument"
+            },
+            {
+              "$ref": "#/$defs/NamedArgument"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "Element": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ExpressionElement"
+            },
+            {
+              "$ref": "#/$defs/MapEntryElement"
+            },
+            {
+              "$ref": "#/$defs/SpreadElement"
+            },
+            {
+              "$ref": "#/$defs/IfElement"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "Expression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/InvalidExpression"
+            },
+            {
+              "$ref": "#/$defs/StaticGet"
+            },
+            {
+              "$ref": "#/$defs/FunctionTearOff"
+            },
+            {
+              "$ref": "#/$defs/ConstructorTearOff"
+            },
+            {
+              "$ref": "#/$defs/ConstructorInvocation"
+            },
+            {
+              "$ref": "#/$defs/IntegerLiteral"
+            },
+            {
+              "$ref": "#/$defs/DoubleLiteral"
+            },
+            {
+              "$ref": "#/$defs/BooleanLiteral"
+            },
+            {
+              "$ref": "#/$defs/NullLiteral"
+            },
+            {
+              "$ref": "#/$defs/SymbolLiteral"
+            },
+            {
+              "$ref": "#/$defs/StringLiteral"
+            },
+            {
+              "$ref": "#/$defs/AdjacentStringLiterals"
+            },
+            {
+              "$ref": "#/$defs/ImplicitInvocation"
+            },
+            {
+              "$ref": "#/$defs/StaticInvocation"
+            },
+            {
+              "$ref": "#/$defs/Instantiation"
+            },
+            {
+              "$ref": "#/$defs/MethodInvocation"
+            },
+            {
+              "$ref": "#/$defs/PropertyGet"
+            },
+            {
+              "$ref": "#/$defs/NullAwarePropertyGet"
+            },
+            {
+              "$ref": "#/$defs/TypeLiteral"
+            },
+            {
+              "$ref": "#/$defs/ParenthesizedExpression"
+            },
+            {
+              "$ref": "#/$defs/ConditionalExpression"
+            },
+            {
+              "$ref": "#/$defs/ListLiteral"
+            },
+            {
+              "$ref": "#/$defs/SetOrMapLiteral"
+            },
+            {
+              "$ref": "#/$defs/RecordLiteral"
+            },
+            {
+              "$ref": "#/$defs/IfNull"
+            },
+            {
+              "$ref": "#/$defs/LogicalExpression"
+            },
+            {
+              "$ref": "#/$defs/EqualityExpression"
+            },
+            {
+              "$ref": "#/$defs/BinaryExpression"
+            },
+            {
+              "$ref": "#/$defs/UnaryExpression"
+            },
+            {
+              "$ref": "#/$defs/IsTest"
+            },
+            {
+              "$ref": "#/$defs/AsExpression"
+            },
+            {
+              "$ref": "#/$defs/NullCheck"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedExpression"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "RecordField": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RecordNamedField"
+            },
+            {
+              "$ref": "#/$defs/RecordPositionalField"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "Reference": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/FieldReference"
+            },
+            {
+              "$ref": "#/$defs/FunctionReference"
+            },
+            {
+              "$ref": "#/$defs/ConstructorReference"
+            },
+            {
+              "$ref": "#/$defs/TypeReference"
+            },
+            {
+              "$ref": "#/$defs/ClassReference"
+            },
+            {
+              "$ref": "#/$defs/TypedefReference"
+            },
+            {
+              "$ref": "#/$defs/ExtensionReference"
+            },
+            {
+              "$ref": "#/$defs/ExtensionTypeReference"
+            },
+            {
+              "$ref": "#/$defs/EnumReference"
+            },
+            {
+              "$ref": "#/$defs/FunctionTypeParameterReference"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "StringLiteralPart": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StringPart"
+            },
+            {
+              "$ref": "#/$defs/InterpolationPart"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "TypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NamedTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/NullableTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/VoidTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/DynamicTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/InvalidTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/FunctionTypeAnnotation"
+            },
+            {
+              "$ref": "#/$defs/FunctionTypeParameterType"
+            },
+            {
+              "$ref": "#/$defs/RecordTypeAnnotation"
+            }
+          ]
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      }
+    },
+    "BinaryOperator": {
+      "type": "string",
+      "description": ""
+    },
+    "LogicalOperator": {
+      "type": "string",
+      "description": ""
+    },
+    "UnaryOperator": {
+      "type": "string",
+      "description": ""
+    },
+    "AsExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        }
+      }
+    },
+    "BinaryExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "left": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "operator": {
+          "$comment": "",
+          "$ref": "#/$defs/BinaryOperator"
+        },
+        "right": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "BooleanLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "ClassReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "ConditionalExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "condition": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "then": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "otherwise": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "ConstructorInvocation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        },
+        "constructor": {
+          "$comment": "",
+          "$ref": "#/$defs/Reference"
+        },
+        "arguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Argument"
+          }
+        }
+      }
+    },
+    "ConstructorReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "ConstructorTearOff": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "type": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        },
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/ConstructorReference"
+        }
+      }
+    },
+    "DoubleLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "DynamicTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/Reference"
+        }
+      }
+    },
+    "EnumReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "EqualityExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "left": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "right": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "isNotEquals": {
+          "type": "boolean",
+          "description": ""
+        }
+      }
+    },
+    "ExpressionElement": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "isNullAware": {
+          "type": "boolean",
+          "description": ""
+        }
+      }
+    },
+    "ExtensionReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "ExtensionTypeReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FieldReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FormalParameter": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FormalParameterGroup": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FunctionReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FunctionTearOff": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/FunctionReference"
+        }
+      }
+    },
+    "FunctionTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "returnType": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        },
+        "typeParameters": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/FunctionTypeParameter"
+          }
+        },
+        "formalParameters": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/FormalParameter"
+          }
+        }
+      }
+    },
+    "FunctionTypeParameter": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FunctionTypeParameterReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "FunctionTypeParameterType": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "functionTypeParameter": {
+          "$comment": "",
+          "$ref": "#/$defs/FunctionTypeParameter"
+        }
+      }
+    },
+    "IfElement": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "condition": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "then": {
+          "$comment": "",
+          "$ref": "#/$defs/Element"
+        },
+        "otherwise": {
+          "$comment": "",
+          "$ref": "#/$defs/Element"
+        }
+      }
+    },
+    "IfNull": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "left": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "right": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "ImplicitInvocation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "receiver": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        },
+        "arguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Argument"
+          }
+        }
+      }
+    },
+    "Instantiation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "receiver": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        }
+      }
+    },
+    "IntegerLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "InterpolationPart": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "InvalidExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "InvalidTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "IsTest": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        },
+        "isNot": {
+          "type": "boolean",
+          "description": ""
+        }
+      }
+    },
+    "ListLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        },
+        "elements": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Element"
+          }
+        }
+      }
+    },
+    "LogicalExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "left": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "operator": {
+          "$comment": "",
+          "$ref": "#/$defs/LogicalOperator"
+        },
+        "right": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "MapEntryElement": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "key": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "value": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "isNullAwareKey": {
+          "type": "boolean",
+          "description": ""
+        },
+        "isNullAwareValue": {
+          "type": "boolean",
+          "description": ""
+        }
+      }
+    },
+    "MethodInvocation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "receiver": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        },
+        "arguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Argument"
+          }
+        }
+      }
+    },
+    "NamedArgument": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "NamedTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/Reference"
+        },
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        }
+      }
+    },
+    "NullableTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "typeAnnotation": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        }
+      }
+    },
+    "NullAwarePropertyGet": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "receiver": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "NullCheck": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "NullLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "ParenthesizedExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "PositionalArgument": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "PropertyGet": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "receiver": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "name": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "RecordLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/RecordField"
+          }
+        }
+      }
+    },
+    "RecordNamedField": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "RecordPositionalField": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "RecordTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "positional": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/RecordTypeEntry"
+          }
+        },
+        "named": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/RecordTypeEntry"
+          }
+        }
+      }
+    },
+    "RecordTypeEntry": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "References": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "SetOrMapLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        },
+        "elements": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Element"
+          }
+        }
+      }
+    },
+    "SpreadElement": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        },
+        "isNullAware": {
+          "type": "boolean",
+          "description": ""
+        }
+      }
+    },
+    "StaticGet": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/FieldReference"
+        }
+      }
+    },
+    "StaticInvocation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "function": {
+          "$comment": "",
+          "$ref": "#/$defs/FunctionReference"
+        },
+        "typeArguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/TypeAnnotation"
+          }
+        },
+        "arguments": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Argument"
+          }
+        }
+      }
+    },
+    "AdjacentStringLiterals": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "expressions": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        }
+      }
+    },
+    "StringLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "parts": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "$ref": "#/$defs/StringLiteralPart"
+          }
+        }
+      }
+    },
+    "StringPart": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": ""
+        }
+      }
+    },
+    "SymbolLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "parts": {
+          "type": "array",
+          "description": "",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TypedefReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "TypeLiteral": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "typeAnnotation": {
+          "$comment": "",
+          "$ref": "#/$defs/TypeAnnotation"
+        }
+      }
+    },
+    "TypeReference": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "UnaryExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "operator": {
+          "$comment": "",
+          "$ref": "#/$defs/UnaryOperator"
+        },
+        "expression": {
+          "$comment": "",
+          "$ref": "#/$defs/Expression"
+        }
+      }
+    },
+    "UnresolvedExpression": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "UnresolvedTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {}
+    },
+    "VoidTypeAnnotation": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "reference": {
+          "$comment": "",
+          "$ref": "#/$defs/Reference"
+        }
+      }
+    }
+  }
+}
