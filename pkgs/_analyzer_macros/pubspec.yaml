@@ -9,6 +9,7 @@ environment:
 dependencies:
   _macro_host: any
   analyzer: any
+  analysis_server: any
   dart_model: any
   macro_service: any
   macros: any
