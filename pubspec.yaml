@@ -28,109 +28,109 @@ dependency_overrides:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/_fe_analyzer_shared
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   _js_interop_checks:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/_js_interop_checks
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   _macros:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/_macros
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   analyzer:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/analyzer
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   analyzer_utilities:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/analyzer_utilities
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   build_integration:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/build_integration
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   compiler:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/compiler
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   dart2js_info:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/dart2js_info
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   dart2wasm:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/dart2wasm
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   dev_compiler:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/dev_compiler
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   front_end:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/front_end
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   frontend_server:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/frontend_server
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   heap_snapshot:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/heap_snapshot
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   js_ast:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/js_ast
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   js_runtime:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/js_runtime
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   js_shared:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/js_shared
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   kernel:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/kernel
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   linter:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/linter
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   mmap:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/mmap
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   vm:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/vm
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   vm_service:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/vm_service
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
   wasm_builder:
     git:
       url: https://github.com/dart-lang/sdk.git
       path: pkg/wasm_builder
-      ref: 6b80ece91eefa7b7fafec4e39e38ff20a7dd7c1d
+      ref: a8bee55e94979730890500026884afcf33e68f2f
