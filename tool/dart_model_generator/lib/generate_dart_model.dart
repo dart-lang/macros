@@ -154,7 +154,8 @@ class Schema {
         ],
         r'$defs': {
           for (var declaration in declarations)
-            declaration.name: declaration.generateSchema(context),
+            if (declaration.includeInSchema)
+              declaration.name: declaration.generateSchema(context),
         }
       };
 
@@ -201,11 +202,21 @@ abstract class Definition {
   /// [extraCode] is arbitrary code to write directly in the extension type.
   /// Needed for static methods and constructors; "instance" methods can be
   /// added as extensions outside the generated code.
+  ///
+  /// If [interfaceOnly] is `true` then this type will not have a constructor,
+  /// and it will not be emitted as a part of the JSON schema, nor will it have
+  /// a typed schema attached to it. It will only have the generated getters and
+  /// will appear in `implements` clauses of other types.
+  ///
+  /// Each type in [implements] will be added to the `implements` clause of this
+  /// type in the generated code. All properties from all implemented types will
+  /// copied directly into the schema for this type.
   factory Definition.clazz(String name,
       {required String description,
       required List<Property> properties,
       bool createInBuffer,
       String? extraCode,
+      bool interfaceOnly,
       List<String> implements}) = ClassTypeDefinition;
 
   /// Defines a union.
@@ -243,6 +254,9 @@ abstract class Definition {
 
   /// The Dart type name of the wire representation of this type.
   String get representationTypeName;
+
+  /// Whether or not to include this type in the schema definition.
+  bool get includeInSchema;
 }
 
 /// A property in a declaration.
@@ -441,6 +455,7 @@ class ClassTypeDefinition implements Definition {
   final List<Property> properties;
   final bool createInBuffer;
   final String? extraCode;
+  final bool interfaceOnly;
   final List<String> implements;
 
   ClassTypeDefinition(this.name,
@@ -448,7 +463,11 @@ class ClassTypeDefinition implements Definition {
       required this.properties,
       this.createInBuffer = false,
       this.extraCode,
+      this.interfaceOnly = false,
       this.implements = const []});
+
+  @override
+  bool get includeInSchema => !interfaceOnly;
 
   /// All properties inherited from the classes in [implements].
   Iterable<Property> inheritedProperties(GenerationContext context) sync* {
@@ -469,14 +488,21 @@ class ClassTypeDefinition implements Definition {
   }
 
   @override
-  Map<String, Object?> generateSchema(GenerationContext context) => {
-        'type': 'object',
-        'description': description,
-        'properties': {
-          for (final property in allProperties(context))
-            ...property.generateSchema(context),
-        }
-      };
+  Map<String, Object?> generateSchema(GenerationContext context) {
+    if (interfaceOnly) {
+      throw StateError(
+          'Cannot generate schema for interface only definitions, check '
+          '`includeInSchema` first.');
+    }
+    return {
+      'type': 'object',
+      'description': description,
+      'properties': {
+        for (final property in allProperties(context))
+          ...property.generateSchema(context),
+      }
+    };
+  }
 
   /// Generates a "class".
   ///
@@ -494,11 +520,17 @@ class ClassTypeDefinition implements Definition {
     final result = StringBuffer();
 
     result.writeln('/// $description');
-    result.write('extension type $name.fromJson(Map<String, Object?> node)'
-        ' implements '
+    // Pure interfaces should only have a private constructor.
+    final defaultConstructorName = interfaceOnly ? '_' : 'fromJson';
+    result.write('extension type '
+        '$name.$defaultConstructorName(Map<String, Object?> node) implements '
         '${implements.isEmpty ? 'Object' : implements.join(', ')} {');
 
     if (createInBuffer) {
+      if (interfaceOnly) {
+        throw StateError(
+            'Cannot have createInBuffer: true and interfaceOnly: true');
+      }
       result.write('static final TypedMapSchema _schema = TypedMapSchema({');
       for (final property in allProperties(context)) {
         result.write(property.typedMapSchemaCode(context));
@@ -506,41 +538,44 @@ class ClassTypeDefinition implements Definition {
       result.write('});');
     }
 
-    // Generate the non-JSON constructor, which accepts an optional value for
-    // every property and constructs JSON from it.
-    if (allProperties(context).exceptMap.isEmpty) {
-      result.writeln('  $name() : ');
-    } else {
-      result.writeln('  $name({');
-      for (final property in allProperties(context).exceptMap) {
-        result.writeln(property.parameterCode);
+    // Only write out constructors for concrete classes.
+    if (!interfaceOnly) {
+      // Generate the non-JSON constructor, which accepts an optional value for
+      // every property and constructs JSON from it.
+      if (allProperties(context).exceptMap.isEmpty) {
+        result.writeln('  $name() : ');
+      } else {
+        result.writeln('  $name({');
+        for (final property in allProperties(context).exceptMap) {
+          result.writeln(property.parameterCode);
+        }
+        result.writeln('}) : ');
       }
-      result.writeln('}) : ');
-    }
 
-    result.writeln('this.fromJson(');
-    if (createInBuffer) {
-      result.writeln('Scope.createMap(_schema,');
-      for (final property in allProperties(context)) {
-        if (property.type.isMap) {
-          result.writeln('Scope.createGrowableMap(),');
-        } else {
-          result.writeln('${property.name},');
+      result.writeln('this.fromJson(');
+      if (createInBuffer) {
+        result.writeln('Scope.createMap(_schema,');
+        for (final property in allProperties(context)) {
+          if (property.type.isMap) {
+            result.writeln('Scope.createGrowableMap(),');
+          } else {
+            result.writeln('${property.name},');
+          }
         }
-      }
-      result.writeln(')');
-    } else {
-      result.writeln('{');
-      for (final property in allProperties(context)) {
-        if (property.type.isMap) {
-          result.writeln("'${property.name}': <String, Object?>{},");
-        } else {
-          result.writeln(property.namedArgumentCode);
+        result.writeln(')');
+      } else {
+        result.writeln('{');
+        for (final property in allProperties(context)) {
+          if (property.type.isMap) {
+            result.writeln("'${property.name}': <String, Object?>{},");
+          } else {
+            result.writeln(property.namedArgumentCode);
+          }
         }
+        result.writeln('}');
       }
-      result.writeln('}');
+      result.writeln(');');
     }
-    result.writeln(');');
 
     if (extraCode != null) {
       result.writeln(extraCode);
@@ -589,6 +624,9 @@ class UnionTypeDefinition implements Definition {
       required this.types,
       required this.properties,
       this.createInBuffer = false});
+
+  @override
+  bool get includeInSchema => true;
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
@@ -735,6 +773,9 @@ class EnumTypeDefinition implements Definition {
       {required this.description, required this.values});
 
   @override
+  bool get includeInSchema => true;
+
+  @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
         'type': 'string',
         'description': description,
@@ -769,6 +810,9 @@ class StringTypedefDefinition implements Definition {
   StringTypedefDefinition(this.name, {required this.description});
 
   @override
+  bool get includeInSchema => true;
+
+  @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
         'type': 'string',
         'description': description,
@@ -796,6 +840,9 @@ class NullTypedefDefinition implements Definition {
   final String description;
 
   NullTypedefDefinition(this.name, {required this.description});
+
+  @override
+  bool get includeInSchema => true;
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {

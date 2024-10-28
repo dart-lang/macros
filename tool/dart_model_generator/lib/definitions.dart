@@ -110,8 +110,8 @@ static Protocol handshakeProtocol = Protocol(
                   description: 'The type of the annotation.'),
             ]),
         Definition.clazz('Declaration',
-            description: 'Base type for all declarations',
-            createInBuffer: true,
+            description: 'Interface type for all declarations',
+            interfaceOnly: true,
             properties: [
               Property('metadataAnnotations',
                   type: 'List<MetadataAnnotation>',

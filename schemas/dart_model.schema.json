@@ -91,23 +91,6 @@
         }
       }
     },
-    "Declaration": {
-      "type": "object",
-      "description": "Base type for all declarations",
-      "properties": {
-        "metadataAnnotations": {
-          "type": "array",
-          "description": "The metadata annotations attached to this declaration.",
-          "items": {
-            "$ref": "#/$defs/MetadataAnnotation"
-          }
-        },
-        "properties": {
-          "$comment": "The properties of this declaration.",
-          "$ref": "#/$defs/Properties"
-        }
-      }
-    },
     "Interface": {
       "type": "object",
       "description": "An interface.",

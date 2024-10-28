@@ -137,22 +137,8 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
   QualifiedName get type => node['type'] as QualifiedName;
 }
 
-/// Base type for all declarations
-extension type Declaration.fromJson(Map<String, Object?> node)
-    implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({
-    'metadataAnnotations': Type.closedListPointer,
-    'properties': Type.typedMapPointer,
-  });
-  Declaration({
-    List<MetadataAnnotation>? metadataAnnotations,
-    Properties? properties,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          metadataAnnotations,
-          properties,
-        ));
-
+/// Interface type for all declarations
+extension type Declaration._(Map<String, Object?> node) implements Object {
   /// The metadata annotations attached to this declaration.
   List<MetadataAnnotation> get metadataAnnotations =>
       (node['metadataAnnotations'] as List).cast();
