@@ -223,7 +223,7 @@ class A {
 
   final double doubleField;
 
-  final num numField;
+  final num numFieldXfzAbcdefgabc;
 
   final List<C> listOfSerializableField;
 
