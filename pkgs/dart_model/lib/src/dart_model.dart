@@ -3,11 +3,62 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart_model.g.dart';
-import 'json_buffer/json_buffer_builder.dart';
+import 'json_buffer/json_buffer_builder.dart' hide Type;
 import 'lazy_merged_map.dart';
 import 'scopes.dart';
 
 export 'dart_model.g.dart';
+
+extension Decl on Declaration {
+  /*WireType get wireType {
+    final path = MacroScope.current.model.pathOf(node)!;
+    final secondLast = path[path.length - 2];
+    switch (secondLast) {
+      case 'members':
+        return WireType.member;
+      case 'scopes':
+        return WireType.interface;
+      default:
+        throw UnsupportedError('Unsupported path: $path');
+    }
+  }*/
+
+  WireType get wireType => Cast.fromJson(node).wireType;
+
+  Cast get cast => Cast.fromJson(node);
+}
+
+enum WireType {
+  member,
+  interface;
+}
+
+extension type Cast.fromJson(Map<String, Object?> node) {
+  WireType get wireType {
+    final path = MacroScope.current.model.pathOf(node)!;
+    final secondLast = path[path.length - 2];
+    switch (secondLast) {
+      case 'members':
+        return WireType.member;
+      case 'scopes':
+        return WireType.interface;
+      default:
+        throw UnsupportedError('Unsupported path: $path');
+    }
+  }
+
+  bool get isMember => wireType == WireType.member;
+  Member? get maybeMember => isMember ? asMember : null;
+  Member get asMember => wireType == WireType.member
+      ? Member.fromJson(node)
+      : throw UnsupportedError('Not a member: $this');
+
+  bool get isInterface => wireType == WireType.interface;
+  Interface? get maybeInterface => isInterface ? asInterface : null;
+  Interface get asInterface => wireType == WireType.interface
+      ? Interface.fromJson(node)
+      : throw UnsupportedError('Not a member: $this');
+}
 
 extension QualifiedNameExtension on QualifiedName {
   String get asString =>
@@ -96,6 +147,33 @@ extension ModelExtension on Model {
     throw UnsupportedError(
         'Unsupported node type for `qualifiedNameOf`, only top level members '
         'are supported for now. $path');
+  }
+
+  List<String>? pathOf(Map<String, Object?> model) {
+    var parent = _getParent(model);
+    if (parent == null) return null;
+    final path = <String>[];
+    path.add(_keyOf(model, parent));
+    var previousParent = parent;
+
+    // Checks if any merged map of `left` == any merged map of `right.
+    bool isEqualNested(Map<String, Object?> left, Map<String, Object?> right) {
+      if (left == right) return true;
+      return left.expand.any((l) => right.expand.contains(l));
+    }
+
+    while (true) {
+      parent = _getParent(previousParent);
+      if (parent == null) return null;
+
+      /// We reached this models node, stop searching higher.
+      if (isEqualNested(parent, node)) break;
+
+      path.insert(0, _keyOf(previousParent, parent));
+      previousParent = parent;
+    }
+
+    return path;
   }
 
   /// Returns the key of [value] in [map].
