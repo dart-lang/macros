@@ -21,6 +21,7 @@ workspace:
   - pkgs/dart_model
   - pkgs/macro
   - pkgs/macro_service
+  - tool/benchmark_generator
   - tool/dart_model_generator
 
 # Update by running: tool/set_sdk_version <git ref>
