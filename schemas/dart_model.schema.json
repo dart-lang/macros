@@ -91,17 +91,14 @@
         }
       }
     },
+    "DeclarationType": {
+      "type": "string",
+      "description": "Declaration type."
+    },
     "Interface": {
       "type": "object",
       "description": "An interface.",
       "properties": {
-        "metadataAnnotations": {
-          "type": "array",
-          "description": "The metadata annotations attached to this interface.",
-          "items": {
-            "$ref": "#/$defs/MetadataAnnotation"
-          }
-        },
         "members": {
           "type": "object",
           "description": "Map of members by name.",
@@ -113,9 +110,20 @@
           "$comment": "The type of the expression `this` when used in this interface.",
           "$ref": "#/$defs/NamedTypeDesc"
         },
+        "metadataAnnotations": {
+          "type": "array",
+          "description": "The metadata annotations attached to this declaration.",
+          "items": {
+            "$ref": "#/$defs/MetadataAnnotation"
+          }
+        },
         "properties": {
-          "$comment": "The properties of this interface.",
+          "$comment": "The properties of this declaration.",
           "$ref": "#/$defs/Properties"
+        },
+        "declarationType": {
+          "$comment": "The type of declaration",
+          "$ref": "#/$defs/DeclarationType"
         }
       }
     },
@@ -136,10 +144,6 @@
       "type": "object",
       "description": "Member of a scope.",
       "properties": {
-        "properties": {
-          "$comment": "The properties of this member.",
-          "$ref": "#/$defs/Properties"
-        },
         "returnType": {
           "$comment": "The return type of this member, if it has one.",
           "$ref": "#/$defs/StaticTypeDesc"
@@ -164,6 +168,21 @@
           "items": {
             "$ref": "#/$defs/NamedFunctionTypeParameter"
           }
+        },
+        "metadataAnnotations": {
+          "type": "array",
+          "description": "The metadata annotations attached to this declaration.",
+          "items": {
+            "$ref": "#/$defs/MetadataAnnotation"
+          }
+        },
+        "properties": {
+          "$comment": "The properties of this declaration.",
+          "$ref": "#/$defs/Properties"
+        },
+        "declarationType": {
+          "$comment": "The type of declaration",
+          "$ref": "#/$defs/DeclarationType"
         }
       }
     },

@@ -9,6 +9,14 @@ import 'scopes.dart';
 
 export 'dart_model.g.dart';
 
+extension DeclarationExtension on Declaration {
+  Member? get maybeMember =>
+      declarationType == DeclarationType.member ? Member.fromJson(node) : null;
+  Interface? get maybeInterface => declarationType == DeclarationType.interface
+      ? Interface.fromJson(node)
+      : null;
+}
+
 extension QualifiedNameExtension on QualifiedName {
   String get asString =>
       '$uri#${scope == null ? '' : '$scope${isStatic! ? '::' : '.'}'}$name';
