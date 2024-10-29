@@ -145,6 +145,17 @@ extension type Declaration._(Map<String, Object?> node) implements Object {
 
   /// The properties of this declaration.
   Properties get properties => node['properties'] as Properties;
+
+  /// The type of declaration
+  DeclarationType get declarationType =>
+      node['declarationType'] as DeclarationType;
+}
+
+/// Declaration type.
+extension type const DeclarationType.fromJson(String string) implements Object {
+  static const DeclarationType interface =
+      DeclarationType.fromJson('interface');
+  static const DeclarationType member = DeclarationType.fromJson('member');
 }
 
 /// An interface.
@@ -155,17 +166,21 @@ extension type Interface.fromJson(Map<String, Object?> node)
     'thisType': Type.typedMapPointer,
     'metadataAnnotations': Type.closedListPointer,
     'properties': Type.typedMapPointer,
+    'declarationType': Type.stringPointer,
   });
   Interface({
     NamedTypeDesc? thisType,
     List<MetadataAnnotation>? metadataAnnotations,
     Properties? properties,
+    DeclarationType? declarationType,
   }) : this.fromJson(Scope.createMap(
           _schema,
           Scope.createGrowableMap(),
           thisType,
           metadataAnnotations,
           properties,
+          // TODO(davidmorgan): this is a manual edit!
+          'interface',
         ));
 
   /// Map of members by name.
@@ -202,6 +217,7 @@ extension type Member.fromJson(Map<String, Object?> node)
     'namedParameters': Type.closedListPointer,
     'metadataAnnotations': Type.closedListPointer,
     'properties': Type.typedMapPointer,
+    'declarationType': Type.stringPointer,
   });
   Member({
     StaticTypeDesc? returnType,
@@ -218,6 +234,8 @@ extension type Member.fromJson(Map<String, Object?> node)
           namedParameters,
           metadataAnnotations,
           properties,
+          // TODO(davidmorgan): this is a manual edit!
+          'member',
         ));
 
   /// The return type of this member, if it has one.

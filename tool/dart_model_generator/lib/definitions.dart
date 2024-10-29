@@ -120,7 +120,15 @@ static Protocol handshakeProtocol = Protocol(
               Property('properties',
                   type: 'Properties',
                   description: 'The properties of this declaration.'),
+              Property('declarationType',
+                  type: 'DeclarationType',
+                  description: 'The type of declaration'),
             ]),
+        Definition.$enum(
+          'DeclarationType',
+          description: 'Declaration type.',
+          values: ['interface', 'member'],
+        ),
         Definition.clazz(
           'Interface',
           description: 'An interface.',

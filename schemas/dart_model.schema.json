@@ -91,6 +91,10 @@
         }
       }
     },
+    "DeclarationType": {
+      "type": "string",
+      "description": "Declaration type."
+    },
     "Interface": {
       "type": "object",
       "description": "An interface.",
@@ -116,6 +120,10 @@
         "properties": {
           "$comment": "The properties of this declaration.",
           "$ref": "#/$defs/Properties"
+        },
+        "declarationType": {
+          "$comment": "The type of declaration",
+          "$ref": "#/$defs/DeclarationType"
         }
       }
     },
@@ -171,6 +179,10 @@
         "properties": {
           "$comment": "The properties of this declaration.",
           "$ref": "#/$defs/Properties"
+        },
+        "declarationType": {
+          "$comment": "The type of declaration",
+          "$ref": "#/$defs/DeclarationType"
         }
       }
     },
