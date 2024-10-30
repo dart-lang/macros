@@ -21,53 +21,59 @@
           "metadataAnnotations": [
             {
               "expression": {
-                "type": {
-                  "reference": {
-                    "type": "ClassReference",
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
                     "value": {}
                   },
-                  "typeArguments": []
-                },
-                "constructor": {
-                  "type": "ConstructorReference",
-                  "value": {}
-                },
-                "arguments": []
+                  "arguments": []
+                }
               }
             },
             {
               "expression": {
-                "type": {
-                  "reference": {
-                    "type": "ClassReference",
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
                     "value": {}
                   },
-                  "typeArguments": []
-                },
-                "constructor": {
-                  "type": "ConstructorReference",
-                  "value": {}
-                },
-                "arguments": [
-                  {
-                    "name": "aBool",
-                    "expression": {
-                      "type": "BooleanLiteral",
-                      "value": {
-                        "text": "true"
+                  "arguments": [
+                    {
+                      "name": "aBool",
+                      "expression": {
+                        "type": "BooleanLiteral",
+                        "value": {
+                          "text": "true"
+                        }
+                      }
+                    },
+                    {
+                      "name": "anInt",
+                      "expression": {
+                        "type": "IntegerLiteral",
+                        "value": {
+                          "text": "23"
+                        }
                       }
                     }
-                  },
-                  {
-                    "name": "anInt",
-                    "expression": {
-                      "type": "IntegerLiteral",
-                      "value": {
-                        "text": "23"
-                      }
-                    }
-                  }
-                ]
+                  ]
+                }
               }
             }
           ],

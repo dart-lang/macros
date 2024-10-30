@@ -201,18 +201,21 @@
           "metadataAnnotations": [
             {
               "expression": {
-                "type": {
-                  "reference": {
-                    "type": "ClassReference",
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
                     "value": {}
                   },
-                  "typeArguments": []
-                },
-                "constructor": {
-                  "type": "ConstructorReference",
-                  "value": {}
-                },
-                "arguments": []
+                  "arguments": []
+                }
               }
             }
           ],
@@ -259,18 +262,21 @@
           "metadataAnnotations": [
             {
               "expression": {
-                "type": {
-                  "reference": {
-                    "type": "ClassReference",
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
                     "value": {}
                   },
-                  "typeArguments": []
-                },
-                "constructor": {
-                  "type": "ConstructorReference",
-                  "value": {}
-                },
-                "arguments": []
+                  "arguments": []
+                }
               }
             }
           ],

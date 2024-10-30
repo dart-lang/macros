@@ -43,8 +43,9 @@ class AnalyzerQueryService implements QueryService {
     for (final annotation in clazz.metadata) {
       metadataAnnotations.add(
         MetadataAnnotation(
-            expression: metadata_converter.convert(analyzer.parseAnnotation(
-                annotation as analyzer.ElementAnnotationImpl))),
+            expression: metadata_converter.convertToExpression(
+                analyzer.parseAnnotation(
+                    annotation as analyzer.ElementAnnotationImpl))),
       );
     }
 
