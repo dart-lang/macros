@@ -1,0 +1,164 @@
+{
+  "uris": {
+    "package:foo/metadata.dart": {
+      "scopes": {
+        "Foo": {
+          "members": {
+            "": {
+              "requiredPositionalParameters": [],
+              "optionalPositionalParameters": [],
+              "namedParameters": [],
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": true,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": false,
+                "isStatic": false
+              }
+            }
+          },
+          "metadataAnnotations": [
+            {
+              "expression": {
+                "type": {
+                  "reference": {
+                    "type": "ClassReference",
+                    "value": {}
+                  },
+                  "typeArguments": []
+                },
+                "constructor": {
+                  "type": "ConstructorReference",
+                  "value": {}
+                },
+                "arguments": []
+              }
+            },
+            {
+              "expression": {
+                "type": {
+                  "reference": {
+                    "type": "ClassReference",
+                    "value": {}
+                  },
+                  "typeArguments": []
+                },
+                "constructor": {
+                  "type": "ConstructorReference",
+                  "value": {}
+                },
+                "arguments": [
+                  {
+                    "name": "aBool",
+                    "expression": {
+                      "type": "BooleanLiteral",
+                      "value": {
+                        "text": "true"
+                      }
+                    }
+                  },
+                  {
+                    "name": "anInt",
+                    "expression": {
+                      "type": "IntegerLiteral",
+                      "value": {
+                        "text": "23"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "properties": {
+            "isClass": true
+          }
+        }
+      }
+    }
+  },
+  "types": {
+    "named": {
+      "dart:core#Object": {
+        "typeParameters": [],
+        "self": {
+          "name": {
+            "uri": "dart:core",
+            "name": "Object"
+          },
+          "instantiation": []
+        },
+        "supertypes": []
+      },
+      "dart:core#Null": {
+        "typeParameters": [],
+        "self": {
+          "name": {
+            "uri": "dart:core",
+            "name": "Null"
+          },
+          "instantiation": []
+        },
+        "supertypes": [
+          {
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
+            "instantiation": []
+          }
+        ]
+      },
+      "dart:async#Future": {
+        "typeParameters": [
+          {
+            "identifier": 0
+          }
+        ],
+        "self": {
+          "name": {
+            "uri": "dart:async",
+            "name": "Future"
+          },
+          "instantiation": [
+            {
+              "type": "TypeParameterTypeDesc",
+              "value": {
+                "parameterId": 0
+              }
+            }
+          ]
+        },
+        "supertypes": [
+          {
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
+            "instantiation": []
+          }
+        ]
+      },
+      "package:foo/metadata.dart#Foo": {
+        "typeParameters": [],
+        "self": {
+          "name": {
+            "uri": "package:foo/metadata.dart",
+            "name": "Foo"
+          },
+          "instantiation": []
+        },
+        "supertypes": [
+          {
+            "name": {
+              "uri": "dart:core",
+              "name": "Object"
+            },
+            "instantiation": []
+          }
+        ]
+      }
+    }
+  }
+}

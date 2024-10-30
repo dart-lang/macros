@@ -113,9 +113,9 @@ static Protocol handshakeProtocol = Protocol(
             description: 'A metadata annotation.',
             createInBuffer: true,
             properties: [
-              Property('type',
-                  type: 'QualifiedName',
-                  description: 'The type of the annotation.'),
+              Property('expression',
+                  type: 'Expression',
+                  description: 'The expression of the annotation.'),
             ]),
         Definition.clazz('Declaration',
             description: 'Interface type for all declarations',
