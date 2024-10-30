@@ -85,9 +85,9 @@
       "type": "object",
       "description": "A metadata annotation.",
       "properties": {
-        "type": {
-          "$comment": "The type of the annotation.",
-          "$ref": "#/$defs/QualifiedName"
+        "expression": {
+          "$comment": "The expression of the annotation.",
+          "$ref": "file:macro_metadata.schema.json#/$defs/Expression"
         }
       }
     },

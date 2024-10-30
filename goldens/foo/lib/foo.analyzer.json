@@ -5,14 +5,6 @@
         "Foo": {
           "members": {
             "construct": {
-              "properties": {
-                "isAbstract": false,
-                "isConstructor": true,
-                "isGetter": false,
-                "isField": false,
-                "isMethod": false,
-                "isStatic": false
-              },
               "requiredPositionalParameters": [
                 {
                   "type": "NamedTypeDesc",
@@ -37,9 +29,7 @@
                     "instantiation": []
                   }
                 }
-              ]
-            },
-            "construct2": {
+              ],
               "properties": {
                 "isAbstract": false,
                 "isConstructor": true,
@@ -47,7 +37,9 @@
                 "isField": false,
                 "isMethod": false,
                 "isStatic": false
-              },
+              }
+            },
+            "construct2": {
               "requiredPositionalParameters": [
                 {
                   "type": "NamedTypeDesc",
@@ -77,17 +69,17 @@
                   }
                 }
               ],
-              "namedParameters": []
-            },
-            "bar": {
+              "namedParameters": [],
               "properties": {
                 "isAbstract": false,
-                "isConstructor": false,
+                "isConstructor": true,
                 "isGetter": false,
-                "isField": true,
+                "isField": false,
                 "isMethod": false,
                 "isStatic": false
-              },
+              }
+            },
+            "bar": {
               "returnType": {
                 "type": "NamedTypeDesc",
                 "value": {
@@ -97,17 +89,17 @@
                   },
                   "instantiation": []
                 }
-              }
-            },
-            "method": {
+              },
               "properties": {
                 "isAbstract": false,
                 "isConstructor": false,
                 "isGetter": false,
-                "isField": false,
-                "isMethod": true,
+                "isField": true,
+                "isMethod": false,
                 "isStatic": false
-              },
+              }
+            },
+            "method": {
               "returnType": {
                 "type": "VoidTypeDesc"
               },
@@ -140,9 +132,7 @@
                     }
                   }
                 }
-              ]
-            },
-            "method2": {
+              ],
               "properties": {
                 "isAbstract": false,
                 "isConstructor": false,
@@ -150,7 +140,9 @@
                 "isField": false,
                 "isMethod": true,
                 "isStatic": false
-              },
+              }
+            },
+            "method2": {
               "returnType": {
                 "type": "NullableTypeDesc",
                 "value": {
@@ -195,9 +187,38 @@
                   }
                 }
               ],
-              "namedParameters": []
+              "namedParameters": [],
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": false,
+                "isGetter": false,
+                "isField": false,
+                "isMethod": true,
+                "isStatic": false
+              }
             }
           },
+          "metadataAnnotations": [
+            {
+              "expression": {
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
+                    "value": {}
+                  },
+                  "arguments": []
+                }
+              }
+            }
+          ],
           "properties": {
             "isClass": true
           }
@@ -205,6 +226,9 @@
         "Bar": {
           "members": {
             "": {
+              "requiredPositionalParameters": [],
+              "optionalPositionalParameters": [],
+              "namedParameters": [],
               "properties": {
                 "isAbstract": false,
                 "isConstructor": true,
@@ -212,20 +236,9 @@
                 "isField": false,
                 "isMethod": false,
                 "isStatic": false
-              },
-              "requiredPositionalParameters": [],
-              "optionalPositionalParameters": [],
-              "namedParameters": []
+              }
             },
             "bar": {
-              "properties": {
-                "isAbstract": false,
-                "isConstructor": false,
-                "isGetter": false,
-                "isField": true,
-                "isMethod": false,
-                "isStatic": false
-              },
               "returnType": {
                 "type": "NamedTypeDesc",
                 "value": {
@@ -235,9 +248,38 @@
                   },
                   "instantiation": []
                 }
+              },
+              "properties": {
+                "isAbstract": false,
+                "isConstructor": false,
+                "isGetter": false,
+                "isField": true,
+                "isMethod": false,
+                "isStatic": false
               }
             }
           },
+          "metadataAnnotations": [
+            {
+              "expression": {
+                "type": "ConstructorInvocation",
+                "value": {
+                  "type": {
+                    "reference": {
+                      "type": "ClassReference",
+                      "value": {}
+                    },
+                    "typeArguments": []
+                  },
+                  "constructor": {
+                    "type": "ConstructorReference",
+                    "value": {}
+                  },
+                  "arguments": []
+                }
+              }
+            }
+          ],
           "properties": {
             "isClass": true
           }

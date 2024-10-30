@@ -6,6 +6,8 @@ import 'package:dart_model/src/deep_cast_map.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:dart_model/src/macro_metadata.g.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/scopes.dart';
 
 /// An augmentation to Dart code.
@@ -124,17 +126,17 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
 extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
-    'type': Type.typedMapPointer,
+    'expression': Type.typedMapPointer,
   });
   MetadataAnnotation({
-    QualifiedName? type,
+    Expression? expression,
   }) : this.fromJson(Scope.createMap(
           _schema,
-          type,
+          expression,
         ));
 
-  /// The type of the annotation.
-  QualifiedName get type => node['type'] as QualifiedName;
+  /// The expression of the annotation.
+  Expression get expression => node['expression'] as Expression;
 }
 
 /// Interface type for all declarations
