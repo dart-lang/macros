@@ -93,54 +93,180 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
           .asQueryResponse
           .model);
 
+  /// Cached macro results
+  static final _declPhaseCachedResults = <
+      // TODO: This is just the name of the class, yikes
+      String,
+      (
+    List<(Query, Model)> queryResults,
+    AugmentResponse macroResponse,
+  )>{};
+
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(
       macros_api_v1.MacroTarget target,
       macros_api_v1.DeclarationPhaseIntrospector
           declarationsPhaseIntrospector) async {
-    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
-    introspector = declarationsPhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
+    var watch = Stopwatch()..start();
+    try {
+      // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+      introspector = declarationsPhaseIntrospector;
+
+      final cached = _declPhaseCachedResults[
+          // TODO: Obviously flawed
+          (target as macros_api_v1.ClassDeclaration).identifier.name];
+      AugmentResponse? response;
+      if (cached != null) {
+        var allWasCached = true;
+        for (final (query, result) in cached.$1) {
+          final newResult = await Scope.query.run(() async => (await _impl
+                  ._host.hostService
+                  .handle(MacroRequest.queryRequest(QueryRequest(query: query),
+                      id: nextRequestId)))
+              .asQueryResponse
+              .model);
+          if (result.identityHash != newResult.identityHash) {
+            allWasCached = false;
+            break;
+          }
+        }
+        if (allWasCached) {
+          response = cached.$2;
+        }
+      }
+      if (response == null) {
+        _impl._host.hostService.startTracking();
+        response = await _impl._host.augment(
             name,
             AugmentRequest(
                 phase: 2,
                 target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+                model: await _queryTarget(target.qualifiedName)));
+        _declPhaseCachedResults[target.identifier.name] =
+            (_impl._host.hostService.stopTracking(), response);
+      }
+      return await AnalyzerMacroExecutionResult.dartModelToInjected(
+          target, response);
+    } finally {
+      print('executeDeclarationsPhase: ${watch.elapsedMilliseconds}ms');
+    }
   }
+
+  /// Cached macro results from the definitions phase.
+  static final _definitionPhaseCachedResults = <
+      // TODO: This is just the name of the class, yikes
+      String,
+      (
+    List<(Query, Model)> queryResults,
+    AugmentResponse macroResponse,
+  )>{};
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDefinitionsPhase(
       macros_api_v1.MacroTarget target,
       macros_api_v1.DefinitionPhaseIntrospector
           definitionPhaseIntrospector) async {
-    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
-    introspector = definitionPhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
+    var watch = Stopwatch()..start();
+    try {
+      // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+      introspector = definitionPhaseIntrospector;
+
+      final cached = _definitionPhaseCachedResults[
+          // TODO: Obviously flawed
+          (target as macros_api_v1.ClassDeclaration).identifier.name];
+      AugmentResponse? response;
+      if (cached != null) {
+        var allWasCached = true;
+        for (final (query, result) in cached.$1) {
+          final newResult = await Scope.query.run(() async => (await _impl
+                  ._host.hostService
+                  .handle(MacroRequest.queryRequest(QueryRequest(query: query),
+                      id: nextRequestId)))
+              .asQueryResponse
+              .model);
+          if (result.identityHash != newResult.identityHash) {
+            allWasCached = false;
+            break;
+          }
+        }
+        if (allWasCached) {
+          response = cached.$2;
+        }
+      }
+
+      if (response == null) {
+        _impl._host.hostService.startTracking();
+        response = await _impl._host.augment(
             name,
             AugmentRequest(
                 phase: 3,
                 target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+                model: await _queryTarget(target.qualifiedName)));
+        _definitionPhaseCachedResults[target.identifier.name] =
+            (_impl._host.hostService.stopTracking(), response);
+      }
+      return await AnalyzerMacroExecutionResult.dartModelToInjected(
+          target, response);
+    } finally {
+      print('executeDefinitionsPhase: ${watch.elapsedMilliseconds}ms');
+    }
   }
+
+  /// Cached macro results from the definitions phase.
+  static final _typesPhaseCachedResults = <
+      // TODO: This is just the name of the class, yikes
+      String,
+      (
+    List<(Query, Model)> queryResults,
+    AugmentResponse macroResponse,
+  )>{};
 
   @override
   Future<AnalyzerMacroExecutionResult> executeTypesPhase(
       macros_api_v1.MacroTarget target,
       macros_api_v1.TypePhaseIntrospector typePhaseIntrospector) async {
-    // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
-    introspector = typePhaseIntrospector;
-    return await AnalyzerMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
+    var watch = Stopwatch()..start();
+    try {
+      // TODO(davidmorgan): this is a hack to access analyzer internals; remove.
+      introspector = typePhaseIntrospector;
+      final cached = _typesPhaseCachedResults[
+          // TODO: Obviously flawed
+          (target as macros_api_v1.ClassDeclaration).identifier.name];
+      AugmentResponse? response;
+      if (cached != null) {
+        var allWasCached = true;
+        for (final (query, result) in cached.$1) {
+          final newResult = await Scope.query.run(() async => (await _impl
+                  ._host.hostService
+                  .handle(MacroRequest.queryRequest(QueryRequest(query: query),
+                      id: nextRequestId)))
+              .asQueryResponse
+              .model);
+          if (result.identityHash != newResult.identityHash) {
+            allWasCached = false;
+            break;
+          }
+        }
+        if (allWasCached) {
+          response = cached.$2;
+        }
+      }
+      if (response == null) {
+        _impl._host.hostService.startTracking();
+        response = await _impl._host.augment(
             name,
             AugmentRequest(
                 phase: 1,
                 target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+                model: await _queryTarget(target.qualifiedName)));
+        _typesPhaseCachedResults[target.identifier.name] =
+            (_impl._host.hostService.stopTracking(), response);
+      }
+      return await AnalyzerMacroExecutionResult.dartModelToInjected(
+          target, response);
+    } finally {
+      print('executeTypesPhase: ${watch.elapsedMilliseconds}ms');
+    }
   }
 }
 

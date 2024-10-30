@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:dart_model/dart_model.dart';
 import 'package:dart_model/serialization.dart';
 
 import 'handshake.g.dart';
@@ -14,6 +15,15 @@ import 'message_grouper.dart';
 
 /// Service provided by the host to the macro.
 abstract interface class HostService {
+  /// Starts globally tracking all queries and their responses.
+  // TODO: A better way of tracking queries
+  void startTracking();
+
+  /// Resets the query tracking and returns all the collected queries
+  /// and responses.
+  // TODO: A better way of tracking queries
+  List<(Query, Model)> stopTracking();
+
   /// Handles [request].
   ///
   /// Returns `null` if the request is of a type not handled by this service

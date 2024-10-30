@@ -145,4 +145,21 @@ class TestHostService implements HostService {
     return Response.errorResponse(ErrorResponse(error: 'unimplemented'),
         requestId: request.id);
   }
+
+  List<(Query, Model)>? _queries;
+
+  @override
+  void startTracking() {
+    if (_queries != null) {
+      throw StateError('Already tracking queries');
+    }
+    _queries = [];
+  }
+
+  @override
+  List<(Query, Model)> stopTracking() {
+    final result = _queries!;
+    _queries = null;
+    return result;
+  }
 }

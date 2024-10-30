@@ -114,13 +114,30 @@ class _HostService implements HostService {
         return Response.macroStartedResponse(MacroStartedResponse(),
             requestId: request.id);
       case MacroRequestType.queryRequest:
-        return Response.queryResponse(
-            await queryService.handle(request.asQueryRequest),
-            requestId: request.id);
+        final response = await queryService.handle(request.asQueryRequest);
+        _queries?.add((request.asQueryRequest.query, response.model));
+        return Response.queryResponse(response, requestId: request.id);
       default:
         return Response.errorResponse(ErrorResponse(error: 'unsupported'),
             requestId: request.id);
     }
+  }
+
+  List<(Query, Model)>? _queries;
+
+  @override
+  void startTracking() {
+    if (_queries != null) {
+      throw StateError('Already tracking queries');
+    }
+    _queries = [];
+  }
+
+  @override
+  List<(Query, Model)> stopTracking() {
+    final result = _queries!;
+    _queries = null;
+    return result;
   }
 }
 
