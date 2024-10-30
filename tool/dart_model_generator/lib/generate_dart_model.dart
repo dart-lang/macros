@@ -376,6 +376,29 @@ class TypeReference {
     }
   }
 
+  /// Returns a piece of code which will return an identity hash for the
+  /// expression represented by [value] with the type of `this`.
+  ///
+  /// If [nullable] is true, it will handle the [value] expression being
+  /// nullable, otherwise it won't.
+  String hashExpression(String value, {bool nullable = false}) {
+    final q = nullable ? '?' : '';
+    if (isMap) {
+      return 'Object.hashAll($value$q.entries.map('
+          '(entry) => Object.hash(entry.key, '
+          '${elementType!.hashExpression('entry.value')}))'
+          '${nullable ? '?? const []' : ''})';
+    } else if (isList) {
+      return 'Object.hashAll($value$q.map('
+          '(entry) => ${elementType!.hashExpression('entry')})'
+          '${nullable ? '?? const []' : ''})';
+    } else if (const ['String', 'bool', 'int'].contains(name)) {
+      return '$value.hashCode';
+    } else {
+      return '$value$q.identityHash${nullable ? '?? 0' : ''}';
+    }
+  }
+
   /// The Dart type name of this type.
   String get dartType {
     if (isMap) return 'Map<String, ${elementType!.dartType}>';
@@ -585,6 +608,30 @@ class ClassTypeDefinition implements Definition {
     for (final property in properties) {
       result.writeln(property.getterCode);
     }
+
+    // Write an identityHash function which combines all our properties
+    final numProperties = allProperties(context).length;
+    result
+      ..writeln('/// Hash code for comparing instances of this extension type.')
+      ..write('int get identityHash => ')
+      ..writeln(switch (numProperties) {
+        > 20 => 'Object.hashAll([',
+        > 1 => 'Object.hash(',
+        1 => '',
+        0 => '0',
+        _ => throw StateError('Unreachable'),
+      });
+    for (final property in allProperties(context)) {
+      final hashExpr = property.type
+          .hashExpression(property.name, nullable: property.nullable);
+      result.writeln('$hashExpr${numProperties > 1 ? ', ' : ''}');
+    }
+    result.writeln(switch (numProperties) {
+      > 20 => ']);',
+      > 1 => ');',
+      _ => ';',
+    });
+
     result.writeln('}');
     return result.toString();
   }
@@ -750,6 +797,13 @@ class UnionTypeDefinition implements Definition {
     for (final property in properties) {
       result.writeln(property.getterCode);
     }
+
+    // TODO: Actually implement this
+    result
+      ..writeln('/// Hash code for comparing instances of this extension type.')
+      ..writeln('// TODO: A real implementation for union types.')
+      ..writeln('int get identityHash => 0;');
+
     result.writeln('}');
     return result.toString();
   }
@@ -791,6 +845,11 @@ class EnumTypeDefinition implements Definition {
     for (final value in values) {
       result.writeln("static const $name $value = $name.fromJson('$value');");
     }
+
+    result
+      ..writeln('/// Hash code for comparing instances of this extension type.')
+      ..writeln('int get identityHash => string.hashCode;');
+
     result.writeln('}');
     return result.toString();
   }

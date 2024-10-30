@@ -2,12 +2,16 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: implementation_imports
+import 'package:_analyzer_cfe_macros/metadata_converter.dart'
+    as metadata_converter;
 import 'package:_macro_host/macro_host.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/type_provider.dart';
-// ignore: implementation_imports
+import 'package:analyzer/src/dart/element/element.dart' as analyzer;
 import 'package:analyzer/src/summary2/linked_element_factory.dart' as analyzer;
+import 'package:analyzer/src/summary2/macro_metadata.dart' as analyzer;
 import 'package:dart_model/dart_model.dart' hide InterfaceType;
 import 'package:macro_service/macro_service.dart';
 
@@ -34,8 +38,20 @@ class AnalyzerQueryService implements QueryService {
     final clazz = library.getClass(target.name)!;
     final types = AnalyzerTypeHierarchy(library.typeProvider)
       ..addInterfaceElement(clazz);
+    final metadataAnnotations = <MetadataAnnotation>[];
 
-    final interface = Interface(properties: Properties(isClass: true));
+    for (final annotation in clazz.metadata) {
+      metadataAnnotations.add(
+        MetadataAnnotation(
+            expression: metadata_converter.convertToExpression(
+                analyzer.parseAnnotation(
+                    annotation as analyzer.ElementAnnotationImpl))),
+      );
+    }
+
+    final interface = Interface(
+        properties: Properties(isClass: true),
+        metadataAnnotations: metadataAnnotations);
     try {
       for (final constructor in clazz.constructors) {
         interface.members[constructor.name] = Member(

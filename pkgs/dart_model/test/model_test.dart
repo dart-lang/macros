@@ -16,13 +16,7 @@ void main() {
         model = Model()
           ..uris['package:dart_model/dart_model.dart'] = (Library()
             ..scopes['JsonData'] = (Interface(
-                properties: Properties(isClass: true),
-                metadataAnnotations: [
-                  MetadataAnnotation(
-                      type: QualifiedName(
-                          uri: 'package:dart_model/dart_model.dart',
-                          name: 'SomeAnnotation'))
-                ])
+                properties: Properties(isClass: true), metadataAnnotations: [])
               ..members['_root'] = Member(
                 properties: Properties(isField: true, isStatic: false),
               )));
@@ -34,14 +28,7 @@ void main() {
         'package:dart_model/dart_model.dart': {
           'scopes': {
             'JsonData': {
-              'metadataAnnotations': [
-                {
-                  'type': {
-                    'uri': 'package:dart_model/dart_model.dart',
-                    'name': 'SomeAnnotation'
-                  }
-                }
-              ],
+              'metadataAnnotations': <Map<String, Object?>>[],
               'members': {
                 '_root': {
                   'properties': {'isField': true, 'isStatic': false}

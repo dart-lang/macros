@@ -31,6 +31,11 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
 
   /// A pre-computed query result for the target.
   Model get model => node['model'] as Model;
+  int get identityHash => Object.hash(
+        phase.hashCode,
+        target.identityHash,
+        model.identityHash,
+      );
 }
 
 /// Macro's response to an [AugmentRequest]: the resulting augmentations.
@@ -81,6 +86,41 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node)
   Map<String, List<Augmentation>>? get typeAugmentations =>
       (node['typeAugmentations'] as Map?)
           ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+  int get identityHash => Object.hash(
+        Object.hashAll(enumValueAugmentations?.entries.map((entry) =>
+                Object.hash(
+                    entry.key,
+                    Object.hashAll(
+                        entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+        Object.hashAll(extendsTypeAugmentations?.entries.map((entry) =>
+                Object.hash(
+                    entry.key,
+                    Object.hashAll(
+                        entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+        Object.hashAll(interfaceAugmentations?.entries.map((entry) =>
+                Object.hash(
+                    entry.key,
+                    Object.hashAll(
+                        entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+        Object.hashAll(
+            libraryAugmentations?.map((entry) => entry.identityHash) ??
+                const []),
+        Object.hashAll(mixinAugmentations?.entries.map((entry) => Object.hash(
+                entry.key,
+                Object.hashAll(
+                    entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+        Object.hashAll(
+            newTypeNames?.map((entry) => entry.hashCode) ?? const []),
+        Object.hashAll(typeAugmentations?.entries.map((entry) => Object.hash(
+                entry.key,
+                Object.hashAll(
+                    entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+      );
 }
 
 /// Request could not be handled.
@@ -94,6 +134,7 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node)
 
   /// The error.
   String get error => node['error'] as String;
+  int get identityHash => error.hashCode;
 }
 
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?
@@ -107,6 +148,7 @@ extension type HostEndpoint.fromJson(Map<String, Object?> node)
 
   /// TCP port to connect to.
   int get port => node['port'] as int;
+  int get identityHash => port.hashCode;
 }
 
 enum HostRequestType {
@@ -151,6 +193,7 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
 
   /// The annotation identifying the macro that should handle the request.
   QualifiedName get macroAnnotation => node['macroAnnotation'] as QualifiedName;
+  int get identityHash => 0;
 }
 
 /// Information about a macro that the macro provides to the host.
@@ -169,6 +212,10 @@ extension type MacroDescription.fromJson(Map<String, Object?> node)
 
   /// Phases that the macro runs in: 1, 2 and/or 3.
   List<int> get runsInPhases => (node['runsInPhases'] as List).cast();
+  int get identityHash => Object.hash(
+        annotation.identityHash,
+        Object.hashAll(runsInPhases.map((entry) => entry.hashCode)),
+      );
 }
 
 /// Informs the host that a macro has started.
@@ -183,12 +230,14 @@ extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
   /// The macro description.
   MacroDescription get macroDescription =>
       node['macroDescription'] as MacroDescription;
+  int get identityHash => macroDescription.identityHash;
 }
 
 /// Host's response to a [MacroStartedRequest].
 extension type MacroStartedResponse.fromJson(Map<String, Object?> node)
     implements Object {
   MacroStartedResponse() : this.fromJson({});
+  int get identityHash => 0;
 }
 
 enum MacroRequestType {
@@ -247,6 +296,7 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 
   /// The id of this request, must be returned in responses.
   int get id => node['id'] as int;
+  int get identityHash => 0;
 }
 
 /// Macro's query about the code it should augment.
@@ -260,6 +310,7 @@ extension type QueryRequest.fromJson(Map<String, Object?> node)
 
   /// The query.
   Query get query => node['query'] as Query;
+  int get identityHash => query.identityHash;
 }
 
 /// Host's response to a [QueryRequest].
@@ -273,6 +324,7 @@ extension type QueryResponse.fromJson(Map<String, Object?> node)
 
   /// The model.
   Model get model => node['model'] as Model;
+  int get identityHash => model.identityHash;
 }
 
 enum ResponseType {
@@ -368,4 +420,5 @@ extension type Response.fromJson(Map<String, Object?> node) implements Object {
 
   /// The id of the request this is responding to.
   int get requestId => node['requestId'] as int;
+  int get identityHash => 0;
 }

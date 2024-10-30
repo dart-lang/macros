@@ -4,20 +4,23 @@
 
 import 'package:_analyzer_cfe_macros/metadata_converter.dart';
 import 'package:_fe_analyzer_shared/src/metadata/ast.dart';
+import 'package:dart_model/dart_model.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('converts with unions', () {
     final invocation = MethodInvocation(DoubleLiteral('1.23'), 'round', [], []);
 
-    expect(convert<Object>(invocation), <String, Object?>{
-      'receiver': {
-        'type': 'DoubleLiteral',
-        'value': {'text': '1.23'}
-      },
-      'name': 'round',
-      'typeArguments': [],
-      'arguments': [],
+    Scope.query.run(() {
+      expect(convert<Object>(invocation), <String, Object?>{
+        'receiver': {
+          'type': 'DoubleLiteral',
+          'value': {'text': '1.23'}
+        },
+        'name': 'round',
+        'typeArguments': [],
+        'arguments': [],
+      });
     });
   });
 
@@ -25,16 +28,18 @@ void main() {
     final expression = BinaryExpression(
         DoubleLiteral('1.23'), BinaryOperator.minus, DoubleLiteral('1.24'));
 
-    expect(convert<Object>(expression), <String, Object?>{
-      'left': {
-        'type': 'DoubleLiteral',
-        'value': {'text': '1.23'}
-      },
-      'operator': 'minus',
-      'right': {
-        'type': 'DoubleLiteral',
-        'value': {'text': '1.24'}
-      }
+    Scope.query.run(() {
+      expect(convert<Object>(expression), <String, Object?>{
+        'left': {
+          'type': 'DoubleLiteral',
+          'value': {'text': '1.23'}
+        },
+        'operator': 'minus',
+        'right': {
+          'type': 'DoubleLiteral',
+          'value': {'text': '1.24'}
+        }
+      });
     });
   });
 
@@ -42,21 +47,23 @@ void main() {
     final invocation = MethodInvocation(DoubleLiteral('1.23'), 'round', [],
         [PositionalArgument(IntegerLiteral('4'))]);
 
-    expect(convert<Object>(invocation), <String, Object?>{
-      'receiver': {
-        'type': 'DoubleLiteral',
-        'value': {'text': '1.23'}
-      },
-      'name': 'round',
-      'typeArguments': [],
-      'arguments': [
-        {
-          'expression': {
-            'type': 'IntegerLiteral',
-            'value': {'text': '4'}
+    Scope.query.run(() {
+      expect(convert<Object>(invocation), <String, Object?>{
+        'receiver': {
+          'type': 'DoubleLiteral',
+          'value': {'text': '1.23'}
+        },
+        'name': 'round',
+        'typeArguments': [],
+        'arguments': [
+          {
+            'expression': {
+              'type': 'IntegerLiteral',
+              'value': {'text': '4'}
+            }
           }
-        }
-      ]
+        ]
+      });
     });
   });
 }
