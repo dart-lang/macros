@@ -25,6 +25,8 @@ extension type Augmentation.fromJson(Map<String, Object?> node)
 
   /// Augmentation code.
   List<Code> get code => (node['code'] as List).cast();
+  int get identityHash =>
+      Object.hashAll(code.map((entry) => entry.identityHash));
 }
 
 enum CodeType {
@@ -76,6 +78,8 @@ extension type Code.fromJson(Map<String, Object?> node) implements Object {
     }
     return node['value'] as String;
   }
+
+  int get identityHash => 0;
 }
 
 /// The type-hierarchy representation of the type `dynamic`.
@@ -120,6 +124,15 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
       (node['optionalPositionalParameters'] as List).cast();
   List<NamedFunctionTypeParameter> get namedParameters =>
       (node['namedParameters'] as List).cast();
+  int get identityHash => Object.hash(
+        returnType.identityHash,
+        Object.hashAll(typeParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(
+            requiredPositionalParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(
+            optionalPositionalParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(namedParameters.map((entry) => entry.identityHash)),
+      );
 }
 
 /// A metadata annotation.
@@ -137,6 +150,7 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
 
   /// The expression of the annotation.
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 /// Interface type for all declarations
@@ -147,6 +161,10 @@ extension type Declaration._(Map<String, Object?> node) implements Object {
 
   /// The properties of this declaration.
   Properties get properties => node['properties'] as Properties;
+  int get identityHash => Object.hash(
+        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
+        properties.identityHash,
+      );
 }
 
 /// An interface.
@@ -176,6 +194,13 @@ extension type Interface.fromJson(Map<String, Object?> node)
 
   /// The type of the expression `this` when used in this interface.
   NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
+  int get identityHash => Object.hash(
+        Object.hashAll(members.entries
+            .map((entry) => Object.hash(entry.key, entry.value.identityHash))),
+        thisType.identityHash,
+        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
+        properties.identityHash,
+      );
 }
 
 /// Library.
@@ -192,6 +217,8 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
   /// Scopes by name.
   Map<String, Interface> get scopes =>
       (node['scopes'] as Map).cast<String, Interface>();
+  int get identityHash => Object.hashAll(scopes.entries
+      .map((entry) => Object.hash(entry.key, entry.value.identityHash)));
 }
 
 /// Member of a scope.
@@ -236,6 +263,16 @@ extension type Member.fromJson(Map<String, Object?> node)
   /// The named parameters of this member, if it has them.
   List<NamedFunctionTypeParameter> get namedParameters =>
       (node['namedParameters'] as List).cast();
+  int get identityHash => Object.hash(
+        returnType.identityHash,
+        Object.hashAll(
+            requiredPositionalParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(
+            optionalPositionalParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(namedParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
+        properties.identityHash,
+      );
 }
 
 /// Partial model of a corpus of Dart source code.
@@ -258,6 +295,11 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
 
   /// The resolved static type hierarchy.
   TypeHierarchy get types => node['types'] as TypeHierarchy;
+  int get identityHash => Object.hash(
+        Object.hashAll(uris.entries
+            .map((entry) => Object.hash(entry.key, entry.value.identityHash))),
+        types.identityHash,
+      );
 }
 
 /// A resolved named parameter as part of a [FunctionTypeDesc].
@@ -281,6 +323,11 @@ extension type NamedFunctionTypeParameter.fromJson(Map<String, Object?> node)
   String get name => node['name'] as String;
   bool get required => node['required'] as bool;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
+  int get identityHash => Object.hash(
+        name.hashCode,
+        required.hashCode,
+        type.identityHash,
+      );
 }
 
 /// A named field in a [RecordTypeDesc], consisting of the field name and the associated type.
@@ -300,6 +347,10 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
         ));
   String get name => node['name'] as String;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
+  int get identityHash => Object.hash(
+        name.hashCode,
+        type.identityHash,
+      );
 }
 
 /// A resolved static type.
@@ -320,6 +371,10 @@ extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
   QualifiedName get name => node['name'] as QualifiedName;
   List<StaticTypeDesc> get instantiation =>
       (node['instantiation'] as List).cast();
+  int get identityHash => Object.hash(
+        name.identityHash,
+        Object.hashAll(instantiation.map((entry) => entry.identityHash)),
+      );
 }
 
 /// Representation of the bottom type [Never].
@@ -342,6 +397,7 @@ extension type NullableTypeDesc.fromJson(Map<String, Object?> node)
 
   /// The type T.
   StaticTypeDesc get inner => node['inner'] as StaticTypeDesc;
+  int get identityHash => inner.identityHash;
 }
 
 /// Set of boolean properties.
@@ -395,6 +451,15 @@ extension type Properties.fromJson(Map<String, Object?> node)
 
   /// Whether the entity is static.
   bool get isStatic => node['isStatic'] as bool;
+  int get identityHash => Object.hash(
+        isAbstract.hashCode,
+        isClass.hashCode,
+        isConstructor.hashCode,
+        isGetter.hashCode,
+        isField.hashCode,
+        isMethod.hashCode,
+        isStatic.hashCode,
+      );
 }
 
 /// A URI combined with a name and scope referring to a declaration. The name and scope are looked up in the export scope of the URI.
@@ -461,6 +526,12 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
 
   /// Whether the name refers to something in the static scope as opposed to the instance scope of `scope`. Will be `null` if `scope` is `null`.
   bool? get isStatic => node['isStatic'] as bool?;
+  int get identityHash => Object.hash(
+        uri.hashCode,
+        scope.hashCode,
+        name.hashCode,
+        isStatic.hashCode,
+      );
 }
 
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
@@ -473,6 +544,7 @@ extension type Query.fromJson(Map<String, Object?> node) implements Object {
 
   /// The class to query about.
   QualifiedName get target => node['target'] as QualifiedName;
+  int get identityHash => target.identityHash;
 }
 
 /// A resolved record type in the type hierarchy.
@@ -492,6 +564,10 @@ extension type RecordTypeDesc.fromJson(Map<String, Object?> node)
         ));
   List<StaticTypeDesc> get positional => (node['positional'] as List).cast();
   List<NamedRecordField> get named => (node['named'] as List).cast();
+  int get identityHash => Object.hash(
+        Object.hashAll(positional.map((entry) => entry.identityHash)),
+        Object.hashAll(named.map((entry) => entry.identityHash)),
+      );
 }
 
 enum StaticTypeDescType {
@@ -643,6 +719,8 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
     }
     return VoidTypeDesc.fromJson(node['value'] as Null);
   }
+
+  int get identityHash => 0;
 }
 
 /// A resolved type parameter introduced by a [FunctionTypeDesc].
@@ -662,6 +740,10 @@ extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
         ));
   int get identifier => node['identifier'] as int;
   StaticTypeDesc? get bound => node['bound'] as StaticTypeDesc?;
+  int get identityHash => Object.hash(
+        identifier.hashCode,
+        bound?.identityHash ?? 0,
+      );
 }
 
 /// View of a subset of a Dart program's type hierarchy as part of a queried model.
@@ -679,6 +761,8 @@ extension type TypeHierarchy.fromJson(Map<String, Object?> node)
   /// Map of qualified interface names to their resolved named type.
   Map<String, TypeHierarchyEntry> get named =>
       (node['named'] as Map).cast<String, TypeHierarchyEntry>();
+  int get identityHash => Object.hashAll(named.entries
+      .map((entry) => Object.hash(entry.key, entry.value.identityHash)));
 }
 
 /// Entry of an interface in Dart's type hierarchy, along with supertypes.
@@ -709,6 +793,11 @@ extension type TypeHierarchyEntry.fromJson(Map<String, Object?> node)
 
   /// All direct supertypes of this type.
   List<NamedTypeDesc> get supertypes => (node['supertypes'] as List).cast();
+  int get identityHash => Object.hash(
+        Object.hashAll(typeParameters.map((entry) => entry.identityHash)),
+        self.identityHash,
+        Object.hashAll(supertypes.map((entry) => entry.identityHash)),
+      );
 }
 
 /// A type formed by a reference to a type parameter.
@@ -724,6 +813,7 @@ extension type TypeParameterTypeDesc.fromJson(Map<String, Object?> node)
           parameterId,
         ));
   int get parameterId => node['parameterId'] as int;
+  int get identityHash => parameterId.hashCode;
 }
 
 /// The type-hierarchy representation of the type `void`.

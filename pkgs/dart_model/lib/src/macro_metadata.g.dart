@@ -58,6 +58,8 @@ extension type Argument.fromJson(Map<String, Object?> node) implements Object {
     }
     return NamedArgument.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum ElementType {
@@ -142,6 +144,8 @@ extension type Element.fromJson(Map<String, Object?> node) implements Object {
     }
     return IfElement.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum ExpressionType {
@@ -701,6 +705,8 @@ extension type Expression.fromJson(Map<String, Object?> node)
     }
     return UnresolvedExpression.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum RecordFieldType {
@@ -756,6 +762,8 @@ extension type RecordField.fromJson(Map<String, Object?> node)
     return RecordPositionalField.fromJson(
         node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum ReferenceType {
@@ -941,6 +949,8 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
     return FunctionTypeParameterReference.fromJson(
         node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum StringLiteralPartType {
@@ -995,6 +1005,8 @@ extension type StringLiteralPart.fromJson(Map<String, Object?> node)
     }
     return InterpolationPart.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 enum TypeAnnotationType {
@@ -1175,6 +1187,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
     }
     return RecordTypeAnnotation.fromJson(node['value'] as Map<String, Object?>);
   }
+
+  int get identityHash => 0;
 }
 
 ///
@@ -1203,12 +1217,14 @@ extension type const BinaryOperator.fromJson(String string) implements Object {
       BinaryOperator.fromJson('bitwiseAnd');
   static const BinaryOperator bitwiseXor =
       BinaryOperator.fromJson('bitwiseXor');
+  int get identityHash => string.hashCode;
 }
 
 ///
 extension type const LogicalOperator.fromJson(String string) implements Object {
   static const LogicalOperator and = LogicalOperator.fromJson('and');
   static const LogicalOperator or = LogicalOperator.fromJson('or');
+  int get identityHash => string.hashCode;
 }
 
 ///
@@ -1216,6 +1232,7 @@ extension type const UnaryOperator.fromJson(String string) implements Object {
   static const UnaryOperator minus = UnaryOperator.fromJson('minus');
   static const UnaryOperator bang = UnaryOperator.fromJson('bang');
   static const UnaryOperator tilde = UnaryOperator.fromJson('tilde');
+  int get identityHash => string.hashCode;
 }
 
 ///
@@ -1239,6 +1256,10 @@ extension type AsExpression.fromJson(Map<String, Object?> node)
 
   ///
   TypeAnnotation get type => node['type'] as TypeAnnotation;
+  int get identityHash => Object.hash(
+        expression.identityHash,
+        type.identityHash,
+      );
 }
 
 ///
@@ -1268,6 +1289,11 @@ extension type BinaryExpression.fromJson(Map<String, Object?> node)
 
   ///
   Expression get right => node['right'] as Expression;
+  int get identityHash => Object.hash(
+        left.identityHash,
+        operator.identityHash,
+        right.identityHash,
+      );
 }
 
 ///
@@ -1285,6 +1311,7 @@ extension type BooleanLiteral.fromJson(Map<String, Object?> node)
 
   ///
   String get text => node['text'] as String;
+  int get identityHash => text.hashCode;
 }
 
 ///
@@ -1295,6 +1322,7 @@ extension type ClassReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1324,6 +1352,11 @@ extension type ConditionalExpression.fromJson(Map<String, Object?> node)
 
   ///
   Expression get otherwise => node['otherwise'] as Expression;
+  int get identityHash => Object.hash(
+        condition.identityHash,
+        then.identityHash,
+        otherwise.identityHash,
+      );
 }
 
 ///
@@ -1353,6 +1386,11 @@ extension type ConstructorInvocation.fromJson(Map<String, Object?> node)
 
   ///
   List<Argument> get arguments => (node['arguments'] as List).cast();
+  int get identityHash => Object.hash(
+        type.identityHash,
+        constructor.identityHash,
+        Object.hashAll(arguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1363,6 +1401,7 @@ extension type ConstructorReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1387,6 +1426,10 @@ extension type ConstructorTearOff.fromJson(Map<String, Object?> node)
   ///
   ConstructorReference get reference =>
       node['reference'] as ConstructorReference;
+  int get identityHash => Object.hash(
+        type.identityHash,
+        reference.identityHash,
+      );
 }
 
 ///
@@ -1404,6 +1447,7 @@ extension type DoubleLiteral.fromJson(Map<String, Object?> node)
 
   ///
   String get text => node['text'] as String;
+  int get identityHash => text.hashCode;
 }
 
 ///
@@ -1421,6 +1465,7 @@ extension type DynamicTypeAnnotation.fromJson(Map<String, Object?> node)
 
   ///
   Reference get reference => node['reference'] as Reference;
+  int get identityHash => reference.identityHash;
 }
 
 ///
@@ -1431,6 +1476,7 @@ extension type EnumReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1460,6 +1506,11 @@ extension type EqualityExpression.fromJson(Map<String, Object?> node)
 
   ///
   bool get isNotEquals => node['isNotEquals'] as bool;
+  int get identityHash => Object.hash(
+        left.identityHash,
+        right.identityHash,
+        isNotEquals.hashCode,
+      );
 }
 
 ///
@@ -1483,6 +1534,10 @@ extension type ExpressionElement.fromJson(Map<String, Object?> node)
 
   ///
   bool get isNullAware => node['isNullAware'] as bool;
+  int get identityHash => Object.hash(
+        expression.identityHash,
+        isNullAware.hashCode,
+      );
 }
 
 ///
@@ -1493,6 +1548,7 @@ extension type ExtensionReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1503,6 +1559,7 @@ extension type ExtensionTypeReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1513,6 +1570,7 @@ extension type FieldReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1523,6 +1581,7 @@ extension type FormalParameter.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1533,6 +1592,7 @@ extension type FormalParameterGroup.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1543,6 +1603,7 @@ extension type FunctionReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1560,6 +1621,7 @@ extension type FunctionTearOff.fromJson(Map<String, Object?> node)
 
   ///
   FunctionReference get reference => node['reference'] as FunctionReference;
+  int get identityHash => reference.identityHash;
 }
 
 ///
@@ -1591,6 +1653,11 @@ extension type FunctionTypeAnnotation.fromJson(Map<String, Object?> node)
   ///
   List<FormalParameter> get formalParameters =>
       (node['formalParameters'] as List).cast();
+  int get identityHash => Object.hash(
+        returnType?.identityHash ?? 0,
+        Object.hashAll(typeParameters.map((entry) => entry.identityHash)),
+        Object.hashAll(formalParameters.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1601,6 +1668,7 @@ extension type FunctionTypeParameter.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1611,6 +1679,7 @@ extension type FunctionTypeParameterReference.fromJson(
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1629,6 +1698,7 @@ extension type FunctionTypeParameterType.fromJson(Map<String, Object?> node)
   ///
   FunctionTypeParameter get functionTypeParameter =>
       node['functionTypeParameter'] as FunctionTypeParameter;
+  int get identityHash => functionTypeParameter.identityHash;
 }
 
 ///
@@ -1657,6 +1727,11 @@ extension type IfElement.fromJson(Map<String, Object?> node) implements Object {
 
   ///
   Element? get otherwise => node['otherwise'] as Element?;
+  int get identityHash => Object.hash(
+        condition.identityHash,
+        then.identityHash,
+        otherwise?.identityHash ?? 0,
+      );
 }
 
 ///
@@ -1679,6 +1754,10 @@ extension type IfNull.fromJson(Map<String, Object?> node) implements Object {
 
   ///
   Expression get right => node['right'] as Expression;
+  int get identityHash => Object.hash(
+        left.identityHash,
+        right.identityHash,
+      );
 }
 
 ///
@@ -1709,6 +1788,11 @@ extension type ImplicitInvocation.fromJson(Map<String, Object?> node)
 
   ///
   List<Argument> get arguments => (node['arguments'] as List).cast();
+  int get identityHash => Object.hash(
+        receiver.identityHash,
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+        Object.hashAll(arguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1733,6 +1817,10 @@ extension type Instantiation.fromJson(Map<String, Object?> node)
   ///
   List<TypeAnnotation> get typeArguments =>
       (node['typeArguments'] as List).cast();
+  int get identityHash => Object.hash(
+        receiver.identityHash,
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1750,6 +1838,7 @@ extension type IntegerLiteral.fromJson(Map<String, Object?> node)
 
   ///
   String get text => node['text'] as String;
+  int get identityHash => text.hashCode;
 }
 
 ///
@@ -1767,6 +1856,7 @@ extension type InterpolationPart.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 ///
@@ -1777,6 +1867,7 @@ extension type InvalidExpression.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1787,6 +1878,7 @@ extension type InvalidTypeAnnotation.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -1815,6 +1907,11 @@ extension type IsTest.fromJson(Map<String, Object?> node) implements Object {
 
   ///
   bool get isNot => node['isNot'] as bool;
+  int get identityHash => Object.hash(
+        expression.identityHash,
+        type.identityHash,
+        isNot.hashCode,
+      );
 }
 
 ///
@@ -1839,6 +1936,10 @@ extension type ListLiteral.fromJson(Map<String, Object?> node)
 
   ///
   List<Element> get elements => (node['elements'] as List).cast();
+  int get identityHash => Object.hash(
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+        Object.hashAll(elements.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1868,6 +1969,11 @@ extension type LogicalExpression.fromJson(Map<String, Object?> node)
 
   ///
   Expression get right => node['right'] as Expression;
+  int get identityHash => Object.hash(
+        left.identityHash,
+        operator.identityHash,
+        right.identityHash,
+      );
 }
 
 ///
@@ -1903,6 +2009,12 @@ extension type MapEntryElement.fromJson(Map<String, Object?> node)
 
   ///
   bool get isNullAwareValue => node['isNullAwareValue'] as bool;
+  int get identityHash => Object.hash(
+        key.identityHash,
+        value.identityHash,
+        isNullAwareKey.hashCode,
+        isNullAwareValue.hashCode,
+      );
 }
 
 ///
@@ -1939,6 +2051,12 @@ extension type MethodInvocation.fromJson(Map<String, Object?> node)
 
   ///
   List<Argument> get arguments => (node['arguments'] as List).cast();
+  int get identityHash => Object.hash(
+        receiver.identityHash,
+        name.hashCode,
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+        Object.hashAll(arguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -1962,6 +2080,10 @@ extension type NamedArgument.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => Object.hash(
+        name.hashCode,
+        expression.identityHash,
+      );
 }
 
 ///
@@ -1986,6 +2108,10 @@ extension type NamedTypeAnnotation.fromJson(Map<String, Object?> node)
   ///
   List<TypeAnnotation> get typeArguments =>
       (node['typeArguments'] as List).cast();
+  int get identityHash => Object.hash(
+        reference.identityHash,
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -2003,6 +2129,7 @@ extension type NullableTypeAnnotation.fromJson(Map<String, Object?> node)
 
   ///
   TypeAnnotation get typeAnnotation => node['typeAnnotation'] as TypeAnnotation;
+  int get identityHash => typeAnnotation.identityHash;
 }
 
 ///
@@ -2026,6 +2153,10 @@ extension type NullAwarePropertyGet.fromJson(Map<String, Object?> node)
 
   ///
   String get name => node['name'] as String;
+  int get identityHash => Object.hash(
+        receiver.identityHash,
+        name.hashCode,
+      );
 }
 
 ///
@@ -2042,6 +2173,7 @@ extension type NullCheck.fromJson(Map<String, Object?> node) implements Object {
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 ///
@@ -2052,6 +2184,7 @@ extension type NullLiteral.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2069,6 +2202,7 @@ extension type ParenthesizedExpression.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 ///
@@ -2086,6 +2220,7 @@ extension type PositionalArgument.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 ///
@@ -2109,6 +2244,10 @@ extension type PropertyGet.fromJson(Map<String, Object?> node)
 
   ///
   String get name => node['name'] as String;
+  int get identityHash => Object.hash(
+        receiver.identityHash,
+        name.hashCode,
+      );
 }
 
 ///
@@ -2126,6 +2265,8 @@ extension type RecordLiteral.fromJson(Map<String, Object?> node)
 
   ///
   List<RecordField> get fields => (node['fields'] as List).cast();
+  int get identityHash =>
+      Object.hashAll(fields.map((entry) => entry.identityHash));
 }
 
 ///
@@ -2149,6 +2290,10 @@ extension type RecordNamedField.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => Object.hash(
+        name.hashCode,
+        expression.identityHash,
+      );
 }
 
 ///
@@ -2166,6 +2311,7 @@ extension type RecordPositionalField.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => expression.identityHash;
 }
 
 ///
@@ -2189,6 +2335,10 @@ extension type RecordTypeAnnotation.fromJson(Map<String, Object?> node)
 
   ///
   List<RecordTypeEntry> get named => (node['named'] as List).cast();
+  int get identityHash => Object.hash(
+        Object.hashAll(positional.map((entry) => entry.identityHash)),
+        Object.hashAll(named.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -2199,6 +2349,7 @@ extension type RecordTypeEntry.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2209,6 +2360,7 @@ extension type References.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2233,6 +2385,10 @@ extension type SetOrMapLiteral.fromJson(Map<String, Object?> node)
 
   ///
   List<Element> get elements => (node['elements'] as List).cast();
+  int get identityHash => Object.hash(
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+        Object.hashAll(elements.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -2256,6 +2412,10 @@ extension type SpreadElement.fromJson(Map<String, Object?> node)
 
   ///
   bool get isNullAware => node['isNullAware'] as bool;
+  int get identityHash => Object.hash(
+        expression.identityHash,
+        isNullAware.hashCode,
+      );
 }
 
 ///
@@ -2272,6 +2432,7 @@ extension type StaticGet.fromJson(Map<String, Object?> node) implements Object {
 
   ///
   FieldReference get reference => node['reference'] as FieldReference;
+  int get identityHash => reference.identityHash;
 }
 
 ///
@@ -2302,6 +2463,11 @@ extension type StaticInvocation.fromJson(Map<String, Object?> node)
 
   ///
   List<Argument> get arguments => (node['arguments'] as List).cast();
+  int get identityHash => Object.hash(
+        function.identityHash,
+        Object.hashAll(typeArguments.map((entry) => entry.identityHash)),
+        Object.hashAll(arguments.map((entry) => entry.identityHash)),
+      );
 }
 
 ///
@@ -2319,6 +2485,8 @@ extension type AdjacentStringLiterals.fromJson(Map<String, Object?> node)
 
   ///
   List<Expression> get expressions => (node['expressions'] as List).cast();
+  int get identityHash =>
+      Object.hashAll(expressions.map((entry) => entry.identityHash));
 }
 
 ///
@@ -2336,6 +2504,8 @@ extension type StringLiteral.fromJson(Map<String, Object?> node)
 
   ///
   List<StringLiteralPart> get parts => (node['parts'] as List).cast();
+  int get identityHash =>
+      Object.hashAll(parts.map((entry) => entry.identityHash));
 }
 
 ///
@@ -2353,6 +2523,7 @@ extension type StringPart.fromJson(Map<String, Object?> node)
 
   ///
   String get text => node['text'] as String;
+  int get identityHash => text.hashCode;
 }
 
 ///
@@ -2370,6 +2541,7 @@ extension type SymbolLiteral.fromJson(Map<String, Object?> node)
 
   ///
   List<String> get parts => (node['parts'] as List).cast();
+  int get identityHash => Object.hashAll(parts.map((entry) => entry.hashCode));
 }
 
 ///
@@ -2380,6 +2552,7 @@ extension type TypedefReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2397,6 +2570,7 @@ extension type TypeLiteral.fromJson(Map<String, Object?> node)
 
   ///
   TypeAnnotation get typeAnnotation => node['typeAnnotation'] as TypeAnnotation;
+  int get identityHash => typeAnnotation.identityHash;
 }
 
 ///
@@ -2407,6 +2581,7 @@ extension type TypeReference.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2430,6 +2605,10 @@ extension type UnaryExpression.fromJson(Map<String, Object?> node)
 
   ///
   Expression get expression => node['expression'] as Expression;
+  int get identityHash => Object.hash(
+        operator.identityHash,
+        expression.identityHash,
+      );
 }
 
 ///
@@ -2440,6 +2619,7 @@ extension type UnresolvedExpression.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2450,6 +2630,7 @@ extension type UnresolvedTypeAnnotation.fromJson(Map<String, Object?> node)
       : this.fromJson(Scope.createMap(
           _schema,
         ));
+  int get identityHash => 0;
 }
 
 ///
@@ -2467,4 +2648,5 @@ extension type VoidTypeAnnotation.fromJson(Map<String, Object?> node)
 
   ///
   Reference get reference => node['reference'] as Reference;
+  int get identityHash => reference.identityHash;
 }
