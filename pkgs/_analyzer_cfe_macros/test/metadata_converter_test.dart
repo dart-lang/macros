@@ -57,9 +57,12 @@ void main() {
         'typeArguments': [],
         'arguments': [
           {
-            'expression': {
-              'type': 'IntegerLiteral',
-              'value': {'text': '4'}
+            'type': 'PositionalArgument',
+            'value': {
+              'expression': {
+                'type': 'IntegerLiteral',
+                'value': {'text': '4'}
+              }
             }
           }
         ]
