@@ -135,6 +135,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
         }
       }
       if (response == null) {
+        print('invalidated, re-running');
         _impl._host.hostService.startTracking();
         response = await _impl._host.augment(
             name,
@@ -195,6 +196,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
       }
 
       if (response == null) {
+        print('invalidated, re-running');
         _impl._host.hostService.startTracking();
         response = await _impl._host.augment(
             name,
@@ -252,6 +254,7 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
         }
       }
       if (response == null) {
+        print('invalidated, re-running');
         _impl._host.hostService.startTracking();
         response = await _impl._host.augment(
             name,

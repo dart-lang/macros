@@ -369,7 +369,9 @@ class TypeReference {
       return '($rawCast)$q.deepCast<String, ${elementType!.dartType}>('
           '(v) => ${elementType!.castExpression('v')})';
     } else if (isList) {
-      if (elementType!.elementType == null) return '($rawCast)$q.cast()';
+      if (elementType!.elementType == null) {
+        return '($rawCast)$q.cast<${elementType!.dartType}>()';
+      }
       throw UnsupportedError('Deep casting for lists isn\'t yet supported.');
     } else {
       return rawCast;
@@ -622,8 +624,12 @@ class ClassTypeDefinition implements Definition {
         _ => throw StateError('Unreachable'),
       });
     for (final property in allProperties(context)) {
-      final hashExpr = property.type
-          .hashExpression(property.name, nullable: property.nullable);
+      var castExpr = property.type
+          .castExpression("node['${property.name}']", nullable: true);
+      if (!castExpr.endsWith(')')) {
+        castExpr = '($castExpr)';
+      }
+      final hashExpr = property.type.hashExpression(castExpr, nullable: true);
       result.writeln('$hashExpr${numProperties > 1 ? ', ' : ''}');
     }
     result.writeln(switch (numProperties) {

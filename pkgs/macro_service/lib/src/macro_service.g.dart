@@ -31,10 +31,12 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
 
   /// A pre-computed query result for the target.
   Model get model => node['model'] as Model;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        phase.hashCode,
-        target.identityHash,
-        model.identityHash,
+        (node['phase'] as int?).hashCode,
+        (node['target'] as QualifiedName?)?.identityHash ?? 0,
+        (node['model'] as Model?)?.identityHash ?? 0,
       );
 }
 
@@ -58,67 +60,94 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node)
   /// Any augmentations to enum values that should be applied to an enum as a result of executing a macro, indexed by the name of the enum.
   Map<String, List<Augmentation>>? get enumValueAugmentations =>
       (node['enumValueAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+          ?.deepCast<String, List<Augmentation>>(
+              (v) => (v as List).cast<Augmentation>());
 
   /// Any extends clauses that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
   Map<String, List<Augmentation>>? get extendsTypeAugmentations =>
       (node['extendsTypeAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+          ?.deepCast<String, List<Augmentation>>(
+              (v) => (v as List).cast<Augmentation>());
 
   /// Any interfaces that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
   Map<String, List<Augmentation>>? get interfaceAugmentations =>
       (node['interfaceAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+          ?.deepCast<String, List<Augmentation>>(
+              (v) => (v as List).cast<Augmentation>());
 
   /// Any augmentations that should be applied to the library as a result of executing a macro.
   List<Augmentation>? get libraryAugmentations =>
-      (node['libraryAugmentations'] as List?)?.cast();
+      (node['libraryAugmentations'] as List?)?.cast<Augmentation>();
 
   /// Any mixins that should be added to types as a result of executing a macro, indexed by the name of the augmented type declaration.
   Map<String, List<Augmentation>>? get mixinAugmentations =>
       (node['mixinAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+          ?.deepCast<String, List<Augmentation>>(
+              (v) => (v as List).cast<Augmentation>());
 
   /// The names of any new types declared in [libraryAugmentations].
-  List<String>? get newTypeNames => (node['newTypeNames'] as List?)?.cast();
+  List<String>? get newTypeNames =>
+      (node['newTypeNames'] as List?)?.cast<String>();
 
   /// Any augmentations that should be applied to a class as a result of executing a macro, indexed by the name of the class.
   Map<String, List<Augmentation>>? get typeAugmentations =>
-      (node['typeAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+      (node['typeAugmentations'] as Map?)?.deepCast<String, List<Augmentation>>(
+          (v) => (v as List).cast<Augmentation>());
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        Object.hashAll(enumValueAugmentations?.entries.map((entry) =>
-                Object.hash(
+        Object.hashAll((node['enumValueAugmentations'] as Map?)
+                ?.deepCast<String, List<Augmentation>>(
+                    (v) => (v as List).cast<Augmentation>())
+                ?.entries
+                .map((entry) => Object.hash(
                     entry.key,
                     Object.hashAll(
                         entry.value.map((entry) => entry.identityHash)))) ??
             const []),
-        Object.hashAll(extendsTypeAugmentations?.entries.map((entry) =>
-                Object.hash(
+        Object.hashAll((node['extendsTypeAugmentations'] as Map?)
+                ?.deepCast<String, List<Augmentation>>(
+                    (v) => (v as List).cast<Augmentation>())
+                ?.entries
+                .map((entry) => Object.hash(
                     entry.key,
                     Object.hashAll(
                         entry.value.map((entry) => entry.identityHash)))) ??
             const []),
-        Object.hashAll(interfaceAugmentations?.entries.map((entry) =>
-                Object.hash(
+        Object.hashAll((node['interfaceAugmentations'] as Map?)
+                ?.deepCast<String, List<Augmentation>>(
+                    (v) => (v as List).cast<Augmentation>())
+                ?.entries
+                .map((entry) => Object.hash(
                     entry.key,
                     Object.hashAll(
                         entry.value.map((entry) => entry.identityHash)))) ??
             const []),
-        Object.hashAll(
-            libraryAugmentations?.map((entry) => entry.identityHash) ??
-                const []),
-        Object.hashAll(mixinAugmentations?.entries.map((entry) => Object.hash(
-                entry.key,
-                Object.hashAll(
-                    entry.value.map((entry) => entry.identityHash)))) ??
+        Object.hashAll((node['libraryAugmentations'] as List?)
+                ?.cast<Augmentation>()
+                ?.map((entry) => entry.identityHash) ??
             const []),
-        Object.hashAll(
-            newTypeNames?.map((entry) => entry.hashCode) ?? const []),
-        Object.hashAll(typeAugmentations?.entries.map((entry) => Object.hash(
-                entry.key,
-                Object.hashAll(
-                    entry.value.map((entry) => entry.identityHash)))) ??
+        Object.hashAll((node['mixinAugmentations'] as Map?)
+                ?.deepCast<String, List<Augmentation>>(
+                    (v) => (v as List).cast<Augmentation>())
+                ?.entries
+                .map((entry) => Object.hash(
+                    entry.key,
+                    Object.hashAll(
+                        entry.value.map((entry) => entry.identityHash)))) ??
+            const []),
+        Object.hashAll((node['newTypeNames'] as List?)
+                ?.cast<String>()
+                ?.map((entry) => entry.hashCode) ??
+            const []),
+        Object.hashAll((node['typeAugmentations'] as Map?)
+                ?.deepCast<String, List<Augmentation>>(
+                    (v) => (v as List).cast<Augmentation>())
+                ?.entries
+                .map((entry) => Object.hash(
+                    entry.key,
+                    Object.hashAll(
+                        entry.value.map((entry) => entry.identityHash)))) ??
             const []),
       );
 }
@@ -134,7 +163,9 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node)
 
   /// The error.
   String get error => node['error'] as String;
-  int get identityHash => error.hashCode;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['error'] as String?).hashCode;
 }
 
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?
@@ -148,7 +179,9 @@ extension type HostEndpoint.fromJson(Map<String, Object?> node)
 
   /// TCP port to connect to.
   int get port => node['port'] as int;
-  int get identityHash => port.hashCode;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['port'] as int?).hashCode;
 }
 
 enum HostRequestType {
@@ -193,6 +226,9 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
 
   /// The annotation identifying the macro that should handle the request.
   QualifiedName get macroAnnotation => node['macroAnnotation'] as QualifiedName;
+
+  /// Hash code for comparing instances of this extension type.
+// TODO: A real implementation for union types.
   int get identityHash => 0;
 }
 
@@ -211,10 +247,15 @@ extension type MacroDescription.fromJson(Map<String, Object?> node)
   QualifiedName get annotation => node['annotation'] as QualifiedName;
 
   /// Phases that the macro runs in: 1, 2 and/or 3.
-  List<int> get runsInPhases => (node['runsInPhases'] as List).cast();
+  List<int> get runsInPhases => (node['runsInPhases'] as List).cast<int>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        annotation.identityHash,
-        Object.hashAll(runsInPhases.map((entry) => entry.hashCode)),
+        (node['annotation'] as QualifiedName?)?.identityHash ?? 0,
+        Object.hashAll((node['runsInPhases'] as List?)
+                ?.cast<int>()
+                ?.map((entry) => entry.hashCode) ??
+            const []),
       );
 }
 
@@ -230,13 +271,18 @@ extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
   /// The macro description.
   MacroDescription get macroDescription =>
       node['macroDescription'] as MacroDescription;
-  int get identityHash => macroDescription.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash =>
+      (node['macroDescription'] as MacroDescription?)?.identityHash ?? 0;
 }
 
 /// Host's response to a [MacroStartedRequest].
 extension type MacroStartedResponse.fromJson(Map<String, Object?> node)
     implements Object {
   MacroStartedResponse() : this.fromJson({});
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => 0;
 }
 
@@ -296,6 +342,9 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 
   /// The id of this request, must be returned in responses.
   int get id => node['id'] as int;
+
+  /// Hash code for comparing instances of this extension type.
+// TODO: A real implementation for union types.
   int get identityHash => 0;
 }
 
@@ -310,7 +359,9 @@ extension type QueryRequest.fromJson(Map<String, Object?> node)
 
   /// The query.
   Query get query => node['query'] as Query;
-  int get identityHash => query.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['query'] as Query?)?.identityHash ?? 0;
 }
 
 /// Host's response to a [QueryRequest].
@@ -324,7 +375,9 @@ extension type QueryResponse.fromJson(Map<String, Object?> node)
 
   /// The model.
   Model get model => node['model'] as Model;
-  int get identityHash => model.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['model'] as Model?)?.identityHash ?? 0;
 }
 
 enum ResponseType {
@@ -420,5 +473,8 @@ extension type Response.fromJson(Map<String, Object?> node) implements Object {
 
   /// The id of the request this is responding to.
   int get requestId => node['requestId'] as int;
+
+  /// Hash code for comparing instances of this extension type.
+// TODO: A real implementation for union types.
   int get identityHash => 0;
 }

@@ -24,9 +24,13 @@ extension type Augmentation.fromJson(Map<String, Object?> node)
         ));
 
   /// Augmentation code.
-  List<Code> get code => (node['code'] as List).cast();
-  int get identityHash =>
-      Object.hashAll(code.map((entry) => entry.identityHash));
+  List<Code> get code => (node['code'] as List).cast<Code>();
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => Object.hashAll((node['code'] as List?)
+          ?.cast<Code>()
+          ?.map((entry) => entry.identityHash) ??
+      const []);
 }
 
 enum CodeType {
@@ -79,6 +83,8 @@ extension type Code.fromJson(Map<String, Object?> node) implements Object {
     return node['value'] as String;
   }
 
+  /// Hash code for comparing instances of this extension type.
+// TODO: A real implementation for union types.
   int get identityHash => 0;
 }
 
@@ -117,21 +123,33 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
 
   /// Static type parameters introduced by this function type.
   List<StaticTypeParameterDesc> get typeParameters =>
-      (node['typeParameters'] as List).cast();
+      (node['typeParameters'] as List).cast<StaticTypeParameterDesc>();
   List<StaticTypeDesc> get requiredPositionalParameters =>
-      (node['requiredPositionalParameters'] as List).cast();
+      (node['requiredPositionalParameters'] as List).cast<StaticTypeDesc>();
   List<StaticTypeDesc> get optionalPositionalParameters =>
-      (node['optionalPositionalParameters'] as List).cast();
+      (node['optionalPositionalParameters'] as List).cast<StaticTypeDesc>();
   List<NamedFunctionTypeParameter> get namedParameters =>
-      (node['namedParameters'] as List).cast();
+      (node['namedParameters'] as List).cast<NamedFunctionTypeParameter>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        returnType.identityHash,
-        Object.hashAll(typeParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(
-            requiredPositionalParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(
-            optionalPositionalParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(namedParameters.map((entry) => entry.identityHash)),
+        (node['returnType'] as StaticTypeDesc?)?.identityHash ?? 0,
+        Object.hashAll((node['typeParameters'] as List?)
+                ?.cast<StaticTypeParameterDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['requiredPositionalParameters'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['optionalPositionalParameters'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['namedParameters'] as List?)
+                ?.cast<NamedFunctionTypeParameter>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
       );
 }
 
@@ -150,20 +168,28 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
 
   /// The expression of the annotation.
   Expression get expression => node['expression'] as Expression;
-  int get identityHash => expression.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash =>
+      (node['expression'] as Expression?)?.identityHash ?? 0;
 }
 
 /// Interface type for all declarations
 extension type Declaration._(Map<String, Object?> node) implements Object {
   /// The metadata annotations attached to this declaration.
   List<MetadataAnnotation> get metadataAnnotations =>
-      (node['metadataAnnotations'] as List).cast();
+      (node['metadataAnnotations'] as List).cast<MetadataAnnotation>();
 
   /// The properties of this declaration.
   Properties get properties => node['properties'] as Properties;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
-        properties.identityHash,
+        Object.hashAll((node['metadataAnnotations'] as List?)
+                ?.cast<MetadataAnnotation>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        (node['properties'] as Properties?)?.identityHash ?? 0,
       );
 }
 
@@ -194,12 +220,21 @@ extension type Interface.fromJson(Map<String, Object?> node)
 
   /// The type of the expression `this` when used in this interface.
   NamedTypeDesc get thisType => node['thisType'] as NamedTypeDesc;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        Object.hashAll(members.entries
-            .map((entry) => Object.hash(entry.key, entry.value.identityHash))),
-        thisType.identityHash,
-        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
-        properties.identityHash,
+        Object.hashAll((node['members'] as Map?)
+                ?.cast<String, Member>()
+                ?.entries
+                .map((entry) =>
+                    Object.hash(entry.key, entry.value.identityHash)) ??
+            const []),
+        (node['thisType'] as NamedTypeDesc?)?.identityHash ?? 0,
+        Object.hashAll((node['metadataAnnotations'] as List?)
+                ?.cast<MetadataAnnotation>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        (node['properties'] as Properties?)?.identityHash ?? 0,
       );
 }
 
@@ -217,8 +252,13 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
   /// Scopes by name.
   Map<String, Interface> get scopes =>
       (node['scopes'] as Map).cast<String, Interface>();
-  int get identityHash => Object.hashAll(scopes.entries
-      .map((entry) => Object.hash(entry.key, entry.value.identityHash)));
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => Object.hashAll((node['scopes'] as Map?)
+          ?.cast<String, Interface>()
+          ?.entries
+          .map((entry) => Object.hash(entry.key, entry.value.identityHash)) ??
+      const []);
 }
 
 /// Member of a scope.
@@ -254,24 +294,36 @@ extension type Member.fromJson(Map<String, Object?> node)
 
   /// The required positional parameters of this member, if it has them.
   List<StaticTypeDesc> get requiredPositionalParameters =>
-      (node['requiredPositionalParameters'] as List).cast();
+      (node['requiredPositionalParameters'] as List).cast<StaticTypeDesc>();
 
   /// The optional positional parameters of this member, if it has them.
   List<StaticTypeDesc> get optionalPositionalParameters =>
-      (node['optionalPositionalParameters'] as List).cast();
+      (node['optionalPositionalParameters'] as List).cast<StaticTypeDesc>();
 
   /// The named parameters of this member, if it has them.
   List<NamedFunctionTypeParameter> get namedParameters =>
-      (node['namedParameters'] as List).cast();
+      (node['namedParameters'] as List).cast<NamedFunctionTypeParameter>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        returnType.identityHash,
-        Object.hashAll(
-            requiredPositionalParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(
-            optionalPositionalParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(namedParameters.map((entry) => entry.identityHash)),
-        Object.hashAll(metadataAnnotations.map((entry) => entry.identityHash)),
-        properties.identityHash,
+        (node['returnType'] as StaticTypeDesc?)?.identityHash ?? 0,
+        Object.hashAll((node['requiredPositionalParameters'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['optionalPositionalParameters'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['namedParameters'] as List?)
+                ?.cast<NamedFunctionTypeParameter>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['metadataAnnotations'] as List?)
+                ?.cast<MetadataAnnotation>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        (node['properties'] as Properties?)?.identityHash ?? 0,
       );
 }
 
@@ -295,11 +347,27 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
 
   /// The resolved static type hierarchy.
   TypeHierarchy get types => node['types'] as TypeHierarchy;
-  int get identityHash => Object.hash(
-        Object.hashAll(uris.entries
-            .map((entry) => Object.hash(entry.key, entry.value.identityHash))),
-        types.identityHash,
+
+  static final watch = Stopwatch()..start();
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash {
+    watch.start();
+    try {
+      return Object.hash(
+        Object.hashAll((node['uris'] as Map?)
+                ?.cast<String, Library>()
+                ?.entries
+                .map((entry) =>
+                    Object.hash(entry.key, entry.value.identityHash)) ??
+            const []),
+        (node['types'] as TypeHierarchy?)?.identityHash ?? 0,
       );
+    } finally {
+      watch.stop();
+      print('Model.identityHash: ${watch.elapsedMilliseconds}ms');
+    }
+  }
 }
 
 /// A resolved named parameter as part of a [FunctionTypeDesc].
@@ -323,10 +391,12 @@ extension type NamedFunctionTypeParameter.fromJson(Map<String, Object?> node)
   String get name => node['name'] as String;
   bool get required => node['required'] as bool;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        name.hashCode,
-        required.hashCode,
-        type.identityHash,
+        (node['name'] as String?).hashCode,
+        (node['required'] as bool?).hashCode,
+        (node['type'] as StaticTypeDesc?)?.identityHash ?? 0,
       );
 }
 
@@ -347,9 +417,11 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
         ));
   String get name => node['name'] as String;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        name.hashCode,
-        type.identityHash,
+        (node['name'] as String?).hashCode,
+        (node['type'] as StaticTypeDesc?)?.identityHash ?? 0,
       );
 }
 
@@ -370,10 +442,15 @@ extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
         ));
   QualifiedName get name => node['name'] as QualifiedName;
   List<StaticTypeDesc> get instantiation =>
-      (node['instantiation'] as List).cast();
+      (node['instantiation'] as List).cast<StaticTypeDesc>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        name.identityHash,
-        Object.hashAll(instantiation.map((entry) => entry.identityHash)),
+        (node['name'] as QualifiedName?)?.identityHash ?? 0,
+        Object.hashAll((node['instantiation'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
       );
 }
 
@@ -397,7 +474,9 @@ extension type NullableTypeDesc.fromJson(Map<String, Object?> node)
 
   /// The type T.
   StaticTypeDesc get inner => node['inner'] as StaticTypeDesc;
-  int get identityHash => inner.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['inner'] as StaticTypeDesc?)?.identityHash ?? 0;
 }
 
 /// Set of boolean properties.
@@ -451,14 +530,16 @@ extension type Properties.fromJson(Map<String, Object?> node)
 
   /// Whether the entity is static.
   bool get isStatic => node['isStatic'] as bool;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        isAbstract.hashCode,
-        isClass.hashCode,
-        isConstructor.hashCode,
-        isGetter.hashCode,
-        isField.hashCode,
-        isMethod.hashCode,
-        isStatic.hashCode,
+        (node['isAbstract'] as bool?).hashCode,
+        (node['isClass'] as bool?).hashCode,
+        (node['isConstructor'] as bool?).hashCode,
+        (node['isGetter'] as bool?).hashCode,
+        (node['isField'] as bool?).hashCode,
+        (node['isMethod'] as bool?).hashCode,
+        (node['isStatic'] as bool?).hashCode,
       );
 }
 
@@ -526,11 +607,13 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
 
   /// Whether the name refers to something in the static scope as opposed to the instance scope of `scope`. Will be `null` if `scope` is `null`.
   bool? get isStatic => node['isStatic'] as bool?;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        uri.hashCode,
-        scope.hashCode,
-        name.hashCode,
-        isStatic.hashCode,
+        (node['uri'] as String?).hashCode,
+        (node['scope'] as String?).hashCode,
+        (node['name'] as String?).hashCode,
+        (node['isStatic'] as bool?).hashCode,
       );
 }
 
@@ -544,7 +627,9 @@ extension type Query.fromJson(Map<String, Object?> node) implements Object {
 
   /// The class to query about.
   QualifiedName get target => node['target'] as QualifiedName;
-  int get identityHash => target.identityHash;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['target'] as QualifiedName?)?.identityHash ?? 0;
 }
 
 /// A resolved record type in the type hierarchy.
@@ -562,11 +647,21 @@ extension type RecordTypeDesc.fromJson(Map<String, Object?> node)
           positional,
           named,
         ));
-  List<StaticTypeDesc> get positional => (node['positional'] as List).cast();
-  List<NamedRecordField> get named => (node['named'] as List).cast();
+  List<StaticTypeDesc> get positional =>
+      (node['positional'] as List).cast<StaticTypeDesc>();
+  List<NamedRecordField> get named =>
+      (node['named'] as List).cast<NamedRecordField>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        Object.hashAll(positional.map((entry) => entry.identityHash)),
-        Object.hashAll(named.map((entry) => entry.identityHash)),
+        Object.hashAll((node['positional'] as List?)
+                ?.cast<StaticTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        Object.hashAll((node['named'] as List?)
+                ?.cast<NamedRecordField>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
       );
 }
 
@@ -720,6 +815,8 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
     return VoidTypeDesc.fromJson(node['value'] as Null);
   }
 
+  /// Hash code for comparing instances of this extension type.
+// TODO: A real implementation for union types.
   int get identityHash => 0;
 }
 
@@ -740,9 +837,11 @@ extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
         ));
   int get identifier => node['identifier'] as int;
   StaticTypeDesc? get bound => node['bound'] as StaticTypeDesc?;
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        identifier.hashCode,
-        bound?.identityHash ?? 0,
+        (node['identifier'] as int?).hashCode,
+        (node['bound'] as StaticTypeDesc?)?.identityHash ?? 0,
       );
 }
 
@@ -761,8 +860,13 @@ extension type TypeHierarchy.fromJson(Map<String, Object?> node)
   /// Map of qualified interface names to their resolved named type.
   Map<String, TypeHierarchyEntry> get named =>
       (node['named'] as Map).cast<String, TypeHierarchyEntry>();
-  int get identityHash => Object.hashAll(named.entries
-      .map((entry) => Object.hash(entry.key, entry.value.identityHash)));
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => Object.hashAll((node['named'] as Map?)
+          ?.cast<String, TypeHierarchyEntry>()
+          ?.entries
+          .map((entry) => Object.hash(entry.key, entry.value.identityHash)) ??
+      const []);
 }
 
 /// Entry of an interface in Dart's type hierarchy, along with supertypes.
@@ -786,17 +890,26 @@ extension type TypeHierarchyEntry.fromJson(Map<String, Object?> node)
 
   /// Type parameters defined on this interface-defining element.
   List<StaticTypeParameterDesc> get typeParameters =>
-      (node['typeParameters'] as List).cast();
+      (node['typeParameters'] as List).cast<StaticTypeParameterDesc>();
 
   /// The named static type represented by this entry.
   NamedTypeDesc get self => node['self'] as NamedTypeDesc;
 
   /// All direct supertypes of this type.
-  List<NamedTypeDesc> get supertypes => (node['supertypes'] as List).cast();
+  List<NamedTypeDesc> get supertypes =>
+      (node['supertypes'] as List).cast<NamedTypeDesc>();
+
+  /// Hash code for comparing instances of this extension type.
   int get identityHash => Object.hash(
-        Object.hashAll(typeParameters.map((entry) => entry.identityHash)),
-        self.identityHash,
-        Object.hashAll(supertypes.map((entry) => entry.identityHash)),
+        Object.hashAll((node['typeParameters'] as List?)
+                ?.cast<StaticTypeParameterDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
+        (node['self'] as NamedTypeDesc?)?.identityHash ?? 0,
+        Object.hashAll((node['supertypes'] as List?)
+                ?.cast<NamedTypeDesc>()
+                ?.map((entry) => entry.identityHash) ??
+            const []),
       );
 }
 
@@ -813,7 +926,9 @@ extension type TypeParameterTypeDesc.fromJson(Map<String, Object?> node)
           parameterId,
         ));
   int get parameterId => node['parameterId'] as int;
-  int get identityHash => parameterId.hashCode;
+
+  /// Hash code for comparing instances of this extension type.
+  int get identityHash => (node['parameterId'] as int?).hashCode;
 }
 
 /// The type-hierarchy representation of the type `void`.
