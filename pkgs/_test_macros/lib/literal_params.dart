@@ -54,6 +54,8 @@ class LiteralParamsImplementation implements ClassDeclarationsMacro {
   @override
   Future<void> buildDeclarationsForClass(
       ClassDeclarationsBuilder builder) async {
+    // TODO(davidmorgan): need a way to find the correct annotation, this just
+    // uses the first.
     final annotation = builder
         .target.metadataAnnotations.first.expression.asConstructorInvocation;
 
