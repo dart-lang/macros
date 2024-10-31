@@ -2,14 +2,14 @@
 
 Generates code that uses macros, for benchmarking.
 
-Example use:
+Example use, from the root of this package:
 
 ```
 dart bin/main.dart large macro 64
-dart ~/git/macros/pkgs/_macro_tool/bin/main.dart \
-    --workspace=$HOME/git/macros/goldens/foo \
-    --packageConfig=$HOME/git/macros/.dart_tool/package_config.json \
-    --script=$HOME/git/macros/goldens/foo/lib/generated/large/a0.dart \
+dart ../../pkgs/_macro_tool/bin/main.dart \
+    --workspace=../../goldens/foo \
+    --packageConfig=../../.dart_tool/package_config.json \
+    --script=../../goldens/foo/lib/generated/large/a0.dart \
     --host=analyzer --watch
 ```
 
