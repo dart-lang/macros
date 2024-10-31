@@ -55,20 +55,26 @@
                   },
                   "arguments": [
                     {
-                      "name": "aBool",
-                      "expression": {
-                        "type": "BooleanLiteral",
-                        "value": {
-                          "text": "true"
+                      "type": "NamedArgument",
+                      "value": {
+                        "name": "aBool",
+                        "expression": {
+                          "type": "BooleanLiteral",
+                          "value": {
+                            "text": "true"
+                          }
                         }
                       }
                     },
                     {
-                      "name": "anInt",
-                      "expression": {
-                        "type": "IntegerLiteral",
-                        "value": {
-                          "text": "23"
+                      "type": "NamedArgument",
+                      "value": {
+                        "name": "anInt",
+                        "expression": {
+                          "type": "IntegerLiteral",
+                          "value": {
+                            "text": "23"
+                          }
                         }
                       }
                     }

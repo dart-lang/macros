@@ -407,6 +407,19 @@ T? convert<T>(Object? object) => switch (object) {
       int o => o as T,
       bool o => o as T,
       double o => o as T,
+      // Manually added converters for lists of union types.
+      List<front_end.Argument> o =>
+        o.map((i) => convertToArgument(i)!).toList() as T,
+      List<front_end.Element> o =>
+        o.map((i) => convertToElement(i)!).toList() as T,
+      List<front_end.Expression> o =>
+        o.map((i) => convertToExpression(i)!).toList() as T,
+      List<front_end.RecordField> o =>
+        o.map((i) => convertToRecordField(i)!).toList() as T,
+      List<front_end.StringLiteralPart> o =>
+        o.map((i) => convertToStringLiteralPart(i)!).toList() as T,
+      List<front_end.TypeAnnotation> o =>
+        o.map((i) => convertToTypeAnnotation(i)!).toList() as T,
       List o => o.map((i) => convert<Map<String, Object?>>(i)!).toList() as T,
       null => null,
       _ => throw ArgumentError(object),
