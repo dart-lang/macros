@@ -183,16 +183,21 @@ static Protocol handshakeProtocol = Protocol(
                   description: 'The named parameters of this member, '
                       'if it has them.'),
             ]),
-        Definition.clazz('Model',
-            description: 'Partial model of a corpus of Dart source code.',
-            createInBuffer: true,
-            properties: [
-              Property('uris',
-                  type: 'Map<Library>', description: 'Libraries by URI.'),
-              Property('types',
-                  type: 'TypeHierarchy',
-                  description: 'The resolved static type hierarchy.'),
-            ]),
+        Definition.clazz(
+          'Model',
+          description: 'Partial model of a corpus of Dart source code.',
+          createInBuffer: true,
+          properties: [
+            Property('uris',
+                type: 'Map<Library>', description: 'Libraries by URI.'),
+            Property('types',
+                type: 'TypeHierarchy',
+                description: 'The resolved static type hierarchy.'),
+          ],
+          extraCode: '// A digest of all the bytes in the current buffer.\n'
+              'Digest get digest => '
+              'md5.convert((node as MapInBuffer).buffer.serialize());',
+        ),
         Definition.clazz('NamedFunctionTypeParameter',
             description:
                 'A resolved named parameter as part of a [FunctionTypeDesc].',

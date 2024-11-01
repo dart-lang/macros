@@ -2,6 +2,10 @@
 // then run from the repo root: dart tool/dart_model_generator/bin/main.dart
 
 // ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'dart:typed_data';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
+import 'package:crypto/crypto.dart';
+// ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/deep_cast_map.dart';
 // ignore: implementation_imports,unused_import,prefer_relative_imports
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
@@ -251,6 +255,8 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
           Scope.createGrowableMap(),
           types,
         ));
+// A digest of all the bytes in the current buffer.
+  Digest get digest => md5.convert((node as MapInBuffer).buffer.serialize());
 
   /// Libraries by URI.
   Map<String, Library> get uris =>

@@ -65,6 +65,8 @@ class GenerationContext {
         lookupDeclaringSchema(typeName),
     }.nonNulls;
     return ([
+      "import 'dart:typed_data';",
+      "import 'package:crypto/crypto.dart';",
       "import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';",
       "import 'package:dart_model/src/deep_cast_map.dart';",
       "import 'package:dart_model/src/scopes.dart';",
