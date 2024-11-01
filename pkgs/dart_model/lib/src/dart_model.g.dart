@@ -256,7 +256,10 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
           types,
         ));
 // A digest of all the bytes in the current buffer.
-  Digest get digest => md5.convert((node as MapInBuffer).buffer.serialize());
+  Digest get digest => md5.convert(switch (node) {
+        MapInBuffer mapInBuffer => mapInBuffer.buffer.serialize(),
+        _ => (JsonBufferBuilder()..map.addAll(node)).serialize(),
+      });
 
   /// Libraries by URI.
   Map<String, Library> get uris =>

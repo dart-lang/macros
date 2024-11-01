@@ -201,6 +201,11 @@ void main() {
       expect(copiedModel.qualifiedNameOf(member.node), null);
       expect(model.qualifiedNameOf(copiedMember.node), null);
     });
+
+    test('can produce and compare digests for buffer and SDK maps', () {
+      final copiedModel = Model.fromJson(_copyMap(model.node));
+      expect(model.digest, copiedModel.digest);
+    });
   });
 
   group('QualifiedName', () {
