@@ -23,7 +23,7 @@ TypePhaseIntrospector? introspector;
 cfe.SourceLoader get sourceLoader =>
     (introspector as dynamic).sourceLoader as cfe.SourceLoader;
 
-class CfeQueryService implements QueryService {
+final class CfeQueryService extends QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(

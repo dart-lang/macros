@@ -72,7 +72,11 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
 
 class AnalyzerRunningMacro implements injected.RunningMacro {
   final AnalyzerMacroImplementation _impl;
+
+  /// The name of the macro annotation that triggers the [implementation].
   final QualifiedName name;
+
+  /// The name of the macro implementation class itself.
   final QualifiedName implementation;
 
   AnalyzerRunningMacro._(this._impl, this.name, this.implementation);

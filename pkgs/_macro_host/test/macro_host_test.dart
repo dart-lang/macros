@@ -103,7 +103,7 @@ void main() {
   }
 }
 
-class TestQueryService implements QueryService {
+final class TestQueryService extends QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(

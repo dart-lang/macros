@@ -12,6 +12,7 @@ dependencies:
   _macro_builder: any
   _macro_runner: any
   _macro_server: any
+  crypto: ^3.0.6
   dart_model: any
   macro_service: any
   package_config: ^2.1.0
