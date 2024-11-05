@@ -31,7 +31,12 @@ class MacroResultsCache {
       target: request.target.asRecord,
       phase: request.phase,
     )] = (
-      queries: queryResults.map((q) => q.asCachedResult),
+      queries: queryResults.map((q) => q.query),
+      resultsHash: queryResults
+          .skip(1)
+          .fold(queryResults.first.response,
+              (model, next) => model.mergeWith(next.response))
+          .identityHash,
       response: response
     );
   }
@@ -50,15 +55,14 @@ class MacroResultsCache {
     final cached = _cache[cacheKey];
     if (cached == null) return null;
 
-    Future<bool> checkQuery(_CachedQueryResult cachedQuery) async {
-      var newResult = await Scope.query.run(
-          () => queryService.handle(QueryRequest(query: cachedQuery.query)));
-      return newResult.model.identityHash == cachedQuery.resultHash;
-    }
-
-    // TODO: Consider doing these in parallel?
-    final checkedResults = await Future.wait(cached.queries.map(checkQuery));
-    if (checkedResults.any((cached) => !cached)) {
+    final queryResults = await Scope.query.run(() => Future.wait(cached.queries
+        .map((query) => queryService.handle(QueryRequest(query: query)))));
+    final newResultsHash = queryResults
+        .skip(1)
+        .fold(queryResults.first.model,
+            (model, next) => model.mergeWith(next.model))
+        .identityHash;
+    if (newResultsHash != cached.resultsHash) {
       _cache.remove(cacheKey);
       return null;
     }
@@ -73,13 +77,14 @@ typedef _MacroResultsCacheKey = ({
 });
 
 typedef _MacroResultsCacheValue = ({
-  Iterable<_CachedQueryResult> queries,
-  AugmentResponse response,
-});
+  /// All queries done by a macro in a given phase.
+  Iterable<Query> queries,
 
-typedef _CachedQueryResult = ({
-  Query query,
-  int resultHash,
+  /// The `identityHash` of the merged model from all query responses.
+  int resultsHash,
+
+  /// The macro augmentation response that was cached.
+  AugmentResponse response,
 });
 
 typedef QualifiedNameRecord = (
@@ -88,13 +93,6 @@ typedef QualifiedNameRecord = (
   String name,
   bool? isStatic
 );
-
-extension on ({Query query, Model response}) {
-  _CachedQueryResult get asCachedResult => (
-        query: query,
-        resultHash: response.identityHash,
-      );
-}
 
 extension on QualifiedName {
   QualifiedNameRecord get asRecord => (uri, scope, name, isStatic);
