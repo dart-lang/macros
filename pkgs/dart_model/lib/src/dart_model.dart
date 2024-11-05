@@ -33,7 +33,7 @@ extension ModelExtension on Model {
   /// An identity hash for `this`, used for comparing query results.
   ///
   /// TODO: A faster/better implementation?
-  int get identityHash => const DeepCollectionEquality.unordered().hash(node);
+  int get identityHash => const DeepCollectionEquality().hash(node);
 
   /// Looks up [name] in `this`.
   ///

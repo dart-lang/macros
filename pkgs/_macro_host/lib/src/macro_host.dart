@@ -69,6 +69,7 @@ class MacroHost {
   /// Sends [request] to the macro triggered by [annotation].
   Future<AugmentResponse> augment(
       QualifiedName annotation, AugmentRequest request) async {
+    // TODO: Save the query results or pre-emptively send them to the macro?
     final cached = await _macroResultsCache.cachedResult(annotation, request);
     if (cached != null) return cached;
 

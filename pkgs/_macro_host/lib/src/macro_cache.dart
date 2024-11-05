@@ -36,6 +36,10 @@ class MacroResultsCache {
     );
   }
 
+  /// Returns a cached result for the given augmentation request, if there is
+  /// one and it is still valid.
+  ///
+  /// Otherwise, invalidates the cache for this request and returns `null`.
   Future<AugmentResponse?> cachedResult(
       QualifiedName annotation, AugmentRequest request) async {
     final cacheKey = (
