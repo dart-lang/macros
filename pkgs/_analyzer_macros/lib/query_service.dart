@@ -26,7 +26,7 @@ Object? introspector;
 analyzer.LinkedElementFactory get _elementFactory =>
     (introspector as dynamic).elementFactory as analyzer.LinkedElementFactory;
 
-class AnalyzerQueryService implements QueryService {
+final class AnalyzerQueryService extends QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(model: _evaluateClassQuery(request.query.target));

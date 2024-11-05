@@ -14,6 +14,7 @@ void main() {
   final fooModel = Scope.query.run(() => Model()
     ..uris[fooTarget.uri] = (Library()
       ..scopes['Foo'] = Interface(properties: Properties(isClass: true))));
+  final packageConfig = Isolate.packageConfigSync!;
 
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
@@ -30,8 +31,6 @@ void main() {
             protocol: protocol,
             packageConfig: Isolate.packageConfigSync!,
             queryService: queryService);
-
-        final packageConfig = Isolate.packageConfigSync!;
 
         expect(host.isMacro(macroAnnotation), true);
         expect(
@@ -99,17 +98,60 @@ void main() {
               AugmentRequest(phase: 3, target: fooTarget, model: fooModel));
         }
       });
+
+      group('caching', () {
+        final macroAnnotation = QualifiedName(
+            uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX');
+
+        late AugmentResponse initialResult;
+        late MacroHost host;
+        late TestQueryService queryService;
+
+        setUp(() async {
+          queryService = TestQueryService();
+          host = await MacroHost.serve(
+              protocol: protocol,
+              packageConfig: Isolate.packageConfigSync!,
+              queryService: queryService);
+
+          initialResult = await host.augment(macroAnnotation,
+              AugmentRequest(phase: 2, target: fooTarget, model: fooModel));
+        });
+
+        test('re-uses results if queries don\'t change', () async {
+          final rerunResult = await host.augment(macroAnnotation,
+              AugmentRequest(phase: 2, target: fooTarget, model: fooModel));
+          expect(identical(initialResult, rerunResult), true);
+        });
+
+        test('Invalidates results if queries do change', () async {
+          queryService.handleRequest = (QueryRequest request) async {
+            return QueryResponse(
+                model: Model()
+                  ..uris[request.query.target.uri] = (Library()
+                    ..scopes[request.query.target.name] =
+                        Interface(properties: Properties(isClass: false))));
+          };
+          final rerunResult = await host.augment(macroAnnotation,
+              AugmentRequest(phase: 2, target: fooTarget, model: fooModel));
+          expect(identical(initialResult, rerunResult), false);
+        });
+      });
     });
   }
 }
 
-class TestQueryService implements QueryService {
-  @override
-  Future<QueryResponse> handle(QueryRequest request) async {
+final class TestQueryService extends QueryService {
+  /// Actual implementatin of request handling, can be overwritten.
+  Future<QueryResponse> Function(QueryRequest request) handleRequest =
+      (QueryRequest request) async {
     return QueryResponse(
         model: Model()
           ..uris[request.query.target.uri] = (Library()
             ..scopes[request.query.target.name] =
                 Interface(properties: Properties(isClass: true))));
-  }
+  };
+
+  @override
+  Future<QueryResponse> handle(QueryRequest request) => handleRequest(request);
 }
