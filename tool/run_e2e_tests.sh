@@ -7,12 +7,13 @@ cd $(dirname ${BASH_SOURCE[0]})
 
 echo "Testing goldens/foo/*_test.dart..."
 
-for test_file in $(ls ../goldens/foo/lib/ | grep _test.dart); do
+for test_file in $(ls ../goldens/foo/lib/ | egrep '_test.dart$'); do
   echo "Testing $test_file..."
   if dart ../pkgs/_macro_tool/bin/main.dart \
       --workspace=../goldens/foo \
       --packageConfig=../.dart_tool/package_config.json \
-      --script=../goldens/foo/lib/${test_file}; then
+      --script=../goldens/foo/lib/${test_file} \
+      apply patch_for_cfe run revert; then
     echo "PASS"
   else
     echo "FAIL"

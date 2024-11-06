@@ -4,147 +4,208 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'macro_runner.dart';
+import 'source_file.dart';
 
-import 'analyzer_macro_tool.dart';
-import 'cfe_macro_tool.dart';
+/// Runs macros.
+///
+/// Various functionality related to running macros.
+class MacroTool {
+  final MacroRunner macroRunner;
+  final String packageConfigPath;
+  final String workspacePath;
+  final int benchmarkIterations;
+  final String? scriptPath;
 
-/// Runs a Dart script with `dart_model` macros.
-abstract class MacroTool {
-  String workspacePath;
-  String packageConfigPath;
-  String scriptPath;
-  bool skipCleanup;
-  bool watch;
+  /// The most recent result from running macros.
+  WorkspaceResult? _applyResult;
 
-  MacroTool.internal(
-      {required this.workspacePath,
-      required this.packageConfigPath,
-      required this.scriptPath,
-      required this.skipCleanup,
-      required this.watch});
+  MacroTool({
+    required this.macroRunner,
+    required this.packageConfigPath,
+    required this.workspacePath,
+    required this.benchmarkIterations,
+    this.scriptPath,
+  });
 
-  factory MacroTool(
-          {required HostOption host,
-          required String workspacePath,
-          required String packageConfigPath,
-          required String scriptPath,
-          required bool skipCleanup,
-          required bool watch}) =>
-      host == HostOption.analyzer
-          ? AnalyzerMacroTool(
-              workspacePath: workspacePath,
-              packageConfigPath: packageConfigPath,
-              scriptPath: scriptPath,
-              skipCleanup: skipCleanup,
-              watch: watch)
-          : CfeMacroTool(
-              workspacePath: workspacePath,
-              packageConfigPath: packageConfigPath,
-              scriptPath: scriptPath,
-              skipCleanup: skipCleanup,
-              watch: watch);
+  /// Runs macros.
+  ///
+  /// Throws `StateError` if there are any errors.
+  ///
+  /// Otherwise, writes macro augmentations next to each source file with the
+  /// extension `.macro_tool_output`.
+  Future<void> apply() async {
+    _applyResult = await macroRunner.run();
 
-  Future<void> run() async {
-    print('Running ${p.basename(scriptPath)} with macros on $this.');
-    print('~~~');
-    print('Package config: $packageConfigPath');
-    print('Workspace: $workspacePath');
-    print('Script: $scriptPath');
-
-    // TODO(davidmorgan): make it an option to run with the CFE instead.
-    if (!await augment()) {
-      print('No augmentation was generated, nothing to do, exiting.');
-      exit(1);
+    if (_applyResult!.allErrors.isNotEmpty) {
+      throw StateError('Errors: ${_applyResult!.allErrors}');
     }
 
-    _addImportAugment();
-
-    try {
-      print('~~~ running, output follows');
-      final result = Process.runSync(
-        Platform.resolvedExecutable,
-        [
-          'run',
-          '--enable-experiment=macros',
-          '--enable-experiment=enhanced-parts',
-          '--packages=$packageConfigPath',
-          scriptPath
-        ],
-        workingDirectory: workspacePath,
-      );
-      stdout.write(result.stdout);
-      stderr.write(result.stderr);
-      exitCode = result.exitCode;
-    } finally {
-      if (skipCleanup) {
-        print(
-            '~~~ exit code $exitCode, skipping cleanup because --skip-cleanup');
-      } else {
-        print('~~~ exit code $exitCode, cleanup follows');
-        _removeImportAugment();
-        _removeAugmentations();
+    for (final result in _applyResult!.fileResults) {
+      if (result.output != null) {
+        result.sourceFile.writeOutput(result.output!);
       }
     }
-
-    // The analyzer seems to prevent exit.
-    exit(exitCode);
   }
 
-  /// The path where macro-generated augmentations will be written.
-  String get augmentationFilePath => '$scriptPath.macro_tool_output';
-
-  /// Runs macros in [scriptFile] on the analyzer.
+  /// Patches source so the analyzer can analyze it without running macros.
   ///
-  /// Writes any augmentation to [augmentationFilePath].
+  /// Adds a `part` statement where needed to include augmentation output by
+  /// `apply`.
+  void patchForAnalyzer() {
+    if (_applyResult == null) {
+      throw UnsupportedError(
+          '"patch_for_analyzer" command requires "apply" first.');
+    }
+
+    for (final result in _applyResult!.fileResults) {
+      if (result.output != null) {
+        result.sourceFile.patchForAnalyzer();
+      }
+    }
+  }
+
+  /// Patches source and augmentations so the CFE can run then without
+  /// running macros.
   ///
-  /// Returns whether an augmentation file was written.
-  Future<bool> augment();
+  /// This means changing augmentations from using parts to library
+  /// augmentations and adding `import augment` as needed.
+  void patchForCfe() {
+    if (_applyResult == null) {
+      throw UnsupportedError('"patch_for_cfe" command requires "apply" first.');
+    }
 
-  /// Deletes the augmentation file created by this tool.
-  void _removeAugmentations() {
-    print('Deleting: $augmentationFilePath');
-    File(augmentationFilePath).deleteSync();
+    for (final result in _applyResult!.fileResults) {
+      if (result.output != null) {
+        result.sourceFile.patchForCfe();
+      }
+    }
   }
 
-  /// Adds `import augment` of the augmentation file.
+  /// Runs the script.
   ///
-  /// When macros run in the analyzer or CFE this inclusion of the augmentation
-  /// output is automatic, but for `macro_tool` it has to be patched in.
-  void _addImportAugment() {
-    print('Patching to import augmentations: $scriptPath');
+  /// The process exit code becomes the tool exit code.
+  Future<int> run() async {
+    if (scriptPath == null) {
+      throw UnsupportedError('"run" command requires "--script".');
+    }
 
-    // Add the `import augment` statement at the start of the file.
-    final partName = p.basename(augmentationFilePath);
-    final line = "import augment '$partName'; $_addedMarker\n";
-
-    final file = File(scriptPath);
-    file.writeAsStringSync(
-        line + _removeToolAddedLinesFromSource(file.readAsStringSync()));
+    final result = Process.runSync(
+      Platform.resolvedExecutable,
+      [
+        'run',
+        '--enable-experiment=macros',
+        '--enable-experiment=enhanced-parts',
+        '--packages=$packageConfigPath',
+        scriptPath!
+      ],
+      workingDirectory: workspacePath,
+    );
+    stdout.write(result.stdout);
+    stderr.write(result.stderr);
+    return result.exitCode;
   }
 
-  /// Reverts the script file.
-  void _removeImportAugment() {
-    print('Reverting: $scriptPath');
-    final file = File(scriptPath);
-    file.writeAsStringSync(
-        _removeToolAddedLinesFromSource(file.readAsStringSync()));
+  /// Reverts changes to source from any of [patchForAnalyzer], [patchForCfe]
+  /// and/or [bustCaches].
+  void revert() {
+    for (final sourceFile in macroRunner.sourceFiles) {
+      sourceFile.revert();
+    }
   }
 
-  /// Returns [source] with lines added by [_addImportAugment] removed.
-  String _removeToolAddedLinesFromSource(String source) =>
-      source.split('\n').where((l) => !l.endsWith(_addedMarker)).join('\n');
-}
+  /// Benchmarks [apply].
+  ///
+  /// Each [apply] returns two timings: the time to first result and the time
+  /// to last result. For the analyzer, this corresponds to analysis complete
+  /// for one file in the workspace and analysis complete for all files in the
+  /// workspace.
+  ///
+  /// Output is three sets of values separated by double commas:
+  ///
+  /// 1. Initial apply, first file time then last files time
+  /// 2. All non-initial applies first file times
+  /// 3. All non-initial applies last file times
+  Future<void> benchmarkApply({bool injectImplementation = true}) async {
+    // Busts caches, applies, throws if error, returns result.
+    Future<WorkspaceResult> measure() async {
+      bustCaches();
+      _applyResult =
+          await macroRunner.run(injectImplementation: injectImplementation);
+      if (_applyResult!.allErrors.isNotEmpty) {
+        throw StateError('Errors: ${_applyResult!.allErrors}');
+      }
+      return _applyResult!;
+    }
 
-final String _addedMarker = '// added by macro_tool';
+    final initialResult = await measure();
+    stdout.write('${initialResult.firstResultAfter.inMilliseconds},');
+    stdout.write('${initialResult.lastResultAfter.inMilliseconds},');
+    stdout.write(',');
 
-enum HostOption {
-  analyzer,
-  cfe;
+    final subsequentResults = <WorkspaceResult>[];
+    for (var i = 0; i != benchmarkIterations; ++i) {
+      subsequentResults.add(await measure());
+      stdout.write('${subsequentResults[i].firstResultAfter.inMilliseconds},');
+    }
 
-  static HostOption? forString(String? option) => switch (option) {
-        'analyzer' => HostOption.analyzer,
-        'cfe' => HostOption.cfe,
-        _ => null,
-      };
+    for (var i = 0; i != benchmarkIterations; ++i) {
+      stdout.write(',${subsequentResults[i].lastResultAfter.inMilliseconds}');
+    }
+    print('');
+  }
+
+  /// As [benchmarkApply] but without injecting the `data_model` macro
+  /// implementation.
+  Future<void> benchmarkAnalyze() async {
+    await benchmarkApply(injectImplementation: false);
+  }
+
+  /// Modifies source to avoid cached results, for benchmarking.
+  ///
+  /// Modifies files with `CACHEBUSTER`. Throws if not found in any source.
+  void bustCaches() {
+    var cacheBusterFound = false;
+    for (final sourceFile in macroRunner.sourceFiles) {
+      if (sourceFile.bustCaches()) {
+        cacheBusterFound = true;
+        // Notify the macro runner of the change so that it will be picked up
+        // by the next incremental run.
+        macroRunner.notifyChange(sourceFile);
+      }
+    }
+    if (!cacheBusterFound) {
+      throw StateError(
+          'Did not find CACHEBUSTER in any source, no changes were made.');
+    }
+  }
+
+  /// Loops watching for changes to [scriptPath] and applying after every change.
+  Future<void> watch() async {
+    if (scriptPath == null) {
+      throw UnsupportedError('"watch" command requires "--script".');
+    }
+    // `asBroadcastStream` so repeated use of `first` below waits for the next
+    // change.
+    var events = File(scriptPath!).watch().asBroadcastStream();
+    print('Watching for changes to: $scriptPath');
+    while (true) {
+      _applyResult = await macroRunner.run();
+      for (final result in _applyResult!.fileResults) {
+        if (result.output != null) {
+          result.sourceFile.writeOutput(result.output!);
+        }
+      }
+      if (_applyResult!.allErrors.isNotEmpty) {
+        print('Errors: ${_applyResult!.allErrors}');
+      }
+
+      stdout.write(
+          'Macros ran in in ${_applyResult!.firstResultAfter.inMilliseconds}ms,'
+          ' watching...');
+      await events.first;
+      print('changed, rerunning.');
+      macroRunner.notifyChange(SourceFile(scriptPath!));
+    }
+  }
 }
