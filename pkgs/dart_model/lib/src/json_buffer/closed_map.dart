@@ -55,14 +55,15 @@ class _ClosedMap
     implements MapInBuffer {
   @override
   final JsonBufferBuilder buffer;
-  final _Pointer _pointer;
+  @override
+  final _Pointer pointer;
   @override
   final Map<String, Object?>? parent;
   @override
   final int length;
 
-  _ClosedMap(this.buffer, this._pointer, this.parent)
-      : length = buffer._readLength(_pointer);
+  _ClosedMap(this.buffer, this.pointer, this.parent)
+      : length = buffer._readLength(pointer);
 
   @override
   Object? operator [](Object? key) {
@@ -75,18 +76,18 @@ class _ClosedMap
 
   @override
   late final Iterable<String> keys = _IteratorFunctionIterable(
-      () => _ClosedMapKeyIterator(buffer, this, _pointer, length),
+      () => _ClosedMapKeyIterator(buffer, this, pointer, length),
       length: length);
 
   @override
   late final Iterable<Object?> values = _IteratorFunctionIterable(
-      () => _ClosedMapValueIterator(buffer, this, _pointer, length),
+      () => _ClosedMapValueIterator(buffer, this, pointer, length),
       length: length);
 
   @override
   late final Iterable<MapEntry<String, Object?>> entries =
       _IteratorFunctionIterable(
-          () => _ClosedMapEntryIterator(buffer, this, _pointer, length),
+          () => _ClosedMapEntryIterator(buffer, this, pointer, length),
           length: length);
 
   @override
@@ -109,12 +110,10 @@ class _ClosedMap
 
   @override
   bool operator ==(Object other) =>
-      other is _ClosedMap &&
-      other.buffer == buffer &&
-      other._pointer == _pointer;
+      other is _ClosedMap && other.buffer == buffer && other.pointer == pointer;
 
   @override
-  int get hashCode => Object.hash(buffer, _pointer);
+  int get hashCode => Object.hash(buffer, pointer);
 }
 
 /// `Iterator` that reads a "closed map" in a [JsonBufferBuilder].

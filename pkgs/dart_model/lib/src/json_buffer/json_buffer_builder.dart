@@ -52,6 +52,87 @@ class JsonBufferBuilder {
     map = createGrowableMap<Object?>();
   }
 
+  /// Computes the identity hash of the object at [pointer] from its raw bytes.
+  ///
+  /// Any nested pointers use the hash of the values they point to.
+  ///
+  /// If [type] is provided, [pointer] should point directly at the object.
+  /// Otherwise a [Type] will be read first, followed by the value.
+  ///
+  /// If [alreadyDereferenced] is `true`, then for types which are pointers,
+  /// [pointer] already points at the top of the object, and should not be
+  /// followed before reading the object.
+  int identityHash(int pointer,
+      {Type? type, bool alreadyDereferenced = false}) {
+    if (type == null) {
+      type = _readType(pointer);
+      pointer += _typeSize;
+    }
+    return _identityHash(pointer, type,
+        alreadyDereferenced: alreadyDereferenced);
+  }
+
+  /// Computes the identity hash of the object at [pointer] with a known [type]
+  /// from its raw bytes.
+  ///
+  /// If [alreadyDereferenced] is `true`, then for types which are pointers,
+  /// [pointer] already points at the top of the object, and should not be
+  /// followed before reading the object.
+  int _identityHash(_Pointer pointer, Type type,
+      {bool alreadyDereferenced = false}) {
+    // Dereference [pointer] if it is a pointer type, and hasn't already been
+    // dereferenced.
+    if (type.isPointer && !alreadyDereferenced) {
+      pointer = _readPointer(pointer);
+    }
+
+    switch (type) {
+      case Type.nil:
+        return null.hashCode;
+      case Type.type:
+        return _buffer[pointer];
+      case Type.pointer:
+        return identityHash(pointer);
+      case Type.uint32:
+        return _readUint32(pointer);
+      case Type.boolean:
+        return _buffer[pointer];
+      case Type.anyPointer:
+        return identityHash(pointer);
+      case Type.stringPointer:
+        final length = _readLength(pointer);
+        pointer += _lengthSize;
+        return Object.hashAll(_buffer.sublist(pointer, pointer + length));
+      case Type.closedListPointer:
+        final length = _readLength(pointer);
+        pointer += _lengthSize;
+        return Object.hashAll(Iterable.generate(
+            length, (i) => identityHash(pointer + i * ClosedLists._valueSize)));
+      case Type.closedMapPointer:
+        final length = _readLength(pointer);
+        pointer += _lengthSize;
+        return Object.hashAll(Iterable.generate(
+            length, (i) => identityHash(pointer + i * ClosedMaps._valueSize)));
+      case Type.growableMapPointer:
+        var iterator = _GrowableMapHashIterator(this, null, pointer);
+        var hash = 0;
+        while (iterator.moveNext()) {
+          hash = Object.hash(hash, iterator.current);
+        }
+        return hash;
+      case Type.typedMapPointer:
+        final typedMap = _TypedMap(this, pointer, null);
+        var hash = 0;
+        final iterator = typedMap._schema._isAllBooleans
+            ? _AllBoolsTypedMapHashIterator(typedMap)
+            : _PartialTypedMapHashIterator(typedMap);
+        while (iterator.moveNext()) {
+          hash = Object.hash(hash, iterator.current);
+        }
+        return hash;
+    }
+  }
+
   /// The JSON data.
   ///
   /// The buffer is _not_ copied, unpredictable behavior will result if it is

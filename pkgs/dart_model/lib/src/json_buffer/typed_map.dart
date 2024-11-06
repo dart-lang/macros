@@ -306,7 +306,7 @@ extension TypedMaps on JsonBufferBuilder {
   /// The [map] must have been created in this buffer using [createTypedMap].
   _Pointer _pointerToTypedMap(_TypedMap map) {
     _checkTypedMapOwnership(map);
-    return map._pointer;
+    return map.pointer;
   }
 
   /// Throws if [map is backed by a different buffer to `this`.
@@ -329,17 +329,18 @@ class _TypedMap
     implements Map<String, Object?>, MapInBuffer {
   @override
   final JsonBufferBuilder buffer;
-  final _Pointer _pointer;
+  @override
+  final _Pointer pointer;
   @override
   final Map<String, Object?>? parent;
 
   // If a `TypedMap` is created then immediately added to another `Map` then
-  // these values are never needed, just the `_pointer`. Use `late` so they are
+  // these values are never needed, just the `pointer`. Use `late` so they are
   // only computed if needed.
 
   late final _Pointer _schemaPointer =
       // The high byte of the schema pointer indicates "filled", omit it.
-      buffer._readPointer(_pointer) & 0x7fffffff;
+      buffer._readPointer(pointer) & 0x7fffffff;
 
   /// The schema of this "typed map" giving its field names and types.
   late final TypedMapSchema _schema =
@@ -347,9 +348,9 @@ class _TypedMap
           TypedMapSchema(buffer._readClosedMap(_schemaPointer, null).cast());
 
   /// Whether all fields are present, meaning no explicit field set was written.
-  late final bool filled = (buffer._readPointer(_pointer) & 0x80000000) != 0;
+  late final bool filled = (buffer._readPointer(pointer) & 0x80000000) != 0;
 
-  _TypedMap(this.buffer, this._pointer, this.parent);
+  _TypedMap(this.buffer, this.pointer, this.parent);
 
   /// Whether the field at [index] is present.
   bool _hasField(int index) {
@@ -360,7 +361,7 @@ class _TypedMap
     if (filled) return true;
     final byte = index ~/ 8;
     final bit = index % 8;
-    return buffer._readBit(_pointer + _pointerSize + byte, bit);
+    return buffer._readBit(pointer + _pointerSize + byte, bit);
   }
 
   @override
@@ -428,12 +429,10 @@ class _TypedMap
 
   @override
   bool operator ==(Object other) =>
-      other is _TypedMap &&
-      other.buffer == buffer &&
-      other._pointer == _pointer;
+      other is _TypedMap && other.buffer == buffer && other.pointer == pointer;
 
   @override
-  int get hashCode => Object.hash(buffer, _pointer);
+  int get hashCode => Object.hash(buffer, pointer);
 }
 
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder].
@@ -452,7 +451,7 @@ abstract class _PartialTypedMapIterator<T> implements Iterator<T> {
   _PartialTypedMapIterator(this._map)
       : _buffer = _map.buffer,
         _schema = _map._schema,
-        _valuesPointer = _map._pointer +
+        _valuesPointer = _map.pointer +
             _pointerSize +
             (_map.filled ? 0 : _map._schema._fieldSetSize);
 
@@ -506,6 +505,16 @@ class _PartialTypedMapEntryIterator
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }
 
+class _PartialTypedMapHashIterator extends _PartialTypedMapIterator<int> {
+  _PartialTypedMapHashIterator(super._map);
+
+  @override
+  int get current => Object.hash(
+      _currentKey,
+      _buffer._identityHash(
+          _valuesPointer + _offset, _schema._valueTypes[_index]));
+}
+
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder] with all
 /// values of type [Type.boolean].
 abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
@@ -526,7 +535,7 @@ abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
   _AllBoolsTypedMapIterator(this._map)
       : _buffer = _map.buffer,
         _schema = _map._schema,
-        _valuesPointer = _map._pointer +
+        _valuesPointer = _map.pointer +
             _pointerSize +
             (_map.filled ? 0 : _map._schema._fieldSetSize);
 
@@ -578,4 +587,11 @@ class _AllBoolsTypedMapEntryIterator
 
   @override
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
+}
+
+class _AllBoolsTypedMapHashIterator extends _AllBoolsTypedMapIterator<int> {
+  _AllBoolsTypedMapHashIterator(super._map);
+
+  @override
+  int get current => Object.hash(_currentKey, _currentValue);
 }

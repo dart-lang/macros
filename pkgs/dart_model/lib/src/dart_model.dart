@@ -2,8 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:collection/collection.dart';
-
 import 'dart_model.g.dart';
 import 'json_buffer/json_buffer_builder.dart';
 import 'lazy_merged_map.dart';
@@ -33,7 +31,12 @@ extension ModelExtension on Model {
   /// An identity hash for `this`, used for comparing query results.
   ///
   /// TODO: A faster/better implementation?
-  int get identityHash => const DeepCollectionEquality().hash(node);
+  int get identityHash {
+    // TODO: Implementation for non-buffer maps?
+    var node = this.node as MapInBuffer;
+    return node.buffer.identityHash(node.pointer,
+        type: Type.typedMapPointer, alreadyDereferenced: true);
+  }
 
   /// Looks up [name] in `this`.
   ///
