@@ -34,7 +34,7 @@ extension ModelExtension on Model {
   int get identityHash {
     // TODO: Implementation for non-buffer maps?
     var node = this.node as MapInBuffer;
-    return node.buffer.identityHash(node.pointer,
+    return node.buffer.fingerprint(node.pointer,
         type: Type.typedMapPointer, alreadyDereferenced: true);
   }
 

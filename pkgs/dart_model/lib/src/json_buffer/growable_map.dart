@@ -221,7 +221,7 @@ class _GrowableMapHashIterator extends _GrowableMapIterator<int> {
 
   @override
   int get current => Object.hash(
-        _buffer._identityHash(_pointer + _pointerSize, Type.stringPointer),
-        _buffer.identityHash(_pointer + _pointerSize + GrowableMaps._keySize),
+        _buffer._fingerprint(_pointer + _pointerSize, Type.stringPointer),
+        _buffer.fingerprint(_pointer + _pointerSize + GrowableMaps._keySize),
       );
 }

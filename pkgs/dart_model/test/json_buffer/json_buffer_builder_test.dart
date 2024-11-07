@@ -6,7 +6,7 @@ import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(JsonBufferBuilder, () {
+  group('JsonBufferBuilder', () {
     late JsonBufferBuilder builder;
 
     setUp(() {
@@ -87,5 +87,7 @@ void main() {
           JsonBufferBuilder.deserialize(JsonBufferBuilder().serialize());
       expect(() => deserializedBuilder.map['a'] = 'b', throwsStateError);
     });
+
+    test('can create unique fingerprints', () {});
   });
 }

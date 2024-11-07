@@ -511,7 +511,7 @@ class _PartialTypedMapHashIterator extends _PartialTypedMapIterator<int> {
   @override
   int get current => Object.hash(
       _currentKey,
-      _buffer._identityHash(
+      _buffer._fingerprint(
           _valuesPointer + _offset, _schema._valueTypes[_index]));
 }
 

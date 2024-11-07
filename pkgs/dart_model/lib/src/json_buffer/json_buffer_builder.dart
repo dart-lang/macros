@@ -62,13 +62,12 @@ class JsonBufferBuilder {
   /// If [alreadyDereferenced] is `true`, then for types which are pointers,
   /// [pointer] already points at the top of the object, and should not be
   /// followed before reading the object.
-  int identityHash(int pointer,
-      {Type? type, bool alreadyDereferenced = false}) {
+  int fingerprint(int pointer, {Type? type, bool alreadyDereferenced = false}) {
     if (type == null) {
       type = _readType(pointer);
       pointer += _typeSize;
     }
-    return _identityHash(pointer, type,
+    return _fingerprint(pointer, type,
         alreadyDereferenced: alreadyDereferenced);
   }
 
@@ -78,7 +77,7 @@ class JsonBufferBuilder {
   /// If [alreadyDereferenced] is `true`, then for types which are pointers,
   /// [pointer] already points at the top of the object, and should not be
   /// followed before reading the object.
-  int _identityHash(_Pointer pointer, Type type,
+  int _fingerprint(_Pointer pointer, Type type,
       {bool alreadyDereferenced = false}) {
     // Dereference [pointer] if it is a pointer type, and hasn't already been
     // dereferenced.
@@ -92,13 +91,13 @@ class JsonBufferBuilder {
       case Type.type:
         return _buffer[pointer];
       case Type.pointer:
-        return identityHash(pointer);
+        return fingerprint(pointer);
       case Type.uint32:
         return _readUint32(pointer);
       case Type.boolean:
         return _buffer[pointer];
       case Type.anyPointer:
-        return identityHash(pointer);
+        return fingerprint(pointer);
       case Type.stringPointer:
         final length = _readLength(pointer);
         pointer += _lengthSize;
@@ -107,12 +106,12 @@ class JsonBufferBuilder {
         final length = _readLength(pointer);
         pointer += _lengthSize;
         return Object.hashAll(Iterable.generate(
-            length, (i) => identityHash(pointer + i * ClosedLists._valueSize)));
+            length, (i) => fingerprint(pointer + i * ClosedLists._valueSize)));
       case Type.closedMapPointer:
         final length = _readLength(pointer);
         pointer += _lengthSize;
         return Object.hashAll(Iterable.generate(
-            length, (i) => identityHash(pointer + i * ClosedMaps._valueSize)));
+            length, (i) => fingerprint(pointer + i * ClosedMaps._valueSize)));
       case Type.growableMapPointer:
         var iterator = _GrowableMapHashIterator(this, null, pointer);
         var hash = 0;
