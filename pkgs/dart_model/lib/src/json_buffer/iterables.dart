@@ -48,4 +48,7 @@ abstract interface class MapInBuffer {
   /// The `Map` that contains this value, or `null` if this value has not been
   /// added to a `Map` or is itself the root `Map`.
   Map<String, Object?>? get parent;
+
+  /// A pointer to the start of this object in [buffer].
+  int get pointer;
 }

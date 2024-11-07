@@ -23,17 +23,22 @@ typedef _Pointer = int;
 
 /// The type of a value in the buffer.
 enum Type {
-  nil,
-  type,
-  pointer,
-  uint32,
-  boolean,
-  anyPointer,
-  stringPointer,
-  closedListPointer,
-  closedMapPointer,
-  growableMapPointer,
-  typedMapPointer;
+  nil(false),
+  type(false),
+  pointer(true),
+  uint32(false),
+  boolean(false),
+  anyPointer(false), // This is actually a type followed by a pointer.
+  stringPointer(true),
+  closedListPointer(true),
+  closedMapPointer(true),
+  growableMapPointer(true),
+  typedMapPointer(true);
+
+  /// Whether this object is always stored as a raw pointer.
+  final bool isPointer;
+
+  const Type(this.isPointer);
 
   /// Returns the [Type] of [value], or throws if it is not a supported type.
   ///

@@ -36,7 +36,7 @@ class MacroResultsCache {
           .skip(1)
           .fold(queryResults.first.response,
               (model, next) => model.mergeWith(next.response))
-          .identityHash,
+          .fingerprint,
       response: response
     );
   }
@@ -61,7 +61,7 @@ class MacroResultsCache {
         .skip(1)
         .fold(queryResults.first.model,
             (model, next) => model.mergeWith(next.model))
-        .identityHash;
+        .fingerprint;
     if (newResultsHash != cached.resultsHash) {
       _cache.remove(cacheKey);
       return null;

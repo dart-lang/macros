@@ -6,7 +6,7 @@ import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(JsonBufferBuilder, () {
+  group('JsonBufferBuilder', () {
     late JsonBufferBuilder builder;
 
     setUp(() {
@@ -87,5 +87,87 @@ void main() {
           JsonBufferBuilder.deserialize(JsonBufferBuilder().serialize());
       expect(() => deserializedBuilder.map['a'] = 'b', throwsStateError);
     });
+
+    group('fingerprint', () {
+      /// Re-usable fingerprint tests, [a] and [b] should be different values,
+      /// possibly of different types.
+      void testFingerprint(Object? a, Object? b) {
+        assert(a != b);
+        expect(fingerprint({'a': a}), equals(fingerprint({'a': a})));
+        expect(
+            fingerprint({
+              'a': {'b': b}
+            }),
+            equals(fingerprint({
+              'a': {'b': b}
+            })));
+        expect(fingerprint({'a': a}), isNot(equals(fingerprint({'a': b}))));
+        expect(fingerprint({'a': a}), isNot(equals(fingerprint({'b': a}))));
+        expect(fingerprint({'a': a, 'b': b}),
+            isNot(equals(fingerprint({'a': b, 'b': a}))));
+      }
+
+      test('boolean fields', () {
+        testFingerprint(true, false);
+      });
+
+      test('String fields', () {
+        testFingerprint('a', 'b');
+      });
+
+      test('int fields', () {
+        testFingerprint(1, 2);
+      });
+
+      test('null fields', () {
+        testFingerprint(null, 0);
+        testFingerprint(null, true);
+        testFingerprint(null, false);
+        testFingerprint(null, <String, Object?>{});
+      });
+
+      test('closed list fields', () {
+        testFingerprint([], [1]);
+        testFingerprint([1, 2], [2, 1]);
+      });
+
+      test('closed map fields', () {
+        testFingerprint(<String, Object?>{}, {'a': 1});
+        testFingerprint({'a': 'b'}, {'b': 'a'});
+      });
+
+      test('growable map fields', () {
+        final builderA = JsonBufferBuilder();
+        final builderB = JsonBufferBuilder();
+        testFingerprint(builderA.createGrowableMap<Object?>()..['a'] = 1,
+            builderB.createGrowableMap<Object?>()..['a'] = 2);
+      });
+
+      test('typed maps with same schema', () {
+        final builderA = JsonBufferBuilder();
+        final builderB = JsonBufferBuilder();
+        final schema = TypedMapSchema({
+          'a': Type.stringPointer,
+        });
+        testFingerprint(builderA.createTypedMap(schema, 'a'),
+            builderB.createTypedMap(schema, 'b'));
+      });
+    });
   });
+}
+
+int fingerprint(Map<String, Object?> map) {
+  final builder =
+      map is MapInBuffer ? (map as MapInBuffer).buffer : JsonBufferBuilder()
+        ..map.deepCopy(map);
+  return builder.fingerprint((builder.map as MapInBuffer).pointer,
+      type: Type.growableMapPointer, alreadyDereferenced: true);
+}
+
+extension on Map<String, Object?> {
+  void deepCopy(Map from) {
+    for (var entry in from.entries) {
+      this[entry.key as String] = entry.value;
+    }
+  }
 }
