@@ -103,13 +103,13 @@ class JsonBufferBuilder {
         pointer += _lengthSize;
         return Object.hashAll(_buffer.sublist(pointer, pointer + length));
       case Type.closedListPointer:
-        return _ClosedList(this, pointer).fingerprint();
+        return _ClosedList(this, pointer).fingerprint;
       case Type.closedMapPointer:
-        return _ClosedMap(this, pointer, null).fingerprint();
+        return _ClosedMap(this, pointer, null).fingerprint;
       case Type.growableMapPointer:
-        return _GrowableMap<Object?>(this, pointer, null).fingerprint();
+        return _GrowableMap<Object?>(this, pointer, null).fingerprint;
       case Type.typedMapPointer:
-        return _TypedMap(this, pointer, null).fingerprint();
+        return _TypedMap(this, pointer, null).fingerprint;
     }
   }
 

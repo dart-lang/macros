@@ -31,7 +31,7 @@ extension ModelExtension on Model {
   /// An identity hash for `this`, used for comparing query results.
   ///
   /// TODO: A faster/better implementation?
-  int get identityHash {
+  int get fingerprint {
     // TODO: Implementation for non-buffer maps?
     var node = this.node as MapInBuffer;
     return node.buffer.fingerprint(node.pointer,

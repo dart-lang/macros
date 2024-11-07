@@ -78,7 +78,7 @@ class _ClosedList with ListMixin<Object?> {
     throw UnsupportedError('This JsonBufferBuilder list is read-only.');
   }
 
-  int fingerprint() {
+  int get fingerprint {
     var iterator = _ClosedListHashIterator(_buffer, _pointer, length);
     var hash = 0;
     while (iterator.moveNext()) {

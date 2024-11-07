@@ -115,7 +115,7 @@ class _ClosedMap
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int fingerprint() {
+  int get fingerprint {
     var iterator = _ClosedMapHashIterator(buffer, null, pointer, length);
     var hash = 0;
     while (iterator.moveNext()) {

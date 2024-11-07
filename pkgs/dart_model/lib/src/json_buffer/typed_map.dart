@@ -434,7 +434,7 @@ class _TypedMap
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int fingerprint() {
+  int get fingerprint {
     // Note: we could include the schema but don't need to. If something can
     // be one of multiple types, that type will be included in a `type` field
     // in the map.

@@ -169,7 +169,7 @@ class _GrowableMap<V>
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int fingerprint() {
+  int get fingerprint {
     var iterator = _GrowableMapHashIterator(buffer, null, pointer);
     var hash = 0;
     while (iterator.moveNext()) {
