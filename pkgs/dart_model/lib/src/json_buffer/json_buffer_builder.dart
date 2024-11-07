@@ -103,32 +103,13 @@ class JsonBufferBuilder {
         pointer += _lengthSize;
         return Object.hashAll(_buffer.sublist(pointer, pointer + length));
       case Type.closedListPointer:
-        final length = _readLength(pointer);
-        pointer += _lengthSize;
-        return Object.hashAll(Iterable.generate(
-            length, (i) => fingerprint(pointer + i * ClosedLists._valueSize)));
+        return _ClosedList(this, pointer).fingerprint();
       case Type.closedMapPointer:
-        final length = _readLength(pointer);
-        pointer += _lengthSize;
-        return Object.hashAll(Iterable.generate(
-            length, (i) => fingerprint(pointer + i * ClosedMaps._valueSize)));
+        return _ClosedMap(this, pointer, null).fingerprint();
       case Type.growableMapPointer:
-        var iterator = _GrowableMapHashIterator(this, null, pointer);
-        var hash = 0;
-        while (iterator.moveNext()) {
-          hash = Object.hash(hash, iterator.current);
-        }
-        return hash;
+        return _GrowableMap<Object?>(this, pointer, null).fingerprint();
       case Type.typedMapPointer:
-        final typedMap = _TypedMap(this, pointer, null);
-        var hash = 0;
-        final iterator = typedMap._schema._isAllBooleans
-            ? _AllBoolsTypedMapHashIterator(typedMap)
-            : _PartialTypedMapHashIterator(typedMap);
-        while (iterator.moveNext()) {
-          hash = Object.hash(hash, iterator.current);
-        }
-        return hash;
+        return _TypedMap(this, pointer, null).fingerprint();
     }
   }
 

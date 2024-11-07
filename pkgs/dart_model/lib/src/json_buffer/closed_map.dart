@@ -114,12 +114,21 @@ class _ClosedMap
 
   @override
   int get hashCode => Object.hash(buffer, pointer);
+
+  int fingerprint() {
+    var iterator = _ClosedMapHashIterator(buffer, null, pointer, length);
+    var hash = 0;
+    while (iterator.moveNext()) {
+      hash = Object.hash(hash, iterator.current);
+    }
+    return hash;
+  }
 }
 
 /// `Iterator` that reads a "closed map" in a [JsonBufferBuilder].
 abstract class _ClosedMapIterator<T> implements Iterator<T> {
   final JsonBufferBuilder _buffer;
-  final _ClosedMap _parent;
+  final _ClosedMap? _parent;
   final _Pointer _last;
 
   _Pointer _pointer;
@@ -147,7 +156,7 @@ abstract class _ClosedMapIterator<T> implements Iterator<T> {
 
 class _ClosedMapKeyIterator extends _ClosedMapIterator<String> {
   _ClosedMapKeyIterator(
-      super._buffer, super._porent, super.pointer, super.length);
+      super._buffer, super._parent, super.pointer, super.length);
 
   @override
   String get current => _currentKey;
@@ -155,7 +164,7 @@ class _ClosedMapKeyIterator extends _ClosedMapIterator<String> {
 
 class _ClosedMapValueIterator extends _ClosedMapIterator<Object?> {
   _ClosedMapValueIterator(
-      super._buffer, super._porent, super.pointer, super.length);
+      super._buffer, super._parent, super.pointer, super.length);
 
   @override
   Object? get current => _currentValue;
@@ -164,8 +173,19 @@ class _ClosedMapValueIterator extends _ClosedMapIterator<Object?> {
 class _ClosedMapEntryIterator
     extends _ClosedMapIterator<MapEntry<String, Object?>> {
   _ClosedMapEntryIterator(
-      super._buffer, super._porent, super.pointer, super.length);
+      super._buffer, super._parent, super.pointer, super.length);
 
   @override
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
+}
+
+class _ClosedMapHashIterator extends _ClosedMapIterator<int> {
+  _ClosedMapHashIterator(
+      super._buffer, super._parent, super.pointer, super.length);
+
+  @override
+  int get current => Object.hash(
+        _buffer._fingerprint(_pointer, Type.stringPointer),
+        _buffer.fingerprint(_pointer + ClosedMaps._keySize),
+      );
 }

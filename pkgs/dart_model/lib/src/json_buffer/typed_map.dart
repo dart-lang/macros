@@ -433,6 +433,20 @@ class _TypedMap
 
   @override
   int get hashCode => Object.hash(buffer, pointer);
+
+  int fingerprint() {
+    // Note: we could include the schema but don't need to. If something can
+    // be one of multiple types, that type will be included in a `type` field
+    // in the map.
+    var hash = 0;
+    final iterator = _schema._isAllBooleans
+        ? _AllBoolsTypedMapHashIterator(this)
+        : _PartialTypedMapHashIterator(this);
+    while (iterator.moveNext()) {
+      hash = Object.hash(hash, iterator.current);
+    }
+    return hash;
+  }
 }
 
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder].

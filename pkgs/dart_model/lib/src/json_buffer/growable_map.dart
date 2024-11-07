@@ -168,6 +168,15 @@ class _GrowableMap<V>
 
   @override
   int get hashCode => Object.hash(buffer, pointer);
+
+  int fingerprint() {
+    var iterator = _GrowableMapHashIterator(buffer, null, pointer);
+    var hash = 0;
+    while (iterator.moveNext()) {
+      hash = Object.hash(hash, iterator.current);
+    }
+    return hash;
+  }
 }
 
 /// `Iterator` that reads a "growable map" in a [JsonBufferBuilder].
