@@ -8,3 +8,9 @@ stages:
   - format:
     sdk:
     - dev
+- unit_test:
+  # Some tests write to test/package_under_test, so limit concurrency.
+  - test: --test-randomize-ordering-seed=random --concurrency=1
+    os:
+    - linux
+    - windows

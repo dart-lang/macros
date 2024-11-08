@@ -2,8 +2,10 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:io';
 
-final _random = Random.secure();
-int get largeRandom =>
-    _random.nextInt(0xFFFFFFFF) + (_random.nextInt(0x7FFFFFFF) << 32);
+import 'package:_macro_tool/main.dart' as macro_tool;
+
+Future<void> main(List<String> arguments) async {
+  exit(await macro_tool.main(arguments));
+}

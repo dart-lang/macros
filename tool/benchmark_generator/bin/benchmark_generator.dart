@@ -12,7 +12,7 @@ Future<void> main(List<String> arguments) async {
     print('''
 Creates packages to benchmark macro performance. Usage:
 
-  dart bin/main_json.dart <workspace name> <macro|manual|none> <# libraries>
+  dart run benchmark_generator <workspace name> <macro|manual|none> <# libraries>
 ''');
     exit(1);
   }
