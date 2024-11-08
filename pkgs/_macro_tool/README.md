@@ -27,7 +27,6 @@ Benchmark running macros:
 ```bash
 dart run _macro_tool \
     --workspace=goldens/foo/lib/generated/large \
-    --packageConfig=.dart_tool/package_config.json \
     benchmark_apply
 ```
 
@@ -36,7 +35,6 @@ Benchmark analysis on macro output without running macros:
 ```bash
 dart run _macro_tool \
     --workspace=goldens/foo/lib/generated/large \
-    --packageConfig=.dart_tool/package_config.json \
     apply patch_for_analyzer benchmark_analyze revert
 ```
 
@@ -45,7 +43,6 @@ Run a script with macros:
 ```bash
 dart run _macro_tool \
   --workspace=goldens/foo \
-  --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \
   apply patch_for_cfe run revert
 ```
@@ -56,7 +53,6 @@ output to disk and reporting how long it took:
 ```bash
 dart run _macro_tool \
   --workspace=goldens/foo \
-  --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \
   watch
 ```
@@ -66,7 +62,6 @@ Clean up output after using `watch`:
 ```bash
 dart run _macro_tool \
   --workspace=goldens/foo \
-  --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \
   revert
 ```

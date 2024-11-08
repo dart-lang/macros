@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:isolate';
+
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
@@ -24,13 +26,11 @@ Future<int> main(List<String> arguments) async {
 
   final host = HostOption.forString(args['host'] as String?);
   final workspace = args['workspace'] as String?;
-  final packageConfig = args['packageConfig'] as String?;
+  final packageConfig =
+      args['packageConfig'] as String? ?? Isolate.packageConfigSync!.path;
   final script = args['script'] as String?;
 
-  if (host == null ||
-      workspace == null ||
-      packageConfig == null ||
-      commands.isEmpty) {
+  if (host == null || workspace == null || commands.isEmpty) {
     print('''
 Runs a Dart script with `dart_model` macros.
 
