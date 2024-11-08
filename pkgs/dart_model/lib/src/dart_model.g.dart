@@ -149,6 +149,16 @@ extension type Declaration._(Map<String, Object?> node) implements Object {
   Properties get properties => node['properties'] as Properties;
 }
 
+/// Interface type for all declarations
+extension type Declaration._(Map<String, Object?> node) implements Object {
+  /// The metadata annotations attached to this declaration.
+  List<MetadataAnnotation> get metadataAnnotations =>
+      (node['metadataAnnotations'] as List).cast();
+
+  /// The properties of this declaration.
+  Properties get properties => node['properties'] as Properties;
+}
+
 /// An interface.
 extension type Interface.fromJson(Map<String, Object?> node)
     implements Declaration {

@@ -19,6 +19,7 @@ void main() {
                 properties: Properties(isClass: true), metadataAnnotations: [])
               ..members['_root'] = Member(
                 properties: Properties(isField: true, isStatic: false),
+                namedParameters: [],
               )));
       });
     });
@@ -31,7 +32,8 @@ void main() {
               'metadataAnnotations': <Map<String, Object?>>[],
               'members': {
                 '_root': {
-                  'properties': {'isField': true, 'isStatic': false}
+                  'properties': {'isField': true, 'isStatic': false},
+                  'namedParameters': <Map<String, Object?>>[],
                 }
               },
               'properties': {'isClass': true}
@@ -200,6 +202,38 @@ void main() {
           .node));
       expect(copiedModel.qualifiedNameOf(member.node), null);
       expect(model.qualifiedNameOf(copiedMember.node), null);
+    });
+
+    test('Declaration', () {
+      Scope.macro.run(() {
+        MacroScope.current.addModel(model);
+        final interface = model
+            .uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
+        final member = interface.members['_root']!;
+
+        expect(member.wireType, WireType.member);
+        expect(interface.wireType, WireType.interface);
+
+        expect(member.cast.wireType, WireType.member);
+        expect(interface.cast.wireType, WireType.interface);
+
+        String produceOutput(Declaration declaration) {
+          final maybeMember = declaration.cast.maybeMember;
+          final maybeInterface = declaration.cast.maybeInterface;
+          return [
+            'declaration:${declaration.properties.toString()}',
+            if (maybeMember != null)
+              'member:${maybeMember.namedParameters.toString()}',
+            if (maybeInterface != null)
+              'interface:${maybeInterface.members.length}',
+          ].toString();
+        }
+
+        expect(produceOutput(member),
+            '[declaration:{isField: true, isStatic: false}, member:[]]');
+        expect(produceOutput(interface),
+            '[declaration:{isClass: true}, interface:1]');
+      });
     });
   });
 

@@ -129,6 +129,18 @@ static Protocol handshakeProtocol = Protocol(
                   type: 'Properties',
                   description: 'The properties of this declaration.'),
             ]),
+        Definition.clazz('Declaration',
+            description: 'Interface type for all declarations',
+            interfaceOnly: true,
+            properties: [
+              Property('metadataAnnotations',
+                  type: 'List<MetadataAnnotation>',
+                  description:
+                      'The metadata annotations attached to this declaration.'),
+              Property('properties',
+                  type: 'Properties',
+                  description: 'The properties of this declaration.'),
+            ]),
         Definition.clazz(
           'Interface',
           description: 'An interface.',
