@@ -9,10 +9,21 @@ import 'package:path/path.dart' as p;
 
 final _random = Random.secure();
 
+/// Dart source file manipulation for `_macro_tool`.
 extension type SourceFile(String path) implements String {
   static const _addedMarker = '// added by macro_tool';
   static final _cacheBusterString = 'CACHEBUSTER';
   static final _cacheBusterRegexp = RegExp('$_cacheBusterString[a-z0-9]*');
+
+  /// Returns all `*.dart` files under `workspacePath`, including in
+  /// subdirectories.s
+  static List<SourceFile> findDartInWorkspace(String workspacePath) =>
+      Directory(workspacePath)
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .map((f) => SourceFile(f.path))
+          .toList();
 
   /// The source file path plus `.macro_tool_output`.
   String get toolOutputPath => '$path.macro_tool_output';
@@ -22,6 +33,9 @@ extension type SourceFile(String path) implements String {
     File(toolOutputPath).writeAsStringSync(output);
   }
 
+  /// Patches [path] so the analyzer can analyze it without running macros.
+  ///
+  /// Adds a `part` statement referencing [toolOutputPath].
   void patchForAnalyzer() {
     final partName = p.basename(toolOutputPath);
     final line = "part '$partName'; $_addedMarker\n";
@@ -41,6 +55,11 @@ extension type SourceFile(String path) implements String {
         source.substring(nextLineIndex);
   }
 
+  /// Patches [path] and [toolOutputPath] so the CFE can run then without
+  /// running macros.
+  ///
+  /// This means changing [toolOutputPath] from using parts to library
+  /// augmentations and adding `import augment` to [path].
   void patchForCfe() {
     final partName = p.basename(toolOutputPath);
     final line = "import augment '$partName'; $_addedMarker\n";
@@ -55,6 +74,8 @@ extension type SourceFile(String path) implements String {
         .replaceAll('part of ', 'augment library '));
   }
 
+  /// Reverts changes to source from any of [patchForAnalyzer], [patchForCfe]
+  /// and/or [bustCaches].
   void revert() {
     final file = File(path);
     file.writeAsStringSync(_resetCacheBusters(

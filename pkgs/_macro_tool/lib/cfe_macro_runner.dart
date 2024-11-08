@@ -23,12 +23,7 @@ class CfeMacroRunner implements MacroRunner {
   CfeMacroImplementation? cfeMacroImplementation;
 
   CfeMacroRunner({required this.workspacePath, required this.packageConfigPath})
-      : sourceFiles = Directory(workspacePath)
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .map((f) => SourceFile(f.path))
-            .toList() {}
+      : sourceFiles = SourceFile.findDartInWorkspace(workspacePath);
 
   void notifyChange(SourceFile sourceFile) {
     throw UnimplementedError(
@@ -71,7 +66,6 @@ class CfeMacroRunner implements MacroRunner {
     final packagesUri = Uri.file(packageConfigPath);
 
     final computeKernelResult = await computeKernel([
-      '--enable-experiment=macros',
       '--no-summary',
       '--no-summary-only',
       '--target=vm',
@@ -83,8 +77,6 @@ class CfeMacroRunner implements MacroRunner {
       // augmentation source out of incremental compiler state; find a less
       // hacky way.
       '--use-incremental-compiler',
-      // For augmentations.
-      '--enable-experiment=macros',
     ]);
 
     final sources = computeKernelResult

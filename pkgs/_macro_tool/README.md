@@ -1,5 +1,3 @@
-# macro_tool
-
 A tool for running and benchmarking with macros.
 
 Specify a list of commands in addition to options:
@@ -18,16 +16,16 @@ Specify a list of commands in addition to options:
 
 All examples are run from the root of this repo.
 
-Benchmarks required that you first create sources to benchmark with:
+Benchmarks require that you first create sources to benchmark with:
 
 ```bash
-dart tool/benchmark_generator/bin/main.dart large macro 16
+dart run benchmark_generator large macro 16
 ```
 
 Benchmark running macros:
 
 ```bash
-dart pkgs/_macro_tool/bin/main.dart \
+dart run _macro_tool \
     --workspace=goldens/foo/lib/generated/large \
     --packageConfig=.dart_tool/package_config.json \
     benchmark_apply
@@ -36,7 +34,7 @@ dart pkgs/_macro_tool/bin/main.dart \
 Benchmark analysis on macro output without running macros:
 
 ```bash
-dart pkgs/_macro_tool/bin/main.dart \
+dart run _macro_tool \
     --workspace=goldens/foo/lib/generated/large \
     --packageConfig=.dart_tool/package_config.json \
     apply patch_for_analyzer benchmark_analyze revert
@@ -45,7 +43,7 @@ dart pkgs/_macro_tool/bin/main.dart \
 Run a script with macros:
 
 ```bash
-dart pkgs/_macro_tool/bin/main.dart \
+dart run _macro_tool \
   --workspace=goldens/foo \
   --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \
@@ -56,7 +54,7 @@ Watch for changes to a script, applying macros when it changes, writing the
 output to disk and reporting how long it took:
 
 ```bash
-dart pkgs/_macro_tool/bin/main.dart \
+dart run _macro_tool \
   --workspace=goldens/foo \
   --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \
@@ -66,7 +64,7 @@ dart pkgs/_macro_tool/bin/main.dart \
 Clean up output after using `watch`:
 
 ```bash
-dart pkgs/_macro_tool/bin/main.dart \
+dart run _macro_tool \
   --workspace=goldens/foo \
   --packageConfig=.dart_tool/package_config.json \
   --script=goldens/foo/lib/json_codable_test.dart \

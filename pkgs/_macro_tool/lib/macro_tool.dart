@@ -188,6 +188,8 @@ class MacroTool {
     // `asBroadcastStream` so repeated use of `first` below waits for the next
     // change.
     var events = File(scriptPath!).watch().asBroadcastStream();
+    print('Caution: timings can be misleading due to JIT warmup, host '
+        'caching, and random variation. Check with benchmarks :)');
     print('Watching for changes to: $scriptPath');
     while (true) {
       _applyResult = await macroRunner.run();

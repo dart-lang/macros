@@ -14,7 +14,7 @@ abstract interface class MacroRunner {
   /// Returns augmentations and errors for each file.
   ///
   /// [injectImplementation] controls whether the `dart_model` macro
-  /// implementation is injected.
+  /// implementation is injected. Otherwise, the v1 implementation is used.
   Future<WorkspaceResult> run({bool injectImplementation = true});
 
   /// Notifies the host that a file changed.

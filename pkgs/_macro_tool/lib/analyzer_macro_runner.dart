@@ -28,15 +28,10 @@ class AnalyzerMacroRunner implements MacroRunner {
 
   AnalyzerMacroRunner(
       {required this.workspacePath, required this.packageConfigPath})
-      : sourceFiles = Directory(workspacePath)
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .map((f) => SourceFile(f.path))
-            .toList() {
+      : sourceFiles = SourceFile.findDartInWorkspace(workspacePath) {
     final contextCollection =
         AnalysisContextCollection(includedPaths: [workspacePath]);
-    analysisContext = contextCollection.contexts.first;
+    analysisContext = contextCollection.contexts.single;
   }
 
   void notifyChange(SourceFile sourceFile) {
@@ -58,9 +53,10 @@ class AnalyzerMacroRunner implements MacroRunner {
 
     final fileResults = <FileResult>[];
     final stopwatch = Stopwatch()..start();
+    await analysisContext.applyPendingFileChanges();
+
     Duration? firstDuration;
     for (final sourceFile in sourceFiles) {
-      await analysisContext.applyPendingFileChanges();
       ResolvedLibraryResult resolvedLibrary =
           (await analysisContext.currentSession.getResolvedLibrary(sourceFile))
               as ResolvedLibraryResult;
@@ -78,7 +74,7 @@ class AnalyzerMacroRunner implements MacroRunner {
 
       fileResults.add(
           FileResult(sourceFile: sourceFile, output: output, errors: errors));
-      if (firstDuration == null) firstDuration = stopwatch.elapsed;
+      firstDuration ??= stopwatch.elapsed;
     }
 
     return WorkspaceResult(
