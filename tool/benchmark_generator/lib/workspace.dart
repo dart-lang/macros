@@ -3,12 +3,13 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:isolate';
 
 class Workspace {
   final String name;
 
   Directory get directory => Directory.fromUri(
-      Platform.script.resolve('../../../goldens/foo/lib/generated/$name'));
+      Isolate.packageConfigSync!.resolve('../goldens/foo/lib/generated/$name'));
 
   Workspace(this.name) {
     if (directory.existsSync()) directory.deleteSync(recursive: true);
