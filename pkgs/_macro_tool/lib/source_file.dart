@@ -7,6 +7,8 @@ import 'dart:math';
 
 import 'package:path/path.dart' as p;
 
+import 'macro_runner.dart';
+
 final _random = Random.secure();
 
 /// Dart source file manipulation for `_macro_tool`.
@@ -23,26 +25,33 @@ extension type SourceFile(String path) implements String {
           .whereType<File>()
           .where((f) => f.path.endsWith('.dart'))
           .map((f) => SourceFile(f.path))
-          .toList();
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
 
   /// The source file path plus `.macro_tool_output`.
   String get toolOutputPath => '$path.macro_tool_output';
 
   /// Writes [output] to [toolOutputPath].
-  void writeOutput(String output) {
+  ///
+  /// [macroRunner] is notified of the change.
+  void writeOutput(MacroRunner macroRunner, String output) {
     File(toolOutputPath).writeAsStringSync(output);
+    macroRunner.notifyChange(toolOutputPath);
   }
 
   /// Patches [path] so the analyzer can analyze it without running macros.
   ///
   /// Adds a `part` statement referencing [toolOutputPath].
-  void patchForAnalyzer() {
+  ///
+  /// [macroRunner] is notified of the change.
+  void patchForAnalyzer(MacroRunner macroRunner) {
     final partName = p.basename(toolOutputPath);
     final line = "part '$partName'; $_addedMarker\n";
 
     final file = File(path);
     file.writeAsStringSync(_insertAfterLastImport(
         line, _removeToolAddedLinesFromSource(file.readAsStringSync())));
+    macroRunner.notifyChange(path);
   }
 
   String _insertAfterLastImport(String line, String source) {
@@ -60,28 +69,38 @@ extension type SourceFile(String path) implements String {
   ///
   /// This means changing [toolOutputPath] from using parts to library
   /// augmentations and adding `import augment` to [path].
-  void patchForCfe() {
+  ///
+  /// [macroRunner] is notified of the change.
+  void patchForCfe(MacroRunner macroRunner) {
     final partName = p.basename(toolOutputPath);
     final line = "import augment '$partName'; $_addedMarker\n";
 
     final file = File(path);
     file.writeAsStringSync(
         line + _removeToolAddedLinesFromSource(file.readAsStringSync()));
+    macroRunner.notifyChange(path);
 
     final toolOutputFile = File(toolOutputPath);
     toolOutputFile.writeAsStringSync(toolOutputFile
         .readAsStringSync()
         .replaceAll('part of ', 'augment library '));
+    macroRunner.notifyChange(toolOutputPath);
   }
 
   /// Reverts changes to source from any of [patchForAnalyzer], [patchForCfe]
   /// and/or [bustCaches].
-  void revert() {
+  ///
+  /// [macroRunner] is notified of the change.
+  void revert(MacroRunner macroRunner) {
     final file = File(path);
     file.writeAsStringSync(_resetCacheBusters(
         _removeToolAddedLinesFromSource(file.readAsStringSync())));
+    macroRunner.notifyChange(path);
     final toolOutputFile = File(toolOutputPath);
-    if (toolOutputFile.existsSync()) toolOutputFile.deleteSync();
+    if (toolOutputFile.existsSync()) {
+      toolOutputFile.deleteSync();
+      macroRunner.notifyChange(toolOutputPath);
+    }
   }
 
   /// Returns [source] with lines added by [_addImportAugment] removed.
@@ -96,7 +115,9 @@ extension type SourceFile(String path) implements String {
   /// If there is an augmentation output file, updates that too.
   ///
   /// Returns whether any change was made to a file.
-  bool bustCaches() {
+  ///
+  /// [macroRunner] is notified of the change.
+  bool bustCaches(MacroRunner macroRunner) {
     final token = _random.nextInt(1 << 32).toRadixString(16) +
         _random.nextInt(1 << 32).toRadixString(16);
     var cacheBusterFound = false;
@@ -111,6 +132,7 @@ extension type SourceFile(String path) implements String {
         cacheBusterFound = true;
         file.writeAsStringSync(
             source.replaceAll(_cacheBusterRegexp, '$_cacheBusterString$token'));
+        macroRunner.notifyChange(path);
       }
     }
     return cacheBusterFound;

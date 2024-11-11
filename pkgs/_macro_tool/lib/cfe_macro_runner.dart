@@ -25,9 +25,8 @@ class CfeMacroRunner implements MacroRunner {
   CfeMacroRunner({required this.workspacePath, required this.packageConfigPath})
       : sourceFiles = SourceFile.findDartInWorkspace(workspacePath);
 
-  void notifyChange(SourceFile sourceFile) {
-    throw UnimplementedError(
-        'CfeMacroRunner does not support incremental compilation.');
+  void notifyChange(String sourcePath) {
+    // No incremental compile.
   }
 
   File get _productPlatformDill {
@@ -66,6 +65,7 @@ class CfeMacroRunner implements MacroRunner {
     final packagesUri = Uri.file(packageConfigPath);
 
     final computeKernelResult = await computeKernel([
+      '--enable-experiment=macros',
       '--no-summary',
       '--no-summary-only',
       '--target=vm',

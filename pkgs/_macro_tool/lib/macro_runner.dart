@@ -20,7 +20,7 @@ abstract interface class MacroRunner {
   /// Notifies the host that a file changed.
   ///
   /// Call this on changed files then call [run] again for an incremental run.
-  void notifyChange(SourceFile sourceFile);
+  void notifyChange(String sourcePath);
 }
 
 /// [MacroRunner] result for the whole workspace.
