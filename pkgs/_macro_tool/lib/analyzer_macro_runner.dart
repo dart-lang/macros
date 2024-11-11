@@ -32,8 +32,8 @@ class AnalyzerMacroRunner implements MacroRunner {
     analysisContext = contextCollection.contexts.single;
   }
 
-  void notifyChange(SourceFile sourceFile) {
-    analysisContext.changeFile(sourceFile.path);
+  void notifyChange(String sourcePath) {
+    analysisContext.changeFile(sourcePath);
   }
 
   @override

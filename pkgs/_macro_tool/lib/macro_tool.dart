@@ -43,7 +43,7 @@ class MacroTool {
 
     for (final result in _applyResult!.fileResults) {
       if (result.output != null) {
-        result.sourceFile.writeOutput(result.output!);
+        result.sourceFile.writeOutput(macroRunner, result.output!);
       }
     }
   }
@@ -60,7 +60,7 @@ class MacroTool {
 
     for (final result in _applyResult!.fileResults) {
       if (result.output != null) {
-        result.sourceFile.patchForAnalyzer();
+        result.sourceFile.patchForAnalyzer(macroRunner);
       }
     }
   }
@@ -77,7 +77,7 @@ class MacroTool {
 
     for (final result in _applyResult!.fileResults) {
       if (result.output != null) {
-        result.sourceFile.patchForCfe();
+        result.sourceFile.patchForCfe(macroRunner);
       }
     }
   }
@@ -110,7 +110,7 @@ class MacroTool {
   /// and/or [bustCaches].
   void revert() {
     for (final sourceFile in macroRunner.sourceFiles) {
-      sourceFile.revert();
+      sourceFile.revert(macroRunner);
     }
   }
 
@@ -167,11 +167,8 @@ class MacroTool {
   void bustCaches() {
     var cacheBusterFound = false;
     for (final sourceFile in macroRunner.sourceFiles) {
-      if (sourceFile.bustCaches()) {
+      if (sourceFile.bustCaches(macroRunner)) {
         cacheBusterFound = true;
-        // Notify the macro runner of the change so that it will be picked up
-        // by the next incremental run.
-        macroRunner.notifyChange(sourceFile);
       }
     }
     if (!cacheBusterFound) {
@@ -195,7 +192,7 @@ class MacroTool {
       _applyResult = await macroRunner.run();
       for (final result in _applyResult!.fileResults) {
         if (result.output != null) {
-          result.sourceFile.writeOutput(result.output!);
+          result.sourceFile.writeOutput(macroRunner, result.output!);
         }
       }
       if (_applyResult!.allErrors.isNotEmpty) {
