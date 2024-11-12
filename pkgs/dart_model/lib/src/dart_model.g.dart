@@ -16,12 +16,8 @@ extension type Augmentation.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'code': Type.closedListPointer,
   });
-  Augmentation({
-    List<Code>? code,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          code,
-        ));
+  Augmentation({List<Code>? code})
+    : this.fromJson(Scope.createMap(_schema, code));
 
   /// Augmentation code.
   List<Code> get code => (node['code'] as List).cast();
@@ -42,16 +38,9 @@ extension type Code.fromJson(Map<String, Object?> node) implements Object {
     'value': Type.anyPointer,
   });
   static Code qualifiedName(QualifiedName qualifiedName) =>
-      Code.fromJson(Scope.createMap(
-        _schema,
-        'QualifiedName',
-        qualifiedName,
-      ));
-  static Code string(String string) => Code.fromJson(Scope.createMap(
-        _schema,
-        'String',
-        string,
-      ));
+      Code.fromJson(Scope.createMap(_schema, 'QualifiedName', qualifiedName));
+  static Code string(String string) =>
+      Code.fromJson(Scope.createMap(_schema, 'String', string));
   CodeType get type {
     switch (node['type'] as String) {
       case 'QualifiedName':
@@ -99,14 +88,16 @@ extension type FunctionTypeDesc.fromJson(Map<String, Object?> node)
     List<StaticTypeDesc>? requiredPositionalParameters,
     List<StaticTypeDesc>? optionalPositionalParameters,
     List<NamedFunctionTypeParameter>? namedParameters,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          returnType,
-          typeParameters,
-          requiredPositionalParameters,
-          optionalPositionalParameters,
-          namedParameters,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(
+           _schema,
+           returnType,
+           typeParameters,
+           requiredPositionalParameters,
+           optionalPositionalParameters,
+           namedParameters,
+         ),
+       );
 
   /// The return type of this function type.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
@@ -128,12 +119,8 @@ extension type MetadataAnnotation.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  MetadataAnnotation({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  MetadataAnnotation({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   /// The expression of the annotation.
   Expression get expression => node['expression'] as Expression;
@@ -162,13 +149,15 @@ extension type Interface.fromJson(Map<String, Object?> node)
     NamedTypeDesc? thisType,
     List<MetadataAnnotation>? metadataAnnotations,
     Properties? properties,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          Scope.createGrowableMap(),
-          thisType,
-          metadataAnnotations,
-          properties,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(
+           _schema,
+           Scope.createGrowableMap(),
+           thisType,
+           metadataAnnotations,
+           properties,
+         ),
+       );
 
   /// Map of members by name.
   Map<String, Member> get members =>
@@ -184,10 +173,7 @@ extension type Library.fromJson(Map<String, Object?> node) implements Object {
     'scopes': Type.growableMapPointer,
   });
   Library()
-      : this.fromJson(Scope.createMap(
-          _schema,
-          Scope.createGrowableMap(),
-        ));
+    : this.fromJson(Scope.createMap(_schema, Scope.createGrowableMap()));
 
   /// Scopes by name.
   Map<String, Interface> get scopes =>
@@ -212,15 +198,17 @@ extension type Member.fromJson(Map<String, Object?> node)
     List<NamedFunctionTypeParameter>? namedParameters,
     List<MetadataAnnotation>? metadataAnnotations,
     Properties? properties,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          returnType,
-          requiredPositionalParameters,
-          optionalPositionalParameters,
-          namedParameters,
-          metadataAnnotations,
-          properties,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(
+           _schema,
+           returnType,
+           requiredPositionalParameters,
+           optionalPositionalParameters,
+           namedParameters,
+           metadataAnnotations,
+           properties,
+         ),
+       );
 
   /// The return type of this member, if it has one.
   StaticTypeDesc get returnType => node['returnType'] as StaticTypeDesc;
@@ -244,13 +232,8 @@ extension type Model.fromJson(Map<String, Object?> node) implements Object {
     'uris': Type.growableMapPointer,
     'types': Type.typedMapPointer,
   });
-  Model({
-    TypeHierarchy? types,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          Scope.createGrowableMap(),
-          types,
-        ));
+  Model({TypeHierarchy? types})
+    : this.fromJson(Scope.createMap(_schema, Scope.createGrowableMap(), types));
 
   /// Libraries by URI.
   Map<String, Library> get uris =>
@@ -272,12 +255,7 @@ extension type NamedFunctionTypeParameter.fromJson(Map<String, Object?> node)
     String? name,
     bool? required,
     StaticTypeDesc? type,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          name,
-          required,
-          type,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, name, required, type));
   String get name => node['name'] as String;
   bool get required => node['required'] as bool;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
@@ -290,14 +268,8 @@ extension type NamedRecordField.fromJson(Map<String, Object?> node)
     'name': Type.stringPointer,
     'type': Type.typedMapPointer,
   });
-  NamedRecordField({
-    String? name,
-    StaticTypeDesc? type,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          name,
-          type,
-        ));
+  NamedRecordField({String? name, StaticTypeDesc? type})
+    : this.fromJson(Scope.createMap(_schema, name, type));
   String get name => node['name'] as String;
   StaticTypeDesc get type => node['type'] as StaticTypeDesc;
 }
@@ -309,14 +281,8 @@ extension type NamedTypeDesc.fromJson(Map<String, Object?> node)
     'name': Type.typedMapPointer,
     'instantiation': Type.closedListPointer,
   });
-  NamedTypeDesc({
-    QualifiedName? name,
-    List<StaticTypeDesc>? instantiation,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          name,
-          instantiation,
-        ));
+  NamedTypeDesc({QualifiedName? name, List<StaticTypeDesc>? instantiation})
+    : this.fromJson(Scope.createMap(_schema, name, instantiation));
   QualifiedName get name => node['name'] as QualifiedName;
   List<StaticTypeDesc> get instantiation =>
       (node['instantiation'] as List).cast();
@@ -333,12 +299,8 @@ extension type NullableTypeDesc.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'inner': Type.typedMapPointer,
   });
-  NullableTypeDesc({
-    StaticTypeDesc? inner,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          inner,
-        ));
+  NullableTypeDesc({StaticTypeDesc? inner})
+    : this.fromJson(Scope.createMap(_schema, inner));
 
   /// The type T.
   StaticTypeDesc get inner => node['inner'] as StaticTypeDesc;
@@ -364,16 +326,18 @@ extension type Properties.fromJson(Map<String, Object?> node)
     bool? isField,
     bool? isMethod,
     bool? isStatic,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          isAbstract,
-          isClass,
-          isConstructor,
-          isGetter,
-          isField,
-          isMethod,
-          isStatic,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(
+           _schema,
+           isAbstract,
+           isClass,
+           isConstructor,
+           isGetter,
+           isField,
+           isMethod,
+           isStatic,
+         ),
+       );
 
   /// Whether the entity is abstract, meaning it has no definition.
   bool get isAbstract => node['isAbstract'] as bool;
@@ -406,18 +370,8 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
     'name': Type.stringPointer,
     'isStatic': Type.boolean,
   });
-  QualifiedName({
-    String? uri,
-    String? scope,
-    String? name,
-    bool? isStatic,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          uri,
-          scope,
-          name,
-          isStatic,
-        ));
+  QualifiedName({String? uri, String? scope, String? name, bool? isStatic})
+    : this.fromJson(Scope.createMap(_schema, uri, scope, name, isStatic));
 
   /// Parses [string] of the form `uri#[scope.|scope::]name`.
   ///
@@ -444,10 +398,11 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
       isStatic = null;
     }
     return QualifiedName(
-        uri: string.substring(0, index),
-        name: name,
-        scope: scope,
-        isStatic: isStatic);
+      uri: string.substring(0, index),
+      name: name,
+      scope: scope,
+      isStatic: isStatic,
+    );
   }
 
   /// The URI of the file containing the name.
@@ -465,11 +420,8 @@ extension type QualifiedName.fromJson(Map<String, Object?> node)
 
 /// Query about a corpus of Dart source code. TODO(davidmorgan): this queries about a single class, expand to a union type for different types of queries.
 extension type Query.fromJson(Map<String, Object?> node) implements Object {
-  Query({
-    QualifiedName? target,
-  }) : this.fromJson({
-          if (target != null) 'target': target,
-        });
+  Query({QualifiedName? target})
+    : this.fromJson({if (target != null) 'target': target});
 
   /// The class to query about.
   QualifiedName get target => node['target'] as QualifiedName;
@@ -485,11 +437,7 @@ extension type RecordTypeDesc.fromJson(Map<String, Object?> node)
   RecordTypeDesc({
     List<StaticTypeDesc>? positional,
     List<NamedRecordField>? named,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          positional,
-          named,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, positional, named));
   List<StaticTypeDesc> get positional => (node['positional'] as List).cast();
   List<NamedRecordField> get named => (node['named'] as List).cast();
 }
@@ -516,54 +464,38 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
     'value': Type.anyPointer,
   });
   static StaticTypeDesc dynamicTypeDesc(DynamicTypeDesc dynamicTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'DynamicTypeDesc',
-        dynamicTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'DynamicTypeDesc', dynamicTypeDesc),
+      );
   static StaticTypeDesc functionTypeDesc(FunctionTypeDesc functionTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'FunctionTypeDesc',
-        functionTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'FunctionTypeDesc', functionTypeDesc),
+      );
   static StaticTypeDesc namedTypeDesc(NamedTypeDesc namedTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'NamedTypeDesc',
-        namedTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'NamedTypeDesc', namedTypeDesc),
+      );
   static StaticTypeDesc neverTypeDesc(NeverTypeDesc neverTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'NeverTypeDesc',
-        neverTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'NeverTypeDesc', neverTypeDesc),
+      );
   static StaticTypeDesc nullableTypeDesc(NullableTypeDesc nullableTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'NullableTypeDesc',
-        nullableTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'NullableTypeDesc', nullableTypeDesc),
+      );
   static StaticTypeDesc recordTypeDesc(RecordTypeDesc recordTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'RecordTypeDesc',
-        recordTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'RecordTypeDesc', recordTypeDesc),
+      );
   static StaticTypeDesc typeParameterTypeDesc(
-          TypeParameterTypeDesc typeParameterTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'TypeParameterTypeDesc',
-        typeParameterTypeDesc,
-      ));
+    TypeParameterTypeDesc typeParameterTypeDesc,
+  ) => StaticTypeDesc.fromJson(
+    Scope.createMap(_schema, 'TypeParameterTypeDesc', typeParameterTypeDesc),
+  );
   static StaticTypeDesc voidTypeDesc(VoidTypeDesc voidTypeDesc) =>
-      StaticTypeDesc.fromJson(Scope.createMap(
-        _schema,
-        'VoidTypeDesc',
-        voidTypeDesc,
-      ));
+      StaticTypeDesc.fromJson(
+        Scope.createMap(_schema, 'VoidTypeDesc', voidTypeDesc),
+      );
   StaticTypeDescType get type {
     switch (node['type'] as String) {
       case 'DynamicTypeDesc':
@@ -634,7 +566,8 @@ extension type StaticTypeDesc.fromJson(Map<String, Object?> node)
       throw StateError('Not a TypeParameterTypeDesc.');
     }
     return TypeParameterTypeDesc.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   VoidTypeDesc get asVoidTypeDesc {
@@ -652,14 +585,8 @@ extension type StaticTypeParameterDesc.fromJson(Map<String, Object?> node)
     'identifier': Type.uint32,
     'bound': Type.typedMapPointer,
   });
-  StaticTypeParameterDesc({
-    int? identifier,
-    StaticTypeDesc? bound,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          identifier,
-          bound,
-        ));
+  StaticTypeParameterDesc({int? identifier, StaticTypeDesc? bound})
+    : this.fromJson(Scope.createMap(_schema, identifier, bound));
   int get identifier => node['identifier'] as int;
   StaticTypeDesc? get bound => node['bound'] as StaticTypeDesc?;
 }
@@ -671,10 +598,7 @@ extension type TypeHierarchy.fromJson(Map<String, Object?> node)
     'named': Type.growableMapPointer,
   });
   TypeHierarchy()
-      : this.fromJson(Scope.createMap(
-          _schema,
-          Scope.createGrowableMap(),
-        ));
+    : this.fromJson(Scope.createMap(_schema, Scope.createGrowableMap()));
 
   /// Map of qualified interface names to their resolved named type.
   Map<String, TypeHierarchyEntry> get named =>
@@ -693,12 +617,9 @@ extension type TypeHierarchyEntry.fromJson(Map<String, Object?> node)
     List<StaticTypeParameterDesc>? typeParameters,
     NamedTypeDesc? self,
     List<NamedTypeDesc>? supertypes,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          typeParameters,
-          self,
-          supertypes,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, typeParameters, self, supertypes),
+       );
 
   /// Type parameters defined on this interface-defining element.
   List<StaticTypeParameterDesc> get typeParameters =>
@@ -717,12 +638,8 @@ extension type TypeParameterTypeDesc.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'parameterId': Type.uint32,
   });
-  TypeParameterTypeDesc({
-    int? parameterId,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          parameterId,
-        ));
+  TypeParameterTypeDesc({int? parameterId})
+    : this.fromJson(Scope.createMap(_schema, parameterId));
   int get parameterId => node['parameterId'] as int;
 }
 

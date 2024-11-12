@@ -58,14 +58,18 @@ extension GrowableMaps on JsonBufferBuilder {
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkGrowableMapOwnership(_GrowableMap map) {
     if (map.buffer != this) {
-      throw UnsupportedError('Maps created with `createGrowableMap` can only '
-          'be added to the JsonBufferBuilder instance that created them.');
+      throw UnsupportedError(
+        'Maps created with `createGrowableMap` can only '
+        'be added to the JsonBufferBuilder instance that created them.',
+      );
     }
   }
 
   /// Returns the [_GrowableMap] at [pointer].
   Map<String, V> _readGrowableMap<V>(
-      _Pointer pointer, Map<String, Object?>? parent) {
+    _Pointer pointer,
+    Map<String, Object?>? parent,
+  ) {
     return _GrowableMap<V>(this, pointer, parent);
   }
 }
@@ -83,7 +87,7 @@ class _GrowableMap<V>
   _Pointer? _lastPointer;
 
   _GrowableMap(this.buffer, this.pointer, this.parent)
-      : _length = buffer._readLength(pointer + _pointerSize);
+    : _length = buffer._readLength(pointer + _pointerSize);
 
   @override
   int get length => _length;
@@ -101,18 +105,21 @@ class _GrowableMap<V>
 
   @override
   late final Iterable<String> keys = _IteratorFunctionIterable(
-      () => _GrowableMapKeyIterator(buffer, this, pointer),
-      length: length);
+    () => _GrowableMapKeyIterator(buffer, this, pointer),
+    length: length,
+  );
 
   @override
   late final Iterable<V> values = _IteratorFunctionIterable(
-      () => _GrowableMapValueIterator<V>(buffer, this, pointer),
-      length: length);
+    () => _GrowableMapValueIterator<V>(buffer, this, pointer),
+    length: length,
+  );
 
   @override
   late final Iterable<MapEntry<String, V>> entries = _IteratorFunctionIterable(
-      () => _GrowableMapEntryIterator(buffer, this, pointer),
-      length: length);
+    () => _GrowableMapEntryIterator(buffer, this, pointer),
+    length: length,
+  );
 
   /// Add [value] to the map with key [key].
   ///
@@ -192,9 +199,10 @@ abstract class _GrowableMapIterator<T> implements Iterator<T> {
 
   String get _currentKey =>
       _buffer._readString(_buffer._readPointer(_pointer + _pointerSize));
-  Object? get _currentValue =>
-      _buffer._readAny(_pointer + _pointerSize + GrowableMaps._keySize,
-          parent: _parent);
+  Object? get _currentValue => _buffer._readAny(
+    _pointer + _pointerSize + GrowableMaps._keySize,
+    parent: _parent,
+  );
 
   @override
   bool moveNext() {
@@ -230,7 +238,7 @@ class _GrowableMapHashIterator extends _GrowableMapIterator<int> {
 
   @override
   int get current => Object.hash(
-        _buffer._fingerprint(_pointer + _pointerSize, Type.stringPointer),
-        _buffer.fingerprint(_pointer + _pointerSize + GrowableMaps._keySize),
-      );
+    _buffer._fingerprint(_pointer + _pointerSize, Type.stringPointer),
+    _buffer.fingerprint(_pointer + _pointerSize + GrowableMaps._keySize),
+  );
 }

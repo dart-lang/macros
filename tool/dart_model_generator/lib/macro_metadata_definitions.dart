@@ -13,10 +13,7 @@ final definitions = [
     'Argument',
     createInBuffer: true,
     description: '',
-    types: [
-      'PositionalArgument',
-      'NamedArgument',
-    ],
+    types: ['PositionalArgument', 'NamedArgument'],
     properties: [],
   ),
   Definition.union(
@@ -76,10 +73,7 @@ final definitions = [
     'RecordField',
     createInBuffer: true,
     description: '',
-    types: [
-      'RecordNamedField',
-      'RecordPositionalField',
-    ],
+    types: ['RecordNamedField', 'RecordPositionalField'],
     properties: [],
   ),
   Definition.union(
@@ -104,10 +98,7 @@ final definitions = [
     'StringLiteralPart',
     createInBuffer: true,
     description: '',
-    types: [
-      'StringPart',
-      'InterpolationPart',
-    ],
+    types: ['StringPart', 'InterpolationPart'],
     properties: [],
   ),
   Definition.union(
@@ -149,22 +140,11 @@ final definitions = [
       'bitwiseXor',
     ],
   ),
-  Definition.$enum(
-    'LogicalOperator',
-    description: '',
-    values: [
-      'and',
-      'or',
-    ],
-  ),
+  Definition.$enum('LogicalOperator', description: '', values: ['and', 'or']),
   Definition.$enum(
     'UnaryOperator',
     description: '',
-    values: [
-      'minus',
-      'bang',
-      'tilde',
-    ],
+    values: ['minus', 'bang', 'tilde'],
   ),
   Definition.clazz(
     'AsExpression',
@@ -189,9 +169,7 @@ final definitions = [
     'BooleanLiteral',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('text', type: 'String', description: ''),
-    ],
+    properties: [Property('text', type: 'String', description: '')],
   ),
   Definition.clazz(
     'ClassReference',
@@ -238,17 +216,13 @@ final definitions = [
     'DoubleLiteral',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('text', type: 'String', description: ''),
-    ],
+    properties: [Property('text', type: 'String', description: '')],
   ),
   Definition.clazz(
     'DynamicTypeAnnotation',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('reference', type: 'Reference', description: ''),
-    ],
+    properties: [Property('reference', type: 'Reference', description: '')],
   ),
   Definition.clazz(
     'EnumReference',
@@ -324,12 +298,22 @@ final definitions = [
     createInBuffer: true,
     description: '',
     properties: [
-      Property('returnType',
-          type: 'TypeAnnotation', description: '', nullable: true),
-      Property('typeParameters',
-          type: 'List<FunctionTypeParameter>', description: ''),
-      Property('formalParameters',
-          type: 'List<FormalParameter>', description: ''),
+      Property(
+        'returnType',
+        type: 'TypeAnnotation',
+        description: '',
+        nullable: true,
+      ),
+      Property(
+        'typeParameters',
+        type: 'List<FunctionTypeParameter>',
+        description: '',
+      ),
+      Property(
+        'formalParameters',
+        type: 'List<FormalParameter>',
+        description: '',
+      ),
     ],
   ),
   Definition.clazz(
@@ -349,8 +333,11 @@ final definitions = [
     createInBuffer: true,
     description: '',
     properties: [
-      Property('functionTypeParameter',
-          type: 'FunctionTypeParameter', description: ''),
+      Property(
+        'functionTypeParameter',
+        type: 'FunctionTypeParameter',
+        description: '',
+      ),
     ],
   ),
   Definition.clazz(
@@ -395,17 +382,13 @@ final definitions = [
     'IntegerLiteral',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('text', type: 'String', description: ''),
-    ],
+    properties: [Property('text', type: 'String', description: '')],
   ),
   Definition.clazz(
     'InterpolationPart',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('expression', type: 'Expression', description: ''),
-    ],
+    properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'InvalidExpression',
@@ -509,9 +492,7 @@ final definitions = [
     'NullCheck',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('expression', type: 'Expression', description: ''),
-    ],
+    properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'NullLiteral',
@@ -523,17 +504,13 @@ final definitions = [
     'ParenthesizedExpression',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('expression', type: 'Expression', description: ''),
-    ],
+    properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'PositionalArgument',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('expression', type: 'Expression', description: ''),
-    ],
+    properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'PropertyGet',
@@ -565,9 +542,7 @@ final definitions = [
     'RecordPositionalField',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('expression', type: 'Expression', description: ''),
-    ],
+    properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'RecordTypeAnnotation',
@@ -646,17 +621,13 @@ final definitions = [
     'StringPart',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('text', type: 'String', description: ''),
-    ],
+    properties: [Property('text', type: 'String', description: '')],
   ),
   Definition.clazz(
     'SymbolLiteral',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('parts', type: 'List<String>', description: ''),
-    ],
+    properties: [Property('parts', type: 'List<String>', description: '')],
   ),
   Definition.clazz(
     'TypedefReference',
@@ -703,8 +674,6 @@ final definitions = [
     'VoidTypeAnnotation',
     createInBuffer: true,
     description: '',
-    properties: [
-      Property('reference', type: 'Reference', description: ''),
-    ],
+    properties: [Property('reference', type: 'Reference', description: '')],
   ),
 ];

@@ -21,9 +21,11 @@ class MessageGrouper {
   _FixedBuffer? _messageBuffer;
 
   late final StreamController<Uint8List> _messageStreamController =
-      StreamController<Uint8List>(onCancel: () {
-    _inputStreamSubscription.cancel();
-  });
+      StreamController<Uint8List>(
+        onCancel: () {
+          _inputStreamSubscription.cancel();
+        },
+      );
 
   Stream<Uint8List> get messageStream => _messageStreamController.stream;
 
@@ -45,7 +47,8 @@ class MessageGrouper {
         _lengthBuffer.addByte(bytes[offset++]);
       }
       if (_lengthBuffer.isReady) {
-        final length = _lengthBuffer[0] << 24 |
+        final length =
+            _lengthBuffer[0] << 24 |
             _lengthBuffer[1] << 16 |
             _lengthBuffer[2] << 8 |
             _lengthBuffer[3];

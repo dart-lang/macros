@@ -43,7 +43,7 @@ void main() {
           Type.stringPointer,
           false,
           0,
-          {'a': 'aa'}
+          {'a': 'aa'},
         ],
       };
       builder.map['value'] = value;
@@ -68,7 +68,7 @@ void main() {
         '9': 'abc' * 10,
         '10': {
           'a': {'aa': 'bb'},
-          'b': 2
+          'b': 2,
         },
         '11': growableMap,
       };
@@ -83,8 +83,9 @@ void main() {
     });
 
     test('deserialized does not allow modification', () {
-      final deserializedBuilder =
-          JsonBufferBuilder.deserialize(JsonBufferBuilder().serialize());
+      final deserializedBuilder = JsonBufferBuilder.deserialize(
+        JsonBufferBuilder().serialize(),
+      );
       expect(() => deserializedBuilder.map['a'] = 'b', throwsStateError);
     });
 
@@ -95,16 +96,21 @@ void main() {
         assert(a != b);
         expect(fingerprint({'a': a}), equals(fingerprint({'a': a})));
         expect(
+          fingerprint({
+            'a': {'b': b},
+          }),
+          equals(
             fingerprint({
-              'a': {'b': b}
+              'a': {'b': b},
             }),
-            equals(fingerprint({
-              'a': {'b': b}
-            })));
+          ),
+        );
         expect(fingerprint({'a': a}), isNot(equals(fingerprint({'a': b}))));
         expect(fingerprint({'a': a}), isNot(equals(fingerprint({'b': a}))));
-        expect(fingerprint({'a': a, 'b': b}),
-            isNot(equals(fingerprint({'a': b, 'b': a}))));
+        expect(
+          fingerprint({'a': a, 'b': b}),
+          isNot(equals(fingerprint({'a': b, 'b': a}))),
+        );
       }
 
       test('boolean fields', () {
@@ -139,18 +145,20 @@ void main() {
       test('growable map fields', () {
         final builderA = JsonBufferBuilder();
         final builderB = JsonBufferBuilder();
-        testFingerprint(builderA.createGrowableMap<Object?>()..['a'] = 1,
-            builderB.createGrowableMap<Object?>()..['a'] = 2);
+        testFingerprint(
+          builderA.createGrowableMap<Object?>()..['a'] = 1,
+          builderB.createGrowableMap<Object?>()..['a'] = 2,
+        );
       });
 
       test('typed maps with same schema', () {
         final builderA = JsonBufferBuilder();
         final builderB = JsonBufferBuilder();
-        final schema = TypedMapSchema({
-          'a': Type.stringPointer,
-        });
-        testFingerprint(builderA.createTypedMap(schema, 'a'),
-            builderB.createTypedMap(schema, 'b'));
+        final schema = TypedMapSchema({'a': Type.stringPointer});
+        testFingerprint(
+          builderA.createTypedMap(schema, 'a'),
+          builderB.createTypedMap(schema, 'b'),
+        );
       });
     });
   });
@@ -160,8 +168,11 @@ int fingerprint(Map<String, Object?> map) {
   final builder =
       map is MapInBuffer ? (map as MapInBuffer).buffer : JsonBufferBuilder()
         ..map.deepCopy(map);
-  return builder.fingerprint((builder.map as MapInBuffer).pointer,
-      type: Type.growableMapPointer, alreadyDereferenced: true);
+  return builder.fingerprint(
+    (builder.map as MapInBuffer).pointer,
+    type: Type.growableMapPointer,
+    alreadyDereferenced: true,
+  );
 }
 
 extension on Map<String, Object?> {

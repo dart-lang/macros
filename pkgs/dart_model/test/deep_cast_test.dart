@@ -8,11 +8,12 @@ import 'package:test/test.dart';
 void main() {
   test('can perform deep casts on maps', () {
     final initial = <dynamic, dynamic>{
-      'x': <dynamic>[1, 2, 3]
+      'x': <dynamic>[1, 2, 3],
     };
     expect(initial, isNot(isA<Map<String, List<int>>>()));
-    final typed =
-        initial.deepCast<String, List<int>>((v) => (v as List).cast<int>());
+    final typed = initial.deepCast<String, List<int>>(
+      (v) => (v as List).cast<int>(),
+    );
     expect(typed, isA<Map<String, List<int>>>());
     expect(typed['x']!, isA<List<int>>());
     expect(typed['x']!, [1, 2, 3]);
@@ -21,13 +22,14 @@ void main() {
   test('can perform really deep casts on maps', () {
     final initial = <dynamic, dynamic>{
       'x': <dynamic, dynamic>{
-        'y': <dynamic>[1, 2, 3]
+        'y': <dynamic>[1, 2, 3],
       },
     };
     expect(initial, isNot(isA<Map<String, Map<String, List<int>>>>()));
 
-    final typed = initial.deepCast<String, Map<String, List<int>>>((v) =>
-        (v as Map).deepCast<String, List<int>>((v) => (v as List).cast()));
+    final typed = initial.deepCast<String, Map<String, List<int>>>(
+      (v) => (v as Map).deepCast<String, List<int>>((v) => (v as List).cast()),
+    );
     expect(typed, isA<Map<String, Map<String, List<int>>>>());
 
     expect(initial['x'], isNot(isA<Map<String, List<int>>>()));

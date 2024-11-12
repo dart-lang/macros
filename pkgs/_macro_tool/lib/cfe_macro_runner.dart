@@ -23,7 +23,7 @@ class CfeMacroRunner implements MacroRunner {
   CfeMacroImplementation? cfeMacroImplementation;
 
   CfeMacroRunner({required this.workspacePath, required this.packageConfigPath})
-      : sourceFiles = SourceFile.findDartInWorkspace(workspacePath);
+    : sourceFiles = SourceFile.findDartInWorkspace(workspacePath);
 
   void notifyChange(String sourcePath) {
     // No incremental compile.
@@ -33,8 +33,12 @@ class CfeMacroRunner implements MacroRunner {
     // TODO(davidmorgan): this dill comes from the Dart SDK running the test,
     // but `package:frontend_server` and `package:front_end` are used as a
     // library, so we will see version skew breakage. Find a better way.
-    final result = File(p.canonicalize('${Platform.resolvedExecutable}/../../'
-        'lib/_internal/vm_platform_strong_product.dill'));
+    final result = File(
+      p.canonicalize(
+        '${Platform.resolvedExecutable}/../../'
+        'lib/_internal/vm_platform_strong_product.dill',
+      ),
+    );
     if (!result.existsSync()) {
       throw StateError('Failed to find platform dill: $result');
     }
@@ -45,10 +49,12 @@ class CfeMacroRunner implements MacroRunner {
   Future<WorkspaceResult> run({bool injectImplementation = true}) async {
     if (injectImplementation) {
       cfeMacroImplementation ??= await CfeMacroImplementation.start(
-          protocol: Protocol(
-              encoding: ProtocolEncoding.json,
-              version: ProtocolVersion.macros1),
-          packageConfig: Uri.file(packageConfigPath));
+        protocol: Protocol(
+          encoding: ProtocolEncoding.json,
+          version: ProtocolVersion.macros1,
+        ),
+        packageConfig: Uri.file(packageConfigPath),
+      );
       injected_cfe.macroImplementation = cfeMacroImplementation;
     } else {
       injected_cfe.macroImplementation = null;
@@ -79,23 +85,31 @@ class CfeMacroRunner implements MacroRunner {
       '--use-incremental-compiler',
     ]);
 
-    final sources = computeKernelResult
-        .previousState!.incrementalCompiler!.context.uriToSource;
+    final sources =
+        computeKernelResult
+            .previousState!
+            .incrementalCompiler!
+            .context
+            .uriToSource;
 
     for (final sourceFile in sourceFiles) {
       final macroSource =
           sources[Uri.file(sourceFile.path).replace(scheme: 'dart-macro+file')];
       if (macroSource != null) {
-        fileResults.add(FileResult(
+        fileResults.add(
+          FileResult(
             sourceFile: sourceFile,
             output: macroSource.text,
-            errors: computeKernelResult.succeeded ? [] : ['compile failed']));
+            errors: computeKernelResult.succeeded ? [] : ['compile failed'],
+          ),
+        );
       }
     }
 
     return WorkspaceResult(
-        fileResults: fileResults,
-        firstResultAfter: stopwatch.elapsed,
-        lastResultAfter: stopwatch.elapsed);
+      fileResults: fileResults,
+      firstResultAfter: stopwatch.elapsed,
+      lastResultAfter: stopwatch.elapsed,
+    );
   }
 }

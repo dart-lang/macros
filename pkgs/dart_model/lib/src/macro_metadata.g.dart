@@ -23,17 +23,13 @@ extension type Argument.fromJson(Map<String, Object?> node) implements Object {
     'value': Type.anyPointer,
   });
   static Argument positionalArgument(PositionalArgument positionalArgument) =>
-      Argument.fromJson(Scope.createMap(
-        _schema,
-        'PositionalArgument',
-        positionalArgument,
-      ));
+      Argument.fromJson(
+        Scope.createMap(_schema, 'PositionalArgument', positionalArgument),
+      );
   static Argument namedArgument(NamedArgument namedArgument) =>
-      Argument.fromJson(Scope.createMap(
-        _schema,
-        'NamedArgument',
-        namedArgument,
-      ));
+      Argument.fromJson(
+        Scope.createMap(_schema, 'NamedArgument', namedArgument),
+      );
   ArgumentType get type {
     switch (node['type'] as String) {
       case 'PositionalArgument':
@@ -77,29 +73,18 @@ extension type Element.fromJson(Map<String, Object?> node) implements Object {
     'value': Type.anyPointer,
   });
   static Element expressionElement(ExpressionElement expressionElement) =>
-      Element.fromJson(Scope.createMap(
-        _schema,
-        'ExpressionElement',
-        expressionElement,
-      ));
+      Element.fromJson(
+        Scope.createMap(_schema, 'ExpressionElement', expressionElement),
+      );
   static Element mapEntryElement(MapEntryElement mapEntryElement) =>
-      Element.fromJson(Scope.createMap(
-        _schema,
-        'MapEntryElement',
-        mapEntryElement,
-      ));
-  static Element spreadElement(SpreadElement spreadElement) =>
-      Element.fromJson(Scope.createMap(
-        _schema,
-        'SpreadElement',
-        spreadElement,
-      ));
+      Element.fromJson(
+        Scope.createMap(_schema, 'MapEntryElement', mapEntryElement),
+      );
+  static Element spreadElement(SpreadElement spreadElement) => Element.fromJson(
+    Scope.createMap(_schema, 'SpreadElement', spreadElement),
+  );
   static Element ifElement(IfElement ifElement) =>
-      Element.fromJson(Scope.createMap(
-        _schema,
-        'IfElement',
-        ifElement,
-      ));
+      Element.fromJson(Scope.createMap(_schema, 'IfElement', ifElement));
   ElementType get type {
     switch (node['type'] as String) {
       case 'ExpressionElement':
@@ -191,209 +176,131 @@ extension type Expression.fromJson(Map<String, Object?> node)
     'value': Type.anyPointer,
   });
   static Expression invalidExpression(InvalidExpression invalidExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'InvalidExpression',
-        invalidExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'InvalidExpression', invalidExpression),
+      );
   static Expression staticGet(StaticGet staticGet) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'StaticGet',
-        staticGet,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'StaticGet', staticGet));
   static Expression functionTearOff(FunctionTearOff functionTearOff) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'FunctionTearOff',
-        functionTearOff,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'FunctionTearOff', functionTearOff),
+      );
   static Expression constructorTearOff(ConstructorTearOff constructorTearOff) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ConstructorTearOff',
-        constructorTearOff,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'ConstructorTearOff', constructorTearOff),
+      );
   static Expression constructorInvocation(
-          ConstructorInvocation constructorInvocation) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ConstructorInvocation',
-        constructorInvocation,
-      ));
+    ConstructorInvocation constructorInvocation,
+  ) => Expression.fromJson(
+    Scope.createMap(_schema, 'ConstructorInvocation', constructorInvocation),
+  );
   static Expression integerLiteral(IntegerLiteral integerLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'IntegerLiteral',
-        integerLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'IntegerLiteral', integerLiteral),
+      );
   static Expression doubleLiteral(DoubleLiteral doubleLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'DoubleLiteral',
-        doubleLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'DoubleLiteral', doubleLiteral),
+      );
   static Expression booleanLiteral(BooleanLiteral booleanLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'BooleanLiteral',
-        booleanLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'BooleanLiteral', booleanLiteral),
+      );
   static Expression nullLiteral(NullLiteral nullLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'NullLiteral',
-        nullLiteral,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'NullLiteral', nullLiteral));
   static Expression symbolLiteral(SymbolLiteral symbolLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'SymbolLiteral',
-        symbolLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'SymbolLiteral', symbolLiteral),
+      );
   static Expression stringLiteral(StringLiteral stringLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'StringLiteral',
-        stringLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'StringLiteral', stringLiteral),
+      );
   static Expression adjacentStringLiterals(
-          AdjacentStringLiterals adjacentStringLiterals) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'AdjacentStringLiterals',
-        adjacentStringLiterals,
-      ));
+    AdjacentStringLiterals adjacentStringLiterals,
+  ) => Expression.fromJson(
+    Scope.createMap(_schema, 'AdjacentStringLiterals', adjacentStringLiterals),
+  );
   static Expression implicitInvocation(ImplicitInvocation implicitInvocation) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ImplicitInvocation',
-        implicitInvocation,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'ImplicitInvocation', implicitInvocation),
+      );
   static Expression staticInvocation(StaticInvocation staticInvocation) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'StaticInvocation',
-        staticInvocation,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'StaticInvocation', staticInvocation),
+      );
   static Expression instantiation(Instantiation instantiation) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'Instantiation',
-        instantiation,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'Instantiation', instantiation),
+      );
   static Expression methodInvocation(MethodInvocation methodInvocation) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'MethodInvocation',
-        methodInvocation,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'MethodInvocation', methodInvocation),
+      );
   static Expression propertyGet(PropertyGet propertyGet) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'PropertyGet',
-        propertyGet,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'PropertyGet', propertyGet));
   static Expression nullAwarePropertyGet(
-          NullAwarePropertyGet nullAwarePropertyGet) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'NullAwarePropertyGet',
-        nullAwarePropertyGet,
-      ));
+    NullAwarePropertyGet nullAwarePropertyGet,
+  ) => Expression.fromJson(
+    Scope.createMap(_schema, 'NullAwarePropertyGet', nullAwarePropertyGet),
+  );
   static Expression typeLiteral(TypeLiteral typeLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'TypeLiteral',
-        typeLiteral,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'TypeLiteral', typeLiteral));
   static Expression parenthesizedExpression(
-          ParenthesizedExpression parenthesizedExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ParenthesizedExpression',
-        parenthesizedExpression,
-      ));
+    ParenthesizedExpression parenthesizedExpression,
+  ) => Expression.fromJson(
+    Scope.createMap(
+      _schema,
+      'ParenthesizedExpression',
+      parenthesizedExpression,
+    ),
+  );
   static Expression conditionalExpression(
-          ConditionalExpression conditionalExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ConditionalExpression',
-        conditionalExpression,
-      ));
+    ConditionalExpression conditionalExpression,
+  ) => Expression.fromJson(
+    Scope.createMap(_schema, 'ConditionalExpression', conditionalExpression),
+  );
   static Expression listLiteral(ListLiteral listLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'ListLiteral',
-        listLiteral,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'ListLiteral', listLiteral));
   static Expression setOrMapLiteral(SetOrMapLiteral setOrMapLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'SetOrMapLiteral',
-        setOrMapLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'SetOrMapLiteral', setOrMapLiteral),
+      );
   static Expression recordLiteral(RecordLiteral recordLiteral) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'RecordLiteral',
-        recordLiteral,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'RecordLiteral', recordLiteral),
+      );
   static Expression ifNull(IfNull ifNull) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'IfNull',
-        ifNull,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'IfNull', ifNull));
   static Expression logicalExpression(LogicalExpression logicalExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'LogicalExpression',
-        logicalExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'LogicalExpression', logicalExpression),
+      );
   static Expression equalityExpression(EqualityExpression equalityExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'EqualityExpression',
-        equalityExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'EqualityExpression', equalityExpression),
+      );
   static Expression binaryExpression(BinaryExpression binaryExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'BinaryExpression',
-        binaryExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'BinaryExpression', binaryExpression),
+      );
   static Expression unaryExpression(UnaryExpression unaryExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'UnaryExpression',
-        unaryExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'UnaryExpression', unaryExpression),
+      );
   static Expression isTest(IsTest isTest) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'IsTest',
-        isTest,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'IsTest', isTest));
   static Expression asExpression(AsExpression asExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'AsExpression',
-        asExpression,
-      ));
+      Expression.fromJson(
+        Scope.createMap(_schema, 'AsExpression', asExpression),
+      );
   static Expression nullCheck(NullCheck nullCheck) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'NullCheck',
-        nullCheck,
-      ));
+      Expression.fromJson(Scope.createMap(_schema, 'NullCheck', nullCheck));
   static Expression unresolvedExpression(
-          UnresolvedExpression unresolvedExpression) =>
-      Expression.fromJson(Scope.createMap(
-        _schema,
-        'UnresolvedExpression',
-        unresolvedExpression,
-      ));
+    UnresolvedExpression unresolvedExpression,
+  ) => Expression.fromJson(
+    Scope.createMap(_schema, 'UnresolvedExpression', unresolvedExpression),
+  );
   ExpressionType get type {
     switch (node['type'] as String) {
       case 'InvalidExpression':
@@ -500,7 +407,8 @@ extension type Expression.fromJson(Map<String, Object?> node)
       throw StateError('Not a ConstructorInvocation.');
     }
     return ConstructorInvocation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   IntegerLiteral get asIntegerLiteral {
@@ -550,7 +458,8 @@ extension type Expression.fromJson(Map<String, Object?> node)
       throw StateError('Not a AdjacentStringLiterals.');
     }
     return AdjacentStringLiterals.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   ImplicitInvocation get asImplicitInvocation {
@@ -607,7 +516,8 @@ extension type Expression.fromJson(Map<String, Object?> node)
       throw StateError('Not a ParenthesizedExpression.');
     }
     return ParenthesizedExpression.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   ConditionalExpression get asConditionalExpression {
@@ -615,7 +525,8 @@ extension type Expression.fromJson(Map<String, Object?> node)
       throw StateError('Not a ConditionalExpression.');
     }
     return ConditionalExpression.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   ListLiteral get asListLiteral {
@@ -719,18 +630,14 @@ extension type RecordField.fromJson(Map<String, Object?> node)
     'value': Type.anyPointer,
   });
   static RecordField recordNamedField(RecordNamedField recordNamedField) =>
-      RecordField.fromJson(Scope.createMap(
-        _schema,
-        'RecordNamedField',
-        recordNamedField,
-      ));
+      RecordField.fromJson(
+        Scope.createMap(_schema, 'RecordNamedField', recordNamedField),
+      );
   static RecordField recordPositionalField(
-          RecordPositionalField recordPositionalField) =>
-      RecordField.fromJson(Scope.createMap(
-        _schema,
-        'RecordPositionalField',
-        recordPositionalField,
-      ));
+    RecordPositionalField recordPositionalField,
+  ) => RecordField.fromJson(
+    Scope.createMap(_schema, 'RecordPositionalField', recordPositionalField),
+  );
   RecordFieldType get type {
     switch (node['type'] as String) {
       case 'RecordNamedField':
@@ -754,7 +661,8 @@ extension type RecordField.fromJson(Map<String, Object?> node)
       throw StateError('Not a RecordPositionalField.');
     }
     return RecordPositionalField.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 }
 
@@ -781,68 +689,52 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
     'value': Type.anyPointer,
   });
   static Reference fieldReference(FieldReference fieldReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'FieldReference',
-        fieldReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'FieldReference', fieldReference),
+      );
   static Reference functionReference(FunctionReference functionReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'FunctionReference',
-        functionReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'FunctionReference', functionReference),
+      );
   static Reference constructorReference(
-          ConstructorReference constructorReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'ConstructorReference',
-        constructorReference,
-      ));
+    ConstructorReference constructorReference,
+  ) => Reference.fromJson(
+    Scope.createMap(_schema, 'ConstructorReference', constructorReference),
+  );
   static Reference typeReference(TypeReference typeReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'TypeReference',
-        typeReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'TypeReference', typeReference),
+      );
   static Reference classReference(ClassReference classReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'ClassReference',
-        classReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'ClassReference', classReference),
+      );
   static Reference typedefReference(TypedefReference typedefReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'TypedefReference',
-        typedefReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'TypedefReference', typedefReference),
+      );
   static Reference extensionReference(ExtensionReference extensionReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'ExtensionReference',
-        extensionReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'ExtensionReference', extensionReference),
+      );
   static Reference extensionTypeReference(
-          ExtensionTypeReference extensionTypeReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'ExtensionTypeReference',
-        extensionTypeReference,
-      ));
+    ExtensionTypeReference extensionTypeReference,
+  ) => Reference.fromJson(
+    Scope.createMap(_schema, 'ExtensionTypeReference', extensionTypeReference),
+  );
   static Reference enumReference(EnumReference enumReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'EnumReference',
-        enumReference,
-      ));
+      Reference.fromJson(
+        Scope.createMap(_schema, 'EnumReference', enumReference),
+      );
   static Reference functionTypeParameterReference(
-          FunctionTypeParameterReference functionTypeParameterReference) =>
-      Reference.fromJson(Scope.createMap(
-        _schema,
-        'FunctionTypeParameterReference',
-        functionTypeParameterReference,
-      ));
+    FunctionTypeParameterReference functionTypeParameterReference,
+  ) => Reference.fromJson(
+    Scope.createMap(
+      _schema,
+      'FunctionTypeParameterReference',
+      functionTypeParameterReference,
+    ),
+  );
   ReferenceType get type {
     switch (node['type'] as String) {
       case 'FieldReference':
@@ -924,7 +816,8 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
       throw StateError('Not a ExtensionTypeReference.');
     }
     return ExtensionTypeReference.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   EnumReference get asEnumReference {
@@ -939,7 +832,8 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
       throw StateError('Not a FunctionTypeParameterReference.');
     }
     return FunctionTypeParameterReference.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 }
 
@@ -959,18 +853,14 @@ extension type StringLiteralPart.fromJson(Map<String, Object?> node)
     'value': Type.anyPointer,
   });
   static StringLiteralPart stringPart(StringPart stringPart) =>
-      StringLiteralPart.fromJson(Scope.createMap(
-        _schema,
-        'StringPart',
-        stringPart,
-      ));
+      StringLiteralPart.fromJson(
+        Scope.createMap(_schema, 'StringPart', stringPart),
+      );
   static StringLiteralPart interpolationPart(
-          InterpolationPart interpolationPart) =>
-      StringLiteralPart.fromJson(Scope.createMap(
-        _schema,
-        'InterpolationPart',
-        interpolationPart,
-      ));
+    InterpolationPart interpolationPart,
+  ) => StringLiteralPart.fromJson(
+    Scope.createMap(_schema, 'InterpolationPart', interpolationPart),
+  );
   StringLiteralPartType get type {
     switch (node['type'] as String) {
       case 'StringPart':
@@ -1020,68 +910,58 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
     'value': Type.anyPointer,
   });
   static TypeAnnotation namedTypeAnnotation(
-          NamedTypeAnnotation namedTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'NamedTypeAnnotation',
-        namedTypeAnnotation,
-      ));
+    NamedTypeAnnotation namedTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'NamedTypeAnnotation', namedTypeAnnotation),
+  );
   static TypeAnnotation nullableTypeAnnotation(
-          NullableTypeAnnotation nullableTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'NullableTypeAnnotation',
-        nullableTypeAnnotation,
-      ));
+    NullableTypeAnnotation nullableTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'NullableTypeAnnotation', nullableTypeAnnotation),
+  );
   static TypeAnnotation voidTypeAnnotation(
-          VoidTypeAnnotation voidTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'VoidTypeAnnotation',
-        voidTypeAnnotation,
-      ));
+    VoidTypeAnnotation voidTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'VoidTypeAnnotation', voidTypeAnnotation),
+  );
   static TypeAnnotation dynamicTypeAnnotation(
-          DynamicTypeAnnotation dynamicTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'DynamicTypeAnnotation',
-        dynamicTypeAnnotation,
-      ));
+    DynamicTypeAnnotation dynamicTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'DynamicTypeAnnotation', dynamicTypeAnnotation),
+  );
   static TypeAnnotation invalidTypeAnnotation(
-          InvalidTypeAnnotation invalidTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'InvalidTypeAnnotation',
-        invalidTypeAnnotation,
-      ));
+    InvalidTypeAnnotation invalidTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'InvalidTypeAnnotation', invalidTypeAnnotation),
+  );
   static TypeAnnotation unresolvedTypeAnnotation(
-          UnresolvedTypeAnnotation unresolvedTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'UnresolvedTypeAnnotation',
-        unresolvedTypeAnnotation,
-      ));
+    UnresolvedTypeAnnotation unresolvedTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(
+      _schema,
+      'UnresolvedTypeAnnotation',
+      unresolvedTypeAnnotation,
+    ),
+  );
   static TypeAnnotation functionTypeAnnotation(
-          FunctionTypeAnnotation functionTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'FunctionTypeAnnotation',
-        functionTypeAnnotation,
-      ));
+    FunctionTypeAnnotation functionTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'FunctionTypeAnnotation', functionTypeAnnotation),
+  );
   static TypeAnnotation functionTypeParameterType(
-          FunctionTypeParameterType functionTypeParameterType) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'FunctionTypeParameterType',
-        functionTypeParameterType,
-      ));
+    FunctionTypeParameterType functionTypeParameterType,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(
+      _schema,
+      'FunctionTypeParameterType',
+      functionTypeParameterType,
+    ),
+  );
   static TypeAnnotation recordTypeAnnotation(
-          RecordTypeAnnotation recordTypeAnnotation) =>
-      TypeAnnotation.fromJson(Scope.createMap(
-        _schema,
-        'RecordTypeAnnotation',
-        recordTypeAnnotation,
-      ));
+    RecordTypeAnnotation recordTypeAnnotation,
+  ) => TypeAnnotation.fromJson(
+    Scope.createMap(_schema, 'RecordTypeAnnotation', recordTypeAnnotation),
+  );
   TypeAnnotationType get type {
     switch (node['type'] as String) {
       case 'NamedTypeAnnotation':
@@ -1119,7 +999,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a NullableTypeAnnotation.');
     }
     return NullableTypeAnnotation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   VoidTypeAnnotation get asVoidTypeAnnotation {
@@ -1134,7 +1015,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a DynamicTypeAnnotation.');
     }
     return DynamicTypeAnnotation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   InvalidTypeAnnotation get asInvalidTypeAnnotation {
@@ -1142,7 +1024,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a InvalidTypeAnnotation.');
     }
     return InvalidTypeAnnotation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   UnresolvedTypeAnnotation get asUnresolvedTypeAnnotation {
@@ -1150,7 +1033,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a UnresolvedTypeAnnotation.');
     }
     return UnresolvedTypeAnnotation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   FunctionTypeAnnotation get asFunctionTypeAnnotation {
@@ -1158,7 +1042,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a FunctionTypeAnnotation.');
     }
     return FunctionTypeAnnotation.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   FunctionTypeParameterType get asFunctionTypeParameterType {
@@ -1166,7 +1051,8 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
       throw StateError('Not a FunctionTypeParameterType.');
     }
     return FunctionTypeParameterType.fromJson(
-        node['value'] as Map<String, Object?>);
+      node['value'] as Map<String, Object?>,
+    );
   }
 
   RecordTypeAnnotation get asRecordTypeAnnotation {
@@ -1179,30 +1065,38 @@ extension type TypeAnnotation.fromJson(Map<String, Object?> node)
 
 ///
 extension type const BinaryOperator.fromJson(String string) implements Object {
-  static const BinaryOperator greaterThan =
-      BinaryOperator.fromJson('greaterThan');
-  static const BinaryOperator greaterThanOrEqual =
-      BinaryOperator.fromJson('greaterThanOrEqual');
+  static const BinaryOperator greaterThan = BinaryOperator.fromJson(
+    'greaterThan',
+  );
+  static const BinaryOperator greaterThanOrEqual = BinaryOperator.fromJson(
+    'greaterThanOrEqual',
+  );
   static const BinaryOperator lessThan = BinaryOperator.fromJson('lessThan');
-  static const BinaryOperator lessThanOrEqual =
-      BinaryOperator.fromJson('lessThanOrEqual');
+  static const BinaryOperator lessThanOrEqual = BinaryOperator.fromJson(
+    'lessThanOrEqual',
+  );
   static const BinaryOperator shiftLeft = BinaryOperator.fromJson('shiftLeft');
-  static const BinaryOperator signedShiftRight =
-      BinaryOperator.fromJson('signedShiftRight');
-  static const BinaryOperator unsignedShiftRight =
-      BinaryOperator.fromJson('unsignedShiftRight');
+  static const BinaryOperator signedShiftRight = BinaryOperator.fromJson(
+    'signedShiftRight',
+  );
+  static const BinaryOperator unsignedShiftRight = BinaryOperator.fromJson(
+    'unsignedShiftRight',
+  );
   static const BinaryOperator plus = BinaryOperator.fromJson('plus');
   static const BinaryOperator minus = BinaryOperator.fromJson('minus');
   static const BinaryOperator times = BinaryOperator.fromJson('times');
   static const BinaryOperator divide = BinaryOperator.fromJson('divide');
-  static const BinaryOperator integerDivide =
-      BinaryOperator.fromJson('integerDivide');
+  static const BinaryOperator integerDivide = BinaryOperator.fromJson(
+    'integerDivide',
+  );
   static const BinaryOperator modulo = BinaryOperator.fromJson('modulo');
   static const BinaryOperator bitwiseOr = BinaryOperator.fromJson('bitwiseOr');
-  static const BinaryOperator bitwiseAnd =
-      BinaryOperator.fromJson('bitwiseAnd');
-  static const BinaryOperator bitwiseXor =
-      BinaryOperator.fromJson('bitwiseXor');
+  static const BinaryOperator bitwiseAnd = BinaryOperator.fromJson(
+    'bitwiseAnd',
+  );
+  static const BinaryOperator bitwiseXor = BinaryOperator.fromJson(
+    'bitwiseXor',
+  );
 }
 
 ///
@@ -1225,14 +1119,8 @@ extension type AsExpression.fromJson(Map<String, Object?> node)
     'expression': Type.typedMapPointer,
     'type': Type.typedMapPointer,
   });
-  AsExpression({
-    Expression? expression,
-    TypeAnnotation? type,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-          type,
-        ));
+  AsExpression({Expression? expression, TypeAnnotation? type})
+    : this.fromJson(Scope.createMap(_schema, expression, type));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -1253,12 +1141,7 @@ extension type BinaryExpression.fromJson(Map<String, Object?> node)
     Expression? left,
     BinaryOperator? operator,
     Expression? right,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          left,
-          operator,
-          right,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, left, operator, right));
 
   ///
   Expression get left => node['left'] as Expression;
@@ -1276,12 +1159,8 @@ extension type BooleanLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
   });
-  BooleanLiteral({
-    String? text,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          text,
-        ));
+  BooleanLiteral({String? text})
+    : this.fromJson(Scope.createMap(_schema, text));
 
   ///
   String get text => node['text'] as String;
@@ -1291,10 +1170,7 @@ extension type BooleanLiteral.fromJson(Map<String, Object?> node)
 extension type ClassReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  ClassReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  ClassReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1309,12 +1185,7 @@ extension type ConditionalExpression.fromJson(Map<String, Object?> node)
     Expression? condition,
     Expression? then,
     Expression? otherwise,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          condition,
-          then,
-          otherwise,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, condition, then, otherwise));
 
   ///
   Expression get condition => node['condition'] as Expression;
@@ -1338,12 +1209,7 @@ extension type ConstructorInvocation.fromJson(Map<String, Object?> node)
     TypeAnnotation? type,
     Reference? constructor,
     List<Argument>? arguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          type,
-          constructor,
-          arguments,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, type, constructor, arguments));
 
   ///
   TypeAnnotation get type => node['type'] as TypeAnnotation;
@@ -1359,10 +1225,7 @@ extension type ConstructorInvocation.fromJson(Map<String, Object?> node)
 extension type ConstructorReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  ConstructorReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  ConstructorReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1372,14 +1235,8 @@ extension type ConstructorTearOff.fromJson(Map<String, Object?> node)
     'type': Type.typedMapPointer,
     'reference': Type.typedMapPointer,
   });
-  ConstructorTearOff({
-    TypeAnnotation? type,
-    ConstructorReference? reference,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          type,
-          reference,
-        ));
+  ConstructorTearOff({TypeAnnotation? type, ConstructorReference? reference})
+    : this.fromJson(Scope.createMap(_schema, type, reference));
 
   ///
   TypeAnnotation get type => node['type'] as TypeAnnotation;
@@ -1395,12 +1252,7 @@ extension type DoubleLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
   });
-  DoubleLiteral({
-    String? text,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          text,
-        ));
+  DoubleLiteral({String? text}) : this.fromJson(Scope.createMap(_schema, text));
 
   ///
   String get text => node['text'] as String;
@@ -1412,12 +1264,8 @@ extension type DynamicTypeAnnotation.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'reference': Type.typedMapPointer,
   });
-  DynamicTypeAnnotation({
-    Reference? reference,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          reference,
-        ));
+  DynamicTypeAnnotation({Reference? reference})
+    : this.fromJson(Scope.createMap(_schema, reference));
 
   ///
   Reference get reference => node['reference'] as Reference;
@@ -1427,10 +1275,7 @@ extension type DynamicTypeAnnotation.fromJson(Map<String, Object?> node)
 extension type EnumReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  EnumReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  EnumReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1441,16 +1286,8 @@ extension type EqualityExpression.fromJson(Map<String, Object?> node)
     'right': Type.typedMapPointer,
     'isNotEquals': Type.boolean,
   });
-  EqualityExpression({
-    Expression? left,
-    Expression? right,
-    bool? isNotEquals,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          left,
-          right,
-          isNotEquals,
-        ));
+  EqualityExpression({Expression? left, Expression? right, bool? isNotEquals})
+    : this.fromJson(Scope.createMap(_schema, left, right, isNotEquals));
 
   ///
   Expression get left => node['left'] as Expression;
@@ -1469,14 +1306,8 @@ extension type ExpressionElement.fromJson(Map<String, Object?> node)
     'expression': Type.typedMapPointer,
     'isNullAware': Type.boolean,
   });
-  ExpressionElement({
-    Expression? expression,
-    bool? isNullAware,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-          isNullAware,
-        ));
+  ExpressionElement({Expression? expression, bool? isNullAware})
+    : this.fromJson(Scope.createMap(_schema, expression, isNullAware));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -1489,60 +1320,42 @@ extension type ExpressionElement.fromJson(Map<String, Object?> node)
 extension type ExtensionReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  ExtensionReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  ExtensionReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type ExtensionTypeReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  ExtensionTypeReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  ExtensionTypeReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type FieldReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FieldReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FieldReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type FormalParameter.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FormalParameter()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FormalParameter() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type FormalParameterGroup.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FormalParameterGroup()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FormalParameterGroup() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type FunctionReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FunctionReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FunctionReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1551,12 +1364,8 @@ extension type FunctionTearOff.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'reference': Type.typedMapPointer,
   });
-  FunctionTearOff({
-    FunctionReference? reference,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          reference,
-        ));
+  FunctionTearOff({FunctionReference? reference})
+    : this.fromJson(Scope.createMap(_schema, reference));
 
   ///
   FunctionReference get reference => node['reference'] as FunctionReference;
@@ -1574,12 +1383,9 @@ extension type FunctionTypeAnnotation.fromJson(Map<String, Object?> node)
     TypeAnnotation? returnType,
     List<FunctionTypeParameter>? typeParameters,
     List<FormalParameter>? formalParameters,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          returnType,
-          typeParameters,
-          formalParameters,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, returnType, typeParameters, formalParameters),
+       );
 
   ///
   TypeAnnotation? get returnType => node['returnType'] as TypeAnnotation?;
@@ -1597,20 +1403,16 @@ extension type FunctionTypeAnnotation.fromJson(Map<String, Object?> node)
 extension type FunctionTypeParameter.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FunctionTypeParameter()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FunctionTypeParameter() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type FunctionTypeParameterReference.fromJson(
-    Map<String, Object?> node) implements Object {
+  Map<String, Object?> node
+)
+    implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  FunctionTypeParameterReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  FunctionTypeParameterReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1619,12 +1421,8 @@ extension type FunctionTypeParameterType.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'functionTypeParameter': Type.typedMapPointer,
   });
-  FunctionTypeParameterType({
-    FunctionTypeParameter? functionTypeParameter,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          functionTypeParameter,
-        ));
+  FunctionTypeParameterType({FunctionTypeParameter? functionTypeParameter})
+    : this.fromJson(Scope.createMap(_schema, functionTypeParameter));
 
   ///
   FunctionTypeParameter get functionTypeParameter =>
@@ -1638,16 +1436,8 @@ extension type IfElement.fromJson(Map<String, Object?> node) implements Object {
     'then': Type.typedMapPointer,
     'otherwise': Type.typedMapPointer,
   });
-  IfElement({
-    Expression? condition,
-    Element? then,
-    Element? otherwise,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          condition,
-          then,
-          otherwise,
-        ));
+  IfElement({Expression? condition, Element? then, Element? otherwise})
+    : this.fromJson(Scope.createMap(_schema, condition, then, otherwise));
 
   ///
   Expression get condition => node['condition'] as Expression;
@@ -1665,14 +1455,8 @@ extension type IfNull.fromJson(Map<String, Object?> node) implements Object {
     'left': Type.typedMapPointer,
     'right': Type.typedMapPointer,
   });
-  IfNull({
-    Expression? left,
-    Expression? right,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          left,
-          right,
-        ));
+  IfNull({Expression? left, Expression? right})
+    : this.fromJson(Scope.createMap(_schema, left, right));
 
   ///
   Expression get left => node['left'] as Expression;
@@ -1693,12 +1477,9 @@ extension type ImplicitInvocation.fromJson(Map<String, Object?> node)
     Expression? receiver,
     List<TypeAnnotation>? typeArguments,
     List<Argument>? arguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          receiver,
-          typeArguments,
-          arguments,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, receiver, typeArguments, arguments),
+       );
 
   ///
   Expression get receiver => node['receiver'] as Expression;
@@ -1718,14 +1499,8 @@ extension type Instantiation.fromJson(Map<String, Object?> node)
     'receiver': Type.typedMapPointer,
     'typeArguments': Type.closedListPointer,
   });
-  Instantiation({
-    Expression? receiver,
-    List<TypeAnnotation>? typeArguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          receiver,
-          typeArguments,
-        ));
+  Instantiation({Expression? receiver, List<TypeAnnotation>? typeArguments})
+    : this.fromJson(Scope.createMap(_schema, receiver, typeArguments));
 
   ///
   Expression get receiver => node['receiver'] as Expression;
@@ -1741,12 +1516,8 @@ extension type IntegerLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
   });
-  IntegerLiteral({
-    String? text,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          text,
-        ));
+  IntegerLiteral({String? text})
+    : this.fromJson(Scope.createMap(_schema, text));
 
   ///
   String get text => node['text'] as String;
@@ -1758,12 +1529,8 @@ extension type InterpolationPart.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  InterpolationPart({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  InterpolationPart({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -1773,20 +1540,14 @@ extension type InterpolationPart.fromJson(Map<String, Object?> node)
 extension type InvalidExpression.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  InvalidExpression()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  InvalidExpression() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type InvalidTypeAnnotation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  InvalidTypeAnnotation()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  InvalidTypeAnnotation() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -1796,16 +1557,8 @@ extension type IsTest.fromJson(Map<String, Object?> node) implements Object {
     'type': Type.typedMapPointer,
     'isNot': Type.boolean,
   });
-  IsTest({
-    Expression? expression,
-    TypeAnnotation? type,
-    bool? isNot,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-          type,
-          isNot,
-        ));
+  IsTest({Expression? expression, TypeAnnotation? type, bool? isNot})
+    : this.fromJson(Scope.createMap(_schema, expression, type, isNot));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -1824,14 +1577,8 @@ extension type ListLiteral.fromJson(Map<String, Object?> node)
     'typeArguments': Type.closedListPointer,
     'elements': Type.closedListPointer,
   });
-  ListLiteral({
-    List<TypeAnnotation>? typeArguments,
-    List<Element>? elements,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          typeArguments,
-          elements,
-        ));
+  ListLiteral({List<TypeAnnotation>? typeArguments, List<Element>? elements})
+    : this.fromJson(Scope.createMap(_schema, typeArguments, elements));
 
   ///
   List<TypeAnnotation> get typeArguments =>
@@ -1853,12 +1600,7 @@ extension type LogicalExpression.fromJson(Map<String, Object?> node)
     Expression? left,
     LogicalOperator? operator,
     Expression? right,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          left,
-          operator,
-          right,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, left, operator, right));
 
   ///
   Expression get left => node['left'] as Expression;
@@ -1884,13 +1626,9 @@ extension type MapEntryElement.fromJson(Map<String, Object?> node)
     Expression? value,
     bool? isNullAwareKey,
     bool? isNullAwareValue,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          key,
-          value,
-          isNullAwareKey,
-          isNullAwareValue,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, key, value, isNullAwareKey, isNullAwareValue),
+       );
 
   ///
   Expression get key => node['key'] as Expression;
@@ -1919,13 +1657,9 @@ extension type MethodInvocation.fromJson(Map<String, Object?> node)
     String? name,
     List<TypeAnnotation>? typeArguments,
     List<Argument>? arguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          receiver,
-          name,
-          typeArguments,
-          arguments,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, receiver, name, typeArguments, arguments),
+       );
 
   ///
   Expression get receiver => node['receiver'] as Expression;
@@ -1948,14 +1682,8 @@ extension type NamedArgument.fromJson(Map<String, Object?> node)
     'name': Type.stringPointer,
     'expression': Type.typedMapPointer,
   });
-  NamedArgument({
-    String? name,
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          name,
-          expression,
-        ));
+  NamedArgument({String? name, Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, name, expression));
 
   ///
   String get name => node['name'] as String;
@@ -1974,11 +1702,7 @@ extension type NamedTypeAnnotation.fromJson(Map<String, Object?> node)
   NamedTypeAnnotation({
     Reference? reference,
     List<TypeAnnotation>? typeArguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          reference,
-          typeArguments,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, reference, typeArguments));
 
   ///
   Reference get reference => node['reference'] as Reference;
@@ -1994,12 +1718,8 @@ extension type NullableTypeAnnotation.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'typeAnnotation': Type.typedMapPointer,
   });
-  NullableTypeAnnotation({
-    TypeAnnotation? typeAnnotation,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          typeAnnotation,
-        ));
+  NullableTypeAnnotation({TypeAnnotation? typeAnnotation})
+    : this.fromJson(Scope.createMap(_schema, typeAnnotation));
 
   ///
   TypeAnnotation get typeAnnotation => node['typeAnnotation'] as TypeAnnotation;
@@ -2012,14 +1732,8 @@ extension type NullAwarePropertyGet.fromJson(Map<String, Object?> node)
     'receiver': Type.typedMapPointer,
     'name': Type.stringPointer,
   });
-  NullAwarePropertyGet({
-    Expression? receiver,
-    String? name,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          receiver,
-          name,
-        ));
+  NullAwarePropertyGet({Expression? receiver, String? name})
+    : this.fromJson(Scope.createMap(_schema, receiver, name));
 
   ///
   Expression get receiver => node['receiver'] as Expression;
@@ -2033,12 +1747,8 @@ extension type NullCheck.fromJson(Map<String, Object?> node) implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  NullCheck({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  NullCheck({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -2048,10 +1758,7 @@ extension type NullCheck.fromJson(Map<String, Object?> node) implements Object {
 extension type NullLiteral.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  NullLiteral()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  NullLiteral() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -2060,12 +1767,8 @@ extension type ParenthesizedExpression.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  ParenthesizedExpression({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  ParenthesizedExpression({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -2077,12 +1780,8 @@ extension type PositionalArgument.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  PositionalArgument({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  PositionalArgument({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -2095,14 +1794,8 @@ extension type PropertyGet.fromJson(Map<String, Object?> node)
     'receiver': Type.typedMapPointer,
     'name': Type.stringPointer,
   });
-  PropertyGet({
-    Expression? receiver,
-    String? name,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          receiver,
-          name,
-        ));
+  PropertyGet({Expression? receiver, String? name})
+    : this.fromJson(Scope.createMap(_schema, receiver, name));
 
   ///
   Expression get receiver => node['receiver'] as Expression;
@@ -2117,12 +1810,8 @@ extension type RecordLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'fields': Type.closedListPointer,
   });
-  RecordLiteral({
-    List<RecordField>? fields,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          fields,
-        ));
+  RecordLiteral({List<RecordField>? fields})
+    : this.fromJson(Scope.createMap(_schema, fields));
 
   ///
   List<RecordField> get fields => (node['fields'] as List).cast();
@@ -2135,14 +1824,8 @@ extension type RecordNamedField.fromJson(Map<String, Object?> node)
     'name': Type.stringPointer,
     'expression': Type.typedMapPointer,
   });
-  RecordNamedField({
-    String? name,
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          name,
-          expression,
-        ));
+  RecordNamedField({String? name, Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, name, expression));
 
   ///
   String get name => node['name'] as String;
@@ -2157,12 +1840,8 @@ extension type RecordPositionalField.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expression': Type.typedMapPointer,
   });
-  RecordPositionalField({
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-        ));
+  RecordPositionalField({Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, expression));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -2178,11 +1857,7 @@ extension type RecordTypeAnnotation.fromJson(Map<String, Object?> node)
   RecordTypeAnnotation({
     List<RecordTypeEntry>? positional,
     List<RecordTypeEntry>? named,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          positional,
-          named,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, positional, named));
 
   ///
   List<RecordTypeEntry> get positional => (node['positional'] as List).cast();
@@ -2195,20 +1870,14 @@ extension type RecordTypeAnnotation.fromJson(Map<String, Object?> node)
 extension type RecordTypeEntry.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  RecordTypeEntry()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  RecordTypeEntry() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type References.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  References()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  References() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -2221,11 +1890,7 @@ extension type SetOrMapLiteral.fromJson(Map<String, Object?> node)
   SetOrMapLiteral({
     List<TypeAnnotation>? typeArguments,
     List<Element>? elements,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          typeArguments,
-          elements,
-        ));
+  }) : this.fromJson(Scope.createMap(_schema, typeArguments, elements));
 
   ///
   List<TypeAnnotation> get typeArguments =>
@@ -2242,14 +1907,8 @@ extension type SpreadElement.fromJson(Map<String, Object?> node)
     'expression': Type.typedMapPointer,
     'isNullAware': Type.boolean,
   });
-  SpreadElement({
-    Expression? expression,
-    bool? isNullAware,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expression,
-          isNullAware,
-        ));
+  SpreadElement({Expression? expression, bool? isNullAware})
+    : this.fromJson(Scope.createMap(_schema, expression, isNullAware));
 
   ///
   Expression get expression => node['expression'] as Expression;
@@ -2263,12 +1922,8 @@ extension type StaticGet.fromJson(Map<String, Object?> node) implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'reference': Type.typedMapPointer,
   });
-  StaticGet({
-    FieldReference? reference,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          reference,
-        ));
+  StaticGet({FieldReference? reference})
+    : this.fromJson(Scope.createMap(_schema, reference));
 
   ///
   FieldReference get reference => node['reference'] as FieldReference;
@@ -2286,12 +1941,9 @@ extension type StaticInvocation.fromJson(Map<String, Object?> node)
     FunctionReference? function,
     List<TypeAnnotation>? typeArguments,
     List<Argument>? arguments,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          function,
-          typeArguments,
-          arguments,
-        ));
+  }) : this.fromJson(
+         Scope.createMap(_schema, function, typeArguments, arguments),
+       );
 
   ///
   FunctionReference get function => node['function'] as FunctionReference;
@@ -2310,12 +1962,8 @@ extension type AdjacentStringLiterals.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'expressions': Type.closedListPointer,
   });
-  AdjacentStringLiterals({
-    List<Expression>? expressions,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          expressions,
-        ));
+  AdjacentStringLiterals({List<Expression>? expressions})
+    : this.fromJson(Scope.createMap(_schema, expressions));
 
   ///
   List<Expression> get expressions => (node['expressions'] as List).cast();
@@ -2327,12 +1975,8 @@ extension type StringLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'parts': Type.closedListPointer,
   });
-  StringLiteral({
-    List<StringLiteralPart>? parts,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          parts,
-        ));
+  StringLiteral({List<StringLiteralPart>? parts})
+    : this.fromJson(Scope.createMap(_schema, parts));
 
   ///
   List<StringLiteralPart> get parts => (node['parts'] as List).cast();
@@ -2344,12 +1988,7 @@ extension type StringPart.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
   });
-  StringPart({
-    String? text,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          text,
-        ));
+  StringPart({String? text}) : this.fromJson(Scope.createMap(_schema, text));
 
   ///
   String get text => node['text'] as String;
@@ -2361,12 +2000,8 @@ extension type SymbolLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'parts': Type.closedListPointer,
   });
-  SymbolLiteral({
-    List<String>? parts,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          parts,
-        ));
+  SymbolLiteral({List<String>? parts})
+    : this.fromJson(Scope.createMap(_schema, parts));
 
   ///
   List<String> get parts => (node['parts'] as List).cast();
@@ -2376,10 +2011,7 @@ extension type SymbolLiteral.fromJson(Map<String, Object?> node)
 extension type TypedefReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  TypedefReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  TypedefReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -2388,12 +2020,8 @@ extension type TypeLiteral.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'typeAnnotation': Type.typedMapPointer,
   });
-  TypeLiteral({
-    TypeAnnotation? typeAnnotation,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          typeAnnotation,
-        ));
+  TypeLiteral({TypeAnnotation? typeAnnotation})
+    : this.fromJson(Scope.createMap(_schema, typeAnnotation));
 
   ///
   TypeAnnotation get typeAnnotation => node['typeAnnotation'] as TypeAnnotation;
@@ -2403,10 +2031,7 @@ extension type TypeLiteral.fromJson(Map<String, Object?> node)
 extension type TypeReference.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  TypeReference()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  TypeReference() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -2416,14 +2041,8 @@ extension type UnaryExpression.fromJson(Map<String, Object?> node)
     'operator': Type.stringPointer,
     'expression': Type.typedMapPointer,
   });
-  UnaryExpression({
-    UnaryOperator? operator,
-    Expression? expression,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          operator,
-          expression,
-        ));
+  UnaryExpression({UnaryOperator? operator, Expression? expression})
+    : this.fromJson(Scope.createMap(_schema, operator, expression));
 
   ///
   UnaryOperator get operator => node['operator'] as UnaryOperator;
@@ -2436,20 +2055,14 @@ extension type UnaryExpression.fromJson(Map<String, Object?> node)
 extension type UnresolvedExpression.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  UnresolvedExpression()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  UnresolvedExpression() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
 extension type UnresolvedTypeAnnotation.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({});
-  UnresolvedTypeAnnotation()
-      : this.fromJson(Scope.createMap(
-          _schema,
-        ));
+  UnresolvedTypeAnnotation() : this.fromJson(Scope.createMap(_schema));
 }
 
 ///
@@ -2458,12 +2071,8 @@ extension type VoidTypeAnnotation.fromJson(Map<String, Object?> node)
   static final TypedMapSchema _schema = TypedMapSchema({
     'reference': Type.typedMapPointer,
   });
-  VoidTypeAnnotation({
-    Reference? reference,
-  }) : this.fromJson(Scope.createMap(
-          _schema,
-          reference,
-        ));
+  VoidTypeAnnotation({Reference? reference})
+    : this.fromJson(Scope.createMap(_schema, reference));
 
   ///
   Reference get reference => node['reference'] as Reference;

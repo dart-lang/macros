@@ -32,12 +32,15 @@ class MacroResultsCache {
       phase: request.phase,
     )] = (
       queries: queryResults.map((q) => q.query),
-      resultsHash: queryResults
-          .skip(1)
-          .fold(queryResults.first.response,
-              (model, next) => model.mergeWith(next.response))
-          .fingerprint,
-      response: response
+      resultsHash:
+          queryResults
+              .skip(1)
+              .fold(
+                queryResults.first.response,
+                (model, next) => model.mergeWith(next.response),
+              )
+              .fingerprint,
+      response: response,
     );
   }
 
@@ -46,22 +49,32 @@ class MacroResultsCache {
   ///
   /// Otherwise, invalidates the cache for this request and returns `null`.
   Future<AugmentResponse?> cachedResult(
-      QualifiedName annotation, AugmentRequest request) async {
+    QualifiedName annotation,
+    AugmentRequest request,
+  ) async {
     final cacheKey = (
       annotation: annotation.asRecord,
       target: request.target.asRecord,
-      phase: request.phase
+      phase: request.phase,
     );
     final cached = _cache[cacheKey];
     if (cached == null) return null;
 
-    final queryResults = await Scope.query.run(() => Future.wait(cached.queries
-        .map((query) => queryService.handle(QueryRequest(query: query)))));
-    final newResultsHash = queryResults
-        .skip(1)
-        .fold(queryResults.first.model,
-            (model, next) => model.mergeWith(next.model))
-        .fingerprint;
+    final queryResults = await Scope.query.run(
+      () => Future.wait(
+        cached.queries.map(
+          (query) => queryService.handle(QueryRequest(query: query)),
+        ),
+      ),
+    );
+    final newResultsHash =
+        queryResults
+            .skip(1)
+            .fold(
+              queryResults.first.model,
+              (model, next) => model.mergeWith(next.model),
+            )
+            .fingerprint;
     if (newResultsHash != cached.resultsHash) {
       _cache.remove(cacheKey);
       return null;
@@ -70,29 +83,23 @@ class MacroResultsCache {
   }
 }
 
-typedef _MacroResultsCacheKey = ({
-  QualifiedNameRecord annotation,
-  QualifiedNameRecord target,
-  int phase,
-});
+typedef _MacroResultsCacheKey =
+    ({QualifiedNameRecord annotation, QualifiedNameRecord target, int phase});
 
-typedef _MacroResultsCacheValue = ({
-  /// All queries done by a macro in a given phase.
-  Iterable<Query> queries,
+typedef _MacroResultsCacheValue =
+    ({
+      /// All queries done by a macro in a given phase.
+      Iterable<Query> queries,
 
-  /// The `identityHash` of the merged model from all query responses.
-  int resultsHash,
+      /// The `identityHash` of the merged model from all query responses.
+      int resultsHash,
 
-  /// The macro augmentation response that was cached.
-  AugmentResponse response,
-});
+      /// The macro augmentation response that was cached.
+      AugmentResponse response,
+    });
 
-typedef QualifiedNameRecord = (
-  String uri,
-  String? scope,
-  String name,
-  bool? isStatic
-);
+typedef QualifiedNameRecord =
+    (String uri, String? scope, String name, bool? isStatic);
 
 extension on QualifiedName {
   QualifiedNameRecord get asRecord => (uri, scope, name, isStatic);

@@ -21,12 +21,16 @@ import 'package:macro_service/macro_service.dart';
 /// `PACKAGE_CONFIG_PATH`.
 void main(List<String> args) async {
   injected.macroImplementation = await AnalyzerMacroImplementation.start(
-      protocol: Protocol(
-          encoding: ProtocolEncoding.binary, version: ProtocolVersion.macros1),
-      // TODO(davidmorgan): this needs to come from the analyzer, not be
-      // hardcoded.
-      packageConfig:
-          Uri.file(const String.fromEnvironment('PACKAGE_CONFIG_PATH')));
+    protocol: Protocol(
+      encoding: ProtocolEncoding.binary,
+      version: ProtocolVersion.macros1,
+    ),
+    // TODO(davidmorgan): this needs to come from the analyzer, not be
+    // hardcoded.
+    packageConfig: Uri.file(
+      const String.fromEnvironment('PACKAGE_CONFIG_PATH'),
+    ),
+  );
 
   var starter = ServerStarter();
   starter.start(args);

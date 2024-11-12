@@ -48,10 +48,10 @@ class GenerationContext {
   /// Gets the declaration of the type named [typeName], or throws if it is not
   /// defined in any schema.
   Definition lookupDefinition(String typeName) {
-    final result = lookupDeclaringSchema(typeName)
-        ?.declarations
-        .where((d) => d.name == typeName)
-        .singleOrNull;
+    final result =
+        lookupDeclaringSchema(
+          typeName,
+        )?.declarations.where((d) => d.name == typeName).singleOrNull;
     if (result == null) throw ArgumentError('Unknown type: $typeName');
     return result;
   }
@@ -60,24 +60,27 @@ class GenerationContext {
   List<String> generateImports(GenerationContext context) {
     // Find any types defined in schemas other than the current schema, add
     // imports for them.
-    final schemas = {
-      for (final typeName in currentSchema.allTypeNames(context))
-        lookupDeclaringSchema(typeName),
-    }.nonNulls;
+    final schemas =
+        {
+          for (final typeName in currentSchema.allTypeNames(context))
+            lookupDeclaringSchema(typeName),
+        }.nonNulls;
     return ([
-      "import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';",
-      "import 'package:dart_model/src/deep_cast_map.dart';",
-      "import 'package:dart_model/src/scopes.dart';",
-      for (final schema in schemas)
-        if (schema != currentSchema)
-          "import 'package:${schema.codePackage}/${schema.codePath}';",
-    ].toList()
+            "import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';",
+            "import 'package:dart_model/src/deep_cast_map.dart';",
+            "import 'package:dart_model/src/scopes.dart';",
+            for (final schema in schemas)
+              if (schema != currentSchema)
+                "import 'package:${schema.codePackage}/${schema.codePath}';",
+          ].toList()
           ..sort())
-        .expand((i) => [
-              '// ignore: implementation_imports,'
-                  'unused_import,prefer_relative_imports',
-              i
-            ])
+        .expand(
+          (i) => [
+            '// ignore: implementation_imports,'
+                'unused_import,prefer_relative_imports',
+            i,
+          ],
+        )
         .toList();
   }
 }
@@ -103,15 +106,23 @@ class Schemas {
     final result = <GenerationResult>[];
     for (final schema in schemas) {
       final context = GenerationContext(this, schema);
-      final generatedSchema = const JsonEncoder.withIndent('  ')
-          .convert(schema.generateSchema(context));
-      result.add(GenerationResult(
-          path: 'schemas/${schema.schemaPath}', content: '$generatedSchema\n'));
+      final generatedSchema = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(schema.generateSchema(context));
+      result.add(
+        GenerationResult(
+          path: 'schemas/${schema.schemaPath}',
+          content: '$generatedSchema\n',
+        ),
+      );
 
       final generatedCode = _format(schema.generateCode(context));
-      result.add(GenerationResult(
+      result.add(
+        GenerationResult(
           path: 'pkgs/${schema.codePackage}/lib/${schema.codePath}',
-          content: generatedCode));
+          content: generatedCode,
+        ),
+      );
     }
     return result;
   }
@@ -147,17 +158,16 @@ class Schema {
 
   /// Generates JSON schema corresponding to this schema definition.
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        r'$schema': 'https://json-schema.org/draft/2020-12/schema',
-        'oneOf': [
-          for (var type in rootTypes)
-            TypeReference(type).generateSchema(context),
-        ],
-        r'$defs': {
-          for (var declaration in declarations)
-            if (declaration.includeInSchema)
-              declaration.name: declaration.generateSchema(context),
-        }
-      };
+    r'$schema': 'https://json-schema.org/draft/2020-12/schema',
+    'oneOf': [
+      for (var type in rootTypes) TypeReference(type).generateSchema(context),
+    ],
+    r'$defs': {
+      for (var declaration in declarations)
+        if (declaration.includeInSchema)
+          declaration.name: declaration.generateSchema(context),
+    },
+  };
 
   /// Generates Dart code corresponding to this schema definition.
   String generateCode(GenerationContext context) {
@@ -180,10 +190,10 @@ class Schema {
 
   /// The names of all types referenced in this schema.
   Set<String> allTypeNames(GenerationContext context) => {
-        ...rootTypes,
-        for (final declaration in declarations)
-          ...declaration.allTypeNames(context)
-      };
+    ...rootTypes,
+    for (final declaration in declarations)
+      ...declaration.allTypeNames(context),
+  };
 }
 
 /// Definition of a type.
@@ -211,29 +221,35 @@ abstract class Definition {
   /// Each type in [implements] will be added to the `implements` clause of this
   /// type in the generated code. All properties from all implemented types will
   /// copied directly into the schema for this type.
-  factory Definition.clazz(String name,
-      {required String description,
-      required List<Property> properties,
-      bool createInBuffer,
-      String? extraCode,
-      bool interfaceOnly,
-      List<String> implements}) = ClassTypeDefinition;
+  factory Definition.clazz(
+    String name, {
+    required String description,
+    required List<Property> properties,
+    bool createInBuffer,
+    String? extraCode,
+    bool interfaceOnly,
+    List<String> implements,
+  }) = ClassTypeDefinition;
 
   /// Defines a union.
   ///
   /// [createInBuffer] specifies whether the type is written directly to a
   /// buffer when created. If so, it must be created in a `Scope` which will
   /// provide the buffer.
-  factory Definition.union(String name,
-      {required String description,
-      required List<String> types,
-      required List<Property> properties,
-      bool createInBuffer}) = UnionTypeDefinition;
+  factory Definition.union(
+    String name, {
+    required String description,
+    required List<String> types,
+    required List<Property> properties,
+    bool createInBuffer,
+  }) = UnionTypeDefinition;
 
   /// Defines an enum.
-  factory Definition.$enum(String name,
-      {required String description,
-      required List<String> values}) = EnumTypeDefinition;
+  factory Definition.$enum(
+    String name, {
+    required String description,
+    required List<String> values,
+  }) = EnumTypeDefinition;
 
   /// Defines a named type represented in JSON as a string.
   factory Definition.stringTypedef(String name, {required String description}) =
@@ -279,11 +295,12 @@ class Property {
 
   /// Generates JSON schema for this type.
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        name: type.generateSchema(context, description: description),
-      };
+    name: type.generateSchema(context, description: description),
+  };
 
   /// Dart code for declaring a parameter corresponding to this property.
-  String get parameterCode => '${required ? 'required ' : ''}'
+  String get parameterCode =>
+      '${required ? 'required ' : ''}'
       '${_type(nullable: !required)} $name,';
 
   /// Dart code for passing a named argument corresponding to this property.
@@ -292,8 +309,10 @@ class Property {
 
   /// Dart code for a getter for this property.
   String get getterCode {
-    return _describe('${_type()} get $name => '
-        '${type.castExpression("node['$name']", nullable: nullable)};');
+    return _describe(
+      '${_type()} get $name => '
+      '${type.castExpression("node['$name']", nullable: nullable)};',
+    );
   }
 
   /// Dart code for entry in  `TypedMapSchema`.
@@ -356,9 +375,10 @@ class TypeReference {
   /// nullable, otherwise it won't.
   String castExpression(String value, {bool nullable = false}) {
     final q = nullable ? '?' : '';
-    final representationName = isMap
-        ? 'Map'
-        : isList
+    final representationName =
+        isMap
+            ? 'Map'
+            : isList
             ? 'List'
             : name;
     final rawCast = '$value as $representationName$q';
@@ -408,8 +428,10 @@ class TypeReference {
   }
 
   /// Generates JSON schema for this type.
-  Map<String, Object?> generateSchema(GenerationContext context,
-      {String? description}) {
+  Map<String, Object?> generateSchema(
+    GenerationContext context, {
+    String? description,
+  }) {
     if (isList) {
       return {
         'type': 'array',
@@ -458,13 +480,15 @@ class ClassTypeDefinition implements Definition {
   final bool interfaceOnly;
   final List<String> implements;
 
-  ClassTypeDefinition(this.name,
-      {required this.description,
-      required this.properties,
-      this.createInBuffer = false,
-      this.extraCode,
-      this.interfaceOnly = false,
-      this.implements = const []});
+  ClassTypeDefinition(
+    this.name, {
+    required this.description,
+    required this.properties,
+    this.createInBuffer = false,
+    this.extraCode,
+    this.interfaceOnly = false,
+    this.implements = const [],
+  });
 
   @override
   bool get includeInSchema => !interfaceOnly;
@@ -473,9 +497,9 @@ class ClassTypeDefinition implements Definition {
   Iterable<Property> inheritedProperties(GenerationContext context) sync* {
     final seen = <Property>{};
     for (var interface in implements) {
-      for (var property
-          in (context.lookupDefinition(interface) as ClassTypeDefinition)
-              .allProperties(context)) {
+      for (var property in (context.lookupDefinition(interface)
+              as ClassTypeDefinition)
+          .allProperties(context)) {
         if (seen.add(property)) yield property;
       }
     }
@@ -491,8 +515,9 @@ class ClassTypeDefinition implements Definition {
   Map<String, Object?> generateSchema(GenerationContext context) {
     if (interfaceOnly) {
       throw StateError(
-          'Cannot generate schema for interface only definitions, check '
-          '`includeInSchema` first.');
+        'Cannot generate schema for interface only definitions, check '
+        '`includeInSchema` first.',
+      );
     }
     return {
       'type': 'object',
@@ -500,7 +525,7 @@ class ClassTypeDefinition implements Definition {
       'properties': {
         for (final property in allProperties(context))
           ...property.generateSchema(context),
-      }
+      },
     };
   }
 
@@ -522,14 +547,17 @@ class ClassTypeDefinition implements Definition {
     result.writeln('/// $description');
     // Pure interfaces should only have a private constructor.
     final defaultConstructorName = interfaceOnly ? '_' : 'fromJson';
-    result.write('extension type '
-        '$name.$defaultConstructorName(Map<String, Object?> node) implements '
-        '${implements.isEmpty ? 'Object' : implements.join(', ')} {');
+    result.write(
+      'extension type '
+      '$name.$defaultConstructorName(Map<String, Object?> node) implements '
+      '${implements.isEmpty ? 'Object' : implements.join(', ')} {',
+    );
 
     if (createInBuffer) {
       if (interfaceOnly) {
         throw StateError(
-            'Cannot have createInBuffer: true and interfaceOnly: true');
+          'Cannot have createInBuffer: true and interfaceOnly: true',
+        );
       }
       result.write('static final TypedMapSchema _schema = TypedMapSchema({');
       for (final property in allProperties(context)) {
@@ -590,10 +618,11 @@ class ClassTypeDefinition implements Definition {
   }
 
   @override
-  Set<String> allTypeNames(GenerationContext context) => allProperties(context)
-      .expand((f) => f.type.allTypeNames(context))
-      .followedBy(implements)
-      .toSet();
+  Set<String> allTypeNames(GenerationContext context) =>
+      allProperties(context)
+          .expand((f) => f.type.allTypeNames(context))
+          .followedBy(implements)
+          .toSet();
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
@@ -619,38 +648,36 @@ class UnionTypeDefinition implements Definition {
   final List<String> types;
   final List<Property> properties;
   final bool createInBuffer;
-  UnionTypeDefinition(this.name,
-      {required this.description,
-      required this.types,
-      required this.properties,
-      this.createInBuffer = false});
+  UnionTypeDefinition(
+    this.name, {
+    required this.description,
+    required this.types,
+    required this.properties,
+    this.createInBuffer = false,
+  });
 
   @override
   bool get includeInSchema => true;
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        'type': 'object',
-        'description': description,
-        'properties': {
-          'type': {
-            'type': 'string',
-          },
-          'value': {
-            'oneOf': [
-              for (final type in types)
-                TypeReference(type).generateSchema(context),
-            ],
-          },
-          for (final property in properties)
-            ...property.generateSchema(context),
-          'required': [
-            'type',
-            'value',
-            ...properties.where((e) => e.required).map((e) => e.name)
-          ]..sort(),
-        }
-      };
+    'type': 'object',
+    'description': description,
+    'properties': {
+      'type': {'type': 'string'},
+      'value': {
+        'oneOf': [
+          for (final type in types) TypeReference(type).generateSchema(context),
+        ],
+      },
+      for (final property in properties) ...property.generateSchema(context),
+      'required': [
+        'type',
+        'value',
+        ...properties.where((e) => e.required).map((e) => e.name),
+      ]..sort(),
+    },
+  };
 
   @override
   String generateCode(GenerationContext context) {
@@ -668,8 +695,9 @@ class UnionTypeDefinition implements Definition {
 
     // TODO(davidmorgan): add description.
     result.writeln(
-        'extension type $name.fromJson(Map<String, Object?> node)  implements '
-        'Object {');
+      'extension type $name.fromJson(Map<String, Object?> node)  implements '
+      'Object {',
+    );
 
     if (createInBuffer) {
       result
@@ -733,16 +761,20 @@ class UnionTypeDefinition implements Definition {
     for (final type in types) {
       result
         ..writeln('$type get as$type {')
-        ..writeln("if (node['type'] != '$type') "
-            "{ throw StateError('Not a $type.'); }");
+        ..writeln(
+          "if (node['type'] != '$type') "
+          "{ throw StateError('Not a $type.'); }",
+        );
       // TODO(davidmorgan): this special case allows `String` to be in a union
       // type, see if there is a nice way to generalize to other primitives.
       if (type == 'String') {
         result.writeln("return node['value'] as String;");
       } else {
-        result.writeln('return $type.fromJson'
-            "(node['value'] as "
-            '${context.lookupDefinition(type).representationTypeName});');
+        result.writeln(
+          'return $type.fromJson'
+          "(node['value'] as "
+          '${context.lookupDefinition(type).representationTypeName});',
+        );
       }
       result.writeln('}');
     }
@@ -755,8 +787,10 @@ class UnionTypeDefinition implements Definition {
   }
 
   @override
-  Set<String> allTypeNames(GenerationContext context) =>
-      {...types, ...properties.expand((f) => f.type.allTypeNames(context))};
+  Set<String> allTypeNames(GenerationContext context) => {
+    ...types,
+    ...properties.expand((f) => f.type.allTypeNames(context)),
+  };
 
   @override
   String get representationTypeName => 'Map<String, Object?>';
@@ -769,25 +803,30 @@ class EnumTypeDefinition implements Definition {
   final String description;
   final List<String> values;
 
-  EnumTypeDefinition(this.name,
-      {required this.description, required this.values});
+  EnumTypeDefinition(
+    this.name, {
+    required this.description,
+    required this.values,
+  });
 
   @override
   bool get includeInSchema => true;
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        'type': 'string',
-        'description': description,
-      };
+    'type': 'string',
+    'description': description,
+  };
 
   @override
   String generateCode(GenerationContext context) {
     final result = StringBuffer();
 
     result.writeln('/// $description');
-    result.write('extension type const $name.fromJson(String string)'
-        ' implements Object {');
+    result.write(
+      'extension type const $name.fromJson(String string)'
+      ' implements Object {',
+    );
     for (final value in values) {
       result.writeln("static const $name $value = $name.fromJson('$value');");
     }
@@ -814,9 +853,9 @@ class StringTypedefDefinition implements Definition {
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        'type': 'string',
-        'description': description,
-      };
+    'type': 'string',
+    'description': description,
+  };
 
   @override
   String generateCode(GenerationContext context) {
@@ -846,9 +885,9 @@ class NullTypedefDefinition implements Definition {
 
   @override
   Map<String, Object?> generateSchema(GenerationContext context) => {
-        'type': 'null',
-        'description': description,
-      };
+    'type': 'null',
+    'description': description,
+  };
 
   @override
   String generateCode(GenerationContext context) {
@@ -870,7 +909,9 @@ String _firstToLowerCase(String string) =>
 
 String _format(String source) {
   try {
-    return DartFormatter().formatSource(SourceCode(source)).text;
+    return DartFormatter(
+      languageVersion: DartFormatter.latestLanguageVersion,
+    ).formatSource(SourceCode(source)).text;
   } catch (_) {
     print('Failed to format:\n---\n$source\n---');
     rethrow;

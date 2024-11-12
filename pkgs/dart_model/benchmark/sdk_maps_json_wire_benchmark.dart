@@ -15,21 +15,27 @@ class SdkMapsJsonWireBenchmark extends SerializationBenchmark {
   }
 
   Map<String, Object?> createData() {
-    return Map<String, Object?>.fromIterable(mapKeys, value: (key) {
-      final intKey = int.parse(key as String);
-      return Interface(
-        members: Map<String, Object?>.fromIterable(makeMemberNames(intKey),
-            value: (k) => _makeMember(k as String)).cast(),
-        properties: Properties(
-          isAbstract: (intKey & 1) == 1,
-          isClass: (intKey & 2) == 2,
-          isGetter: (intKey & 4) == 4,
-          isField: (intKey & 8) == 8,
-          isMethod: (intKey & 16) == 16,
-          isStatic: (intKey & 32) == 32,
-        ),
-      );
-    });
+    return Map<String, Object?>.fromIterable(
+      mapKeys,
+      value: (key) {
+        final intKey = int.parse(key as String);
+        return Interface(
+          members:
+              Map<String, Object?>.fromIterable(
+                makeMemberNames(intKey),
+                value: (k) => _makeMember(k as String),
+              ).cast(),
+          properties: Properties(
+            isAbstract: (intKey & 1) == 1,
+            isClass: (intKey & 2) == 2,
+            isGetter: (intKey & 4) == 4,
+            isField: (intKey & 8) == 8,
+            isMethod: (intKey & 16) == 16,
+            isStatic: (intKey & 32) == 32,
+          ),
+        );
+      },
+    );
   }
 
   Member _makeMember(String key) {
@@ -54,13 +60,11 @@ class SdkMapsJsonWireBenchmark extends SerializationBenchmark {
 
 /// An interface.
 extension type Interface.fromJson(Map<String, Object?> node) {
-  Interface({
-    Map<String, Member>? members,
-    Properties? properties,
-  }) : this.fromJson({
-          if (members != null) 'members': members,
-          if (properties != null) 'properties': properties,
-        });
+  Interface({Map<String, Member>? members, Properties? properties})
+    : this.fromJson({
+        if (members != null) 'members': members,
+        if (properties != null) 'properties': properties,
+      });
 
   /// Map of members by name.
   Map<String, Member> get members => (node['members'] as Map).cast();
@@ -70,11 +74,8 @@ extension type Interface.fromJson(Map<String, Object?> node) {
 }
 
 extension type Member.fromJson(Map<String, Object?> node) {
-  Member({
-    Properties? properties,
-  }) : this.fromJson({
-          if (properties != null) 'properties': properties,
-        });
+  Member({Properties? properties})
+    : this.fromJson({if (properties != null) 'properties': properties});
 
   /// The properties of this member.
   Properties get properties => node['properties'] as Properties;
@@ -90,13 +91,13 @@ extension type Properties.fromJson(Map<String, Object?> node) {
     bool? isMethod,
     bool? isStatic,
   }) : this.fromJson({
-          if (isAbstract != null) 'isAbstract': isAbstract,
-          if (isClass != null) 'isClass': isClass,
-          if (isGetter != null) 'isGetter': isGetter,
-          if (isField != null) 'isField': isField,
-          if (isMethod != null) 'isMethod': isMethod,
-          if (isStatic != null) 'isStatic': isStatic,
-        });
+         if (isAbstract != null) 'isAbstract': isAbstract,
+         if (isClass != null) 'isClass': isClass,
+         if (isGetter != null) 'isGetter': isGetter,
+         if (isField != null) 'isField': isField,
+         if (isMethod != null) 'isMethod': isMethod,
+         if (isStatic != null) 'isStatic': isStatic,
+       });
 
   /// Whether the entity is abstract, meaning it has no definition.
   bool get isAbstract => node['isAbstract'] as bool;

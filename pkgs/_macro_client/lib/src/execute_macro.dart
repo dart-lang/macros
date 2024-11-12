@@ -13,7 +13,10 @@ import 'builder_impls.dart';
 
 /// Runs [macro] in the types phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeTypesMacro(
-    Macro macro, Host host, AugmentRequest request) async {
+  Macro macro,
+  Host host,
+  AugmentRequest request,
+) async {
   final target = request.target;
   final model = request.model;
   final interface = model.uris[target.uri]!.scopes[target.name]!;
@@ -37,14 +40,19 @@ Future<AugmentResponse> executeTypesMacro(
     case (_, TypeAliasTypesMacro()):
       throw UnimplementedError('Unimplemented macro target');
     default:
-      throw UnsupportedError('Unsupported macro type or invalid target:\n'
-          'macro: $macro\ntarget: $target');
+      throw UnsupportedError(
+        'Unsupported macro type or invalid target:\n'
+        'macro: $macro\ntarget: $target',
+      );
   }
 }
 
 /// Runs [macro] in the declarations phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeDeclarationsMacro(
-    Macro macro, Host host, AugmentRequest request) async {
+  Macro macro,
+  Host host,
+  AugmentRequest request,
+) async {
   final target = request.target;
   final model = request.model;
   final interface = model.uris[target.uri]!.scopes[target.name]!;
@@ -68,14 +76,19 @@ Future<AugmentResponse> executeDeclarationsMacro(
     case (_, TypeAliasDeclarationsMacro()):
       throw UnimplementedError('Unimplemented macro target');
     default:
-      throw UnsupportedError('Unsupported macro type or invalid target:\n'
-          'macro: $macro\ntarget: $target');
+      throw UnsupportedError(
+        'Unsupported macro type or invalid target:\n'
+        'macro: $macro\ntarget: $target',
+      );
   }
 }
 
 /// Runs [macro] in the definitions phase and returns an [AugmentResponse].
 Future<AugmentResponse> executeDefinitionsMacro(
-    Macro macro, Host host, AugmentRequest request) async {
+  Macro macro,
+  Host host,
+  AugmentRequest request,
+) async {
   final target = request.target;
   final model = request.model;
   final interface = model.uris[target.uri]!.scopes[target.name]!;
@@ -98,7 +111,9 @@ Future<AugmentResponse> executeDefinitionsMacro(
     case (_, VariableDefinitionsMacro()):
       throw UnimplementedError('Unimplemented macro target');
     default:
-      throw UnsupportedError('Unsupported macro type or invalid target:\n'
-          'macro: $macro\ntarget: $target');
+      throw UnsupportedError(
+        'Unsupported macro type or invalid target:\n'
+        'macro: $macro\ntarget: $target',
+      );
   }
 }

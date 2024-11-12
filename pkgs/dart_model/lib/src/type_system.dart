@@ -13,8 +13,9 @@ final class StaticTypeSystem {
   late final InterfaceType _object = _lookupNamed('dart:core#Object');
   late final StaticType _objectQuestion = NullableType(_object);
   late final StaticType _null = _lookupNamed('dart:core#Null');
-  late final InterfaceType _futureVoid =
-      _lookupEntry('dart:async#Future').instantiate([const VoidType()]);
+  late final InterfaceType _futureVoid = _lookupEntry(
+    'dart:async#Future',
+  ).instantiate([const VoidType()]);
 
   StaticTypeSystem(this._hierarchy);
 
@@ -26,7 +27,8 @@ final class StaticTypeSystem {
 
   InterfaceType _lookupNamed(String qualifiedName) {
     return StaticType(
-            StaticTypeDesc.namedTypeDesc(_lookupEntry(qualifiedName).self))
+          StaticTypeDesc.namedTypeDesc(_lookupEntry(qualifiedName).self),
+        )
         as InterfaceType;
   }
 
@@ -112,11 +114,10 @@ final class StaticTypeSystem {
 
       // If `T0` is `FutureOr<S>` for some `S`, then `T0 <: T1` iff
       // `S <: Object`
-      if (T1
-          case InterfaceType(
-            isDartAsyncFutureOr: true,
-            instantiation: [final S]
-          )) {
+      if (T1 case InterfaceType(
+        isDartAsyncFutureOr: true,
+        instantiation: [final S],
+      )) {
         return _isSubtype(S, _object);
       }
 
@@ -142,10 +143,7 @@ final class StaticTypeSystem {
         TypeParameterType() => false,
         // If `T1` is `FutureOr<S>` for some `S`, then the query is true iff
         // `Null <: S`.
-        InterfaceType(
-          isDartAsyncFutureOr: true,
-          instantiation: [final S],
-        ) =>
+        InterfaceType(isDartAsyncFutureOr: true, instantiation: [final S]) =>
           _isSubtype(_null, S),
         // If `T1` is `Null`, `S?` or `S*` for some `S` then the query is true.
         InterfaceType(isDartCoreNull: true) || NullableType() => true,
@@ -159,11 +157,10 @@ final class StaticTypeSystem {
 
     // Left FutureOr: If `T0` is `FutureOr<S0>` then: `T0 <: T1` iff
     // `Future<S0> <: T1` and `S0 <: T1`.
-    if (T0
-        case InterfaceType(
-          isDartAsyncFutureOr: true,
-          instantiation: [final S0]
-        )) {
+    if (T0 case InterfaceType(
+      isDartAsyncFutureOr: true,
+      instantiation: [final S0],
+    )) {
       return _isSubtype(S0, T1) && _isSubtype(_future(S0), T1);
     }
 
@@ -185,11 +182,10 @@ final class StaticTypeSystem {
 
     // Right FutureOr: If `T1` is `FutureOr<S1>` then `T0 <: T1` iff any of the
     // following hold:
-    if (T1
-        case InterfaceType(
-          isDartAsyncFutureOr: true,
-          instantiation: [final S1]
-        )) {
+    if (T1 case InterfaceType(
+      isDartAsyncFutureOr: true,
+      instantiation: [final S1],
+    )) {
       if (_isSubtype(T0, _future(S1))) {
         // `T0 <: Future<S1>`
         return true;
@@ -198,10 +194,9 @@ final class StaticTypeSystem {
         // `T0 <: T1`
         return true;
       }
-      if (T0
-          case TypeParameterType(
-            parameter: StaticTypeParameter(bound: final S0?)
-          ) when _isSubtype(S0, T1)) {
+      if (T0 case TypeParameterType(
+        parameter: StaticTypeParameter(bound: final S0?),
+      ) when _isSubtype(S0, T1)) {
         // `T0` is `X0` and `X0` has bound `S0` and `S0 <: T1`
         return true;
       }
@@ -221,10 +216,9 @@ final class StaticTypeSystem {
       if (_isSubtype(T0, _null)) {
         // or `T0 <: Null`
       }
-      if (T0
-          case TypeParameterType(
-            parameter: StaticTypeParameter(bound: final S0?)
-          ) when _isSubtype(S0, T1)) {
+      if (T0 case TypeParameterType(
+        parameter: StaticTypeParameter(bound: final S0?),
+      ) when _isSubtype(S0, T1)) {
         // `T0` is `X0` and `X0` has bound `S0` and `S0 <: T1`
         return true;
       }
@@ -239,9 +233,9 @@ final class StaticTypeSystem {
 
     // Left Type Variable Bound: `T0` is a type variable `X0` with bound `B0`
     // and `B0 <: T1`.
-    if (T0
-        case TypeParameterType(parameter: StaticTypeParameter(bound: final B0?))
-        when _isSubtype(B0, T1)) {
+    if (T0 case TypeParameterType(
+      parameter: StaticTypeParameter(bound: final B0?),
+    ) when _isSubtype(B0, T1)) {
       return true;
     }
 
@@ -302,13 +296,17 @@ final class StaticTypeSystem {
 
     if (subType.name.equals(superType.name)) {
       return _matchingInstantiation(
-          subType.instantiation, superType.instantiation);
+        subType.instantiation,
+        superType.instantiation,
+      );
     }
 
     for (final actualSuperType in _constructSuperTypes(subType, [])) {
       if (actualSuperType.name.equals(superType.name)) {
         return _matchingInstantiation(
-            actualSuperType.instantiation, superType.instantiation);
+          actualSuperType.instantiation,
+          superType.instantiation,
+        );
       }
     }
 
@@ -330,7 +328,9 @@ final class StaticTypeSystem {
   /// Walks the type hierarchy upwards from [type], yielding instantiated
   /// supertypes of that type.
   Iterable<InterfaceType> _constructSuperTypes(
-      InterfaceType type, List<QualifiedName> coveredClasses) sync* {
+    InterfaceType type,
+    List<QualifiedName> coveredClasses,
+  ) sync* {
     final hierarchyEntry = _hierarchy.named[type.name.asString]!;
     // Consider e.g. a class `List<T> extends Iterable<T>` for which we have an
     // instantiation `List<int>` and now want to find supertypes.
@@ -344,10 +344,12 @@ final class StaticTypeSystem {
       parameterIdToTypeParameter[parameter.identifier] = resolved;
     }
 
-    final substitution = TypeSubstitution(substitution: {
-      for (var i = 0; i < typeParameters.length; i++)
-        typeParameters[i]: type.instantiation[i]
-    });
+    final substitution = TypeSubstitution(
+      substitution: {
+        for (var i = 0; i < typeParameters.length; i++)
+          typeParameters[i]: type.instantiation[i],
+      },
+    );
 
     for (final superType in hierarchyEntry.supertypes) {
       if (coveredClasses.contains(superType.name)) {
@@ -368,22 +370,25 @@ final class StaticTypeSystem {
 
       // Which then allows instantiating the supertype based on the
       // instantiation of the subtype.
-      final instantiatedSuperType = substitution
-          .applyTo(superTypeUsingThisTypesTypeParameters) as InterfaceType;
+      final instantiatedSuperType =
+          substitution.applyTo(superTypeUsingThisTypesTypeParameters)
+              as InterfaceType;
       yield instantiatedSuperType;
       yield* _constructSuperTypes(instantiatedSuperType, coveredClasses);
     }
   }
 
   bool _checkFunctionSubtype(FunctionType left, FunctionType right) {
-    final freshTypeParams =
-        _freshTypeParameters(left.typeParameters, right.typeParameters);
+    final freshTypeParams = _freshTypeParameters(
+      left.typeParameters,
+      right.typeParameters,
+    );
     if (freshTypeParams == null) {
       return false;
     }
 
     final freshTypeArgs = [
-      for (final param in freshTypeParams) TypeParameterType(parameter: param)
+      for (final param in freshTypeParams) TypeParameterType(parameter: param),
     ];
 
     // Turn the type parameters in the function types into free type variables
@@ -409,12 +414,14 @@ final class StaticTypeSystem {
       }
 
       for (var i = 0; i < q; i++) {
-        final Si = i >= p
-            ? right.optionalPositional[i - p]
-            : right.optionalPositional[i];
-        final Vi = i >= n
-            ? left.optionalPositional[i - n]
-            : left.requiredPositional[i];
+        final Si =
+            i >= p
+                ? right.optionalPositional[i - p]
+                : right.optionalPositional[i];
+        final Vi =
+            i >= n
+                ? left.optionalPositional[i - n]
+                : left.requiredPositional[i];
 
         if (!_isSubtype(Si, Vi)) {
           return false;
@@ -430,7 +437,9 @@ final class StaticTypeSystem {
 
       for (var i = 0; i < left.requiredPositional.length; i++) {
         if (!_isSubtype(
-            right.requiredPositional[i], left.requiredPositional[i])) {
+          right.requiredPositional[i],
+          left.requiredPositional[i],
+        )) {
           return false;
         }
       }
@@ -477,7 +486,9 @@ final class StaticTypeSystem {
   /// This allows applying a substitution to the source types defining [a] and
   /// [b], which then makes comparing type parameters easier.
   List<StaticTypeParameter>? _freshTypeParameters(
-      List<StaticTypeParameter> a, List<StaticTypeParameter> b) {
+    List<StaticTypeParameter> a,
+    List<StaticTypeParameter> b,
+  ) {
     if (a.length != b.length) {
       return null;
     }
@@ -485,17 +496,25 @@ final class StaticTypeSystem {
       return const [];
     }
 
-    final freshParameters =
-        List.generate(a.length, (_) => StaticTypeParameter());
+    final freshParameters = List.generate(
+      a.length,
+      (_) => StaticTypeParameter(),
+    );
     final freshTypes = List.generate(
-        a.length, (i) => TypeParameterType(parameter: freshParameters[i]));
+      a.length,
+      (i) => TypeParameterType(parameter: freshParameters[i]),
+    );
 
-    final substitutionA = TypeSubstitution(substitution: {
-      for (final (i, parameter) in a.indexed) parameter: freshTypes[i]
-    });
-    final substitutionB = TypeSubstitution(substitution: {
-      for (final (i, parameter) in b.indexed) parameter: freshTypes[i]
-    });
+    final substitutionA = TypeSubstitution(
+      substitution: {
+        for (final (i, parameter) in a.indexed) parameter: freshTypes[i],
+      },
+    );
+    final substitutionB = TypeSubstitution(
+      substitution: {
+        for (final (i, parameter) in b.indexed) parameter: freshTypes[i],
+      },
+    );
 
     for (var i = 0; i < a.length; i++) {
       var boundA = a[i].bound;

@@ -11,10 +11,14 @@ void main() {
     typeSystem = StaticTypeSystem(_model.types);
   });
 
-  InterfaceType interfaceType(String name,
-      [List<StaticType> instantiation = const []]) {
+  InterfaceType interfaceType(
+    String name, [
+    List<StaticType> instantiation = const [],
+  ]) {
     return InterfaceType(
-        name: QualifiedName.parse(name), instantiation: instantiation);
+      name: QualifiedName.parse(name),
+      instantiation: instantiation,
+    );
   }
 
   InterfaceType future(StaticType of) {
@@ -33,36 +37,49 @@ void main() {
 
     test('subtypes through class hierarchy', () {
       expect(
-          typeSystem.isSubtype(interfaceType('dart:core#double'),
-              interfaceType('dart:core#num')),
-          isTrue);
+        typeSystem.isSubtype(
+          interfaceType('dart:core#double'),
+          interfaceType('dart:core#num'),
+        ),
+        isTrue,
+      );
       expect(
-          typeSystem.isSubtype(interfaceType('dart:core#double'),
-              interfaceType('dart:core#int')),
-          isFalse);
+        typeSystem.isSubtype(
+          interfaceType('dart:core#double'),
+          interfaceType('dart:core#int'),
+        ),
+        isFalse,
+      );
     });
 
     test('subtype check checks generics', () {
       // List<Object> <: Iterable<Object>
       expect(
-          typeSystem.isSubtype(interfaceType('dart:core#List', [object]),
-              interfaceType('dart:core#Iterable', [object])),
-          isTrue);
+        typeSystem.isSubtype(
+          interfaceType('dart:core#List', [object]),
+          interfaceType('dart:core#Iterable', [object]),
+        ),
+        isTrue,
+      );
       // List<int> <: Iterable<num>
       expect(
-          typeSystem.isSubtype(
-              interfaceType('dart:core#List', [interfaceType('dart:core#int')]),
-              interfaceType(
-                  'dart:core#Iterable', [interfaceType('dart:core#num')])),
-          isTrue);
+        typeSystem.isSubtype(
+          interfaceType('dart:core#List', [interfaceType('dart:core#int')]),
+          interfaceType('dart:core#Iterable', [interfaceType('dart:core#num')]),
+        ),
+        isTrue,
+      );
 
       // List<int> is not a subtype of Iterable<String>
       expect(
-          typeSystem.isSubtype(
-              interfaceType('dart:core#List', [interfaceType('dart:core#int')]),
-              interfaceType(
-                  'dart:core#Iterable', [interfaceType('dart:core#String')])),
-          isFalse);
+        typeSystem.isSubtype(
+          interfaceType('dart:core#List', [interfaceType('dart:core#int')]),
+          interfaceType('dart:core#Iterable', [
+            interfaceType('dart:core#String'),
+          ]),
+        ),
+        isFalse,
+      );
     });
   });
 
@@ -78,10 +95,7 @@ void main() {
   });
 
   test('Null? and Null are the same type', () {
-    expect(
-      typeSystem.areEqual(NullableType($null), $null),
-      isTrue,
-    );
+    expect(typeSystem.areEqual(NullableType($null), $null), isTrue);
   });
 
   test('Never is a subtype of everything', () {
@@ -90,108 +104,104 @@ void main() {
   });
 
   test('Never? and Null are the same type', () {
-    expect(
-      typeSystem.areEqual(const NullableType(never), $null),
-      isTrue,
-    );
+    expect(typeSystem.areEqual(const NullableType(never), $null), isTrue);
   });
 }
 
-TypeHierarchyEntry _entryWithoutTypeArguments(String name,
-    [String supertype = 'dart:core#Object']) {
+TypeHierarchyEntry _entryWithoutTypeArguments(
+  String name, [
+  String supertype = 'dart:core#Object',
+]) {
   return TypeHierarchyEntry(
     typeParameters: [],
     supertypes: [
-      NamedTypeDesc(
-        name: QualifiedName.parse(supertype),
-        instantiation: [],
-      ),
+      NamedTypeDesc(name: QualifiedName.parse(supertype), instantiation: []),
     ],
-    self: NamedTypeDesc(
-      name: QualifiedName.parse(name),
-      instantiation: [],
-    ),
+    self: NamedTypeDesc(name: QualifiedName.parse(name), instantiation: []),
   );
 }
 
 final _model = Model(
-  types: TypeHierarchy()
-    ..named.addAll(
-      {
-        'dart:core#Object': TypeHierarchyEntry(
-          typeParameters: [],
-          supertypes: [],
-          self: NamedTypeDesc(
-            name: QualifiedName.parse('dart:core#Object'),
-            instantiation: [],
-          ),
-        ),
-        'dart:core#Null': _entryWithoutTypeArguments('dart:core#Null'),
-        'dart:core#Record': _entryWithoutTypeArguments('dart:core#Object'),
-        'dart:core#Function': _entryWithoutTypeArguments('dart:core#Function'),
-        'dart:core#String': _entryWithoutTypeArguments('dart:core#String'),
-        'dart:core#num': _entryWithoutTypeArguments('dart:core#num'),
-        'dart:core#int':
-            _entryWithoutTypeArguments('dart:core#int', 'dart:core#num'),
-        'dart:core#double':
-            _entryWithoutTypeArguments('dart:core#double', 'dart:core#num'),
-        'dart:core#Iterable': TypeHierarchyEntry(
-          typeParameters: [
-            StaticTypeParameterDesc(identifier: 0),
-          ],
-          supertypes: [
-            NamedTypeDesc(
+  types:
+      TypeHierarchy()
+        ..named.addAll({
+          'dart:core#Object': TypeHierarchyEntry(
+            typeParameters: [],
+            supertypes: [],
+            self: NamedTypeDesc(
               name: QualifiedName.parse('dart:core#Object'),
               instantiation: [],
             ),
-          ],
-          self: NamedTypeDesc(
-            name: QualifiedName.parse('dart:core#Iterable'),
-            instantiation: [
-              StaticTypeDesc.typeParameterTypeDesc(
-                  TypeParameterTypeDesc(parameterId: 0)),
-            ],
           ),
-        ),
-        'dart:core#List': TypeHierarchyEntry(
-          typeParameters: [
-            StaticTypeParameterDesc(identifier: 1),
-          ],
-          supertypes: [
-            NamedTypeDesc(
+          'dart:core#Null': _entryWithoutTypeArguments('dart:core#Null'),
+          'dart:core#Record': _entryWithoutTypeArguments('dart:core#Object'),
+          'dart:core#Function': _entryWithoutTypeArguments(
+            'dart:core#Function',
+          ),
+          'dart:core#String': _entryWithoutTypeArguments('dart:core#String'),
+          'dart:core#num': _entryWithoutTypeArguments('dart:core#num'),
+          'dart:core#int': _entryWithoutTypeArguments(
+            'dart:core#int',
+            'dart:core#num',
+          ),
+          'dart:core#double': _entryWithoutTypeArguments(
+            'dart:core#double',
+            'dart:core#num',
+          ),
+          'dart:core#Iterable': TypeHierarchyEntry(
+            typeParameters: [StaticTypeParameterDesc(identifier: 0)],
+            supertypes: [
+              NamedTypeDesc(
+                name: QualifiedName.parse('dart:core#Object'),
+                instantiation: [],
+              ),
+            ],
+            self: NamedTypeDesc(
               name: QualifiedName.parse('dart:core#Iterable'),
               instantiation: [
                 StaticTypeDesc.typeParameterTypeDesc(
-                    TypeParameterTypeDesc(parameterId: 1)),
+                  TypeParameterTypeDesc(parameterId: 0),
+                ),
               ],
             ),
-          ],
-          self: NamedTypeDesc(
-            name: QualifiedName.parse('dart:core#List'),
-            instantiation: [
-              StaticTypeDesc.typeParameterTypeDesc(
-                  TypeParameterTypeDesc(parameterId: 1)),
-            ],
           ),
-        ),
-        'dart:async#Future': TypeHierarchyEntry(
-          typeParameters: [
-            StaticTypeParameterDesc(identifier: 2),
-          ],
-          supertypes: [
-            NamedTypeDesc(
-              name: QualifiedName.parse('dart:core#Object'),
-              instantiation: [],
+          'dart:core#List': TypeHierarchyEntry(
+            typeParameters: [StaticTypeParameterDesc(identifier: 1)],
+            supertypes: [
+              NamedTypeDesc(
+                name: QualifiedName.parse('dart:core#Iterable'),
+                instantiation: [
+                  StaticTypeDesc.typeParameterTypeDesc(
+                    TypeParameterTypeDesc(parameterId: 1),
+                  ),
+                ],
+              ),
+            ],
+            self: NamedTypeDesc(
+              name: QualifiedName.parse('dart:core#List'),
+              instantiation: [
+                StaticTypeDesc.typeParameterTypeDesc(
+                  TypeParameterTypeDesc(parameterId: 1),
+                ),
+              ],
             ),
-          ],
-          self: NamedTypeDesc(
-            name: QualifiedName.parse('dart:async#Future'),
-            instantiation: [
-              StaticTypeDesc.typeParameterTypeDesc(
-                  TypeParameterTypeDesc(parameterId: 2)),
-            ],
           ),
-        ),
-      },
-    ),
+          'dart:async#Future': TypeHierarchyEntry(
+            typeParameters: [StaticTypeParameterDesc(identifier: 2)],
+            supertypes: [
+              NamedTypeDesc(
+                name: QualifiedName.parse('dart:core#Object'),
+                instantiation: [],
+              ),
+            ],
+            self: NamedTypeDesc(
+              name: QualifiedName.parse('dart:async#Future'),
+              instantiation: [
+                StaticTypeDesc.typeParameterTypeDesc(
+                  TypeParameterTypeDesc(parameterId: 2),
+                ),
+              ],
+            ),
+          ),
+        }),
 );

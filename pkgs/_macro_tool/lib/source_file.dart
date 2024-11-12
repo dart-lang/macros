@@ -49,8 +49,12 @@ extension type SourceFile(String path) implements String {
     final line = "part '$partName'; $_addedMarker\n";
 
     final file = File(path);
-    file.writeAsStringSync(_insertAfterLastImport(
-        line, _removeToolAddedLinesFromSource(file.readAsStringSync())));
+    file.writeAsStringSync(
+      _insertAfterLastImport(
+        line,
+        _removeToolAddedLinesFromSource(file.readAsStringSync()),
+      ),
+    );
     macroRunner.notifyChange(path);
   }
 
@@ -77,13 +81,17 @@ extension type SourceFile(String path) implements String {
 
     final file = File(path);
     file.writeAsStringSync(
-        line + _removeToolAddedLinesFromSource(file.readAsStringSync()));
+      line + _removeToolAddedLinesFromSource(file.readAsStringSync()),
+    );
     macroRunner.notifyChange(path);
 
     final toolOutputFile = File(toolOutputPath);
-    toolOutputFile.writeAsStringSync(toolOutputFile
-        .readAsStringSync()
-        .replaceAll('part of ', 'augment library '));
+    toolOutputFile.writeAsStringSync(
+      toolOutputFile.readAsStringSync().replaceAll(
+        'part of ',
+        'augment library ',
+      ),
+    );
     macroRunner.notifyChange(toolOutputPath);
   }
 
@@ -93,8 +101,11 @@ extension type SourceFile(String path) implements String {
   /// [macroRunner] is notified of the change.
   void revert(MacroRunner macroRunner) {
     final file = File(path);
-    file.writeAsStringSync(_resetCacheBusters(
-        _removeToolAddedLinesFromSource(file.readAsStringSync())));
+    file.writeAsStringSync(
+      _resetCacheBusters(
+        _removeToolAddedLinesFromSource(file.readAsStringSync()),
+      ),
+    );
     macroRunner.notifyChange(path);
     final toolOutputFile = File(toolOutputPath);
     if (toolOutputFile.existsSync()) {
@@ -118,20 +129,19 @@ extension type SourceFile(String path) implements String {
   ///
   /// [macroRunner] is notified of the change.
   bool bustCaches(MacroRunner macroRunner) {
-    final token = _random.nextInt(1 << 32).toRadixString(16) +
+    final token =
+        _random.nextInt(1 << 32).toRadixString(16) +
         _random.nextInt(1 << 32).toRadixString(16);
     var cacheBusterFound = false;
-    for (final path in [
-      path,
-      toolOutputPath,
-    ]) {
+    for (final path in [path, toolOutputPath]) {
       final file = File(path);
       if (!file.existsSync()) continue;
       final source = file.readAsStringSync();
       if (source.contains(_cacheBusterRegexp)) {
         cacheBusterFound = true;
         file.writeAsStringSync(
-            source.replaceAll(_cacheBusterRegexp, '$_cacheBusterString$token'));
+          source.replaceAll(_cacheBusterRegexp, '$_cacheBusterString$token'),
+        );
         macroRunner.notifyChange(path);
       }
     }

@@ -17,13 +17,17 @@ class DeclareXImplementation implements ClassDeclarationsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
-      annotation: QualifiedName(
-          uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX'),
-      runsInPhases: [2]);
+    annotation: QualifiedName(
+      uri: 'package:_test_macros/declare_x_macro.dart',
+      name: 'DeclareX',
+    ),
+    runsInPhases: [2],
+  );
 
   @override
   void buildDeclarationsForClass(ClassDeclarationsBuilder builder) {
-    builder
-        .declareInType(Augmentation(code: expandTemplate('int get x => 3;')));
+    builder.declareInType(
+      Augmentation(code: expandTemplate('int get x => 3;')),
+    );
   }
 }

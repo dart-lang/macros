@@ -27,13 +27,15 @@ final class CfeQueryService extends QueryService {
   @override
   Future<QueryResponse> handle(QueryRequest request) async {
     return QueryResponse(
-        model: await _evaluateClassQuery(request.query.target));
+      model: await _evaluateClassQuery(request.query.target),
+    );
   }
 
   Future<Model> _evaluateClassQuery(QualifiedName target) async {
     final uri = target.uri;
-    final libraryBuilder = sourceLoader.sourceLibraryBuilders
-        .singleWhere((l) => l.importUri.toString() == target.uri);
+    final libraryBuilder = sourceLoader.sourceLibraryBuilders.singleWhere(
+      (l) => l.importUri.toString() == target.uri,
+    );
     final classBuilderIterator =
         libraryBuilder.fullMemberIterator<cfe.SourceClassBuilder>();
     cfe.SourceClassBuilder? classBuilder;
@@ -49,13 +51,14 @@ final class CfeQueryService extends QueryService {
     while (fieldIterator.moveNext()) {
       final current = fieldIterator.current;
       interface.members[current.name] = Member(
-          properties: Properties(
-        isAbstract: current.isAbstract,
-        isGetter: current.isGetter,
-        isField: true,
-        isMethod: false,
-        isStatic: current.isStatic,
-      ));
+        properties: Properties(
+          isAbstract: current.isAbstract,
+          isGetter: current.isGetter,
+          isField: true,
+          isMethod: false,
+          isStatic: current.isStatic,
+        ),
+      );
     }
     TypeHierarchy? types;
     try {
@@ -64,12 +67,13 @@ final class CfeQueryService extends QueryService {
       // TODO: Fails in types phase, implement fine grained queries.
     }
     return Model(types: types)
-      ..uris[uri] = (Library()
-        ..
-            // TODO(davidmorgan): return more than just fields.
-            // TODO(davidmorgan): specify in the query what to return.
-
-            scopes[target.name] = interface);
+      ..uris[uri] =
+          (Library()
+            ..
+                // TODO(davidmorgan): return more than just fields.
+                // TODO(davidmorgan): specify in the query what to return.
+                scopes[target.name] =
+                interface);
   }
 
   TypeHierarchy _buildTypeHierarchy(Set<kernel.Class> classes) {
@@ -100,10 +104,11 @@ final class CfeQueryService extends QueryService {
     const translator = KernelTypeToMacros();
     final result = TypeHierarchy();
     for (final element in classes) {
-      final asNamedType = element
-          .getThisType(coreTypes, kernel.Nullability.nonNullable)
-          .accept1(translator, context)
-          .asNamedTypeDesc;
+      final asNamedType =
+          element
+              .getThisType(coreTypes, kernel.Nullability.nonNullable)
+              .accept1(translator, context)
+              .asNamedTypeDesc;
 
       result.named[asNamedType.name.asString] = TypeHierarchyEntry(
         self: asNamedType,
@@ -115,7 +120,7 @@ final class CfeQueryService extends QueryService {
           for (final superType in element.supers)
             superType.asInterfaceType
                 .accept1(translator, context)
-                .asNamedTypeDesc
+                .asNamedTypeDesc,
         ],
       );
     }

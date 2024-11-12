@@ -35,7 +35,11 @@ class MacroServer {
   }) async {
     final serverSocket = await ServerSocket.bind('localhost', 0);
     return MacroServer._(
-        protocol, service, HostEndpoint(port: serverSocket.port), serverSocket);
+      protocol,
+      service,
+      HostEndpoint(port: serverSocket.port),
+      serverSocket,
+    );
   }
 
   /// Sends to the macro identified by `request#macroAnnotation`.
@@ -44,15 +48,21 @@ class MacroServer {
   /// macro to connect and checks again.
   ///
   /// Throws [TimeoutException] if no such macro connects in the time allowed.
-  Future<Response> sendToMacro(HostRequest request,
-      {Duration timeout = const Duration(seconds: 5)}) async {
+  Future<Response> sendToMacro(
+    HostRequest request, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     _Connection? connection;
     while (true) {
       // Look up the connection with the macro corresponding to `annotation`.
-      connection = _connections
-          .where((c) => c.descriptions
-              .any((d) => d.annotation.equals(request.macroAnnotation)))
-          .singleOrNull;
+      connection =
+          _connections
+              .where(
+                (c) => c.descriptions.any(
+                  (d) => d.annotation.equals(request.macroAnnotation),
+                ),
+              )
+              .singleOrNull;
       // If it's found: done.
       if (connection != null) break;
       // Not found, wait [timeout] then recheck. Throws `StateError` on
@@ -82,21 +92,26 @@ class MacroServer {
     // matching `MacroStartedRequest` from the bundle before sending to it,
     // and `MacroStartedRequest` is sent after this message is received and
     // the protocol set.
-    Protocol.handshakeProtocol
-        .send(socket.add, HandshakeResponse(protocol: protocol).node);
+    Protocol.handshakeProtocol.send(
+      socket.add,
+      HandshakeResponse(protocol: protocol).node,
+    );
 
     protocol.decode(broadcastStream).forEach((jsonData) {
       final request = MacroRequest.fromJson(jsonData);
       if (request.type.isKnown) {
         if (request.type == MacroRequestType.macroStartedRequest) {
-          connection.descriptions
-              .add(request.asMacroStartedRequest.macroDescription);
+          connection.descriptions.add(
+            request.asMacroStartedRequest.macroDescription,
+          );
           _macroDescriptionBecomesKnown.add(null);
         }
         // Each query is handled and responded to in a new query scope.
-        Scope.query.runAsync(() async => service
-            .handle(request)
-            .then((response) => protocol.send(socket.add, response.node)));
+        Scope.query.runAsync(
+          () async => service
+              .handle(request)
+              .then((response) => protocol.send(socket.add, response.node)),
+        );
       }
       final response = Response.fromJson(jsonData);
       if (response.type.isKnown) {

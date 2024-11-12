@@ -30,13 +30,14 @@ class CfeMacroImplementation implements injected.MacroImplementation {
     // TODO(davidmorgan): support serving multiple protocols.
     required Protocol protocol,
     required Uri packageConfig,
-  }) async =>
-      CfeMacroImplementation._(
-          packageConfig,
-          await MacroHost.serve(
-              protocol: protocol,
-              packageConfig: packageConfig,
-              queryService: CfeQueryService()));
+  }) async => CfeMacroImplementation._(
+    packageConfig,
+    await MacroHost.serve(
+      protocol: protocol,
+      packageConfig: packageConfig,
+      queryService: CfeQueryService(),
+    ),
+  );
 
   @override
   injected.MacroPackageConfigs get packageConfigs =>
@@ -63,10 +64,12 @@ class CfeMacroRunner implements injected.MacroRunner {
 
   @override
   injected.RunningMacro run(Uri uri, String name) => CfeRunningMacro.run(
-      _impl,
+    _impl,
+    QualifiedName(uri: '$uri', name: name),
+    _impl._host.lookupMacroImplementation(
       QualifiedName(uri: '$uri', name: name),
-      _impl._host
-          .lookupMacroImplementation(QualifiedName(uri: '$uri', name: name))!);
+    )!,
+  );
 }
 
 class CfeRunningMacro implements injected.RunningMacro {
@@ -76,70 +79,85 @@ class CfeRunningMacro implements injected.RunningMacro {
 
   CfeRunningMacro._(this._impl, this.name, this.implementation);
 
-  static CfeRunningMacro run(CfeMacroImplementation impl, QualifiedName name,
-      QualifiedName implementation) {
+  static CfeRunningMacro run(
+    CfeMacroImplementation impl,
+    QualifiedName name,
+    QualifiedName implementation,
+  ) {
     return CfeRunningMacro._(impl, name, implementation);
   }
 
   /// Queries for [target] and returns the [Model] representing the result.
   ///
   /// TODO: Make this a more limited query which doesn't fetch members.
-  Future<Model> _queryTarget(QualifiedName target) =>
-      Scope.query.run(() async => (await _impl._host.hostService.handle(
-              MacroRequest.queryRequest(
-                  QueryRequest(query: Query(target: target)),
-                  id: nextRequestId)))
-          .asQueryResponse
-          .model);
+  Future<Model> _queryTarget(QualifiedName target) => Scope.query.run(
+    () async =>
+        (await _impl._host.hostService.handle(
+          MacroRequest.queryRequest(
+            QueryRequest(query: Query(target: target)),
+            id: nextRequestId,
+          ),
+        )).asQueryResponse.model,
+  );
 
   @override
   Future<CfeMacroExecutionResult> executeDeclarationsPhase(
-      macros_api_v1.MacroTarget target,
-      macros_api_v1.DeclarationPhaseIntrospector
-          declarationsPhaseIntrospector) async {
+    macros_api_v1.MacroTarget target,
+    macros_api_v1.DeclarationPhaseIntrospector declarationsPhaseIntrospector,
+  ) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = declarationsPhaseIntrospector;
     return await CfeMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
-            name,
-            AugmentRequest(
-                phase: 2,
-                target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+      target,
+      await _impl._host.augment(
+        name,
+        AugmentRequest(
+          phase: 2,
+          target: target.qualifiedName,
+          model: await _queryTarget(target.qualifiedName),
+        ),
+      ),
+    );
   }
 
   @override
   Future<CfeMacroExecutionResult> executeDefinitionsPhase(
-      macros_api_v1.MacroTarget target,
-      macros_api_v1.DefinitionPhaseIntrospector
-          definitionPhaseIntrospector) async {
+    macros_api_v1.MacroTarget target,
+    macros_api_v1.DefinitionPhaseIntrospector definitionPhaseIntrospector,
+  ) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = definitionPhaseIntrospector;
     return await CfeMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
-            name,
-            AugmentRequest(
-                phase: 3,
-                target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+      target,
+      await _impl._host.augment(
+        name,
+        AugmentRequest(
+          phase: 3,
+          target: target.qualifiedName,
+          model: await _queryTarget(target.qualifiedName),
+        ),
+      ),
+    );
   }
 
   @override
   Future<CfeMacroExecutionResult> executeTypesPhase(
-      macros_api_v1.MacroTarget target,
-      macros_api_v1.TypePhaseIntrospector typePhaseIntrospector) async {
+    macros_api_v1.MacroTarget target,
+    macros_api_v1.TypePhaseIntrospector typePhaseIntrospector,
+  ) async {
     // TODO(davidmorgan): this is a hack to access CFE internals; remove.
     introspector = typePhaseIntrospector;
     return await CfeMacroExecutionResult.dartModelToInjected(
-        target,
-        await _impl._host.augment(
-            name,
-            AugmentRequest(
-                phase: 1,
-                target: target.qualifiedName,
-                model: await _queryTarget(target.qualifiedName))));
+      target,
+      await _impl._host.augment(
+        name,
+        AugmentRequest(
+          phase: 1,
+          target: target.qualifiedName,
+          model: await _queryTarget(target.qualifiedName),
+        ),
+      ),
+    );
   }
 }
 
@@ -151,22 +169,26 @@ class CfeMacroExecutionResult implements macros_api_v1.MacroExecutionResult {
   final macros_api_v1.MacroTarget target;
   @override
   final Map<macros_api_v1.Identifier, Iterable<macros_api_v1.DeclarationCode>>
-      typeAugmentations;
+  typeAugmentations;
 
   CfeMacroExecutionResult(
-      this.target, Iterable<macros_api_v1.DeclarationCode> declarations)
-      // TODO(davidmorgan): this assumes augmentations are for the macro
-      // application target. Instead, it should be explicit in
-      // `AugmentResponse`.
-      : typeAugmentations = {
-          // TODO(davidmorgan): empty augmentations response breaks the test,
-          // it's not clear why.
-          if (declarations.isNotEmpty)
-            (target as macros_api_v1.Declaration).identifier: declarations
-        };
+    this.target,
+    Iterable<macros_api_v1.DeclarationCode> declarations,
+  )
+    // TODO(davidmorgan): this assumes augmentations are for the macro
+    // application target. Instead, it should be explicit in
+    // `AugmentResponse`.
+    : typeAugmentations = {
+        // TODO(davidmorgan): empty augmentations response breaks the test,
+        // it's not clear why.
+        if (declarations.isNotEmpty)
+          (target as macros_api_v1.Declaration).identifier: declarations,
+      };
 
   static Future<CfeMacroExecutionResult> dartModelToInjected(
-      macros_api_v1.MacroTarget target, AugmentResponse augmentResponse) async {
+    macros_api_v1.MacroTarget target,
+    AugmentResponse augmentResponse,
+  ) async {
     final declarations = <macros_api_v1.DeclarationCode>[];
     if (augmentResponse.typeAugmentations?.isNotEmpty == true) {
       // TODO: Handle multiple type augmentations, or augmentations where the
@@ -174,12 +196,16 @@ class CfeMacroExecutionResult implements macros_api_v1.MacroExecutionResult {
       final entry = augmentResponse.typeAugmentations!.entries.single;
       if (entry.key != target.qualifiedName.name) {
         throw UnimplementedError(
-            'Type augmentations are only implemented when the type is the '
-            'target of the augmentation.');
+          'Type augmentations are only implemented when the type is the '
+          'target of the augmentation.',
+        );
       }
       for (final augmentation in entry.value) {
-        declarations.add(macros_api_v1.DeclarationCode.fromParts(
-            await _resolveNames(augmentation.code)));
+        declarations.add(
+          macros_api_v1.DeclarationCode.fromParts(
+            await _resolveNames(augmentation.code),
+          ),
+        );
       }
     }
 
@@ -204,25 +230,25 @@ class CfeMacroExecutionResult implements macros_api_v1.MacroExecutionResult {
 
   @override
   Map<macros_api_v1.Identifier, Iterable<macros_api_v1.DeclarationCode>>
-      get enumValueAugmentations => {};
+  get enumValueAugmentations => {};
 
   @override
   macros_api_v1.MacroException? get exception => null;
 
   @override
   Map<macros_api_v1.Identifier, macros_api_v1.NamedTypeAnnotationCode>
-      get extendsTypeAugmentations => {};
+  get extendsTypeAugmentations => {};
 
   @override
   Map<macros_api_v1.Identifier, Iterable<macros_api_v1.TypeAnnotationCode>>
-      get interfaceAugmentations => {};
+  get interfaceAugmentations => {};
 
   @override
   Iterable<macros_api_v1.DeclarationCode> get libraryAugmentations => {};
 
   @override
   Map<macros_api_v1.Identifier, Iterable<macros_api_v1.TypeAnnotationCode>>
-      get mixinAugmentations => {};
+  get mixinAugmentations => {};
 
   @override
   Iterable<String> get newTypeNames => [];
@@ -237,20 +263,22 @@ extension MacroTargetExtension on macros_api_v1.MacroTarget {
         ((this as macros_api_v1.Declaration).identifier as cfe.IdentifierImpl)
             .resolveIdentifier();
     return QualifiedName(
-        uri: '${identifier.uri}',
-        name: identifier.name,
-        scope: switch (identifier.kind) {
-          macros_api_v1.IdentifierKind.local ||
-          macros_api_v1.IdentifierKind.topLevelMember =>
-            null,
-          macros_api_v1.IdentifierKind.instanceMember =>
-            throw UnimplementedError(
-                'We dont have access to the parent scope for instance '
-                'members in the CFE yet'),
-          macros_api_v1.IdentifierKind.staticInstanceMember =>
-            identifier.staticScope!,
-        },
-        isStatic: identifier.staticScope != null);
+      uri: '${identifier.uri}',
+      name: identifier.name,
+      scope: switch (identifier.kind) {
+        macros_api_v1.IdentifierKind.local ||
+        macros_api_v1.IdentifierKind.topLevelMember =>
+          null,
+        macros_api_v1.IdentifierKind.instanceMember =>
+          throw UnimplementedError(
+            'We dont have access to the parent scope for instance '
+            'members in the CFE yet',
+          ),
+        macros_api_v1.IdentifierKind.staticInstanceMember =>
+          identifier.staticScope!,
+      },
+      isStatic: identifier.staticScope != null,
+    );
   }
 }
 
@@ -270,15 +298,19 @@ Future<List<Object>> _resolveNames(List<Code> codes) async {
       qualifiedNameStrings.map(QualifiedName.parse).toList();
   final identifierFutures = <Future<macros_api_v1.Identifier>>[];
   for (final qualifiedName in qualifiedNamesList) {
-    identifierFutures.add((introspector as macros_api_v1.TypePhaseIntrospector)
-        // ignore: deprecated_member_use
-        .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name));
+    identifierFutures.add(
+      (introspector as macros_api_v1.TypePhaseIntrospector)
+      // ignore: deprecated_member_use
+      .resolveIdentifier(Uri.parse(qualifiedName.uri), qualifiedName.name),
+    );
   }
   final identifiers = await Future.wait(identifierFutures);
 
   // Build the result using the looked up [Identifier]s.
-  final identifiersByQualifiedNameStrings =
-      Map.fromIterables(qualifiedNameStrings, identifiers);
+  final identifiersByQualifiedNameStrings = Map.fromIterables(
+    qualifiedNameStrings,
+    identifiers,
+  );
   final result = <Object>[];
   for (final code in codes) {
     if (code.type == CodeType.string) {

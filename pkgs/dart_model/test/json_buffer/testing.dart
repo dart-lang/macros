@@ -11,7 +11,9 @@ import 'package:test/test.dart';
 ///
 /// Does additional checks on `map`.
 void expectFullyEquivalentMaps(
-    Map<String, Object?> map, Map<String, Object?> expected) {
+  Map<String, Object?> map,
+  Map<String, Object?> expected,
+) {
   expect(map.entries.map((e) => e.key), expected.entries.map((e) => e.key));
   expect(map.entries.map((e) => e.value), expected.entries.map((e) => e.value));
   expect(map.isEmpty, expected.isEmpty);

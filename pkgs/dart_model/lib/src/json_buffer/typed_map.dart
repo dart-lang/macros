@@ -26,18 +26,19 @@ class TypedMapSchema {
   /// Ordering is important: when a "typed map" is instantiated the values are
   /// passed in the same order that the fields are specified here.
   TypedMapSchema(Map<String, Type> fieldTypes)
-      : this._(fieldTypes.keys.toList(), fieldTypes.values.toList());
+    : this._(fieldTypes.keys.toList(), fieldTypes.values.toList());
 
   TypedMapSchema._(this._keys, this._valueTypes)
-      : _isAllBooleans = _valueTypes.every((t) => t == Type.boolean),
-        _fieldSetSize = (_keys.length + 7) ~/ 8,
-        _valueSizeAsBytes =
-            _valueTypes.map((t) => t._sizeInBytes).fold(0, (a, b) => a + b);
+    : _isAllBooleans = _valueTypes.every((t) => t == Type.boolean),
+      _fieldSetSize = (_keys.length + 7) ~/ 8,
+      _valueSizeAsBytes = _valueTypes
+          .map((t) => t._sizeInBytes)
+          .fold(0, (a, b) => a + b);
 
   /// The schema field names and value types as a `Map`.
   Map<String, Type> toMap() => {
-        for (var i = 0; i != _keys.length; ++i) _keys[i]: _valueTypes[i],
-      };
+    for (var i = 0; i != _keys.length; ++i) _keys[i]: _valueTypes[i],
+  };
 
   // Schemas should be instantiated once per type in generated code, so looking
   // up by identity is sufficient. It's also the fastest way to do it.
@@ -184,11 +185,28 @@ extension TypedMaps on JsonBufferBuilder {
     // If the map is filled this is marked with the high bit of the schema
     // pointer, then the field set is omitted.
     final (valuesSize, filled) = schema._valueSizeOf(
-        v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
+      v0,
+      v1,
+      v2,
+      v3,
+      v4,
+      v5,
+      v6,
+      v7,
+      v8,
+      v9,
+      v10,
+      v11,
+      v12,
+      v13,
+      v14,
+      v15,
+    );
 
     // Layout is: pointer to schema, field set (unless filled!), values.
     final pointer = _reserve(
-        _pointerSize + (filled ? 0 : schema._fieldSetSize) + valuesSize);
+      _pointerSize + (filled ? 0 : schema._fieldSetSize) + valuesSize,
+    );
 
     // Write the pointer to schema, setting the high bit if the map is filled.
     var schemaPointer =
@@ -202,27 +220,29 @@ extension TypedMaps on JsonBufferBuilder {
     if (!filled) {
       if (schema._fieldSetSize >= 1) {
         _setByte(
-            pointer + _pointerSize,
-            (v0 == null ? 0 : 0x01) +
-                (v1 == null ? 0 : 0x02) +
-                (v2 == null ? 0 : 0x04) +
-                (v3 == null ? 0 : 0x08) +
-                (v4 == null ? 0 : 0x10) +
-                (v5 == null ? 0 : 0x20) +
-                (v6 == null ? 0 : 0x40) +
-                (v7 == null ? 0 : 0x80));
+          pointer + _pointerSize,
+          (v0 == null ? 0 : 0x01) +
+              (v1 == null ? 0 : 0x02) +
+              (v2 == null ? 0 : 0x04) +
+              (v3 == null ? 0 : 0x08) +
+              (v4 == null ? 0 : 0x10) +
+              (v5 == null ? 0 : 0x20) +
+              (v6 == null ? 0 : 0x40) +
+              (v7 == null ? 0 : 0x80),
+        );
       }
       if (schema._fieldSetSize >= 2) {
         _setByte(
-            pointer + _pointerSize + 1,
-            (v8 == null ? 0 : 0x01) +
-                (v9 == null ? 0 : 0x02) +
-                (v10 == null ? 0 : 0x04) +
-                (v11 == null ? 0 : 0x08) +
-                (v12 == null ? 0 : 0x10) +
-                (v13 == null ? 0 : 0x20) +
-                (v14 == null ? 0 : 0x40) +
-                (v15 == null ? 0 : 0x80));
+          pointer + _pointerSize + 1,
+          (v8 == null ? 0 : 0x01) +
+              (v9 == null ? 0 : 0x02) +
+              (v10 == null ? 0 : 0x04) +
+              (v11 == null ? 0 : 0x08) +
+              (v12 == null ? 0 : 0x10) +
+              (v13 == null ? 0 : 0x20) +
+              (v14 == null ? 0 : 0x40) +
+              (v15 == null ? 0 : 0x80),
+        );
       }
     }
 
@@ -312,14 +332,18 @@ extension TypedMaps on JsonBufferBuilder {
   /// Throws if [map is backed by a different buffer to `this`.
   void _checkTypedMapOwnership(_TypedMap map) {
     if (map.buffer != this) {
-      throw UnsupportedError('Maps created with `createTypedMap` can only '
-          'be added to the JsonBufferBuilder instance that created them.');
+      throw UnsupportedError(
+        'Maps created with `createTypedMap` can only '
+        'be added to the JsonBufferBuilder instance that created them.',
+      );
     }
   }
 
   /// Returns the [_TypedMap] at [pointer].
   Map<String, Object?> _readTypedMap(
-      _Pointer pointer, Map<String, Object?>? parent) {
+    _Pointer pointer,
+    Map<String, Object?>? parent,
+  ) {
     return _TypedMap(this, pointer, parent);
   }
 }
@@ -344,8 +368,9 @@ class _TypedMap
 
   /// The schema of this "typed map" giving its field names and types.
   late final TypedMapSchema _schema =
-      buffer._schemasByPointer[_schemaPointer] ??=
-          TypedMapSchema(buffer._readClosedMap(_schemaPointer, null).cast());
+      buffer._schemasByPointer[_schemaPointer] ??= TypedMapSchema(
+        buffer._readClosedMap(_schemaPointer, null).cast(),
+      );
 
   /// Whether all fields are present, meaning no explicit field set was written.
   late final bool filled = (buffer._readPointer(pointer) & 0x80000000) != 0;
@@ -356,7 +381,10 @@ class _TypedMap
   bool _hasField(int index) {
     if (index < 0 || index >= _schema.length) {
       throw RangeError.value(
-          index, 'index', 'Is out of range, length: ${_schema.length}.');
+        index,
+        'index',
+        'Is out of range, length: ${_schema.length}.',
+      );
     }
     if (filled) return true;
     final byte = index ~/ 8;
@@ -389,42 +417,48 @@ class _TypedMap
 
   @override
   late final Iterable<String> keys = _IteratorFunctionIterable<String>(
-      _schema._isAllBooleans
-          ? () => _AllBoolsTypedMapKeyIterator(this)
-          : () => _PartialTypedMapKeyIterator(this),
-      length: length);
+    _schema._isAllBooleans
+        ? () => _AllBoolsTypedMapKeyIterator(this)
+        : () => _PartialTypedMapKeyIterator(this),
+    length: length,
+  );
 
   @override
   late final Iterable<Object?> values = _IteratorFunctionIterable<Object?>(
-      _schema._isAllBooleans
-          ? () => _AllBoolsTypedMapValueIterator(this)
-          : () => _PartialTypedMapValueIterator(this),
-      length: length);
+    _schema._isAllBooleans
+        ? () => _AllBoolsTypedMapValueIterator(this)
+        : () => _PartialTypedMapValueIterator(this),
+    length: length,
+  );
 
   @override
   late Iterable<MapEntry<String, Object?>> entries =
       _IteratorFunctionIterable<MapEntry<String, Object?>>(
-          _schema._isAllBooleans
-              ? () => _AllBoolsTypedMapEntryIterator(this)
-              : () => _PartialTypedMapEntryIterator(this),
-          length: length);
+        _schema._isAllBooleans
+            ? () => _AllBoolsTypedMapEntryIterator(this)
+            : () => _PartialTypedMapEntryIterator(this),
+        length: length,
+      );
 
   @override
   void operator []=(String key, Object? value) {
     throw UnsupportedError(
-        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
+      'This JsonBufferBuilder map is read-only, see "createGrowableMap".',
+    );
   }
 
   @override
   Object? remove(Object? key) {
     throw UnsupportedError(
-        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
+      'This JsonBufferBuilder map is read-only, see "createGrowableMap".',
+    );
   }
 
   @override
   void clear() {
     throw UnsupportedError(
-        'This JsonBufferBuilder map is read-only, see "createGrowableMap".');
+      'This JsonBufferBuilder map is read-only, see "createGrowableMap".',
+    );
   }
 
   @override
@@ -439,9 +473,10 @@ class _TypedMap
     // be one of multiple types, that type will be included in a `type` field
     // in the map.
     var hash = 0;
-    final iterator = _schema._isAllBooleans
-        ? _AllBoolsTypedMapHashIterator(this)
-        : _PartialTypedMapHashIterator(this);
+    final iterator =
+        _schema._isAllBooleans
+            ? _AllBoolsTypedMapHashIterator(this)
+            : _PartialTypedMapHashIterator(this);
     while (iterator.moveNext()) {
       hash = Object.hash(hash, iterator.current);
     }
@@ -463,19 +498,22 @@ abstract class _PartialTypedMapIterator<T> implements Iterator<T> {
   int _offset = -1;
 
   _PartialTypedMapIterator(this._map)
-      : _buffer = _map.buffer,
-        _schema = _map._schema,
-        _valuesPointer = _map.pointer +
-            _pointerSize +
-            (_map.filled ? 0 : _map._schema._fieldSetSize);
+    : _buffer = _map.buffer,
+      _schema = _map._schema,
+      _valuesPointer =
+          _map.pointer +
+          _pointerSize +
+          (_map.filled ? 0 : _map._schema._fieldSetSize);
 
   @override
   T get current;
 
   String get _currentKey => _schema._keys[_index];
-  Object? get _currentValue =>
-      _buffer._read(_schema._valueTypes[_index], _valuesPointer + _offset,
-          parent: _map);
+  Object? get _currentValue => _buffer._read(
+    _schema._valueTypes[_index],
+    _valuesPointer + _offset,
+    parent: _map,
+  );
 
   @override
   bool moveNext() {
@@ -524,9 +562,9 @@ class _PartialTypedMapHashIterator extends _PartialTypedMapIterator<int> {
 
   @override
   int get current => Object.hash(
-      _currentKey,
-      _buffer._fingerprint(
-          _valuesPointer + _offset, _schema._valueTypes[_index]));
+    _currentKey,
+    _buffer._fingerprint(_valuesPointer + _offset, _schema._valueTypes[_index]),
+  );
 }
 
 /// `Iterator` that reads a "typed map" in a [JsonBufferBuilder] with all
@@ -547,11 +585,12 @@ abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
   int _bitOffset = 7;
 
   _AllBoolsTypedMapIterator(this._map)
-      : _buffer = _map.buffer,
-        _schema = _map._schema,
-        _valuesPointer = _map.pointer +
-            _pointerSize +
-            (_map.filled ? 0 : _map._schema._fieldSetSize);
+    : _buffer = _map.buffer,
+      _schema = _map._schema,
+      _valuesPointer =
+          _map.pointer +
+          _pointerSize +
+          (_map.filled ? 0 : _map._schema._fieldSetSize);
 
   @override
   T get current;

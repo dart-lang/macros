@@ -44,27 +44,38 @@ sealed class StaticType {
       StaticTypeDescType.dynamicTypeDesc => const DynamicType(),
       StaticTypeDescType.neverTypeDesc => const NeverType(),
       StaticTypeDescType.nullableTypeDesc => NullableType(
-          _translateFromDescription(
-              description.asNullableTypeDesc.inner, knownTypeParameters)),
+        _translateFromDescription(
+          description.asNullableTypeDesc.inner,
+          knownTypeParameters,
+        ),
+      ),
       StaticTypeDescType.namedTypeDesc => InterfaceType._translateFrom(
-          description.asNamedTypeDesc, knownTypeParameters),
+        description.asNamedTypeDesc,
+        knownTypeParameters,
+      ),
       StaticTypeDescType.recordTypeDesc => RecordType(
-          positional: [
-            for (final positional in description.asRecordTypeDesc.positional)
-              _translateFromDescription(positional, knownTypeParameters),
-          ],
-          named: {
-            for (final named in description.asRecordTypeDesc.named)
-              named.name:
-                  _translateFromDescription(named.type, knownTypeParameters),
-          },
-        ),
+        positional: [
+          for (final positional in description.asRecordTypeDesc.positional)
+            _translateFromDescription(positional, knownTypeParameters),
+        ],
+        named: {
+          for (final named in description.asRecordTypeDesc.named)
+            named.name: _translateFromDescription(
+              named.type,
+              knownTypeParameters,
+            ),
+        },
+      ),
       StaticTypeDescType.functionTypeDesc => FunctionType._translateFrom(
-          description.asFunctionTypeDesc, knownTypeParameters),
+        description.asFunctionTypeDesc,
+        knownTypeParameters,
+      ),
       StaticTypeDescType.typeParameterTypeDesc => TypeParameterType(
-          parameter: knownTypeParameters[
-              description.asTypeParameterTypeDesc.parameterId]!,
-        ),
+        parameter:
+            knownTypeParameters[description
+                .asTypeParameterTypeDesc
+                .parameterId]!,
+      ),
       StaticTypeDescType.voidTypeDesc => const VoidType(),
       _ => _UnknownType(description),
     };
@@ -149,18 +160,18 @@ final class InterfaceType extends StaticType {
   /// element [instantiation] containing a [VoidType].
   final List<StaticType> instantiation;
 
-  const InterfaceType({
-    required this.name,
-    required this.instantiation,
-  }) : super._();
+  const InterfaceType({required this.name, required this.instantiation})
+    : super._();
 
   static InterfaceType _translateFrom(
-      NamedTypeDesc desc, Map<int, StaticTypeParameter> parameters) {
+    NamedTypeDesc desc,
+    Map<int, StaticTypeParameter> parameters,
+  ) {
     return InterfaceType(
       name: desc.name,
       instantiation: [
         for (final type in desc.instantiation)
-          StaticType._translateFromDescription(type, parameters)
+          StaticType._translateFromDescription(type, parameters),
       ],
     );
   }
@@ -173,12 +184,14 @@ final class InterfaceType extends StaticType {
 
   @override
   StaticTypeDesc _buildDescription(_StaticTypeToDescription context) {
-    return StaticTypeDesc.namedTypeDesc(NamedTypeDesc(
-      name: name,
-      instantiation: [
-        for (final type in instantiation) type._buildDescription(context),
-      ],
-    ));
+    return StaticTypeDesc.namedTypeDesc(
+      NamedTypeDesc(
+        name: name,
+        instantiation: [
+          for (final type in instantiation) type._buildDescription(context),
+        ],
+      ),
+    );
   }
 
   @override
@@ -187,24 +200,34 @@ final class InterfaceType extends StaticType {
   }
 
   /// The [QualifiedName] for the [Object] type in `dart:core`.
-  static final QualifiedName objectName =
-      QualifiedName(uri: 'dart:core', name: 'Object');
+  static final QualifiedName objectName = QualifiedName(
+    uri: 'dart:core',
+    name: 'Object',
+  );
 
   /// The [QualifiedName] for the [Null] type in `dart:core`.
-  static final QualifiedName nullName =
-      QualifiedName(uri: 'dart:core', name: 'Null');
+  static final QualifiedName nullName = QualifiedName(
+    uri: 'dart:core',
+    name: 'Null',
+  );
 
   /// The [QualifiedName] for the [Function] type in `dart:core`.
-  static final QualifiedName functionName =
-      QualifiedName(uri: 'dart:core', name: 'Function');
+  static final QualifiedName functionName = QualifiedName(
+    uri: 'dart:core',
+    name: 'Function',
+  );
 
   /// The [QualifiedName] for the [Record] type in `dart:core`.
-  static final QualifiedName recordName =
-      QualifiedName(uri: 'dart:core', name: 'Record');
+  static final QualifiedName recordName = QualifiedName(
+    uri: 'dart:core',
+    name: 'Record',
+  );
 
   /// The [QualifiedName] for the [FutureOr] type in `dart:async`.
-  static final QualifiedName futureOrName =
-      QualifiedName(uri: 'dart:async', name: 'FutureOr');
+  static final QualifiedName futureOrName = QualifiedName(
+    uri: 'dart:async',
+    name: 'FutureOr',
+  );
 }
 
 /// A type of the form `T?`.
@@ -217,7 +240,8 @@ final class NullableType extends StaticType {
   @override
   StaticTypeDesc _buildDescription(_StaticTypeToDescription context) {
     return StaticTypeDesc.nullableTypeDesc(
-        NullableTypeDesc(inner: inner._buildDescription(context)));
+      NullableTypeDesc(inner: inner._buildDescription(context)),
+    );
   }
 
   @override
@@ -249,8 +273,9 @@ final class TypeParameterType extends StaticType {
 
   @override
   StaticTypeDesc _buildDescription(_StaticTypeToDescription context) {
-    return StaticTypeDesc.typeParameterTypeDesc(TypeParameterTypeDesc(
-        parameterId: context.referenceParameter(parameter)));
+    return StaticTypeDesc.typeParameterTypeDesc(
+      TypeParameterTypeDesc(parameterId: context.referenceParameter(parameter)),
+    );
   }
 }
 
@@ -348,7 +373,9 @@ final class FunctionType extends StaticType {
   }) : super._();
 
   static FunctionType _translateFrom(
-      FunctionTypeDesc desc, Map<int, StaticTypeParameter> parameters) {
+    FunctionTypeDesc desc,
+    Map<int, StaticTypeParameter> parameters,
+  ) {
     var typeParameters = const <StaticTypeParameter>[];
 
     if (desc.typeParameters.isNotEmpty) {
@@ -357,7 +384,9 @@ final class FunctionType extends StaticType {
       // half-baked type parameters and then patch things up later to create the
       // final representation.
       typeParameters = List.generate(
-          desc.typeParameters.length, (_) => StaticTypeParameter());
+        desc.typeParameters.length,
+        (_) => StaticTypeParameter(),
+      );
 
       parameters = {
         ...parameters,
@@ -369,16 +398,20 @@ final class FunctionType extends StaticType {
       // bounds.
       for (final (i, desc) in desc.typeParameters.indexed) {
         if (desc.bound case final bound?) {
-          typeParameters[i].bound =
-              StaticType._translateFromDescription(bound, parameters);
+          typeParameters[i].bound = StaticType._translateFromDescription(
+            bound,
+            parameters,
+          );
         }
       }
     }
 
     return FunctionType(
       typeParameters: typeParameters,
-      returnType:
-          StaticType._translateFromDescription(desc.returnType, parameters),
+      returnType: StaticType._translateFromDescription(
+        desc.returnType,
+        parameters,
+      ),
       requiredPositional: [
         for (final desc in desc.requiredPositionalParameters)
           StaticType._translateFromDescription(desc, parameters),
@@ -409,30 +442,34 @@ final class FunctionType extends StaticType {
       context.uniqueIdFor(parameter);
     }
 
-    return StaticTypeDesc.functionTypeDesc(FunctionTypeDesc(
-      returnType: returnType._buildDescription(context),
-      typeParameters: [
-        for (final parameter in typeParameters)
-          StaticTypeParameterDesc(
-            identifier: context.referenceParameter(parameter),
-            bound: parameter.bound?._buildDescription(context),
-          ),
-      ],
-      requiredPositionalParameters: [
-        for (final type in requiredPositional) type._buildDescription(context),
-      ],
-      optionalPositionalParameters: [
-        for (final type in optionalPositional) type._buildDescription(context),
-      ],
-      namedParameters: [
-        for (final type in named)
-          NamedFunctionTypeParameter(
-            type: type.type._buildDescription(context),
-            name: type.name,
-            required: type.required,
-          ),
-      ],
-    ));
+    return StaticTypeDesc.functionTypeDesc(
+      FunctionTypeDesc(
+        returnType: returnType._buildDescription(context),
+        typeParameters: [
+          for (final parameter in typeParameters)
+            StaticTypeParameterDesc(
+              identifier: context.referenceParameter(parameter),
+              bound: parameter.bound?._buildDescription(context),
+            ),
+        ],
+        requiredPositionalParameters: [
+          for (final type in requiredPositional)
+            type._buildDescription(context),
+        ],
+        optionalPositionalParameters: [
+          for (final type in optionalPositional)
+            type._buildDescription(context),
+        ],
+        namedParameters: [
+          for (final type in named)
+            NamedFunctionTypeParameter(
+              type: type.type._buildDescription(context),
+              name: type.name,
+              required: type.required,
+            ),
+        ],
+      ),
+    );
   }
 
   /// Instantiates a generic function type with the given [typeArguments].
@@ -445,14 +482,19 @@ final class FunctionType extends StaticType {
   /// with `[VoidType()]` as type argument yields `void Function()`.
   FunctionType instantiate(List<StaticType> typeArguments) {
     if (typeArguments.length != typeParameters.length) {
-      throw ArgumentError.value(typeArguments, 'typeArguments',
-          'Must match length of type parameters (${typeParameters.length})');
+      throw ArgumentError.value(
+        typeArguments,
+        'typeArguments',
+        'Must match length of type parameters (${typeParameters.length})',
+      );
     }
 
-    final substitution = TypeSubstitution(substitution: {
-      for (final (i, parameter) in typeParameters.indexed)
-        parameter: typeArguments[i]
-    });
+    final substitution = TypeSubstitution(
+      substitution: {
+        for (final (i, parameter) in typeParameters.indexed)
+          parameter: typeArguments[i],
+      },
+    );
 
     return FunctionType(
       returnType: substitution.applyTo(returnType),
@@ -550,18 +592,24 @@ final class _ApplyTypeSubstitution
 
   @override
   StaticType visitFunctionType(FunctionType type, TypeSubstitution arg) {
-    final newTypeParameters =
-        List.generate(type.typeParameters.length, (_) => StaticTypeParameter());
+    final newTypeParameters = List.generate(
+      type.typeParameters.length,
+      (_) => StaticTypeParameter(),
+    );
 
-    final innerSubstitution = TypeSubstitution(substitution: {
-      ...arg.substitution,
-      for (final (i, old) in type.typeParameters.indexed)
-        old: TypeParameterType(parameter: newTypeParameters[i]),
-    });
+    final innerSubstitution = TypeSubstitution(
+      substitution: {
+        ...arg.substitution,
+        for (final (i, old) in type.typeParameters.indexed)
+          old: TypeParameterType(parameter: newTypeParameters[i]),
+      },
+    );
 
     for (final (i, newParam) in newTypeParameters.indexed) {
-      newParam.bound =
-          type.typeParameters[i].bound?.accept(this, innerSubstitution);
+      newParam.bound = type.typeParameters[i].bound?.accept(
+        this,
+        innerSubstitution,
+      );
     }
 
     return FunctionType(
@@ -619,7 +667,9 @@ final class _ApplyTypeSubstitution
 
   @override
   StaticType visitTypeParameterType(
-      TypeParameterType type, TypeSubstitution arg) {
+    TypeParameterType type,
+    TypeSubstitution arg,
+  ) {
     if (arg.substitution[type.parameter] case final substitution?) {
       return substitution;
     }

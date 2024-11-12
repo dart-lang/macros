@@ -48,15 +48,20 @@ class MacroClient {
     // Send `HandshakeRequest` telling the host what protocols this macro
     // bundle supports.
     Protocol.handshakeProtocol.send(
-        socket.add,
-        HandshakeRequest(protocols: [
+      socket.add,
+      HandshakeRequest(
+        protocols: [
           Protocol(
-              encoding: ProtocolEncoding.json,
-              version: ProtocolVersion.macros1),
+            encoding: ProtocolEncoding.json,
+            version: ProtocolVersion.macros1,
+          ),
           Protocol(
-              encoding: ProtocolEncoding.binary,
-              version: ProtocolVersion.macros1),
-        ]).node);
+            encoding: ProtocolEncoding.binary,
+            version: ProtocolVersion.macros1,
+          ),
+        ],
+      ).node,
+    );
     // Read `HandshakeResponse`, get from it the protocol to use for the rest of
     // the stream, and decode+handle using that protocol.
     final handshakeResponse = HandshakeResponse.fromJson(await firstResponse);
@@ -69,9 +74,14 @@ class MacroClient {
     // a `MacroStartedRequest` that is sent next.
 
     for (final macro in macros) {
-      unawaited(_sendRequest(MacroRequest.macroStartedRequest(
-          MacroStartedRequest(macroDescription: macro.description),
-          id: nextRequestId)));
+      unawaited(
+        _sendRequest(
+          MacroRequest.macroStartedRequest(
+            MacroStartedRequest(macroDescription: macro.description),
+            id: nextRequestId,
+          ),
+        ),
+      );
     }
   }
 
@@ -101,41 +111,67 @@ class MacroClient {
     final hostRequest = HostRequest.fromJson(jsonData);
     switch (hostRequest.type) {
       case HostRequestType.augmentRequest:
-        final macro = macros
-            .where((m) =>
-                m.description.annotation.equals(hostRequest.macroAnnotation))
-            .singleOrNull;
+        final macro =
+            macros
+                .where(
+                  (m) => m.description.annotation.equals(
+                    hostRequest.macroAnnotation,
+                  ),
+                )
+                .singleOrNull;
 
         if (macro == null) {
-          _sendResponse(Response.errorResponse(
+          _sendResponse(
+            Response.errorResponse(
               requestId: hostRequest.id,
               ErrorResponse(
-                  error: 'No macro for annotation: '
-                      '${hostRequest.macroAnnotation.asString}')));
+                error:
+                    'No macro for annotation: '
+                    '${hostRequest.macroAnnotation.asString}',
+              ),
+            ),
+          );
         } else {
           final augmentRequest = hostRequest.asAugmentRequest;
           await Scope.macro.runAsync(() async {
             MacroScope.current.addModel(augmentRequest.model);
-            return _sendResponse(Response.augmentResponse(
+            return _sendResponse(
+              Response.augmentResponse(
                 switch (augmentRequest.phase) {
-                      1 => macro.description.runsInPhases.contains(1)
-                          ? await executeTypesMacro(
-                              macro, _host, augmentRequest)
-                          : null,
-                      2 => macro.description.runsInPhases.contains(2)
-                          ? await executeDeclarationsMacro(
-                              macro, _host, augmentRequest)
-                          : null,
-                      3 => macro.description.runsInPhases.contains(3)
-                          ? await executeDefinitionsMacro(
-                              macro, _host, augmentRequest)
-                          : null,
-                      _ => throw StateError(
+                      1 =>
+                        macro.description.runsInPhases.contains(1)
+                            ? await executeTypesMacro(
+                              macro,
+                              _host,
+                              augmentRequest,
+                            )
+                            : null,
+                      2 =>
+                        macro.description.runsInPhases.contains(2)
+                            ? await executeDeclarationsMacro(
+                              macro,
+                              _host,
+                              augmentRequest,
+                            )
+                            : null,
+                      3 =>
+                        macro.description.runsInPhases.contains(3)
+                            ? await executeDefinitionsMacro(
+                              macro,
+                              _host,
+                              augmentRequest,
+                            )
+                            : null,
+                      _ =>
+                        throw StateError(
                           'Unexpected phase ${augmentRequest.phase}, '
-                          'expected 1, 2, or 3.')
+                          'expected 1, 2, or 3.',
+                        ),
                     } ??
                     AugmentResponse(),
-                requestId: hostRequest.id));
+                requestId: hostRequest.id,
+              ),
+            );
           });
         }
       default:
@@ -179,11 +215,15 @@ class RemoteMacroHost implements Host {
   Future<Model> query(Query query) async {
     // The macro scope is used to accumulate augment results, drop into
     // "none" scope to avoid clashing with those when sending the query.
-    final model = (await Scope.none.runAsync(() async => _client._sendRequest(
-            MacroRequest.queryRequest(QueryRequest(query: query),
-                id: nextRequestId))))
-        .asQueryResponse
-        .model;
+    final model =
+        (await Scope.none.runAsync(
+          () async => _client._sendRequest(
+            MacroRequest.queryRequest(
+              QueryRequest(query: query),
+              id: nextRequestId,
+            ),
+          ),
+        )).asQueryResponse.model;
     MacroScope.current.addModel(model);
     return model;
   }

@@ -11,14 +11,21 @@ import 'analyzer_macro_runner.dart';
 import 'cfe_macro_runner.dart';
 import 'macro_tool.dart';
 
-final argParser = ArgParser()
-  ..addOption('host',
-      defaultsTo: 'analyzer', help: 'The macro host: "analyzer" or "cfe".')
-  ..addOption('workspace', help: 'Path to workspace.')
-  ..addOption('packageConfig', help: 'Path to package config.')
-  ..addOption('script', help: 'Path to script.')
-  ..addOption('benchmark-iterations',
-      defaultsTo: '5', help: 'Benchmark iterations.');
+final argParser =
+    ArgParser()
+      ..addOption(
+        'host',
+        defaultsTo: 'analyzer',
+        help: 'The macro host: "analyzer" or "cfe".',
+      )
+      ..addOption('workspace', help: 'Path to workspace.')
+      ..addOption('packageConfig', help: 'Path to package config.')
+      ..addOption('script', help: 'Path to script.')
+      ..addOption(
+        'benchmark-iterations',
+        defaultsTo: '5',
+        help: 'Benchmark iterations.',
+      );
 
 Future<int> main(List<String> arguments) async {
   final args = argParser.parse(arguments);
@@ -45,15 +52,16 @@ ${argParser.usage}''');
   final canonicalizedWorkspace = p.canonicalize(workspace);
 
   final tool = MacroTool(
-    macroRunner: host == HostOption.analyzer
-        ? AnalyzerMacroRunner(
-            packageConfigPath: canonicalizedPackageConfig,
-            workspacePath: canonicalizedWorkspace,
-          )
-        : CfeMacroRunner(
-            packageConfigPath: canonicalizedPackageConfig,
-            workspacePath: canonicalizedWorkspace,
-          ),
+    macroRunner:
+        host == HostOption.analyzer
+            ? AnalyzerMacroRunner(
+              packageConfigPath: canonicalizedPackageConfig,
+              workspacePath: canonicalizedWorkspace,
+            )
+            : CfeMacroRunner(
+              packageConfigPath: canonicalizedPackageConfig,
+              workspacePath: canonicalizedWorkspace,
+            ),
     packageConfigPath: canonicalizedPackageConfig,
     workspacePath: canonicalizedWorkspace,
     benchmarkIterations: int.parse(args['benchmark-iterations']),
@@ -95,8 +103,8 @@ enum HostOption {
   cfe;
 
   static HostOption? forString(String? option) => switch (option) {
-        'analyzer' => HostOption.analyzer,
-        'cfe' => HostOption.cfe,
-        _ => throw ArgumentError('Not a valid host: $option'),
-      };
+    'analyzer' => HostOption.analyzer,
+    'cfe' => HostOption.cfe,
+    _ => throw ArgumentError('Not a valid host: $option'),
+  };
 }

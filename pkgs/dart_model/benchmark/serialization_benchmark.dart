@@ -31,9 +31,10 @@ abstract class SerializationBenchmark extends BenchmarkBase {
   List<String> makeMemberNames(int key) {
     final length = key % 10;
     return List<String>.generate(
-        // "key % 2999" so some member names are reused.
-        length,
-        (i) => 'interface${key % 2999}member$i');
+      // "key % 2999" so some member names are reused.
+      length,
+      (i) => 'interface${key % 2999}member$i',
+    );
   }
 }
 

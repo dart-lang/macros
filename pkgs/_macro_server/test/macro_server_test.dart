@@ -14,115 +14,174 @@ import 'package:test/test.dart';
 
 void main() {
   final fooTarget = QualifiedName(name: 'Foo', uri: 'package:foo/foo.dart');
-  final fooModel = Scope.query.run(() => Model()
-    ..uris[fooTarget.uri] = (Library()
-      ..scopes['Foo'] = Interface(properties: Properties(isClass: true))));
+  final fooModel = Scope.query.run(
+    () =>
+        Model()
+          ..uris[fooTarget.uri] =
+              (Library()
+                ..scopes['Foo'] = Interface(
+                  properties: Properties(isClass: true),
+                )),
+  );
 
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
     Protocol(
-        encoding: ProtocolEncoding.binary, version: ProtocolVersion.macros1)
+      encoding: ProtocolEncoding.binary,
+      version: ProtocolVersion.macros1,
+    ),
   ]) {
     group('MacroServer using ${protocol.encoding}', () {
       test('serves a macro service', () async {
         final service = TestHostService();
-        final server =
-            await MacroServer.serve(protocol: protocol, service: service);
+        final server = await MacroServer.serve(
+          protocol: protocol,
+          service: service,
+        );
 
         await MacroClient.run(
-            endpoint: server.endpoint, macros: [DeclareXImplementation()]);
+          endpoint: server.endpoint,
+          macros: [DeclareXImplementation()],
+        );
 
         // Check that the macro sent its description to the host on startup.
-        expect((await service.macroStartedRequests.first).macroDescription,
-            DeclareXImplementation().description);
+        expect(
+          (await service.macroStartedRequests.first).macroDescription,
+          DeclareXImplementation().description,
+        );
       });
 
       test('throws on send to macro that is not running', () async {
         final service = TestHostService();
-        final server =
-            await MacroServer.serve(protocol: protocol, service: service);
+        final server = await MacroServer.serve(
+          protocol: protocol,
+          service: service,
+        );
         expect(
-            server.sendToMacro(HostRequest.augmentRequest(
-                AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
-                id: 1,
-                macroAnnotation: QualifiedName(
-                    uri: 'package:_test_macros/test_macros.dart',
-                    name: 'DeclareX'))),
-            throwsException);
+          server.sendToMacro(
+            HostRequest.augmentRequest(
+              AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
+              id: 1,
+              macroAnnotation: QualifiedName(
+                uri: 'package:_test_macros/test_macros.dart',
+                name: 'DeclareX',
+              ),
+            ),
+          ),
+          throwsException,
+        );
       });
 
       test('send to a macro that is running succeeds', () async {
         final service = TestHostService();
-        final server =
-            await MacroServer.serve(protocol: protocol, service: service);
+        final server = await MacroServer.serve(
+          protocol: protocol,
+          service: service,
+        );
 
-        unawaited(MacroClient.run(
-            endpoint: server.endpoint, macros: [DeclareXImplementation()]));
+        unawaited(
+          MacroClient.run(
+            endpoint: server.endpoint,
+            macros: [DeclareXImplementation()],
+          ),
+        );
 
-        await server.sendToMacro(HostRequest.augmentRequest(
-          id: 1,
-          macroAnnotation: QualifiedName(
-              uri: 'package:_test_macros/declare_x_macro.dart',
-              name: 'DeclareX'),
-          AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
-        ));
-      });
-
-      test('send to macro succeeds with two connected macro binaries',
-          () async {
-        final service = TestHostService();
-        final server =
-            await MacroServer.serve(protocol: protocol, service: service);
-
-        unawaited(MacroClient.run(
-            endpoint: server.endpoint, macros: [DeclareXImplementation()]));
-
-        unawaited(MacroClient.run(
-            endpoint: server.endpoint, macros: [QueryClassImplementation()]));
-
-        await Future.wait([
-          server.sendToMacro(HostRequest.augmentRequest(
+        await server.sendToMacro(
+          HostRequest.augmentRequest(
             id: 1,
             macroAnnotation: QualifiedName(
-                uri: 'package:_test_macros/declare_x_macro.dart',
-                name: 'DeclareX'),
+              uri: 'package:_test_macros/declare_x_macro.dart',
+              name: 'DeclareX',
+            ),
             AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
-          )),
-          server.sendToMacro(HostRequest.augmentRequest(
-              id: 2,
-              macroAnnotation: QualifiedName(
-                  uri: 'package:_test_macros/query_class.dart',
-                  name: 'QueryClass'),
-              AugmentRequest(phase: 1, target: fooTarget, model: fooModel)))
-        ]);
+          ),
+        );
       });
 
       test(
-          'send to macro succeeds with one connected macro binary containing '
+        'send to macro succeeds with two connected macro binaries',
+        () async {
+          final service = TestHostService();
+          final server = await MacroServer.serve(
+            protocol: protocol,
+            service: service,
+          );
+
+          unawaited(
+            MacroClient.run(
+              endpoint: server.endpoint,
+              macros: [DeclareXImplementation()],
+            ),
+          );
+
+          unawaited(
+            MacroClient.run(
+              endpoint: server.endpoint,
+              macros: [QueryClassImplementation()],
+            ),
+          );
+
+          await Future.wait([
+            server.sendToMacro(
+              HostRequest.augmentRequest(
+                id: 1,
+                macroAnnotation: QualifiedName(
+                  uri: 'package:_test_macros/declare_x_macro.dart',
+                  name: 'DeclareX',
+                ),
+                AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
+              ),
+            ),
+            server.sendToMacro(
+              HostRequest.augmentRequest(
+                id: 2,
+                macroAnnotation: QualifiedName(
+                  uri: 'package:_test_macros/query_class.dart',
+                  name: 'QueryClass',
+                ),
+                AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
+              ),
+            ),
+          ]);
+        },
+      );
+
+      test('send to macro succeeds with one connected macro binary containing '
           'two macros', () async {
         final service = TestHostService();
-        final server =
-            await MacroServer.serve(protocol: protocol, service: service);
+        final server = await MacroServer.serve(
+          protocol: protocol,
+          service: service,
+        );
 
-        unawaited(MacroClient.run(
+        unawaited(
+          MacroClient.run(
             endpoint: server.endpoint,
-            macros: [DeclareXImplementation(), QueryClassImplementation()]));
+            macros: [DeclareXImplementation(), QueryClassImplementation()],
+          ),
+        );
 
         await Future.wait([
-          server.sendToMacro(HostRequest.augmentRequest(
-            id: 1,
-            macroAnnotation: QualifiedName(
+          server.sendToMacro(
+            HostRequest.augmentRequest(
+              id: 1,
+              macroAnnotation: QualifiedName(
                 uri: 'package:_test_macros/declare_x_macro.dart',
-                name: 'DeclareX'),
-            AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
-          )),
-          server.sendToMacro(HostRequest.augmentRequest(
-            id: 2,
-            macroAnnotation: QualifiedName(
+                name: 'DeclareX',
+              ),
+              AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
+            ),
+          ),
+          server.sendToMacro(
+            HostRequest.augmentRequest(
+              id: 2,
+              macroAnnotation: QualifiedName(
                 uri: 'package:_test_macros/query_class.dart',
-                name: 'QueryClass'),
-            AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
-          ))
+                name: 'QueryClass',
+              ),
+              AugmentRequest(phase: 1, target: fooTarget, model: fooModel),
+            ),
+          ),
         ]);
       });
     });
@@ -139,10 +198,14 @@ class TestHostService implements HostService {
   Future<Response> handle(MacroRequest request) async {
     if (request.type == MacroRequestType.macroStartedRequest) {
       _macroStartedRequestsController.add(request.asMacroStartedRequest);
-      return Response.macroStartedResponse(MacroStartedResponse(),
-          requestId: request.id);
+      return Response.macroStartedResponse(
+        MacroStartedResponse(),
+        requestId: request.id,
+      );
     }
-    return Response.errorResponse(ErrorResponse(error: 'unimplemented'),
-        requestId: request.id);
+    return Response.errorResponse(
+      ErrorResponse(error: 'unimplemented'),
+      requestId: request.id,
+    );
   }
 }

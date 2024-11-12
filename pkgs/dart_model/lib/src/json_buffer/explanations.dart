@@ -35,14 +35,17 @@ class _Explanations {
   /// Otherwise, this method throws on multiple writes.
   void explain(_Pointer pointer, {bool allowOverwrite = false}) {
     if (_explanationsStack.isNotEmpty) {
-      final explanation = _explanationsStack.join(', ') +
+      final explanation =
+          _explanationsStack.join(', ') +
           (allowOverwrite ? _allowOverwriteTag : '');
       final oldExplanation = _explanationsByPointer[pointer];
       if (oldExplanation != null) {
         if (!allowOverwrite || !oldExplanation.contains(_allowOverwriteTag)) {
-          throw StateError('Second write to $pointer!\n'
-              '  Old explanation: ${_explanationsByPointer[pointer]}\n'
-              '  New explanation: $explanation');
+          throw StateError(
+            'Second write to $pointer!\n'
+            '  Old explanation: ${_explanationsByPointer[pointer]}\n'
+            '  New explanation: $explanation',
+          );
         }
       }
       _explanationsByPointer[pointer] = explanation;

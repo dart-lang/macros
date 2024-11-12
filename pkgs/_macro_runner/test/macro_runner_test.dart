@@ -14,15 +14,16 @@ import 'package:test/test.dart';
 void main() {
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json),
-    Protocol(encoding: ProtocolEncoding.binary)
+    Protocol(encoding: ProtocolEncoding.binary),
   ]) {
     group('MacroRunner with ${protocol.encoding}', () {
       test('runs macros', () async {
         final builder = MacroBuilder();
         final bundle = await builder.build(Isolate.packageConfigSync!, [
           QualifiedName(
-              uri: 'package:_test_macros/declare_x_macro.dart',
-              name: 'DeclareXImplementation')
+            uri: 'package:_test_macros/declare_x_macro.dart',
+            name: 'DeclareXImplementation',
+          ),
         ]);
 
         final serverSocket = await ServerSocket.bind('localhost', 0);
@@ -30,11 +31,14 @@ void main() {
 
         final runner = MacroRunner();
         runner.start(
-            macroBundle: bundle,
-            endpoint: HostEndpoint(port: serverSocket.port));
+          macroBundle: bundle,
+          endpoint: HostEndpoint(port: serverSocket.port),
+        );
 
         expect(
-            serverSocket.first.timeout(const Duration(seconds: 10)), completes);
+          serverSocket.first.timeout(const Duration(seconds: 10)),
+          completes,
+        );
       });
     });
   }

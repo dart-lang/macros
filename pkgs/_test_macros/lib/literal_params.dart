@@ -29,48 +29,62 @@ class LiteralParams {
   final List<String>? strings;
   final List<Object>? objects;
 
-  const LiteralParams(
-      {required this.anInt,
-      this.aNum,
-      this.aDouble,
-      this.aString,
-      this.anObject,
-      this.ints,
-      this.nums,
-      this.doubles,
-      this.strings,
-      this.objects});
+  const LiteralParams({
+    required this.anInt,
+    this.aNum,
+    this.aDouble,
+    this.aString,
+    this.anObject,
+    this.ints,
+    this.nums,
+    this.doubles,
+    this.strings,
+    this.objects,
+  });
 }
 
 class LiteralParamsImplementation implements ClassDeclarationsMacro {
   // TODO(davidmorgan): this should be injected by the bootstrap script.
   @override
   MacroDescription get description => MacroDescription(
-      annotation: QualifiedName(
-          uri: 'package:_test_macros/literal_params.dart',
-          name: 'LiteralParams'),
-      runsInPhases: [2]);
+    annotation: QualifiedName(
+      uri: 'package:_test_macros/literal_params.dart',
+      name: 'LiteralParams',
+    ),
+    runsInPhases: [2],
+  );
 
   @override
   Future<void> buildDeclarationsForClass(
-      ClassDeclarationsBuilder builder) async {
+    ClassDeclarationsBuilder builder,
+  ) async {
     // TODO(davidmorgan): need a way to find the correct annotation, this just
     // uses the first.
-    final annotation = builder
-        .target.metadataAnnotations.first.expression.asConstructorInvocation;
+    final annotation =
+        builder
+            .target
+            .metadataAnnotations
+            .first
+            .expression
+            .asConstructorInvocation;
 
     final namedArguments = {
       for (final argument in annotation.arguments)
         if (argument.type == ArgumentType.namedArgument)
           argument.asNamedArgument.name:
-              argument.asNamedArgument.expression.evaluate
+              argument.asNamedArgument.expression.evaluate,
     };
 
-    builder.declareInType(Augmentation(
-        code: expandTemplate([
-      for (final entry in namedArguments.entries)
-        ' // ${entry.key}: ${entry.value}, ${entry.value.runtimeType}',
-    ].join('\n'))));
+    builder.declareInType(
+      Augmentation(
+        code: expandTemplate(
+          [
+            for (final entry in namedArguments.entries)
+              ' // ${entry.key}: ${entry.value}, ${entry.value.runtimeType}',
+          ].join('\n'),
+        ),
+      ),
+    );
   }
 }
 
@@ -78,44 +92,49 @@ class LiteralParamsImplementation implements ClassDeclarationsMacro {
 // all have to write expression evaluation code.
 extension ExpressionExtension on Expression {
   Object get evaluate => switch (type) {
-        ExpressionType.integerLiteral => int.parse(asIntegerLiteral.text),
-        ExpressionType.doubleLiteral => double.parse(asDoubleLiteral.text),
-        ExpressionType.stringLiteral => asStringLiteral.evaluate,
-        ExpressionType.booleanLiteral => bool.parse(asBooleanLiteral.text),
-        ExpressionType.listLiteral =>
-          asListLiteral.elements.map((e) => e.evaluate).toList(),
-        // TODO(davidmorgan): need the type name to do something useful here,
-        // for now just return the JSON.
-        ExpressionType.constructorInvocation =>
-          asConstructorInvocation.toString(),
-        // TODO(davidmorgan): need to follow references to do something useful
-        // here, for now just return the JSON.
-        ExpressionType.staticGet => asStaticGet.toString(),
-        _ => throw UnsupportedError(
-            'Not supported in @LiteralParams annotation: $this'),
-      };
+    ExpressionType.integerLiteral => int.parse(asIntegerLiteral.text),
+    ExpressionType.doubleLiteral => double.parse(asDoubleLiteral.text),
+    ExpressionType.stringLiteral => asStringLiteral.evaluate,
+    ExpressionType.booleanLiteral => bool.parse(asBooleanLiteral.text),
+    ExpressionType.listLiteral =>
+      asListLiteral.elements.map((e) => e.evaluate).toList(),
+    // TODO(davidmorgan): need the type name to do something useful here,
+    // for now just return the JSON.
+    ExpressionType.constructorInvocation => asConstructorInvocation.toString(),
+    // TODO(davidmorgan): need to follow references to do something useful
+    // here, for now just return the JSON.
+    ExpressionType.staticGet => asStaticGet.toString(),
+    _ =>
+      throw UnsupportedError(
+        'Not supported in @LiteralParams annotation: $this',
+      ),
+  };
 }
 
 extension ElementExtension on Element {
   Object get evaluate => switch (type) {
-        ElementType.expressionElement =>
-          asExpressionElement.expression.evaluate,
-        _ => throw UnsupportedError(
-            'Not supported in @LiteralParams annotation: $this'),
-      };
+    ElementType.expressionElement => asExpressionElement.expression.evaluate,
+    _ =>
+      throw UnsupportedError(
+        'Not supported in @LiteralParams annotation: $this',
+      ),
+  };
 }
 
 extension StringLiteralExtension on StringLiteral {
   Object get evaluate {
     if (parts.length != 1) {
       throw UnsupportedError(
-          'Not supported in @LiteralParams annotation: $this');
+        'Not supported in @LiteralParams annotation: $this',
+      );
     }
     final part = parts.single;
     return switch (part.type) {
       StringLiteralPartType.stringPart => part.asStringPart.text,
-      _ => throw UnsupportedError(
-          'Not supported in @LiteralParams annotation: $this'),
+      _ =>
+        throw UnsupportedError(
+          'Not supported in @LiteralParams annotation: $this',
+        ),
     };
   }
 }

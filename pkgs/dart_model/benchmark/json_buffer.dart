@@ -138,8 +138,11 @@ class JsonBuffer {
       final key = keys[i];
       _writeInt(start + _intSize + i * _intSize * 2, _intSize, _addString(key));
       final value = lookup(key);
-      _writeInt(start + _intSize + i * _intSize * 2 + _intSize, _intSize,
-          _addValue(value));
+      _writeInt(
+        start + _intSize + i * _intSize * 2 + _intSize,
+        _intSize,
+        _addValue(value),
+      );
     }
   }
 
@@ -327,7 +330,8 @@ class JsonBuffer {
     if (maybeResult != null) return maybeResult;
     final length = _readInt(pointer, _intSize);
     return _decodedStrings[pointer] ??= utf8.decode(
-        _buffer.sublist(pointer + _intSize, pointer + _intSize + length));
+      _buffer.sublist(pointer + _intSize, pointer + _intSize + length),
+    );
   }
 
   /// Reads the `bool` at [_Pointer].
@@ -364,14 +368,18 @@ class _JsonBufferMap
   }
 
   @override
-  late Iterable<String> keys =
-      _JsonBufferMapEntryIterable(_buffer, _pointer, readValues: false)
-          .map((e) => e.key);
+  late Iterable<String> keys = _JsonBufferMapEntryIterable(
+    _buffer,
+    _pointer,
+    readValues: false,
+  ).map((e) => e.key);
 
   @override
-  late Iterable<Object?> values =
-      _JsonBufferMapEntryIterable(_buffer, _pointer, readKeys: false)
-          .map((e) => e.value);
+  late Iterable<Object?> values = _JsonBufferMapEntryIterable(
+    _buffer,
+    _pointer,
+    readKeys: false,
+  ).map((e) => e.value);
 
   @override
   late Iterable<MapEntry<String, Object?>> entries =
@@ -402,13 +410,21 @@ class _JsonBufferMapEntryIterable
   final bool readKeys;
   final bool readValues;
 
-  _JsonBufferMapEntryIterable(this._buffer, this._pointer,
-      {this.readKeys = true, this.readValues = true});
+  _JsonBufferMapEntryIterable(
+    this._buffer,
+    this._pointer, {
+    this.readKeys = true,
+    this.readValues = true,
+  });
 
   @override
   Iterator<MapEntry<String, Object?>> get iterator =>
-      _JsonBufferMapEntryIterator(_buffer, _pointer,
-          readKeys: readKeys, readValues: readValues);
+      _JsonBufferMapEntryIterator(
+        _buffer,
+        _pointer,
+        readKeys: readKeys,
+        readValues: readValues,
+      );
 }
 
 /// `Iterator` that reads a `Map` in a [JsonBuffer].
@@ -422,19 +438,24 @@ class _JsonBufferMapEntryIterator
   final bool readKeys;
   final bool readValues;
 
-  _JsonBufferMapEntryIterator(this._buffer, _Pointer pointer,
-      {this.readKeys = true, this.readValues = true})
-      : _last = pointer +
-            _intSize +
-            _buffer._readInt(pointer, _intSize) * 2 * _intSize,
-        _pointer = pointer - _intSize;
+  _JsonBufferMapEntryIterator(
+    this._buffer,
+    _Pointer pointer, {
+    this.readKeys = true,
+    this.readValues = true,
+  }) : _last =
+           pointer +
+           _intSize +
+           _buffer._readInt(pointer, _intSize) * 2 * _intSize,
+       _pointer = pointer - _intSize;
 
   @override
   MapEntry<String, Object?> get current => MapEntry(
-      readKeys ? _buffer._readString(_buffer._readPointer(_pointer)) : '',
-      readValues
-          ? _buffer._readValue(_buffer._readPointer(_pointer + _intSize))
-          : null);
+    readKeys ? _buffer._readString(_buffer._readPointer(_pointer)) : '',
+    readValues
+        ? _buffer._readValue(_buffer._readPointer(_pointer + _intSize))
+        : null,
+  );
 
   @override
   bool moveNext() {
@@ -459,8 +480,9 @@ class _JsonBufferList with ListMixin<Object?> implements List<Object?> {
       throw UnsupportedError('JsonBufferList is readonly.');
 
   @override
-  Object? operator [](int index) => _buffer
-      ._readValue(_buffer._readPointer(_pointer + _intSize + index * _intSize));
+  Object? operator [](int index) => _buffer._readValue(
+    _buffer._readPointer(_pointer + _intSize + index * _intSize),
+  );
 
   @override
   void operator []=(int index, Object? value) {
@@ -480,13 +502,7 @@ typedef _Pointer = int;
 ///
 /// TODO(davidmorgan): we can get more use out of "type" bytes, for example
 /// encoding bools directly in the type byte.
-enum Type {
-  string,
-  bool,
-  map,
-  list,
-  int,
-}
+enum Type { string, bool, map, list, int }
 
 /// Bytes needed by [Type].
 final _typeSize = 1;

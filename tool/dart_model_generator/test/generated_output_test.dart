@@ -14,13 +14,17 @@ void main() {
       final actual = File('../../${generationResult.path}').readAsStringSync();
       // TODO: On windows we get carriage returns, which makes this fail
       // without ignoring white space. In theory this shouldn't happen.
-      expect(actual, equalsIgnoringWhitespace(expected), reason: '''
+      expect(
+        actual,
+        equalsIgnoringWhitespace(expected),
+        reason: '''
 Output is not up to date. Please run
 
   dart tool/dart_model_generator/bin/main.dart
 
 in repo root.
-''');
+''',
+      );
     });
   }
 }

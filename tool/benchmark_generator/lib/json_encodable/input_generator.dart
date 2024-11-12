@@ -26,11 +26,12 @@ class JsonEncodableInputGenerator {
   final int librariesPerCycle;
   final Strategy strategy;
 
-  JsonEncodableInputGenerator(
-      {required this.fieldsPerClass,
-      required this.classesPerLibrary,
-      required this.librariesPerCycle,
-      required this.strategy});
+  JsonEncodableInputGenerator({
+    required this.fieldsPerClass,
+    required this.classesPerLibrary,
+    required this.librariesPerCycle,
+    required this.strategy,
+  });
 
   void generate(Workspace workspace) {
     for (var i = 0; i != librariesPerCycle; ++i) {
@@ -38,8 +39,11 @@ class JsonEncodableInputGenerator {
     }
   }
 
-  String _generateLibrary(int index,
-      {bool topLevelCacheBuster = false, bool fieldCacheBuster = false}) {
+  String _generateLibrary(
+    int index, {
+    bool topLevelCacheBuster = false,
+    bool fieldCacheBuster = false,
+  }) {
     final buffer = StringBuffer();
 
     if (strategy == Strategy.macro) {
@@ -68,8 +72,9 @@ class JsonEncodableInputGenerator {
       return 'a$fieldIndex';
     }
 
-    final result =
-        StringBuffer(strategy == Strategy.macro ? '@JsonCodable()' : '');
+    final result = StringBuffer(
+      strategy == Strategy.macro ? '@JsonCodable()' : '',
+    );
 
     result.writeln('class $className {');
     result.writeln('''
@@ -92,12 +97,14 @@ class JsonEncodableInputGenerator {
       result.writeln('  final result = <String, Object?>{};');
       for (var i = 0; i != fieldsPerClass; ++i) {
         result.writeln(
-            "if (${fieldName(i)} != null) result['${fieldName(i)}'] = ${fieldName(i)};");
+          "if (${fieldName(i)} != null) result['${fieldName(i)}'] = ${fieldName(i)};",
+        );
       }
       result.writeln('return result;');
       result.writeln('}');
-      result
-          .writeln('factory $className.fromJson(Map<String, Object?> json) {');
+      result.writeln(
+        'factory $className.fromJson(Map<String, Object?> json) {',
+      );
       result.writeln('return $className._(');
       for (var i = 0; i != fieldsPerClass; ++i) {
         result.writeln("${fieldName(i)}: json['${fieldName(i)}'] as int,");
@@ -111,12 +118,16 @@ class JsonEncodableInputGenerator {
   }
 
   void changeIrrelevantInput(Workspace workspace) {
-    workspace.write('a0.dart',
-        source: _generateLibrary(0, topLevelCacheBuster: true));
+    workspace.write(
+      'a0.dart',
+      source: _generateLibrary(0, topLevelCacheBuster: true),
+    );
   }
 
   void changeRevelantInput(Workspace workspace) {
-    workspace.write('a0.dart',
-        source: _generateLibrary(0, fieldCacheBuster: true));
+    workspace.write(
+      'a0.dart',
+      source: _generateLibrary(0, fieldCacheBuster: true),
+    );
   }
 }

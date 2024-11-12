@@ -21,7 +21,7 @@ mixin _EntryMapMixin<K, V> on Map<K, V> {
   @override
   bool get isEmpty => length == 0;
 
-// `MapMixin` uses `keys.isNotEmpty`.
+  // `MapMixin` uses `keys.isNotEmpty`.
   @override
   bool get isNotEmpty => length != 0;
 }

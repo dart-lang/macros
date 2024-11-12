@@ -78,21 +78,27 @@ class _DeepCastMap<SK, SV, K, V> extends MapBase<K, V> {
 
   @override
   V update(K key, V Function(V value) update, {V Function()? ifAbsent}) {
-    return _castValue(_source.update(
-        key as SK, (SV value) => update(_castValue(value)) as SV,
-        ifAbsent: (ifAbsent == null) ? null : () => ifAbsent() as SV));
+    return _castValue(
+      _source.update(
+        key as SK,
+        (SV value) => update(_castValue(value)) as SV,
+        ifAbsent: (ifAbsent == null) ? null : () => ifAbsent() as SV,
+      ),
+    );
   }
 
   @override
   void updateAll(V Function(K key, V value) update) {
     _source.updateAll(
-        (SK key, SV value) => update(key as K, _castValue(value)) as SV);
+      (SK key, SV value) => update(key as K, _castValue(value)) as SV,
+    );
   }
 
   @override
   Iterable<MapEntry<K, V>> get entries {
-    return _source.entries.map<MapEntry<K, V>>((MapEntry<SK, SV> e) =>
-        MapEntry<K, V>(e.key as K, _castValue(e.value)));
+    return _source.entries.map<MapEntry<K, V>>(
+      (MapEntry<SK, SV> e) => MapEntry<K, V>(e.key as K, _castValue(e.value)),
+    );
   }
 
   @override
@@ -104,7 +110,8 @@ class _DeepCastMap<SK, SV, K, V> extends MapBase<K, V> {
 
   @override
   void removeWhere(bool Function(K key, V value) test) {
-    _source
-        .removeWhere((SK key, SV value) => test(key as K, _castValue(value)));
+    _source.removeWhere(
+      (SK key, SV value) => test(key as K, _castValue(value)),
+    );
   }
 }

@@ -59,12 +59,14 @@ extension ProtocolExtension on Protocol {
         // sense than fixed four bytes.
         final binary = node.serializeToBinary();
         final length = binary.length;
-        sink(Uint8List.fromList([
-          (length >> 24) & 255,
-          (length >> 16) & 255,
-          (length >> 8) & 255,
-          length & 255,
-        ]));
+        sink(
+          Uint8List.fromList([
+            (length >> 24) & 255,
+            (length >> 16) & 255,
+            (length >> 8) & 255,
+            length & 255,
+          ]),
+        );
         sink(binary);
       default:
         throw StateError('Unsupported protocol: $this.');
@@ -84,9 +86,9 @@ extension ProtocolExtension on Protocol {
             .map((line) => json.decode(line) as Map<String, Object?>);
 
       case ProtocolEncoding.binary:
-        return MessageGrouper(stream)
-            .messageStream
-            .map((message) => message.deserializeFromBinary());
+        return MessageGrouper(
+          stream,
+        ).messageStream.map((message) => message.deserializeFromBinary());
       default:
         throw StateError('Unsupported protocol: $this');
     }

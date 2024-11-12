@@ -32,7 +32,7 @@ class MacroHost {
   QueryService get _queryService => _hostService.queryService;
 
   MacroHost._(this.macroPackageConfig, this.macroServer, this._hostService)
-      : _macroResultsCache = MacroResultsCache(_hostService.queryService);
+    : _macroResultsCache = MacroResultsCache(_hostService.queryService);
 
   /// Starts a macro host with introspection queries handled by [queryService].
   static Future<MacroHost> serve({
@@ -43,8 +43,10 @@ class MacroHost {
   }) async {
     final macroPackageConfig = MacroPackageConfig.readFromUri(packageConfig);
     final hostService = _HostService(queryService);
-    final server =
-        await MacroServer.serve(protocol: protocol, service: hostService);
+    final server = await MacroServer.serve(
+      protocol: protocol,
+      service: hostService,
+    );
     return MacroHost._(macroPackageConfig, server, hostService);
   }
 
@@ -61,33 +63,44 @@ class MacroHost {
 
   /// Determines which phases the macro triggered by [annotation] runs in.
   Future<Set<int>> queryMacroPhases(
-      Uri packageConfig, QualifiedName annotation) async {
+    Uri packageConfig,
+    QualifiedName annotation,
+  ) async {
     await _ensureRunning(annotation);
     return _hostService._macroState[annotation.asString]!.phases;
   }
 
   /// Sends [request] to the macro triggered by [annotation].
   Future<AugmentResponse> augment(
-      QualifiedName annotation, AugmentRequest request) async {
+    QualifiedName annotation,
+    AugmentRequest request,
+  ) async {
     // TODO: Save the query results or pre-emptively send them to the macro?
     final cached = await _macroResultsCache.cachedResult(annotation, request);
     if (cached != null) return cached;
 
     await _ensureRunning(annotation);
     _queryService.startTrackingQueries();
-    final response = (await macroServer.sendToMacro(HostRequest.augmentRequest(
-            macroAnnotation: annotation, request, id: nextRequestId)))
-        .asAugmentResponse;
+    final response =
+        (await macroServer.sendToMacro(
+          HostRequest.augmentRequest(
+            macroAnnotation: annotation,
+            request,
+            id: nextRequestId,
+          ),
+        )).asAugmentResponse;
     _macroResultsCache.cache(
-        annotation: annotation,
-        request: request,
-        queryResults: _queryService.stopTrackingQueries()
-          // Add an initial query for the model itself also.
-          ..add((
-            query: Query(target: request.target),
-            response: request.model,
-          )),
-        response: response);
+      annotation: annotation,
+      request: request,
+      queryResults:
+          _queryService.stopTrackingQueries()
+            // Add an initial query for the model itself also.
+            ..add((
+              query: Query(target: request.target),
+              response: request.model,
+            )),
+      response: response,
+    );
     return response;
   }
 
@@ -109,8 +122,9 @@ class MacroHost {
     // is still building; currently requests while the macro is building will
     // time out after 5s.
     _hostService._macroState[annotation.asString] = _MacroState();
-    final macroBundle = await macroBuilder.build(
-        macroPackageConfig.uri, [lookupMacroImplementation(annotation)!]);
+    final macroBundle = await macroBuilder.build(macroPackageConfig.uri, [
+      lookupMacroImplementation(annotation)!,
+    ]);
     macroRunner.start(macroBundle: macroBundle, endpoint: macroServer.endpoint);
   }
 }
@@ -132,16 +146,22 @@ class _HostService implements HostService {
         _macroState[macroStartedRequest.macroDescription.annotation.asString]!
             ._phasesCompleter
             .complete(
-                macroStartedRequest.macroDescription.runsInPhases.toSet());
-        return Response.macroStartedResponse(MacroStartedResponse(),
-            requestId: request.id);
+              macroStartedRequest.macroDescription.runsInPhases.toSet(),
+            );
+        return Response.macroStartedResponse(
+          MacroStartedResponse(),
+          requestId: request.id,
+        );
       case MacroRequestType.queryRequest:
         return Response.queryResponse(
-            await queryService.handle(request.asQueryRequest),
-            requestId: request.id);
+          await queryService.handle(request.asQueryRequest),
+          requestId: request.id,
+        );
       default:
-        return Response.errorResponse(ErrorResponse(error: 'unsupported'),
-            requestId: request.id);
+        return Response.errorResponse(
+          ErrorResponse(error: 'unsupported'),
+          requestId: request.id,
+        );
     }
   }
 }
@@ -160,7 +180,8 @@ abstract base class QueryService {
   void startTrackingQueries() {
     if (_trackedQueries != null) {
       throw StateError(
-          'Already tracking queries, cannot handle concurrent macros');
+        'Already tracking queries, cannot handle concurrent macros',
+      );
     }
     _trackedQueries = [];
   }
@@ -173,7 +194,8 @@ abstract base class QueryService {
   List<({Query query, Model response})> stopTrackingQueries() {
     if (_trackedQueries == null) {
       throw StateError(
-          'Not tracking queries, must call `startTrackingQueries` first.');
+        'Not tracking queries, must call `startTrackingQueries` first.',
+      );
     }
     final result = _trackedQueries!;
     _trackedQueries = null;

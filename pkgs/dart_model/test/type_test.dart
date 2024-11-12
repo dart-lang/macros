@@ -28,10 +28,12 @@ void main() {
   }
 
   StaticTypeDesc coreType(String name) {
-    return StaticTypeDesc.namedTypeDesc(NamedTypeDesc(
-      name: QualifiedName(name: name, uri: 'dart:core'),
-      instantiation: [],
-    ));
+    return StaticTypeDesc.namedTypeDesc(
+      NamedTypeDesc(
+        name: QualifiedName(name: name, uri: 'dart:core'),
+        instantiation: [],
+      ),
+    );
   }
 
   test('isSubtype uses resolved model', () {
