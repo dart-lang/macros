@@ -13,13 +13,17 @@ void main() {
 
     setUp(() {
       Scope.macro.run(() {
-        model = Model()
-          ..uris['package:dart_model/dart_model.dart'] = (Library()
-            ..scopes['JsonData'] = (Interface(
-                properties: Properties(isClass: true), metadataAnnotations: [])
-              ..members['_root'] = Member(
-                properties: Properties(isField: true, isStatic: false),
-              )));
+        model =
+            Model()
+              ..uris['package:dart_model/dart_model.dart'] =
+                  (Library()
+                    ..scopes['JsonData'] = (Interface(
+                        properties: Properties(isClass: true),
+                        metadataAnnotations: [],
+                      )
+                      ..members['_root'] = Member(
+                        properties: Properties(isField: true, isStatic: false),
+                      )));
       });
     });
 
@@ -31,14 +35,14 @@ void main() {
               'metadataAnnotations': <Map<String, Object?>>[],
               'members': {
                 '_root': {
-                  'properties': {'isField': true, 'isStatic': false}
-                }
+                  'properties': {'isField': true, 'isStatic': false},
+                },
               },
-              'properties': {'isClass': true}
-            }
-          }
-        }
-      }
+              'properties': {'isClass': true},
+            },
+          },
+        },
+      },
     };
 
     test('maps to JSON', () {
@@ -47,82 +51,111 @@ void main() {
 
     test('maps to JSON after deserialization', () {
       final deserializedModel = Model.fromJson(
-          json.decode(json.encode(model as Map)) as Map<String, Object?>);
+        json.decode(json.encode(model as Map)) as Map<String, Object?>,
+      );
       expect(deserializedModel as Map, expected);
     });
 
     test('maps can be accessed as fields', () {
-      expect(model.uris['package:dart_model/dart_model.dart'],
-          expected['uris']!['package:dart_model/dart_model.dart']);
       expect(
-          model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData'],
-          expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
-              'JsonData']);
+        model.uris['package:dart_model/dart_model.dart'],
+        expected['uris']!['package:dart_model/dart_model.dart'],
+      );
       expect(
-          model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!
-              .properties,
-          expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
-              'JsonData']!['properties']);
+        model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData'],
+        expected['uris']!['package:dart_model/dart_model.dart']!['scopes']!['JsonData'],
+      );
+      expect(
+        model
+            .uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!
+            .properties,
+        expected['uris']!['package:dart_model/dart_model.dart']!['scopes']!['JsonData']!['properties'],
+      );
     });
 
     test('maps can be accessed as fields after deserialization', () {
       final deserializedModel = Model.fromJson(
-          json.decode(json.encode(model as Map)) as Map<String, Object?>);
+        json.decode(json.encode(model as Map)) as Map<String, Object?>,
+      );
 
       expect(
-          deserializedModel.uris['package:dart_model/dart_model.dart']!
-              .scopes['JsonData']!.properties,
-          expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
-              'JsonData']!['properties']);
+        deserializedModel
+            .uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!
+            .properties,
+        expected['uris']!['package:dart_model/dart_model.dart']!['scopes']!['JsonData']!['properties'],
+      );
     });
 
     test('lists can be accessed as fields', () {
       expect(
-          model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!
-              .members,
-          expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
-              'JsonData']!['members']);
+        model
+            .uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!
+            .members,
+        expected['uris']!['package:dart_model/dart_model.dart']!['scopes']!['JsonData']!['members'],
+      );
     });
 
     test('lists can be accessed as fields after deserialization', () {
       final deserializedModel = Model.fromJson(
-          json.decode(json.encode(model as Map)) as Map<String, Object?>);
+        json.decode(json.encode(model as Map)) as Map<String, Object?>,
+      );
 
       expect(
-          deserializedModel.uris['package:dart_model/dart_model.dart']!
-              .scopes['JsonData']!.members,
-          expected['uris']!['package:dart_model/dart_model.dart']!['scopes']![
-              'JsonData']!['members']);
+        deserializedModel
+            .uris['package:dart_model/dart_model.dart']!
+            .scopes['JsonData']!
+            .members,
+        expected['uris']!['package:dart_model/dart_model.dart']!['scopes']!['JsonData']!['members'],
+      );
     });
 
     test('can give the path to Interfaces in buffer backed maps', () {
       final interface =
           model.uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
-      expect(model.qualifiedNameOf(interface.node)!.asString,
-          'package:dart_model/dart_model.dart#JsonData');
+      expect(
+        model.qualifiedNameOf(interface.node)!.asString,
+        'package:dart_model/dart_model.dart#JsonData',
+      );
     });
 
     test('can give the path to Members in buffer backed maps', () {
-      final member = model.uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!.members['_root']!;
-      expect(model.qualifiedNameOf(member.node)!.asString,
-          'package:dart_model/dart_model.dart#JsonData._root');
+      final member =
+          model
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!;
+      expect(
+        model.qualifiedNameOf(member.node)!.asString,
+        'package:dart_model/dart_model.dart#JsonData._root',
+      );
     });
 
     test('can give the path to Interfaces in SDK maps', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
-      final interface = copiedModel
-          .uris['package:dart_model/dart_model.dart']!.scopes['JsonData']!;
-      expect(copiedModel.qualifiedNameOf(interface.node)!.asString,
-          'package:dart_model/dart_model.dart#JsonData');
+      final interface =
+          copiedModel
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!;
+      expect(
+        copiedModel.qualifiedNameOf(interface.node)!.asString,
+        'package:dart_model/dart_model.dart#JsonData',
+      );
     });
 
     test('can give the path to Members in SDK maps', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
-      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!.members['_root']!;
-      expect(copiedModel.qualifiedNameOf(member.node)!.asString,
-          'package:dart_model/dart_model.dart#JsonData._root');
+      final member =
+          copiedModel
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!;
+      expect(
+        copiedModel.qualifiedNameOf(member.node)!.asString,
+        'package:dart_model/dart_model.dart#JsonData._root',
+      );
     });
 
     test('can give the path to Members in merged maps', () {
@@ -131,25 +164,39 @@ void main() {
 
       /// Create one model in a different scope so it gets a different buffer.
       Scope.query.run(() {
-        otherModel = Model()
-          ..uris['package:dart_model/dart_model.dart'] = (Library()
-            ..scopes['JsonData'] = (Interface()
-              ..members['foo'] =
-                  Member(properties: Properties(isStatic: true))));
-        fooMember = otherModel.uris['package:dart_model/dart_model.dart']!
-            .scopes['JsonData']!.members['foo']!;
+        otherModel =
+            Model()
+              ..uris['package:dart_model/dart_model.dart'] =
+                  (Library()
+                    ..scopes['JsonData'] =
+                        (Interface()
+                          ..members['foo'] = Member(
+                            properties: Properties(isStatic: true),
+                          )));
+        fooMember =
+            otherModel
+                .uris['package:dart_model/dart_model.dart']!
+                .scopes['JsonData']!
+                .members['foo']!;
       });
 
       Scope.macro.run(() {
-        final rootMember = model.uris['package:dart_model/dart_model.dart']!
-            .scopes['JsonData']!.members['_root']!;
+        final rootMember =
+            model
+                .uris['package:dart_model/dart_model.dart']!
+                .scopes['JsonData']!
+                .members['_root']!;
 
         final mergedModel = model.mergeWith(otherModel);
 
-        expect(mergedModel.qualifiedNameOf(rootMember.node)!.asString,
-            'package:dart_model/dart_model.dart#JsonData._root');
-        expect(mergedModel.qualifiedNameOf(fooMember.node)!.asString,
-            'package:dart_model/dart_model.dart#JsonData::foo');
+        expect(
+          mergedModel.qualifiedNameOf(rootMember.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData._root',
+        );
+        expect(
+          mergedModel.qualifiedNameOf(fooMember.node)!.asString,
+          'package:dart_model/dart_model.dart#JsonData::foo',
+        );
 
         expect(model.qualifiedNameOf(fooMember.node), null);
         expect(otherModel.qualifiedNameOf(rootMember.node), null);
@@ -160,16 +207,20 @@ void main() {
       final copiedModel = Model.fromJson(_copyMap(model.node));
       // Add an invalid link creating a loop in the map structure.
       (copiedModel.node['uris'] as Map<String, Object?>)['loop'] = copiedModel;
-      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!.members['_root']!;
+      final member =
+          copiedModel
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!;
       expect(
-          copiedModel.qualifiedNameOf(member.node),
-          QualifiedName(
-            uri: 'package:dart_model/dart_model.dart',
-            scope: 'JsonData',
-            name: '_root',
-            isStatic: false,
-          ));
+        copiedModel.qualifiedNameOf(member.node),
+        QualifiedName(
+          uri: 'package:dart_model/dart_model.dart',
+          scope: 'JsonData',
+          name: '_root',
+          isStatic: false,
+        ),
+      );
     });
 
     test('path to Members works for reused node', () {
@@ -177,27 +228,38 @@ void main() {
       // Reuse a node.
       copiedModel.uris['duplicate'] =
           copiedModel.uris['package:dart_model/dart_model.dart']!;
-      final member = copiedModel.uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!.members['_root']!;
+      final member =
+          copiedModel
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!;
       expect(
-          copiedModel.qualifiedNameOf(member.node),
-          QualifiedName(
-            uri: 'package:dart_model/dart_model.dart',
-            scope: 'JsonData',
-            name: '_root',
-            isStatic: false,
-          ));
+        copiedModel.qualifiedNameOf(member.node),
+        QualifiedName(
+          uri: 'package:dart_model/dart_model.dart',
+          scope: 'JsonData',
+          name: '_root',
+          isStatic: false,
+        ),
+      );
     });
 
     test('path to Member returns null for Member in wrong Map', () {
       final copiedModel = Model.fromJson(_copyMap(model.node));
-      final member = model.uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!.members['_root']!;
-      final copiedMember = Member.fromJson(_copyMap(model
-          .uris['package:dart_model/dart_model.dart']!
-          .scopes['JsonData']!
-          .members['_root']!
-          .node));
+      final member =
+          model
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!;
+      final copiedMember = Member.fromJson(
+        _copyMap(
+          model
+              .uris['package:dart_model/dart_model.dart']!
+              .scopes['JsonData']!
+              .members['_root']!
+              .node,
+        ),
+      );
       expect(copiedModel.qualifiedNameOf(member.node), null);
       expect(model.qualifiedNameOf(copiedMember.node), null);
     });
@@ -205,29 +267,35 @@ void main() {
 
   group('QualifiedName', () {
     test('asString', () {
-      expect(QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo').asString,
-          'package:foo/foo.dart#Foo');
       expect(
-          QualifiedName(
-                  uri: 'package:foo/foo.dart',
-                  name: 'bar',
-                  scope: 'Foo',
-                  isStatic: false)
-              .asString,
-          'package:foo/foo.dart#Foo.bar');
+        QualifiedName(uri: 'package:foo/foo.dart', name: 'Foo').asString,
+        'package:foo/foo.dart#Foo',
+      );
       expect(
-          QualifiedName(
-                  uri: 'package:foo/foo.dart',
-                  name: 'baz',
-                  scope: 'Foo',
-                  isStatic: true)
-              .asString,
-          'package:foo/foo.dart#Foo::baz');
+        QualifiedName(
+          uri: 'package:foo/foo.dart',
+          name: 'bar',
+          scope: 'Foo',
+          isStatic: false,
+        ).asString,
+        'package:foo/foo.dart#Foo.bar',
+      );
+      expect(
+        QualifiedName(
+          uri: 'package:foo/foo.dart',
+          name: 'baz',
+          scope: 'Foo',
+          isStatic: true,
+        ).asString,
+        'package:foo/foo.dart#Foo::baz',
+      );
     });
 
     test('parse', () {
-      expect(QualifiedName.parse('package:foo/foo.dart#Foo').uri,
-          'package:foo/foo.dart');
+      expect(
+        QualifiedName.parse('package:foo/foo.dart#Foo').uri,
+        'package:foo/foo.dart',
+      );
       expect(QualifiedName.parse('package:foo/foo.dart#Foo').name, 'Foo');
       final fooBar = QualifiedName.parse('package:foo/foo.dart#Foo.bar');
       expect(fooBar.name, 'bar');

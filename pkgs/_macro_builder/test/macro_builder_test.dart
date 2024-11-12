@@ -15,12 +15,17 @@ void main() {
     test('bootstrap matches golden', () async {
       final script = createBootstrap([
         QualifiedName(
-            uri: 'package:_test_macros/declare_x_macro.dart', name: 'DeclareX'),
+          uri: 'package:_test_macros/declare_x_macro.dart',
+          name: 'DeclareX',
+        ),
         QualifiedName(
-            uri: 'package:_test_macros/declare_y_macro.dart', name: 'DeclareY'),
+          uri: 'package:_test_macros/declare_y_macro.dart',
+          name: 'DeclareY',
+        ),
         QualifiedName(
-            uri: 'package:_more_macros/other_macro.dart',
-            name: 'OtherMacroImplementation')
+          uri: 'package:_more_macros/other_macro.dart',
+          name: 'OtherMacroImplementation',
+        ),
       ]);
 
       expect(script, '''
@@ -46,8 +51,9 @@ void main(List<String> arguments) {
 
       final bundle = await builder.build(Isolate.packageConfigSync!, [
         QualifiedName(
-            uri: 'package:_test_macros/declare_x_macro.dart',
-            name: 'DeclareXImplementation')
+          uri: 'package:_test_macros/declare_x_macro.dart',
+          name: 'DeclareXImplementation',
+        ),
       ]);
 
       expect(File(bundle.executablePath).existsSync(), true);

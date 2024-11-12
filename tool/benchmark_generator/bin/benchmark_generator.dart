@@ -24,9 +24,10 @@ Creates packages to benchmark macro performance. Usage:
   final workspace = Workspace(workspaceName);
   print('Creating under: ${workspace.directory.path}');
   final inputGenerator = JsonEncodableInputGenerator(
-      fieldsPerClass: 100,
-      classesPerLibrary: 10,
-      librariesPerCycle: libraryCount,
-      strategy: strategy);
+    fieldsPerClass: 100,
+    classesPerLibrary: 10,
+    librariesPerCycle: libraryCount,
+    strategy: strategy,
+  );
   inputGenerator.generate(workspace);
 }

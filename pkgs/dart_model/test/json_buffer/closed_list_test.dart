@@ -37,7 +37,7 @@ void main() {
         [
           'ccc',
           {'a': 3},
-        ]
+        ],
       ];
       builder.map['value'] = value;
       final deserializedValue = builder.map['value'] as List<Object?>;

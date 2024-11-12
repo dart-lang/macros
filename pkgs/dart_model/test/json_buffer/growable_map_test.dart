@@ -95,7 +95,7 @@ void main() {
           'D': [1, 2, 3],
           'E': <Object?>[],
           'F': <String, Object?>{},
-        }
+        },
       });
     });
   });

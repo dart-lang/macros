@@ -70,7 +70,8 @@ enum Type {
         return Type.closedMapPointer;
     }
     throw UnsupportedError(
-        'Unsupported type: ${value.runtimeType}, value: $value');
+      'Unsupported type: ${value.runtimeType}, value: $value',
+    );
   }
 
   /// The size in bytes of value of this type.

@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 void main() {
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json),
-    Protocol(encoding: ProtocolEncoding.binary)
+    Protocol(encoding: ProtocolEncoding.binary),
   ]) {
     group('Protocol using ${protocol.encoding}', () {
       test('can round trip JSON data', () async {
@@ -21,7 +21,7 @@ void main() {
           'int': 7,
           'boolean': true,
           'map': {'key': 'value'},
-          'list': [1, 'two', 3]
+          'list': [1, 'two', 3],
         };
 
         final receivedData = <int>[];
@@ -42,7 +42,7 @@ void main() {
           'int': 7,
           'boolean': true,
           'map': {'key': 'value'},
-          'list': [1, 'two', 3]
+          'list': [1, 'two', 3],
         };
 
         final receivedData = <int>[];
@@ -58,8 +58,9 @@ void main() {
         var sizeToTake = 1;
         while (receivedData.isNotEmpty) {
           final take = min(sizeToTake++, receivedData.length);
-          final takenBytes =
-              Uint8List.fromList(receivedData.take(take).toList());
+          final takenBytes = Uint8List.fromList(
+            receivedData.take(take).toList(),
+          );
           receivedData.removeRange(0, take);
           streamController.add(takenBytes);
         }

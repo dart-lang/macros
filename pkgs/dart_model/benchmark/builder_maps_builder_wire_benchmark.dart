@@ -25,14 +25,16 @@ class BuilderMapsBuilderWireBenchmark extends SerializationBenchmark {
       final intKey = int.parse(key);
       final members = buffer.createGrowableMap<Member>();
       map[key] = Interface(
-          members: members,
-          properties: Properties(
-              isAbstract: (intKey & 1) == 1,
-              isClass: (intKey & 2) == 2,
-              isGetter: (intKey & 4) == 4,
-              isField: (intKey & 8) == 8,
-              isMethod: (intKey & 16) == 16,
-              isStatic: (intKey & 32) == 32));
+        members: members,
+        properties: Properties(
+          isAbstract: (intKey & 1) == 1,
+          isClass: (intKey & 2) == 2,
+          isGetter: (intKey & 4) == 4,
+          isField: (intKey & 8) == 8,
+          isMethod: (intKey & 16) == 16,
+          isStatic: (intKey & 32) == 32,
+        ),
+      );
       for (final memberName in makeMemberNames(intKey)) {
         members[memberName] = _makeMember(memberName);
       }
@@ -49,13 +51,15 @@ class BuilderMapsBuilderWireBenchmark extends SerializationBenchmark {
   Member _makeMember(String key) {
     final intKey = key.length;
     return Member(
-        properties: Properties(
-            isAbstract: (intKey & 1) == 1,
-            isClass: (intKey & 2) == 2,
-            isGetter: (intKey & 4) == 4,
-            isField: const [true, false, null][intKey % 3],
-            isMethod: (intKey & 16) == 16,
-            isStatic: (intKey & 32) == 32));
+      properties: Properties(
+        isAbstract: (intKey & 1) == 1,
+        isClass: (intKey & 2) == 2,
+        isGetter: (intKey & 4) == 4,
+        isField: const [true, false, null][intKey % 3],
+        isMethod: (intKey & 16) == 16,
+        isStatic: (intKey & 32) == 32,
+      ),
+    );
   }
 }
 
@@ -66,11 +70,8 @@ extension type Interface.fromJson(Map<String, Object?> node) {
     'properties': Type.typedMapPointer,
   });
 
-  Interface({
-    Map<String, Member>? members,
-    Properties? properties,
-  }) : this.fromJson(
-            runningBuffer!.createTypedMap(schema, members, properties));
+  Interface({Map<String, Member>? members, Properties? properties})
+    : this.fromJson(runningBuffer!.createTypedMap(schema, members, properties));
 
   /// Map of members by name.
   Map<String, Member> get members => (node['members'] as Map).cast();
@@ -80,13 +81,12 @@ extension type Interface.fromJson(Map<String, Object?> node) {
 }
 
 extension type Member.fromJson(Map<String, Object?> node) {
-  static TypedMapSchema schema = TypedMapSchema(
-    {'properties': Type.typedMapPointer},
-  );
+  static TypedMapSchema schema = TypedMapSchema({
+    'properties': Type.typedMapPointer,
+  });
 
-  Member({
-    Properties? properties,
-  }) : this.fromJson(runningBuffer!.createTypedMap(schema, properties));
+  Member({Properties? properties})
+    : this.fromJson(runningBuffer!.createTypedMap(schema, properties));
 
   /// The properties of this member.
   Properties get properties => node['properties'] as Properties;
@@ -110,8 +110,17 @@ extension type Properties.fromJson(Map<String, Object?> node) {
     bool? isField,
     bool? isMethod,
     bool? isStatic,
-  }) : this.fromJson(runningBuffer!.createTypedMap(schema, isAbstract, isClass,
-            isGetter, isField, isMethod, isStatic));
+  }) : this.fromJson(
+         runningBuffer!.createTypedMap(
+           schema,
+           isAbstract,
+           isClass,
+           isGetter,
+           isField,
+           isMethod,
+           isStatic,
+         ),
+       );
 
   /// Whether the entity is abstract, meaning it has no definition.
   bool get isAbstract => node['isAbstract'] as bool;

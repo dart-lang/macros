@@ -6,7 +6,7 @@ repository: https://github.com/dart-lang/macros/tree/master/pkgs/_macro_server
 resolution: workspace
 
 environment:
-  sdk: ^3.7.0-39.0.dev
+  sdk: ^3.7.0-123.0.dev
 
 dependencies:
   dart_model: any

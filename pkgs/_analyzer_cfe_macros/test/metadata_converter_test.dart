@@ -9,13 +9,18 @@ import 'package:test/test.dart';
 
 void main() {
   test('converts with unions', () {
-    final invocation = MethodInvocation(DoubleLiteral('1.23'), 'round', [], []);
+    final invocation = MethodInvocation(
+      DoubleLiteral('1.23', 1.23),
+      'round',
+      [],
+      [],
+    );
 
     Scope.query.run(() {
       expect(convert<Object>(invocation), <String, Object?>{
         'receiver': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'}
+          'value': {'text': '1.23'},
         },
         'name': 'round',
         'typeArguments': [],
@@ -26,32 +31,39 @@ void main() {
 
   test('converts with enums', () {
     final expression = BinaryExpression(
-        DoubleLiteral('1.23'), BinaryOperator.minus, DoubleLiteral('1.24'));
+      DoubleLiteral('1.23', 1.23),
+      BinaryOperator.minus,
+      DoubleLiteral('1.24', 1.24),
+    );
 
     Scope.query.run(() {
       expect(convert<Object>(expression), <String, Object?>{
         'left': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'}
+          'value': {'text': '1.23'},
         },
         'operator': 'minus',
         'right': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.24'}
-        }
+          'value': {'text': '1.24'},
+        },
       });
     });
   });
 
   test('converts with lists', () {
-    final invocation = MethodInvocation(DoubleLiteral('1.23'), 'round', [],
-        [PositionalArgument(IntegerLiteral('4'))]);
+    final invocation = MethodInvocation(
+      DoubleLiteral('1.23', 1.23),
+      'round',
+      [],
+      [PositionalArgument(IntegerLiteral.fromText('4'))],
+    );
 
     Scope.query.run(() {
       expect(convert<Object>(invocation), <String, Object?>{
         'receiver': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'}
+          'value': {'text': '1.23'},
         },
         'name': 'round',
         'typeArguments': [],
@@ -61,11 +73,11 @@ void main() {
             'value': {
               'expression': {
                 'type': 'IntegerLiteral',
-                'value': {'text': '4'}
-              }
-            }
-          }
-        ]
+                'value': {'text': '4'},
+              },
+            },
+          },
+        ],
       });
     });
   });

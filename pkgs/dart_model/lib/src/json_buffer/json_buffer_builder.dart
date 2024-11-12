@@ -40,15 +40,15 @@ class JsonBufferBuilder {
   final Map<String, _Pointer> _pointersByString = {};
 
   JsonBufferBuilder.deserialize(this._buffer)
-      : _allowWrites = false,
-        _nextFree = _buffer.length {
+    : _allowWrites = false,
+      _nextFree = _buffer.length {
     map = _readGrowableMap<Object?>(0, null);
   }
 
   JsonBufferBuilder()
-      : _allowWrites = true,
-        _buffer = Uint8List(_initialBufferSize),
-        _nextFree = 0 {
+    : _allowWrites = true,
+      _buffer = Uint8List(_initialBufferSize),
+      _nextFree = 0 {
     map = createGrowableMap<Object?>();
   }
 
@@ -67,8 +67,11 @@ class JsonBufferBuilder {
       type = _readType(pointer);
       pointer += _typeSize;
     }
-    return _fingerprint(pointer, type,
-        alreadyDereferenced: alreadyDereferenced);
+    return _fingerprint(
+      pointer,
+      type,
+      alreadyDereferenced: alreadyDereferenced,
+    );
   }
 
   /// Computes the identity hash of the object at [pointer] with a known [type]
@@ -77,8 +80,11 @@ class JsonBufferBuilder {
   /// If [alreadyDereferenced] is `true`, then for types which are pointers,
   /// [pointer] already points at the top of the object, and should not be
   /// followed before reading the object.
-  int _fingerprint(_Pointer pointer, Type type,
-      {bool alreadyDereferenced = false}) {
+  int _fingerprint(
+    _Pointer pointer,
+    Type type, {
+    bool alreadyDereferenced = false,
+  }) {
     // Dereference [pointer] if it is a pointer type, and hasn't already been
     // dereferenced.
     if (type.isPointer && !alreadyDereferenced) {
@@ -212,7 +218,9 @@ class JsonBufferBuilder {
 
       case Type.growableMapPointer:
         _writePointer(
-            pointer, _pointerToGrowableMap(value as _GrowableMap<Object?>));
+          pointer,
+          _pointerToGrowableMap(value as _GrowableMap<Object?>),
+        );
 
       case Type.typedMapPointer:
         _writePointer(pointer, _pointerToTypedMap(value as _TypedMap));
@@ -243,7 +251,8 @@ class JsonBufferBuilder {
   String _readString(_Pointer pointer) {
     final length = _readLength(pointer);
     return utf8.decode(
-        _buffer.sublist(pointer + _lengthSize, pointer + _lengthSize + length));
+      _buffer.sublist(pointer + _lengthSize, pointer + _lengthSize + length),
+    );
   }
 
   /// Writes [type] at [pointer].
@@ -259,8 +268,11 @@ class JsonBufferBuilder {
   }
 
   /// Writes [length] at [pointer].
-  void _writeLength(_Pointer pointer, int length,
-      {bool allowOverwrite = false}) {
+  void _writeLength(
+    _Pointer pointer,
+    int length, {
+    bool allowOverwrite = false,
+  }) {
     _explanations?.push('_writeLength $length');
     __writeUint32(pointer, length, allowOverwrite: allowOverwrite);
     _explanations?.pop();
@@ -286,11 +298,19 @@ class JsonBufferBuilder {
     _explanations?.pop();
   }
 
-  void __writeUint32(_Pointer pointer, int value,
-      {bool allowOverwrite = false}) {
-    _setFourBytes(pointer, value & 0xff, (value >> 8) & 0xff,
-        (value >> 16) & 0xff, (value >> 24) & 0xff,
-        allowOverwrite: allowOverwrite);
+  void __writeUint32(
+    _Pointer pointer,
+    int value, {
+    bool allowOverwrite = false,
+  }) {
+    _setFourBytes(
+      pointer,
+      value & 0xff,
+      (value >> 8) & 0xff,
+      (value >> 16) & 0xff,
+      (value >> 24) & 0xff,
+      allowOverwrite: allowOverwrite,
+    );
   }
 
   /// Reads the uint32 at [_Pointer].
@@ -338,8 +358,14 @@ class JsonBufferBuilder {
   ///
   /// If [_explanations] is being used, [allowOverwrite] controls whether
   /// multiple writes to the same byte will be allowed or will throw.
-  void _setFourBytes(_Pointer pointer, int b1, int b2, int b3, int b4,
-      {bool allowOverwrite = false}) {
+  void _setFourBytes(
+    _Pointer pointer,
+    int b1,
+    int b2,
+    int b3,
+    int b4, {
+    bool allowOverwrite = false,
+  }) {
     _setByte(pointer, b1, allowOverwrite: allowOverwrite);
     _setByte(pointer + 1, b2, allowOverwrite: allowOverwrite);
     _setByte(pointer + 2, b3, allowOverwrite: allowOverwrite);

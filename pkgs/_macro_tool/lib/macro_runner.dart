@@ -34,14 +34,16 @@ class WorkspaceResult {
   /// Time taken to produce all results.
   Duration lastResultAfter;
 
-  WorkspaceResult(
-      {required this.fileResults,
-      required this.firstResultAfter,
-      required this.lastResultAfter});
+  WorkspaceResult({
+    required this.fileResults,
+    required this.firstResultAfter,
+    required this.lastResultAfter,
+  });
 
   /// Errors from all [FileResult]s.
-  List<String> get allErrors =>
-      [for (final result in fileResults) ...result.errors];
+  List<String> get allErrors => [
+    for (final result in fileResults) ...result.errors,
+  ];
 }
 
 /// [MacroRunner] result for one file.
@@ -55,6 +57,9 @@ class FileResult {
   /// Errors for this file.
   final List<String> errors;
 
-  FileResult(
-      {required this.sourceFile, required this.output, required this.errors});
+  FileResult({
+    required this.sourceFile,
+    required this.output,
+    required this.errors,
+  });
 }

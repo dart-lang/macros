@@ -21,21 +21,24 @@ void main() {
       // Set up analyzer.
       final directory =
           Directory.fromUri(Uri.parse('./test/package_under_test')).absolute;
-      final contextCollection =
-          AnalysisContextCollection(includedPaths: [directory.path]);
+      final contextCollection = AnalysisContextCollection(
+        includedPaths: [directory.path],
+      );
       analysisContext = contextCollection.contexts.first;
       injected.macroImplementation = await AnalyzerMacroImplementation.start(
-          protocol: Protocol(
-              encoding: ProtocolEncoding.binary,
-              version: ProtocolVersion.macros1),
-          packageConfig: Isolate.packageConfigSync!);
+        protocol: Protocol(
+          encoding: ProtocolEncoding.binary,
+          version: ProtocolVersion.macros1,
+        ),
+        packageConfig: Isolate.packageConfigSync!,
+      );
     });
 
     test('discovers macros, runs them, applies augmentations', () async {
-      final path = File.fromUri(
-              Uri.parse('./test/package_under_test/lib/apply_declare_x.dart'))
-          .absolute
-          .path;
+      final path =
+          File.fromUri(
+            Uri.parse('./test/package_under_test/lib/apply_declare_x.dart'),
+          ).absolute.path;
 
       // No analysis errors.
       final errors =
@@ -43,8 +46,9 @@ void main() {
       expect(errors.errors, isEmpty);
 
       // The expected new declaration augmentation was applied.
-      final resolvedLibrary = (await analysisContext.currentSession
-          .getResolvedLibrary(path)) as ResolvedLibraryResult;
+      final resolvedLibrary =
+          (await analysisContext.currentSession.getResolvedLibrary(path))
+              as ResolvedLibraryResult;
       final clazz = resolvedLibrary.element.getClass('ClassWithMacroApplied')!;
       expect(clazz.fields, isEmpty);
       expect(clazz.augmented.fields, isNotEmpty);

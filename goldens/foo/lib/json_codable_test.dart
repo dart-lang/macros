@@ -21,7 +21,7 @@ void main() {
           {'x': 2},
         ],
         'mapOfSerializableField': {
-          'c': {'x': 3}
+          'c': {'x': 3},
         },
       };
 
@@ -107,10 +107,7 @@ void main() {
     });
 
     test('class hierarchies', () {
-      var json = {
-        'x': 1,
-        'y': 'z',
-      };
+      var json = {'x': 1, 'y': 'z'};
       var d = D.fromJson(json);
       expect(d.x, 1);
       expect(d.y, 'z');
@@ -123,34 +120,25 @@ void main() {
         'listOfNullableInts': [null, 1],
         'listOfNullableSerializables': [
           {'x': 1},
-          null
+          null,
         ],
         'listOfNullableMapsOfNullableInts': [
           null,
           {'a': 1, 'b': null},
         ],
-        'setOfNullableInts': [
-          null,
-          2,
-        ],
+        'setOfNullableInts': [null, 2],
         'setOfNullableSerializables': [
           {'x': 2},
           null,
         ],
         'setOfNullableMapsOfNullableInts': [
           null,
-          {
-            'a': 2,
-            'b': null,
-          },
+          {'a': 2, 'b': null},
         ],
-        'mapOfNullableInts': {
-          'a': 3,
-          'b': null,
-        },
+        'mapOfNullableInts': {'a': 3, 'b': null},
         'mapOfNullableSerializables': {
           'a': {'x': 3},
-          'b': null
+          'b': null,
         },
         'mapOfNullableSetsOfNullableInts': {
           'a': [null, 3],
@@ -163,29 +151,23 @@ void main() {
       expect(e.listOfNullableSerializables.first!.x, 1);
       expect(e.listOfNullableSerializables[1], null);
       expect(
-          e.listOfNullableMapsOfNullableInts,
-          equals([
-            null,
-            {'a': 1, 'b': null},
-          ]));
+        e.listOfNullableMapsOfNullableInts,
+        equals([
+          null,
+          {'a': 1, 'b': null},
+        ]),
+      );
       expect(e.setOfNullableInts, equals({null, 2}));
       expect(e.setOfNullableSerializables.first!.x, 2);
       expect(e.setOfNullableSerializables.elementAt(1), null);
       expect(
-          e.setOfNullableMapsOfNullableInts,
-          equals({
-            null,
-            {
-              'a': 2,
-              'b': null,
-            },
-          }));
-      expect(
-          e.mapOfNullableInts,
-          equals({
-            'a': 3,
-            'b': null,
-          }));
+        e.setOfNullableMapsOfNullableInts,
+        equals({
+          null,
+          {'a': 2, 'b': null},
+        }),
+      );
+      expect(e.mapOfNullableInts, equals({'a': 3, 'b': null}));
       expect(e.mapOfNullableSerializables['a']!.x, 3);
       expect(e.mapOfNullableSerializables.containsKey('b'), true);
       expect(e.mapOfNullableSerializables['b'], null);
@@ -198,9 +180,7 @@ void main() {
     });
 
     test(r'field with dollar sign $', () {
-      var json = {
-        r'fieldWithDollarSign$': 1,
-      };
+      var json = {r'fieldWithDollarSign$': 1};
       var f = F.fromJson(json);
       expect(f.fieldWithDollarSign$, 1);
 

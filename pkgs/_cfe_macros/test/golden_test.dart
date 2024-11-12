@@ -19,9 +19,10 @@ void main() {
     late Directory tempDir;
 
     final directory = Directory(
-        Isolate.resolvePackageUriSync(Uri.parse('package:foo/foo.dart'))!
-            .resolve('../../../goldens')
-            .toFilePath());
+      Isolate.resolvePackageUriSync(
+        Uri.parse('package:foo/foo.dart'),
+      )!.resolve('../../../goldens').toFilePath(),
+    );
 
     setUp(() async {
       // Set up CFE.
@@ -29,8 +30,10 @@ void main() {
       // TODO(davidmorgan): this dill comes from the Dart SDK running the test,
       // but `package:frontend_server` and `package:front_end` are used as a
       // library, so we will see version skew breakage. Find a better way.
-      productPlatformDill = File('${Platform.resolvedExecutable}/../../'
-          'lib/_internal/vm_platform_strong_product.dill');
+      productPlatformDill = File(
+        '${Platform.resolvedExecutable}/../../'
+        'lib/_internal/vm_platform_strong_product.dill',
+      );
       if (!File.fromUri(productPlatformDill.uri).existsSync()) {
         throw StateError('Failed to find platform dill: $productPlatformDill');
       }
@@ -38,10 +41,12 @@ void main() {
 
       // Inject test macro implementation.
       injected.macroImplementation = await CfeMacroImplementation.start(
-          protocol: Protocol(
-              encoding: ProtocolEncoding.json,
-              version: ProtocolVersion.macros1),
-          packageConfig: Isolate.packageConfigSync!);
+        protocol: Protocol(
+          encoding: ProtocolEncoding.json,
+          version: ProtocolVersion.macros1,
+        ),
+        packageConfig: Isolate.packageConfigSync!,
+      );
     });
 
     for (final file in directory
@@ -71,8 +76,9 @@ void main() {
           introspectionGoldenFile = null;
         }
 
-        applicationGoldenFile =
-            File(p.setExtension(path, '.cfe.augmentations'));
+        applicationGoldenFile = File(
+          p.setExtension(path, '.cfe.augmentations'),
+        );
         if (applicationGoldenFile!.existsSync()) {
           applicationGolden = applicationGoldenFile!.readAsStringSync();
         } else {
@@ -83,11 +89,14 @@ void main() {
         tearDown(() {
           if (introspectionGoldenFile != null &&
               introspectionMacroOutput != null) {
-            final string = (const JsonEncoder.withIndent('  '))
-                .convert(introspectionMacroOutput);
+            final string = (const JsonEncoder.withIndent(
+              '  ',
+            )).convert(introspectionMacroOutput);
             if (introspectionGoldenFile!.readAsStringSync() != string) {
-              print('Updating mismatched golden: '
-                  '${introspectionGoldenFile!.path}');
+              print(
+                'Updating mismatched golden: '
+                '${introspectionGoldenFile!.path}',
+              );
               introspectionGoldenFile!.writeAsStringSync(string);
             }
           }
@@ -95,7 +104,8 @@ void main() {
             if (applicationGoldenFile!.readAsStringSync() !=
                 applicationMacroOutput) {
               print(
-                  'Updating mismatched golden: ${applicationGoldenFile!.path}');
+                'Updating mismatched golden: ${applicationGoldenFile!.path}',
+              );
               applicationGoldenFile!.writeAsStringSync(applicationMacroOutput!);
             }
           }
@@ -128,12 +138,17 @@ void main() {
           '--enable-experiment=macros',
         ]);
 
-        final sources = computeKernelResult
-            .previousState!.incrementalCompiler!.context.uriToSource;
-        applicationMacroOutput = sources.entries
-            .singleWhere((e) => e.key.scheme == 'dart-macro+file')
-            .value
-            .text;
+        final sources =
+            computeKernelResult
+                .previousState!
+                .incrementalCompiler!
+                .context
+                .uriToSource;
+        applicationMacroOutput =
+            sources.entries
+                .singleWhere((e) => e.key.scheme == 'dart-macro+file')
+                .value
+                .text;
 
         if (introspectionGolden != null) {
           // Each `QueryClass` outputs its query result as a comment in an
@@ -142,23 +157,34 @@ void main() {
           final macroOutputs = applicationMacroOutput!
               .split('\n')
               .where((l) => l.startsWith('// '))
-              .map((l) => json.decode(l.substring('// '.length))
-                  as Map<String, Object?>);
+              .map(
+                (l) =>
+                    json.decode(l.substring('// '.length))
+                        as Map<String, Object?>,
+              );
           introspectionMacroOutput = _merge(macroOutputs);
 
-          expect(introspectionMacroOutput, introspectionGolden,
-              reason: updateGoldens
-                  ? '\n--> Goldens updated! Should pass on rerun.'
-                  : '\n--> To update goldens, run: '
-                      'UPDATE_GOLDENS=yes dart test');
+          expect(
+            introspectionMacroOutput,
+            introspectionGolden,
+            reason:
+                updateGoldens
+                    ? '\n--> Goldens updated! Should pass on rerun.'
+                    : '\n--> To update goldens, run: '
+                        'UPDATE_GOLDENS=yes dart test',
+          );
         }
 
         if (applicationGolden != null) {
-          expect(applicationMacroOutput, applicationGolden,
-              reason: updateGoldens
-                  ? '\n--> Goldens updated! Should pass on rerun.'
-                  : '\n--> To update goldens, run: '
-                      'UPDATE_GOLDENS=yes dart test');
+          expect(
+            applicationMacroOutput,
+            applicationGolden,
+            reason:
+                updateGoldens
+                    ? '\n--> Goldens updated! Should pass on rerun.'
+                    : '\n--> To update goldens, run: '
+                        'UPDATE_GOLDENS=yes dart test',
+          );
         }
       });
     }
@@ -170,8 +196,10 @@ Map<String, Object?> _merge(Iterable<Map<String, Object?>> maps) {
   for (final map in maps) {
     for (final entry in map.entries) {
       if (result[entry.key] case final Map<String, Object?> nested) {
-        result[entry.key] =
-            _merge([nested, entry.value as Map<String, Object?>]);
+        result[entry.key] = _merge([
+          nested,
+          entry.value as Map<String, Object?>,
+        ]);
       } else {
         result[entry.key] = entry.value;
       }

@@ -29,7 +29,8 @@ abstract interface class LibraryTypesMacro implements Macro {
 /// want to contribute new non-type declarations to the library.
 abstract interface class LibraryDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForLibrary(
-      LibraryDeclarationsBuilder builder);
+    LibraryDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to a library directive, and
@@ -50,7 +51,8 @@ abstract interface class FunctionTypesMacro implements Macro {
 /// declarations to the program.
 abstract interface class FunctionDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForFunction(
-      FunctionDeclarationsBuilder builder);
+    FunctionDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any top level function,
@@ -58,7 +60,8 @@ abstract interface class FunctionDeclarationsMacro implements Macro {
 /// definition.
 abstract interface class FunctionDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForFunction(
-      FunctionDefinitionsBuilder builder);
+    FunctionDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any top level variable or
@@ -73,14 +76,16 @@ abstract interface class VariableTypesMacro implements Macro {
 /// program.
 abstract interface class VariableDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForVariable(
-      VariableDeclarationsBuilder builder);
+    VariableDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any top level variable
 /// or instance field, and want to augment the variable definition.
 abstract interface class VariableDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForVariable(
-      VariableDefinitionsBuilder builder);
+    VariableDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any class, and want to
@@ -129,14 +134,16 @@ abstract interface class EnumValueTypesMacro implements Macro {
 /// contribute new non-type declarations to the program.
 abstract interface class EnumValueDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForEnumValue(
-      EnumValueDeclarationsBuilder builder);
+    EnumValueDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any enum, and want to
 /// augment the definitions of members or values of that enum.
 abstract interface class EnumValueDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForEnumValue(
-      EnumValueDefinitionsBuilder builder);
+    EnumValueDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any field, and want to
@@ -185,14 +192,16 @@ abstract interface class ConstructorTypesMacro implements Macro {
 /// want to contribute new non-type declarations to the program.
 abstract interface class ConstructorDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForConstructor(
-      ConstructorDeclarationsBuilder builder);
+    ConstructorDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any constructor, and want
 /// to augment the function definition.
 abstract interface class ConstructorDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForConstructor(
-      ConstructorDefinitionsBuilder builder);
+    ConstructorDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any mixin declaration, and
@@ -223,14 +232,16 @@ abstract interface class ExtensionTypesMacro implements Macro {
 /// and want to contribute new non-type declarations to the program.
 abstract interface class ExtensionDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForExtension(
-      ExtensionDeclarationsBuilder builder);
+    ExtensionDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any extension declaration,
 /// and want to augment the definitions of the members of that extension.
 abstract interface class ExtensionDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForExtension(
-      ExtensionDefinitionsBuilder builder);
+    ExtensionDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any extension type
@@ -244,7 +255,8 @@ abstract interface class ExtensionTypeTypesMacro implements Macro {
 /// program.
 abstract interface class ExtensionTypeDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForExtensionType(
-      ExtensionTypeDeclarationsBuilder builder);
+    ExtensionTypeDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any extension type
@@ -252,7 +264,8 @@ abstract interface class ExtensionTypeDeclarationsMacro implements Macro {
 /// extension.
 abstract interface class ExtensionTypeDefinitionsMacro implements Macro {
   FutureOr<void> buildDefinitionsForExtensionType(
-      ExtensionTypeDefinitionsBuilder builder);
+    ExtensionTypeDefinitionsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any type alias
@@ -266,7 +279,8 @@ abstract interface class TypeAliasTypesMacro implements Macro {
 /// program.
 abstract interface class TypeAliasDeclarationsMacro implements Macro {
   FutureOr<void> buildDeclarationsForTypeAlias(
-      TypeAliasDeclarationsBuilder builder);
+    TypeAliasDeclarationsBuilder builder,
+  );
 }
 
 /// The interface for [Macro]s that can be applied to any type alias
@@ -274,5 +288,6 @@ abstract interface class TypeAliasDeclarationsMacro implements Macro {
 /// program.
 abstract interface class TypeAliasDefinitionsMacro implements Macro {
   FutureOr<void> buildDeclarationsForTypeAlias(
-      TypeAliasDeclarationsBuilder builder);
+    TypeAliasDeclarationsBuilder builder,
+  );
 }

@@ -41,14 +41,18 @@ class LazyMergedMapView extends MapBase<String, Object?> {
         }
         if (leftValue is List<Object?> && rightValue is List<Object?>) {
           if (leftValue.length != rightValue.length) {
-            throw StateError('Cannot merge lists of different lengths, '
-                'got $leftValue and $rightValue');
+            throw StateError(
+              'Cannot merge lists of different lengths, '
+              'got $leftValue and $rightValue',
+            );
           }
           // TODO: Something better for lists, it isn't clear how to merge them.
           return leftValue;
         } else if (leftValue != rightValue) {
-          throw StateError('Cannot merge maps with different values, and '
-              '$leftValue != $rightValue');
+          throw StateError(
+            'Cannot merge maps with different values, and '
+            '$leftValue != $rightValue',
+          );
         }
         return leftValue;
       }

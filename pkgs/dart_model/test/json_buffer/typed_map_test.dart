@@ -43,7 +43,7 @@ void main() {
         'b': Type.boolean,
         'missing1': Type.stringPointer,
         'c': Type.uint32,
-        'missing2': Type.stringPointer
+        'missing2': Type.stringPointer,
       });
       final map = builder.createTypedMap(schema, 'aa', true, null, 12345, null);
       expectFullyEquivalentMaps(map, {'a': 'aa', 'b': true, 'c': 12345});
@@ -69,13 +69,19 @@ void main() {
         'd': Type.boolean,
       });
       final map = builder.createTypedMap(schema, false, true, false, true);
-      expectFullyEquivalentMaps(
-          map, {'a': false, 'b': true, 'c': false, 'd': true});
+      expectFullyEquivalentMaps(map, {
+        'a': false,
+        'b': true,
+        'c': false,
+        'd': true,
+      });
     });
 
     test('schemas are written once per buffer', () {
-      final schema =
-          TypedMapSchema({'a': Type.stringPointer, 'b': Type.uint32});
+      final schema = TypedMapSchema({
+        'a': Type.stringPointer,
+        'b': Type.uint32,
+      });
 
       // Write three times, checking how much the buffer grows.
       final length1 = builder.length;
@@ -127,12 +133,30 @@ void main() {
 
       // Write once so schema is written.
       builder.createTypedMap(
-          schema, true, false, true, false, true, false, true, false);
+        schema,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      );
 
       // Check length of write with already-written schema.
       final length1 = builder.length;
       builder.createTypedMap(
-          schema, true, false, true, false, true, false, true, false);
+        schema,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      );
       final length2 = builder.length;
 
       // Size should be schema pointer, one byte for eight bools.
@@ -153,12 +177,30 @@ void main() {
 
       // Write once so schema is written.
       builder.createTypedMap(
-          schema, null, false, true, false, true, false, true, false);
+        schema,
+        null,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      );
 
       // Check length of write with already-written schema.
       final length1 = builder.length;
       builder.createTypedMap(
-          schema, true, null, true, false, true, false, true, false);
+        schema,
+        true,
+        null,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      );
       final length2 = builder.length;
 
       // Size should be schema pointer, one byte field set, one byte for seven
@@ -197,20 +239,30 @@ void main() {
         'g': Type.anyPointer,
       });
 
-      final typedMap =
-          builder.createTypedMap(TypedMapSchema({'a': Type.boolean}), true);
+      final typedMap = builder.createTypedMap(
+        TypedMapSchema({'a': Type.boolean}),
+        true,
+      );
       final growableMap = builder.createGrowableMap<int>();
       growableMap['foo'] = 3;
 
-      final map = builder.createTypedMap(schema, null, 1, false, {'a': 'b'},
-          ['a', 'b', 'c'], typedMap, growableMap);
+      final map = builder.createTypedMap(
+        schema,
+        null,
+        1,
+        false,
+        {'a': 'b'},
+        ['a', 'b', 'c'],
+        typedMap,
+        growableMap,
+      );
       expectFullyEquivalentMaps(map, {
         'b': 1,
         'c': false,
         'd': {'a': 'b'},
         'e': ['a', 'b', 'c'],
         'f': typedMap,
-        'g': growableMap
+        'g': growableMap,
       });
     });
 

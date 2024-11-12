@@ -27,7 +27,9 @@ class MacroBuilder {
   /// TODO(davidmorgan): support (or decide not to support) in-memory overlay
   /// filesystems.
   Future<BuiltMacroBundle> build(
-      Uri packageConfig, Iterable<QualifiedName> macroImplementations) async {
+    Uri packageConfig,
+    Iterable<QualifiedName> macroImplementations,
+  ) async {
     final script = createBootstrap(macroImplementations.toList());
 
     return await MacroBuild(packageConfig, script).build();
@@ -49,8 +51,9 @@ class BuiltMacroBundle {
 class MacroBuild {
   final Uri packageConfig;
   final String script;
-  final Directory workspace =
-      Directory.systemTemp.createTempSync('macro_builder');
+  final Directory workspace = Directory.systemTemp.createTempSync(
+    'macro_builder',
+  );
 
   /// Creates a build for [script] with [packageConfig], which must have all
   /// the needed deps.
@@ -64,11 +67,13 @@ class MacroBuild {
     await scriptFile.create(recursive: true);
     await scriptFile.writeAsString(script.toString());
 
-    final targetPackageConfig =
-        File.fromUri(workspace.uri.resolve('.dart_tool/package_config.json'));
+    final targetPackageConfig = File.fromUri(
+      workspace.uri.resolve('.dart_tool/package_config.json'),
+    );
     targetPackageConfig.parent.createSync(recursive: true);
-    targetPackageConfig
-        .writeAsStringSync(_makePackageConfigAbsolute(packageConfig));
+    targetPackageConfig.writeAsStringSync(
+      _makePackageConfigAbsolute(packageConfig),
+    );
 
     // See package:analyzer/src/summary2/kernel_compilation_service.dart for an
     // example of compiling macros using the frontend server.
@@ -76,17 +81,19 @@ class MacroBuild {
     // For now just use the command line.
 
     final result = Process.runSync(
-        // TODO(davidmorgan): this is wrong if run from an AOT-compiled
-        // executable.
-        Platform.resolvedExecutable,
-        ['compile', 'exe', 'bin/main.dart', '--output=bin/main.exe'],
-        workingDirectory: workspace.path);
+      // TODO(davidmorgan): this is wrong if run from an AOT-compiled
+      // executable.
+      Platform.resolvedExecutable,
+      ['compile', 'exe', 'bin/main.dart', '--output=bin/main.exe'],
+      workingDirectory: workspace.path,
+    );
     if (result.exitCode != 0) {
       throw StateError('Compile failed: ${result.stderr}');
     }
 
     return BuiltMacroBundle(
-        File.fromUri(scriptFile.parent.uri.resolve('main.exe')).path);
+      File.fromUri(scriptFile.parent.uri.resolve('main.exe')).path,
+    );
   }
 
   /// Returns the contents of [packageConfig] with relative paths replaced to
@@ -94,8 +101,9 @@ class MacroBuild {
   String _makePackageConfigAbsolute(Uri packageConfig) {
     final file = File.fromUri(packageConfig);
     final root = file.parent.parent.absolute.uri;
-    return file
-        .readAsStringSync()
-        .replaceAll('"rootUri": "../', '"rootUri": "$root');
+    return file.readAsStringSync().replaceAll(
+      '"rootUri": "../',
+      '"rootUri": "$root',
+    );
   }
 }

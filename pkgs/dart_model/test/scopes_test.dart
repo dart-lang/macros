@@ -10,23 +10,35 @@ void main() {
   group('Scope', () {
     for (final scope in [Scope.none, Scope.macro, Scope.query]) {
       test('create maps and serialize work in $scope', () {
-        expect(scope.run(() => Scope.createMap(TypedMapSchema({}))),
-            <String, Object?>{});
+        expect(
+          scope.run(() => Scope.createMap(TypedMapSchema({}))),
+          <String, Object?>{},
+        );
         expect(scope.run(Scope.createGrowableMap), <String, Object?>{});
-        expect(scope.run(() => Scope.serializeToBinary(<String, Object>{})),
-            JsonBufferBuilder().serialize());
+        expect(
+          scope.run(() => Scope.serializeToBinary(<String, Object>{})),
+          JsonBufferBuilder().serialize(),
+        );
       });
     }
 
     test('macro and query scopes cannot be nested', () {
-      expect(() => Scope.macro.run(() => Scope.macro.run(() {})),
-          throwsStateError);
-      expect(() => Scope.macro.run(() => Scope.query.run(() {})),
-          throwsStateError);
-      expect(() => Scope.query.run(() => Scope.macro.run(() {})),
-          throwsStateError);
-      expect(() => Scope.query.run(() => Scope.query.run(() {})),
-          throwsStateError);
+      expect(
+        () => Scope.macro.run(() => Scope.macro.run(() {})),
+        throwsStateError,
+      );
+      expect(
+        () => Scope.macro.run(() => Scope.query.run(() {})),
+        throwsStateError,
+      );
+      expect(
+        () => Scope.query.run(() => Scope.macro.run(() {})),
+        throwsStateError,
+      );
+      expect(
+        () => Scope.query.run(() => Scope.query.run(() {})),
+        throwsStateError,
+      );
     });
 
     test('none scope can be nested in macro or query scopes', () {
@@ -39,8 +51,8 @@ void main() {
       late Model firstQuery;
       Scope.query.run(() {
         initial = Model()..uris['a'] = (Library()..scopes['A'] = Interface());
-        firstQuery = Model()
-          ..uris['a'] = (Library()..scopes['B'] = Interface());
+        firstQuery =
+            Model()..uris['a'] = (Library()..scopes['B'] = Interface());
       });
       Scope.macro.run(() {
         MacroScope.current.addModel(initial);

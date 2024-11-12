@@ -14,10 +14,7 @@ import 'package:_test_macros/literal_params.dart';
   nums: [13.0, 14],
   doubles: [15.0, 16],
   strings: ['17', 'eighteen'],
-  objects: [
-    19,
-    Bar(a: true, b: false),
-  ],
+  objects: [19, Bar(a: true, b: false)],
 )
 class Foo {}
 

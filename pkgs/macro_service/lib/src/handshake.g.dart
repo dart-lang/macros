@@ -11,11 +11,8 @@ import 'package:dart_model/src/scopes.dart';
 /// Request to pick a protocol.
 extension type HandshakeRequest.fromJson(Map<String, Object?> node)
     implements Object {
-  HandshakeRequest({
-    List<Protocol>? protocols,
-  }) : this.fromJson({
-          if (protocols != null) 'protocols': protocols,
-        });
+  HandshakeRequest({List<Protocol>? protocols})
+    : this.fromJson({if (protocols != null) 'protocols': protocols});
 
   /// Supported protocols.
   List<Protocol> get protocols => (node['protocols'] as List).cast();
@@ -24,11 +21,8 @@ extension type HandshakeRequest.fromJson(Map<String, Object?> node)
 /// The picked protocol, or `null` if no requested protocol is supported.
 extension type HandshakeResponse.fromJson(Map<String, Object?> node)
     implements Object {
-  HandshakeResponse({
-    Protocol? protocol,
-  }) : this.fromJson({
-          if (protocol != null) 'protocol': protocol,
-        });
+  HandshakeResponse({Protocol? protocol})
+    : this.fromJson({if (protocol != null) 'protocol': protocol});
 
   /// Supported protocol.
   Protocol? get protocol => node['protocol'] as Protocol?;
@@ -36,17 +30,17 @@ extension type HandshakeResponse.fromJson(Map<String, Object?> node)
 
 /// The macro to host protocol version and encoding. TODO(davidmorgan): add the version.
 extension type Protocol.fromJson(Map<String, Object?> node) implements Object {
-  Protocol({
-    ProtocolEncoding? encoding,
-    ProtocolVersion? version,
-  }) : this.fromJson({
-          if (encoding != null) 'encoding': encoding,
-          if (version != null) 'version': version,
-        });
+  Protocol({ProtocolEncoding? encoding, ProtocolVersion? version})
+    : this.fromJson({
+        if (encoding != null) 'encoding': encoding,
+        if (version != null) 'version': version,
+      });
 
   /// The initial protocol for any `host<->macro` connection.
   static Protocol handshakeProtocol = Protocol(
-      encoding: ProtocolEncoding.json, version: ProtocolVersion.handshake);
+    encoding: ProtocolEncoding.json,
+    version: ProtocolVersion.handshake,
+  );
 
   /// The wire format: json or binary.
   ProtocolEncoding get encoding => node['encoding'] as ProtocolEncoding;
@@ -64,7 +58,8 @@ extension type const ProtocolEncoding.fromJson(String string)
 
 /// The protocol version.
 extension type const ProtocolVersion.fromJson(String string) implements Object {
-  static const ProtocolVersion handshake =
-      ProtocolVersion.fromJson('handshake');
+  static const ProtocolVersion handshake = ProtocolVersion.fromJson(
+    'handshake',
+  );
   static const ProtocolVersion macros1 = ProtocolVersion.fromJson('macros1');
 }

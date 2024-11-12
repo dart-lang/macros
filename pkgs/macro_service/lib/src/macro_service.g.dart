@@ -17,11 +17,7 @@ extension type AugmentRequest.fromJson(Map<String, Object?> node)
     required int phase,
     required QualifiedName target,
     required Model model,
-  }) : this.fromJson({
-          'phase': phase,
-          'target': target,
-          'model': model,
-        });
+  }) : this.fromJson({'phase': phase, 'target': target, 'model': model});
 
   /// Which phase to run: 1, 2 or 3.
   int get phase => node['phase'] as int;
@@ -40,15 +36,15 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node)
     List<Augmentation>? libraryAugmentations,
     List<String>? newTypeNames,
   }) : this.fromJson({
-          'enumValueAugmentations': <String, Object?>{},
-          'extendsTypeAugmentations': <String, Object?>{},
-          'interfaceAugmentations': <String, Object?>{},
-          if (libraryAugmentations != null)
-            'libraryAugmentations': libraryAugmentations,
-          'mixinAugmentations': <String, Object?>{},
-          if (newTypeNames != null) 'newTypeNames': newTypeNames,
-          'typeAugmentations': <String, Object?>{},
-        });
+         'enumValueAugmentations': <String, Object?>{},
+         'extendsTypeAugmentations': <String, Object?>{},
+         'interfaceAugmentations': <String, Object?>{},
+         if (libraryAugmentations != null)
+           'libraryAugmentations': libraryAugmentations,
+         'mixinAugmentations': <String, Object?>{},
+         if (newTypeNames != null) 'newTypeNames': newTypeNames,
+         'typeAugmentations': <String, Object?>{},
+       });
 
   /// Any augmentations to enum values that should be applied to an enum as a result of executing a macro, indexed by the name of the enum.
   Map<String, List<Augmentation>>? get enumValueAugmentations =>
@@ -79,18 +75,16 @@ extension type AugmentResponse.fromJson(Map<String, Object?> node)
 
   /// Any augmentations that should be applied to a class as a result of executing a macro, indexed by the name of the class.
   Map<String, List<Augmentation>>? get typeAugmentations =>
-      (node['typeAugmentations'] as Map?)
-          ?.deepCast<String, List<Augmentation>>((v) => (v as List).cast());
+      (node['typeAugmentations'] as Map?)?.deepCast<String, List<Augmentation>>(
+        (v) => (v as List).cast(),
+      );
 }
 
 /// Request could not be handled.
 extension type ErrorResponse.fromJson(Map<String, Object?> node)
     implements Object {
-  ErrorResponse({
-    String? error,
-  }) : this.fromJson({
-          if (error != null) 'error': error,
-        });
+  ErrorResponse({String? error})
+    : this.fromJson({if (error != null) 'error': error});
 
   /// The error.
   String get error => node['error'] as String;
@@ -99,11 +93,7 @@ extension type ErrorResponse.fromJson(Map<String, Object?> node)
 /// A macro host server endpoint. TODO(davidmorgan): this should be a oneOf supporting different types of connection. TODO(davidmorgan): it's not clear if this belongs in this package! But, where else?
 extension type HostEndpoint.fromJson(Map<String, Object?> node)
     implements Object {
-  HostEndpoint({
-    int? port,
-  }) : this.fromJson({
-          if (port != null) 'port': port,
-        });
+  HostEndpoint({int? port}) : this.fromJson({if (port != null) 'port': port});
 
   /// TCP port to connect to.
   int get port => node['port'] as int;
@@ -123,13 +113,12 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
     AugmentRequest augmentRequest, {
     required int id,
     QualifiedName? macroAnnotation,
-  }) =>
-      HostRequest.fromJson({
-        'type': 'AugmentRequest',
-        'value': augmentRequest,
-        'id': id,
-        if (macroAnnotation != null) 'macroAnnotation': macroAnnotation,
-      });
+  }) => HostRequest.fromJson({
+    'type': 'AugmentRequest',
+    'value': augmentRequest,
+    'id': id,
+    if (macroAnnotation != null) 'macroAnnotation': macroAnnotation,
+  });
   HostRequestType get type {
     switch (node['type'] as String) {
       case 'AugmentRequest':
@@ -156,13 +145,11 @@ extension type HostRequest.fromJson(Map<String, Object?> node)
 /// Information about a macro that the macro provides to the host.
 extension type MacroDescription.fromJson(Map<String, Object?> node)
     implements Object {
-  MacroDescription({
-    QualifiedName? annotation,
-    List<int>? runsInPhases,
-  }) : this.fromJson({
-          if (annotation != null) 'annotation': annotation,
-          if (runsInPhases != null) 'runsInPhases': runsInPhases,
-        });
+  MacroDescription({QualifiedName? annotation, List<int>? runsInPhases})
+    : this.fromJson({
+        if (annotation != null) 'annotation': annotation,
+        if (runsInPhases != null) 'runsInPhases': runsInPhases,
+      });
 
   /// The annotation that triggers the macro.
   QualifiedName get annotation => node['annotation'] as QualifiedName;
@@ -174,11 +161,10 @@ extension type MacroDescription.fromJson(Map<String, Object?> node)
 /// Informs the host that a macro has started.
 extension type MacroStartedRequest.fromJson(Map<String, Object?> node)
     implements Object {
-  MacroStartedRequest({
-    MacroDescription? macroDescription,
-  }) : this.fromJson({
-          if (macroDescription != null) 'macroDescription': macroDescription,
-        });
+  MacroStartedRequest({MacroDescription? macroDescription})
+    : this.fromJson({
+        if (macroDescription != null) 'macroDescription': macroDescription,
+      });
 
   /// The macro description.
   MacroDescription get macroDescription =>
@@ -205,21 +191,19 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
   static MacroRequest macroStartedRequest(
     MacroStartedRequest macroStartedRequest, {
     required int id,
-  }) =>
-      MacroRequest.fromJson({
-        'type': 'MacroStartedRequest',
-        'value': macroStartedRequest,
-        'id': id,
-      });
+  }) => MacroRequest.fromJson({
+    'type': 'MacroStartedRequest',
+    'value': macroStartedRequest,
+    'id': id,
+  });
   static MacroRequest queryRequest(
     QueryRequest queryRequest, {
     required int id,
-  }) =>
-      MacroRequest.fromJson({
-        'type': 'QueryRequest',
-        'value': queryRequest,
-        'id': id,
-      });
+  }) => MacroRequest.fromJson({
+    'type': 'QueryRequest',
+    'value': queryRequest,
+    'id': id,
+  });
   MacroRequestType get type {
     switch (node['type'] as String) {
       case 'MacroStartedRequest':
@@ -252,11 +236,8 @@ extension type MacroRequest.fromJson(Map<String, Object?> node)
 /// Macro's query about the code it should augment.
 extension type QueryRequest.fromJson(Map<String, Object?> node)
     implements Object {
-  QueryRequest({
-    Query? query,
-  }) : this.fromJson({
-          if (query != null) 'query': query,
-        });
+  QueryRequest({Query? query})
+    : this.fromJson({if (query != null) 'query': query});
 
   /// The query.
   Query get query => node['query'] as Query;
@@ -265,11 +246,8 @@ extension type QueryRequest.fromJson(Map<String, Object?> node)
 /// Host's response to a [QueryRequest].
 extension type QueryResponse.fromJson(Map<String, Object?> node)
     implements Object {
-  QueryResponse({
-    Model? model,
-  }) : this.fromJson({
-          if (model != null) 'model': model,
-        });
+  QueryResponse({Model? model})
+    : this.fromJson({if (model != null) 'model': model});
 
   /// The model.
   Model get model => node['model'] as Model;
@@ -290,39 +268,35 @@ extension type Response.fromJson(Map<String, Object?> node) implements Object {
   static Response augmentResponse(
     AugmentResponse augmentResponse, {
     required int requestId,
-  }) =>
-      Response.fromJson({
-        'type': 'AugmentResponse',
-        'value': augmentResponse,
-        'requestId': requestId,
-      });
+  }) => Response.fromJson({
+    'type': 'AugmentResponse',
+    'value': augmentResponse,
+    'requestId': requestId,
+  });
   static Response errorResponse(
     ErrorResponse errorResponse, {
     required int requestId,
-  }) =>
-      Response.fromJson({
-        'type': 'ErrorResponse',
-        'value': errorResponse,
-        'requestId': requestId,
-      });
+  }) => Response.fromJson({
+    'type': 'ErrorResponse',
+    'value': errorResponse,
+    'requestId': requestId,
+  });
   static Response macroStartedResponse(
     MacroStartedResponse macroStartedResponse, {
     required int requestId,
-  }) =>
-      Response.fromJson({
-        'type': 'MacroStartedResponse',
-        'value': macroStartedResponse,
-        'requestId': requestId,
-      });
+  }) => Response.fromJson({
+    'type': 'MacroStartedResponse',
+    'value': macroStartedResponse,
+    'requestId': requestId,
+  });
   static Response queryResponse(
     QueryResponse queryResponse, {
     required int requestId,
-  }) =>
-      Response.fromJson({
-        'type': 'QueryResponse',
-        'value': queryResponse,
-        'requestId': requestId,
-      });
+  }) => Response.fromJson({
+    'type': 'QueryResponse',
+    'value': queryResponse,
+    'requestId': requestId,
+  });
   ResponseType get type {
     switch (node['type'] as String) {
       case 'AugmentResponse':

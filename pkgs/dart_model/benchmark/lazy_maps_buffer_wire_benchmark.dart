@@ -51,19 +51,20 @@ class LazyMapsBufferWireBenchmark extends SerializationBenchmark {
 
 /// An interface.
 extension type Interface.fromJson(Map<String, Object?> node) {
-  Interface({
-    Map<String, Member>? members,
-    Properties? properties,
-  }) : this.fromJson(LazyMap(
-            [
-              if (members != null) 'members',
-              if (properties != null) 'properties',
-            ],
-            (key) => switch (key) {
-                  'members' => members,
-                  'properties' => properties,
-                  _ => null,
-                }));
+  Interface({Map<String, Member>? members, Properties? properties})
+    : this.fromJson(
+        LazyMap(
+          [
+            if (members != null) 'members',
+            if (properties != null) 'properties',
+          ],
+          (key) => switch (key) {
+            'members' => members,
+            'properties' => properties,
+            _ => null,
+          },
+        ),
+      );
 
   /// Map of members by name.
   Map<String, Member> get members => (node['members'] as Map).cast();
@@ -73,16 +74,16 @@ extension type Interface.fromJson(Map<String, Object?> node) {
 }
 
 extension type Member.fromJson(Map<String, Object?> node) {
-  Member({
-    Properties? properties,
-  }) : this.fromJson(LazyMap(
-            [
-              if (properties != null) 'properties',
-            ],
-            (key) => switch (key) {
-                  'properties' => properties,
-                  _ => null,
-                }));
+  Member({Properties? properties})
+    : this.fromJson(
+        LazyMap(
+          [if (properties != null) 'properties'],
+          (key) => switch (key) {
+            'properties' => properties,
+            _ => null,
+          },
+        ),
+      );
 
   /// The properties of this member.
   Properties get properties => node['properties'] as Properties;
@@ -97,24 +98,27 @@ extension type Properties.fromJson(Map<String, Object?> node) {
     bool? isField,
     bool? isMethod,
     bool? isStatic,
-  }) : this.fromJson(LazyMap(
-            [
-              if (isAbstract != null) 'isAbstract',
-              if (isClass != null) 'isClass',
-              if (isGetter != null) 'isGetter',
-              if (isField != null) 'isField',
-              if (isMethod != null) 'isMethod',
-              if (isStatic != null) 'isStatic',
-            ],
-            (key) => switch (key) {
-                  'isAbstract' => isAbstract,
-                  'isClass' => isClass,
-                  'isGetter' => isGetter,
-                  'isField' => isField,
-                  'isMethod' => isMethod,
-                  'isStatic' => isStatic,
-                  _ => null,
-                }));
+  }) : this.fromJson(
+         LazyMap(
+           [
+             if (isAbstract != null) 'isAbstract',
+             if (isClass != null) 'isClass',
+             if (isGetter != null) 'isGetter',
+             if (isField != null) 'isField',
+             if (isMethod != null) 'isMethod',
+             if (isStatic != null) 'isStatic',
+           ],
+           (key) => switch (key) {
+             'isAbstract' => isAbstract,
+             'isClass' => isClass,
+             'isGetter' => isGetter,
+             'isField' => isField,
+             'isMethod' => isMethod,
+             'isStatic' => isStatic,
+             _ => null,
+           },
+         ),
+       );
 
   /// Whether the entity is abstract, meaning it has no definition.
   bool get isAbstract => node['isAbstract'] as bool;

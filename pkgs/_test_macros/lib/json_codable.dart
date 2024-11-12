@@ -22,30 +22,42 @@ class JsonCodableImplementation
     implements ClassDeclarationsMacro, ClassDefinitionsMacro {
   @override
   MacroDescription get description => MacroDescription(
-      annotation: QualifiedName(
-          uri: 'package:_test_macros/json_codable.dart', name: 'JsonCodable'),
-      runsInPhases: [2, 3]);
+    annotation: QualifiedName(
+      uri: 'package:_test_macros/json_codable.dart',
+      name: 'JsonCodable',
+    ),
+    runsInPhases: [2, 3],
+  );
 
   @override
   void buildDeclarationsForClass(ClassDeclarationsBuilder builder) {
     final name = builder.model.qualifiedNameOf(builder.target.node)!.name;
     builder
-      ..declareInType(Augmentation(code: expandTemplate('''
+      ..declareInType(
+        Augmentation(
+          code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external $name.fromJson($_jsonMapType json);
-   ''')))
-      ..declareInType(Augmentation(code: expandTemplate('''
+   '''),
+        ),
+      )
+      ..declareInType(
+        Augmentation(
+          code: expandTemplate('''
 // TODO(davidmorgan): see https://github.com/dart-lang/macros/issues/80.
 // external $_jsonMapType toJson();
-   ''')));
+   '''),
+        ),
+      );
   }
 
   @override
   void buildDefinitionsForClass(ClassDefinitionsBuilder builder) async {
     final qualifiedName = builder.model.qualifiedNameOf(builder.target.node)!;
     // TODO(davidmorgan): put `extends` information directly in `Interface`.
-    final superclassName =
-        MacroScope.current.typeSystem.supertypeOf(qualifiedName);
+    final superclassName = MacroScope.current.typeSystem.supertypeOf(
+      qualifiedName,
+    );
 
     await _generateFromJson(builder, qualifiedName, superclassName);
     await _generateToJson(builder, qualifiedName, superclassName);
@@ -69,19 +81,22 @@ class JsonCodableImplementation
       } else {
         // TODO(davidmorgan): report as a diagnostic.
         throw ArgumentError(
-            'Serialization of classes that extend other classes is only '
-            'supported if those classes have a valid '
-            '`fromJson(Map<String, Object?> json)` constructor.');
+          'Serialization of classes that extend other classes is only '
+          'supported if those classes have a valid '
+          '`fromJson(Map<String, Object?> json)` constructor.',
+        );
       }
     }
 
     final initializers = <String>[];
-    for (final field in builder.target.members.entries
-        .where((m) => m.value.properties.isField)) {
+    for (final field in builder.target.members.entries.where(
+      (m) => m.value.properties.isField,
+    )) {
       final name = field.key;
       final type = field.value.returnType;
-      initializers
-          .add('$name = ${_convertTypeFromJson("json[r'$name']", type)}');
+      initializers.add(
+        '$name = ${_convertTypeFromJson("json[r'$name']", type)}',
+      );
     }
 
     if (superclassHasFromJson) {
@@ -89,12 +104,17 @@ class JsonCodableImplementation
     }
 
     builder
-        .buildConstructor(builder.model
-            .qualifiedNameOf(builder.target.members['fromJson']!.node)!)
-        .augment(initializers: [
-      for (var initializer in initializers)
-        Augmentation(code: expandTemplate(initializer)),
-    ]);
+        .buildConstructor(
+          builder.model.qualifiedNameOf(
+            builder.target.members['fromJson']!.node,
+          )!,
+        )
+        .augment(
+          initializers: [
+            for (var initializer in initializers)
+              Augmentation(code: expandTemplate(initializer)),
+          ],
+        );
   }
 
   Future<void> _generateToJson(
@@ -114,15 +134,17 @@ class JsonCodableImplementation
       } else {
         // TODO(davidmorgan): report as a diagnostic.
         throw ArgumentError(
-            'Serialization of classes that extend other classes is only '
-            'supported if those classes have a valid '
-            '`Map<String, Object?> json toJson()` method.');
+          'Serialization of classes that extend other classes is only '
+          'supported if those classes have a valid '
+          '`Map<String, Object?> json toJson()` method.',
+        );
       }
     }
 
     final serializers = <String>[];
-    for (final field in builder.target.members.entries
-        .where((m) => m.value.properties.isField)) {
+    for (final field in builder.target.members.entries.where(
+      (m) => m.value.properties.isField,
+    )) {
       final name = field.key;
       final type = field.value.returnType;
       var serializer = "json[r'$name'] = ${_convertTypeToJson(name, type)};\n";
@@ -137,15 +159,22 @@ class JsonCodableImplementation
     final jsonInitializer =
         superclassHasToJson ? 'super.toJson()' : '$_jsonMapTypeForLiteral{}';
     builder
-        .buildMethod(builder.model
-            .qualifiedNameOf(builder.target.members['toJson']!.node)!)
-        .augment(body: Augmentation(code: expandTemplate('''
+        .buildMethod(
+          builder.model.qualifiedNameOf(
+            builder.target.members['toJson']!.node,
+          )!,
+        )
+        .augment(
+          body: Augmentation(
+            code: expandTemplate('''
 {
   final json = $jsonInitializer;
 ${serializers.join('')}
   return json;
 }
-''')));
+'''),
+          ),
+        );
   }
 
   /// Returns whether [constructor] is a constructor
@@ -158,7 +187,8 @@ ${serializers.join('')}
       constructor.requiredPositionalParameters[0].type ==
           StaticTypeDescType.namedTypeDesc &&
       _isJsonMapType(
-          constructor.requiredPositionalParameters[0].asNamedTypeDesc);
+        constructor.requiredPositionalParameters[0].asNamedTypeDesc,
+      );
 
   /// Returns whether [method] is a method
   /// `toJson(Map<String, Object?>)`.
@@ -176,7 +206,12 @@ ${serializers.join('')}
       type.instantiation[0].asNamedTypeDesc.name.asString ==
           'dart:core#String' &&
       type.instantiation[1].type == StaticTypeDescType.nullableTypeDesc &&
-      type.instantiation[1].asNullableTypeDesc.inner.asNamedTypeDesc.name
+      type
+              .instantiation[1]
+              .asNullableTypeDesc
+              .inner
+              .asNamedTypeDesc
+              .name
               .asString ==
           'dart:core#Object';
 
@@ -188,9 +223,10 @@ ${serializers.join('')}
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
     final orNull = nullable ? '?' : '';
     final nullCheck = nullable ? '$reference == null ? null : ' : '';
-    final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
-        ? type.asNullableTypeDesc.inner
-        : type;
+    final underlyingType =
+        type.type == StaticTypeDescType.nullableTypeDesc
+            ? type.asNullableTypeDesc.inner
+            : type;
 
     if (underlyingType.type == StaticTypeDescType.namedTypeDesc) {
       final namedType = underlyingType.asNamedTypeDesc;
@@ -237,9 +273,10 @@ ${serializers.join('')}
     final nullable = type.type == StaticTypeDescType.nullableTypeDesc;
     final nullCheck = nullable ? '$reference == null ? null : ' : '';
     final nullCheckedReference = nullable ? '$reference!' : reference;
-    final underlyingType = type.type == StaticTypeDescType.nullableTypeDesc
-        ? type.asNullableTypeDesc.inner
-        : type;
+    final underlyingType =
+        type.type == StaticTypeDescType.nullableTypeDesc
+            ? type.asNullableTypeDesc.inner
+            : type;
 
     if (underlyingType.type == StaticTypeDescType.namedTypeDesc) {
       final namedType = underlyingType.asNamedTypeDesc;

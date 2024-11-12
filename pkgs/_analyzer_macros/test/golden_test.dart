@@ -21,20 +21,24 @@ void main() {
 
   group('analyzer with injected macro impl query result matches golden', () {
     final directory = Directory(
-        Isolate.resolvePackageUriSync(Uri.parse('package:foo/foo.dart'))!
-            .resolve('../../../goldens')
-            .toFilePath());
+      Isolate.resolvePackageUriSync(
+        Uri.parse('package:foo/foo.dart'),
+      )!.resolve('../../../goldens').toFilePath(),
+    );
 
     setUp(() async {
       // Set up analyzer.
-      final contextCollection =
-          AnalysisContextCollection(includedPaths: [directory.path]);
+      final contextCollection = AnalysisContextCollection(
+        includedPaths: [directory.path],
+      );
       analysisContext = contextCollection.contexts.first;
       injected.macroImplementation = await AnalyzerMacroImplementation.start(
-          protocol: Protocol(
-              encoding: ProtocolEncoding.binary,
-              version: ProtocolVersion.macros1),
-          packageConfig: Isolate.packageConfigSync!);
+        protocol: Protocol(
+          encoding: ProtocolEncoding.binary,
+          version: ProtocolVersion.macros1,
+        ),
+        packageConfig: Isolate.packageConfigSync!,
+      );
     });
 
     for (final file in directory
@@ -63,8 +67,9 @@ void main() {
           introspectionGoldenFile = null;
         }
 
-        applicationGoldenFile =
-            File(p.setExtension(path, '.analyzer.augmentations'));
+        applicationGoldenFile = File(
+          p.setExtension(path, '.analyzer.augmentations'),
+        );
         if (applicationGoldenFile!.existsSync()) {
           applicationGolden = applicationGoldenFile!.readAsStringSync();
         } else {
@@ -76,11 +81,14 @@ void main() {
         tearDown(() {
           if (introspectionGoldenFile != null &&
               introspectionMacroOutput != null) {
-            final string = (const JsonEncoder.withIndent('  '))
-                .convert(introspectionMacroOutput);
+            final string = (const JsonEncoder.withIndent(
+              '  ',
+            )).convert(introspectionMacroOutput);
             if (introspectionGoldenFile!.readAsStringSync() != string) {
-              print('Updating mismatched golden: '
-                  '${introspectionGoldenFile!.path}');
+              print(
+                'Updating mismatched golden: '
+                '${introspectionGoldenFile!.path}',
+              );
               introspectionGoldenFile!.writeAsStringSync(string);
             }
           }
@@ -88,7 +96,8 @@ void main() {
             if (applicationGoldenFile!.readAsStringSync() !=
                 applicationMacroOutput) {
               print(
-                  'Updating mismatched golden: ${applicationGoldenFile!.path}');
+                'Updating mismatched golden: ${applicationGoldenFile!.path}',
+              );
               applicationGoldenFile!.writeAsStringSync(applicationMacroOutput!);
             }
           }
@@ -101,16 +110,20 @@ void main() {
           return;
         }
 
-        final errors = (await analysisContext.currentSession.getErrors(path))
-            as ErrorsResult;
+        final errors =
+            (await analysisContext.currentSession.getErrors(path))
+                as ErrorsResult;
         expect(
-            errors.errors.where((e) => e.severity == Severity.error).toList(),
-            isEmpty);
+          errors.errors.where((e) => e.severity == Severity.error).toList(),
+          isEmpty,
+        );
 
-        final resolvedLibrary = (await analysisContext.currentSession
-            .getResolvedLibrary(path)) as ResolvedLibraryResult;
-        final augmentationUnit =
-            resolvedLibrary.units.singleWhere((u) => u.isMacroPart);
+        final resolvedLibrary =
+            (await analysisContext.currentSession.getResolvedLibrary(path))
+                as ResolvedLibraryResult;
+        final augmentationUnit = resolvedLibrary.units.singleWhere(
+          (u) => u.isMacroPart,
+        );
 
         if (introspectionGolden != null) {
           // Each `QueryClass` outputs its query result as a comment in an
@@ -119,24 +132,35 @@ void main() {
           final macroOutputs = augmentationUnit.content
               .split('\n')
               .where((l) => l.startsWith('// '))
-              .map((l) => json.decode(l.substring('// '.length))
-                  as Map<String, Object?>);
+              .map(
+                (l) =>
+                    json.decode(l.substring('// '.length))
+                        as Map<String, Object?>,
+              );
           introspectionMacroOutput = _merge(macroOutputs);
 
-          expect(introspectionMacroOutput, introspectionGolden,
-              reason: updateGoldens
-                  ? '\n--> Goldens updated! Should pass on rerun.'
-                  : '\n--> To update goldens, run: '
-                      'UPDATE_GOLDENS=yes dart test');
+          expect(
+            introspectionMacroOutput,
+            introspectionGolden,
+            reason:
+                updateGoldens
+                    ? '\n--> Goldens updated! Should pass on rerun.'
+                    : '\n--> To update goldens, run: '
+                        'UPDATE_GOLDENS=yes dart test',
+          );
         }
 
         if (applicationGolden != null) {
           applicationMacroOutput = augmentationUnit.content;
-          expect(applicationMacroOutput, applicationGolden,
-              reason: updateGoldens
-                  ? '\n--> Goldens updated! Should pass on rerun.'
-                  : '\n--> To update goldens, run: '
-                      'UPDATE_GOLDENS=yes dart test');
+          expect(
+            applicationMacroOutput,
+            applicationGolden,
+            reason:
+                updateGoldens
+                    ? '\n--> Goldens updated! Should pass on rerun.'
+                    : '\n--> To update goldens, run: '
+                        'UPDATE_GOLDENS=yes dart test',
+          );
         }
       });
     }
@@ -148,8 +172,10 @@ Map<String, Object?> _merge(Iterable<Map<String, Object?>> maps) {
   for (final map in maps) {
     for (final entry in map.entries) {
       if (result[entry.key] case final Map<String, Object?> nested) {
-        result[entry.key] =
-            _merge([nested, entry.value as Map<String, Object?>]);
+        result[entry.key] = _merge([
+          nested,
+          entry.value as Map<String, Object?>,
+        ]);
       } else {
         result[entry.key] = entry.value;
       }

@@ -20,7 +20,7 @@ abstract base class BuilderBase<T extends Object> implements Builder<T> {
   Model get model => MacroScope.current.model;
 
   BuilderBase(this.target, this.host)
-      : response = AugmentResponse(libraryAugmentations: [], newTypeNames: []);
+    : response = AugmentResponse(libraryAugmentations: [], newTypeNames: []);
 
   BuilderBase.nested(this.target, this.host, this.response);
 
@@ -33,7 +33,7 @@ abstract base class TypesBuilderBase<T extends Object> extends BuilderBase<T>
   TypesBuilderBase(super.target, super.host);
 
   TypesBuilderBase.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 
   @override
   void declareType(String name, Augmentation typeDeclaration) {
@@ -61,7 +61,8 @@ base mixin ExtendsClauseBuilderImpl<T extends Interface> on TypesBuilderBase<T>
 }
 
 base mixin ImplementsClauseBuilderImpl<T extends Interface>
-    on TypesBuilderBase<T> implements ImplementsClauseBuilder<T> {
+    on TypesBuilderBase<T>
+    implements ImplementsClauseBuilder<T> {
   /// Appends [interfaces] to the list of interfaces for this type.
   @override
   void appendInterfaces(Iterable<Augmentation> interfaces) {
@@ -96,15 +97,16 @@ final class ClassTypesBuilderImpl<T extends Interface>
   ClassTypesBuilderImpl(super.target, super.host);
 
   ClassTypesBuilderImpl.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 }
 
 abstract base class DeclarationsBuilderBase<T extends Object>
-    extends BuilderBase<T> implements DeclarationsBuilder<T> {
+    extends BuilderBase<T>
+    implements DeclarationsBuilder<T> {
   DeclarationsBuilderBase(super.target, super.host);
 
   DeclarationsBuilderBase.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 
   @override
   void declareInLibrary(Augmentation declaration) {
@@ -113,11 +115,12 @@ abstract base class DeclarationsBuilderBase<T extends Object>
 }
 
 abstract base class MemberDeclarationsBuilderBase<T extends Interface>
-    extends DeclarationsBuilderBase<T> implements MemberDeclarationsBuilder<T> {
+    extends DeclarationsBuilderBase<T>
+    implements MemberDeclarationsBuilder<T> {
   MemberDeclarationsBuilderBase(super.target, super.host);
 
   MemberDeclarationsBuilderBase.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 
   @override
   void declareInType(Augmentation declaration) {
@@ -135,54 +138,75 @@ final class ClassDeclarationsBuilderImpl<T extends Interface>
   ClassDeclarationsBuilderImpl(super.target, super.host);
 
   ClassDeclarationsBuilderImpl.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 }
 
 final class MethodDefinitionsBuilderImpl<T extends Member>
-    extends BuilderBase<T> implements MethodDefinitionsBuilder<T> {
+    extends BuilderBase<T>
+    implements MethodDefinitionsBuilder<T> {
   MethodDefinitionsBuilderImpl(super.target, super.host);
 
   MethodDefinitionsBuilderImpl.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 
   @override
   void augment({Augmentation? body, Augmentation? docCommentsAndMetadata}) {
-    final augmentation = _buildFunctionAugmentation(body, target, model,
-        docComments: docCommentsAndMetadata);
+    final augmentation = _buildFunctionAugmentation(
+      body,
+      target,
+      model,
+      docComments: docCommentsAndMetadata,
+    );
     response.typeAugmentations!.update(
-        target.parentInterface.name, (value) => value..add(augmentation),
-        ifAbsent: () => [augmentation]);
+      target.parentInterface.name,
+      (value) => value..add(augmentation),
+      ifAbsent: () => [augmentation],
+    );
   }
 }
 
 final class ConstructorDefinitionsBuilderImpl<T extends Member>
-    extends BuilderBase<T> implements ConstructorDefinitionsBuilder<T> {
+    extends BuilderBase<T>
+    implements ConstructorDefinitionsBuilder<T> {
   ConstructorDefinitionsBuilderImpl(super.target, super.host);
 
   ConstructorDefinitionsBuilderImpl.nested(
-      super.target, super.host, super.response)
-      : super.nested();
+    super.target,
+    super.host,
+    super.response,
+  ) : super.nested();
 
   @override
-  void augment(
-      {Augmentation? body,
-      List<Augmentation>? initializers,
-      Augmentation? docCommentsAndMetadata}) {
-    final augmentation = _buildFunctionAugmentation(body, target, model,
-        initializers: initializers, docComments: docCommentsAndMetadata);
+  void augment({
+    Augmentation? body,
+    List<Augmentation>? initializers,
+    Augmentation? docCommentsAndMetadata,
+  }) {
+    final augmentation = _buildFunctionAugmentation(
+      body,
+      target,
+      model,
+      initializers: initializers,
+      docComments: docCommentsAndMetadata,
+    );
     response.typeAugmentations!.update(
-        target.parentInterface.name, (value) => value..add(augmentation),
-        ifAbsent: () => [augmentation]);
+      target.parentInterface.name,
+      (value) => value..add(augmentation),
+      ifAbsent: () => [augmentation],
+    );
   }
 }
 
 abstract base class InterfaceDefinitionsBuilderBase<T extends Interface>
-    extends BuilderBase<T> implements InterfaceDefinitionsBuilder<T> {
+    extends BuilderBase<T>
+    implements InterfaceDefinitionsBuilder<T> {
   InterfaceDefinitionsBuilderBase(super.target, super.host);
 
   InterfaceDefinitionsBuilderBase.nested(
-      super.target, super.host, super.response)
-      : super.nested();
+    super.target,
+    super.host,
+    super.response,
+  ) : super.nested();
 
   /// Retrieve a [FieldDefinitionsBuilder] for a field with [name] in
   /// [target].
@@ -201,7 +225,10 @@ abstract base class InterfaceDefinitionsBuilderBase<T extends Interface>
   @override
   MethodDefinitionsBuilder buildMethod(QualifiedName name) =>
       MethodDefinitionsBuilderImpl.nested(
-          Member.fromJson(model.lookup(name)!), host, response);
+        Member.fromJson(model.lookup(name)!),
+        host,
+        response,
+      );
 
   /// Retrieve a [ConstructorDefinitionsBuilder] for a constructor with [name]
   /// in [target].
@@ -211,7 +238,10 @@ abstract base class InterfaceDefinitionsBuilderBase<T extends Interface>
   @override
   ConstructorDefinitionsBuilder buildConstructor(QualifiedName name) =>
       ConstructorDefinitionsBuilderImpl.nested(
-          Member.fromJson(model.lookup(name)!), host, response);
+        Member.fromJson(model.lookup(name)!),
+        host,
+        response,
+      );
 }
 
 final class ClassDefinitionsBuilderImpl<T extends Interface>
@@ -220,7 +250,7 @@ final class ClassDefinitionsBuilderImpl<T extends Interface>
   ClassDefinitionsBuilderImpl(super.target, super.host);
 
   ClassDefinitionsBuilderImpl.nested(super.target, super.host, super.response)
-      : super.nested();
+    : super.nested();
 
   @override
   void augment({Augmentation? docCommentsAndMetadata}) {
@@ -239,8 +269,12 @@ final class ClassDefinitionsBuilderImpl<T extends Interface>
 /// The [initializers] parameter can only be used if [declaration] is a
 /// constructor.
 Augmentation _buildFunctionAugmentation(
-    Augmentation? body, Member declaration, Model model,
-    {List<Augmentation>? initializers, Augmentation? docComments}) {
+  Augmentation? body,
+  Member declaration,
+  Model model, {
+  List<Augmentation>? initializers,
+  Augmentation? docComments,
+}) {
   assert(initializers == null || declaration.properties.isConstructor);
   final properties = declaration.properties;
   final qualifiedName = model.qualifiedNameOf(declaration.node)!;
@@ -325,20 +359,17 @@ Augmentation _buildFunctionAugmentation(
         ...initializer.code,
       ],
     ],
-    if (body == null)
-      ';'
-    else ...[
-      ' ',
-      ...body.code,
-    ]
+    if (body == null) ';' else ...[' ', ...body.code],
   ];
-  return Augmentation(code: [
-    for (var part in parts)
-      switch (part) {
-        String() => Code.string(part),
-        // TODO: All maps will pass this check...
-        Code() => part,
-        _ => throw StateError('Unexpected code kind $part'),
-      },
-  ]);
+  return Augmentation(
+    code: [
+      for (var part in parts)
+        switch (part) {
+          String() => Code.string(part),
+          // TODO: All maps will pass this check...
+          Code() => part,
+          _ => throw StateError('Unexpected code kind $part'),
+        },
+    ],
+  );
 }

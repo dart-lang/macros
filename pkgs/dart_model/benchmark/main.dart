@@ -52,9 +52,12 @@ void main() {
 
     for (final benchmark in serializationBenchmarks.skip(1)) {
       if (!const DeepCollectionEquality().equals(
-          benchmark.deserialized, serializationBenchmarks.first.deserialized)) {
+        benchmark.deserialized,
+        serializationBenchmarks.first.deserialized,
+      )) {
         throw StateError(
-            'Validation failed for ${benchmark.name}, deserialized does not match.');
+          'Validation failed for ${benchmark.name}, deserialized does not match.',
+        );
       }
     }
     print('\nDeserialized output validated.\n');

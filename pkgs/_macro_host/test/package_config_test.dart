@@ -12,31 +12,40 @@ import 'package:test/test.dart';
 void main() {
   group(MacroPackageConfig, () {
     test('can look up macro implementations from package URIs', () async {
-      final packageConfig =
-          MacroPackageConfig.readFromUri(Isolate.packageConfigSync!);
+      final packageConfig = MacroPackageConfig.readFromUri(
+        Isolate.packageConfigSync!,
+      );
 
       expect(
-          packageConfig
-              .lookupMacroImplementation(QualifiedName(
-                  uri: 'package:_test_macros/declare_x_macro.dart',
-                  name: 'DeclareX'))!
-              .asString,
-          'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
+        packageConfig
+            .lookupMacroImplementation(
+              QualifiedName(
+                uri: 'package:_test_macros/declare_x_macro.dart',
+                name: 'DeclareX',
+              ),
+            )!
+            .asString,
+        'package:_test_macros/declare_x_macro.dart#DeclareXImplementation',
+      );
     });
 
     test('can look up macro implementations from file URIs', () async {
-      final packageConfig =
-          MacroPackageConfig.readFromUri(Isolate.packageConfigSync!);
+      final packageConfig = MacroPackageConfig.readFromUri(
+        Isolate.packageConfigSync!,
+      );
 
-      final sourceFileUri = Directory.current.uri
-          .resolve('../_test_macros/lib/declare_x_macro.dart');
+      final sourceFileUri = Directory.current.uri.resolve(
+        '../_test_macros/lib/declare_x_macro.dart',
+      );
 
       expect(
-          packageConfig
-              .lookupMacroImplementation(
-                  QualifiedName(uri: '$sourceFileUri', name: 'DeclareX'))!
-              .asString,
-          'package:_test_macros/declare_x_macro.dart#DeclareXImplementation');
+        packageConfig
+            .lookupMacroImplementation(
+              QualifiedName(uri: '$sourceFileUri', name: 'DeclareX'),
+            )!
+            .asString,
+        'package:_test_macros/declare_x_macro.dart#DeclareXImplementation',
+      );
     });
   });
 }

@@ -43,62 +43,77 @@ final class AnalyzerQueryService extends QueryService {
     for (final annotation in clazz.metadata) {
       metadataAnnotations.add(
         MetadataAnnotation(
-            expression: metadata_converter.convertToExpression(
-                analyzer.parseAnnotation(
-                    annotation as analyzer.ElementAnnotationImpl))),
+          expression: metadata_converter.convertToExpression(
+            analyzer.parseAnnotation(
+              annotation as analyzer.ElementAnnotationImpl,
+            ),
+          ),
+        ),
       );
     }
 
     final interface = Interface(
-        properties: Properties(isClass: true),
-        metadataAnnotations: metadataAnnotations);
+      properties: Properties(isClass: true),
+      metadataAnnotations: metadataAnnotations,
+    );
     try {
       for (final constructor in clazz.constructors) {
         interface.members[constructor.name] = Member(
-            requiredPositionalParameters: constructor
-                .requiredPositionalParameters(types.translator, types.context),
-            optionalPositionalParameters: constructor
-                .optionalPositionalParameters(types.translator, types.context),
-            namedParameters:
-                constructor.namedParameters(types.translator, types.context),
-            properties: Properties(
-              isAbstract: constructor.isAbstract,
-              isConstructor: true,
-              isGetter: false,
-              isField: false,
-              isMethod: false,
-              isStatic: false,
-            ));
+          requiredPositionalParameters: constructor
+              .requiredPositionalParameters(types.translator, types.context),
+          optionalPositionalParameters: constructor
+              .optionalPositionalParameters(types.translator, types.context),
+          namedParameters: constructor.namedParameters(
+            types.translator,
+            types.context,
+          ),
+          properties: Properties(
+            isAbstract: constructor.isAbstract,
+            isConstructor: true,
+            isGetter: false,
+            isField: false,
+            isMethod: false,
+            isStatic: false,
+          ),
+        );
       }
       for (final field in clazz.fields) {
         interface.members[field.name] = Member(
-            properties: Properties(
-              isAbstract: field.isAbstract,
-              isConstructor: false,
-              isGetter: false,
-              isField: true,
-              isMethod: false,
-              isStatic: field.isStatic,
-            ),
-            returnType: types.addDartType(field.type));
+          properties: Properties(
+            isAbstract: field.isAbstract,
+            isConstructor: false,
+            isGetter: false,
+            isField: true,
+            isMethod: false,
+            isStatic: field.isStatic,
+          ),
+          returnType: types.addDartType(field.type),
+        );
       }
       for (final method in clazz.methods) {
         interface.members[method.name] = Member(
-            requiredPositionalParameters: method.requiredPositionalParameters(
-                types.translator, types.context),
-            optionalPositionalParameters: method.optionalPositionalParameters(
-                types.translator, types.context),
-            namedParameters:
-                method.namedParameters(types.translator, types.context),
-            properties: Properties(
-              isAbstract: method.isAbstract,
-              isConstructor: false,
-              isGetter: false,
-              isField: false,
-              isMethod: true,
-              isStatic: method.isStatic,
-            ),
-            returnType: types.addDartType(method.returnType));
+          requiredPositionalParameters: method.requiredPositionalParameters(
+            types.translator,
+            types.context,
+          ),
+          optionalPositionalParameters: method.optionalPositionalParameters(
+            types.translator,
+            types.context,
+          ),
+          namedParameters: method.namedParameters(
+            types.translator,
+            types.context,
+          ),
+          properties: Properties(
+            isAbstract: method.isAbstract,
+            isConstructor: false,
+            isGetter: false,
+            isField: false,
+            isMethod: true,
+            isStatic: method.isStatic,
+          ),
+          returnType: types.addDartType(method.returnType),
+        );
       }
     } catch (_) {
       // TODO: Fails in types phase, implement fine grained queries.
@@ -129,9 +144,10 @@ class AnalyzerTypeHierarchy {
   /// Adds [element] and any supertypes to the hierarchy, if not already
   /// present.
   void addInterfaceElement(InterfaceElement element) {
-    final asNamedType = element.thisType
-        .acceptWithArgument(translator, context)
-        .asNamedTypeDesc;
+    final asNamedType =
+        element.thisType
+            .acceptWithArgument(translator, context)
+            .asNamedTypeDesc;
 
     final maybeEntry = typeHierarchy.named[asNamedType.name.asString];
     if (maybeEntry != null) {
@@ -156,7 +172,7 @@ class AnalyzerTypeHierarchy {
       ],
       supertypes: [
         for (final superType in superTypes)
-          superType.acceptWithArgument(translator, context).asNamedTypeDesc
+          superType.acceptWithArgument(translator, context).asNamedTypeDesc,
       ],
     );
   }
@@ -164,27 +180,30 @@ class AnalyzerTypeHierarchy {
 
 extension ExecutableElementExtension on ExecutableElement {
   List<StaticTypeDesc> requiredPositionalParameters(
-          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
-      [
-        for (final parameter in parameters)
-          if (parameter.isRequiredPositional)
-            parameter.type.acceptWithArgument(translator, context)
-      ];
+    AnalyzerTypesToMacros translator,
+    TypeTranslationContext context,
+  ) => [
+    for (final parameter in parameters)
+      if (parameter.isRequiredPositional)
+        parameter.type.acceptWithArgument(translator, context),
+  ];
 
   List<StaticTypeDesc> optionalPositionalParameters(
-          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
-      [
-        for (final parameter in parameters)
-          if (parameter.isOptionalPositional)
-            parameter.type.acceptWithArgument(translator, context)
-      ];
+    AnalyzerTypesToMacros translator,
+    TypeTranslationContext context,
+  ) => [
+    for (final parameter in parameters)
+      if (parameter.isOptionalPositional)
+        parameter.type.acceptWithArgument(translator, context),
+  ];
 
   List<NamedFunctionTypeParameter> namedParameters(
-          AnalyzerTypesToMacros translator, TypeTranslationContext context) =>
-      [
-        for (final parameter in parameters)
-          if (parameter.isNamed)
-            parameter.type.acceptWithArgument(translator, context)
-                as NamedFunctionTypeParameter
-      ];
+    AnalyzerTypesToMacros translator,
+    TypeTranslationContext context,
+  ) => [
+    for (final parameter in parameters)
+      if (parameter.isNamed)
+        parameter.type.acceptWithArgument(translator, context)
+            as NamedFunctionTypeParameter,
+  ];
 }

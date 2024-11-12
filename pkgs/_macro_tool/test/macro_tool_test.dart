@@ -16,30 +16,32 @@ void main() {
 
   test('apply macros with analyzer then run', () async {
     expect(
-        await macro_tool.main([
-          '--workspace=test/package_under_test',
-          '--packageConfig=../../.dart_tool/package_config.json',
-          '--script=test/package_under_test/lib/apply_declare_x.dart',
-          'apply',
-          'patch_for_cfe',
-          'run',
-        ]),
-        // The script exit code is the macro-generated value: 3.
-        3);
+      await macro_tool.main([
+        '--workspace=test/package_under_test',
+        '--packageConfig=../../.dart_tool/package_config.json',
+        '--script=test/package_under_test/lib/apply_declare_x.dart',
+        'apply',
+        'patch_for_cfe',
+        'run',
+      ]),
+      // The script exit code is the macro-generated value: 3.
+      3,
+    );
   });
 
   test('apply macros with CFE then run', () async {
     expect(
-        await macro_tool.main([
-          '--workspace=test/package_under_test',
-          '--packageConfig=../../.dart_tool/package_config.json',
-          '--script=test/package_under_test/lib/apply_declare_x.dart',
-          '--host=cfe',
-          'apply',
-          'patch_for_cfe',
-          'run',
-        ]),
-        // The script exit code is the macro-generated value: 3.
-        3);
+      await macro_tool.main([
+        '--workspace=test/package_under_test',
+        '--packageConfig=../../.dart_tool/package_config.json',
+        '--script=test/package_under_test/lib/apply_declare_x.dart',
+        '--host=cfe',
+        'apply',
+        'patch_for_cfe',
+        'run',
+      ]),
+      // The script exit code is the macro-generated value: 3.
+      3,
+    );
   });
 }

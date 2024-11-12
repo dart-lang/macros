@@ -63,8 +63,10 @@ enum Scope {
     if (this == Scope.macro || this == Scope.query) {
       final current = _currentOrNull?.type ?? Scope.none;
       if (current != Scope.none) {
-        throw StateError('$this cannot be nested in another scope; '
-            'but, currently running: $current');
+        throw StateError(
+          '$this cannot be nested in another scope; '
+          'but, currently running: $current',
+        );
       }
     }
   }
@@ -73,15 +75,17 @@ enum Scope {
   ///
   /// If there is no current scope, creates a buffer just for this map, which
   /// is slow.
-  static Map<String, Object?> createMap(TypedMapSchema schema,
-      [Object? v0,
-      Object? v1,
-      Object? v2,
-      Object? v3,
-      Object? v4,
-      Object? v5,
-      Object? v6,
-      Object? v7]) {
+  static Map<String, Object?> createMap(
+    TypedMapSchema schema, [
+    Object? v0,
+    Object? v1,
+    Object? v2,
+    Object? v3,
+    Object? v4,
+    Object? v5,
+    Object? v6,
+    Object? v7,
+  ]) {
     final scope = Scope._currentOrNull;
     final buffer = scope?.buffer ?? JsonBufferBuilder();
     return buffer.createTypedMap(schema, v0, v1, v2, v3, v4, v5, v6, v7);
@@ -107,8 +111,10 @@ enum Scope {
     final scope = _currentOrNull;
     final buffer = scope?.buffer ?? JsonBufferBuilder();
     if (buffer.map.isNotEmpty) {
-      throw StateError('Buffer was already used to send: '
-          '${buffer.map}, tried to use it to send: $node');
+      throw StateError(
+        'Buffer was already used to send: '
+        '${buffer.map}, tried to use it to send: $node',
+      );
     }
     buffer.map.addAll(node);
     return buffer.serialize();
@@ -174,9 +180,11 @@ class MacroScope {
     final scope = Scope._currentOrNull;
     return switch (scope) {
       _ScopeData(:final macro?) => macro,
-      _ => throw StateError(
+      _ =>
+        throw StateError(
           'MacroScope.current can only be called in macro scope, '
-          'but currently running ${scope?.type ?? Scope.none}.'),
+          'but currently running ${scope?.type ?? Scope.none}.',
+        ),
     };
   }
 }

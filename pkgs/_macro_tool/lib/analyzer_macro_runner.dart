@@ -24,11 +24,13 @@ class AnalyzerMacroRunner implements MacroRunner {
   late final AnalysisContext analysisContext;
   AnalyzerMacroImplementation? analyzerMacroImplementation;
 
-  AnalyzerMacroRunner(
-      {required this.workspacePath, required this.packageConfigPath})
-      : sourceFiles = SourceFile.findDartInWorkspace(workspacePath) {
-    final contextCollection =
-        AnalysisContextCollection(includedPaths: [workspacePath]);
+  AnalyzerMacroRunner({
+    required this.workspacePath,
+    required this.packageConfigPath,
+  }) : sourceFiles = SourceFile.findDartInWorkspace(workspacePath) {
+    final contextCollection = AnalysisContextCollection(
+      includedPaths: [workspacePath],
+    );
     analysisContext = contextCollection.contexts.single;
   }
 
@@ -40,10 +42,12 @@ class AnalyzerMacroRunner implements MacroRunner {
   Future<WorkspaceResult> run({bool injectImplementation = true}) async {
     if (injectImplementation) {
       analyzerMacroImplementation ??= await AnalyzerMacroImplementation.start(
-          protocol: Protocol(
-              encoding: ProtocolEncoding.binary,
-              version: ProtocolVersion.macros1),
-          packageConfig: Uri.file(packageConfigPath));
+        protocol: Protocol(
+          encoding: ProtocolEncoding.binary,
+          version: ProtocolVersion.macros1,
+        ),
+        packageConfig: Uri.file(packageConfigPath),
+      );
       injected_analyzer.macroImplementation = analyzerMacroImplementation;
     } else {
       injected_analyzer.macroImplementation = null;
@@ -59,25 +63,28 @@ class AnalyzerMacroRunner implements MacroRunner {
           (await analysisContext.currentSession.getResolvedLibrary(sourceFile))
               as ResolvedLibraryResult;
 
-      final errors = ((await analysisContext.currentSession
-              .getErrors(sourceFile)) as ErrorsResult)
-          .errors
-          .where((e) => e.severity == Severity.error)
-          .map((e) => e.toString())
-          .toList();
+      final errors =
+          ((await analysisContext.currentSession.getErrors(sourceFile))
+                  as ErrorsResult)
+              .errors
+              .where((e) => e.severity == Severity.error)
+              .map((e) => e.toString())
+              .toList();
 
       final augmentationUnits =
           resolvedLibrary.units.where((u) => u.isMacroPart).toList();
       final output = augmentationUnits.singleOrNull?.content;
 
       fileResults.add(
-          FileResult(sourceFile: sourceFile, output: output, errors: errors));
+        FileResult(sourceFile: sourceFile, output: output, errors: errors),
+      );
       firstDuration ??= stopwatch.elapsed;
     }
 
     return WorkspaceResult(
-        fileResults: fileResults,
-        firstResultAfter: firstDuration!,
-        lastResultAfter: stopwatch.elapsed);
+      fileResults: fileResults,
+      firstResultAfter: firstDuration!,
+      lastResultAfter: stopwatch.elapsed,
+    );
   }
 }

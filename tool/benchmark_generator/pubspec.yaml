@@ -2,7 +2,7 @@ name: benchmark_generator
 publish-to: none
 resolution: workspace
 environment:
-  sdk: ^3.7.0-39.0.dev
+  sdk: ^3.7.0-123.0.dev
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.0.0

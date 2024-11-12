@@ -15,9 +15,12 @@ class MacroPackageConfig {
   MacroPackageConfig({required this.uri, required this.packageConfig});
 
   factory MacroPackageConfig.readFromUri(Uri uri) => MacroPackageConfig(
-      uri: uri,
-      packageConfig:
-          PackageConfig.parseBytes(File.fromUri(uri).readAsBytesSync(), uri));
+    uri: uri,
+    packageConfig: PackageConfig.parseBytes(
+      File.fromUri(uri).readAsBytesSync(),
+      uri,
+    ),
+  );
 
   /// Checks whether [name] is a macro annotation.
   ///

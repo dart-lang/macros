@@ -55,7 +55,8 @@ class MacroTool {
   void patchForAnalyzer() {
     if (_applyResult == null) {
       throw UnsupportedError(
-          '"patch_for_analyzer" command requires "apply" first.');
+        '"patch_for_analyzer" command requires "apply" first.',
+      );
     }
 
     for (final result in _applyResult!.fileResults) {
@@ -90,17 +91,13 @@ class MacroTool {
       throw UnsupportedError('"run" command requires "--script".');
     }
 
-    final result = Process.runSync(
-      Platform.resolvedExecutable,
-      [
-        'run',
-        '--enable-experiment=macros',
-        '--enable-experiment=enhanced-parts',
-        '--packages=$packageConfigPath',
-        scriptPath!
-      ],
-      workingDirectory: workspacePath,
-    );
+    final result = Process.runSync(Platform.resolvedExecutable, [
+      'run',
+      '--enable-experiment=macros',
+      '--enable-experiment=enhanced-parts',
+      '--packages=$packageConfigPath',
+      scriptPath!,
+    ], workingDirectory: workspacePath);
     stdout.write(result.stdout);
     stderr.write(result.stderr);
     return result.exitCode;
@@ -130,8 +127,9 @@ class MacroTool {
     // Busts caches, applies, throws if error, returns result.
     Future<WorkspaceResult> measure() async {
       bustCaches();
-      _applyResult =
-          await macroRunner.run(injectImplementation: injectImplementation);
+      _applyResult = await macroRunner.run(
+        injectImplementation: injectImplementation,
+      );
       if (_applyResult!.allErrors.isNotEmpty) {
         throw StateError('Errors: ${_applyResult!.allErrors}');
       }
@@ -173,7 +171,8 @@ class MacroTool {
     }
     if (!cacheBusterFound) {
       throw StateError(
-          'Did not find CACHEBUSTER in any source, no changes were made.');
+        'Did not find CACHEBUSTER in any source, no changes were made.',
+      );
     }
   }
 
@@ -185,8 +184,10 @@ class MacroTool {
     // `asBroadcastStream` so repeated use of `first` below waits for the next
     // change.
     var events = File(scriptPath!).watch().asBroadcastStream();
-    print('Caution: timings can be misleading due to JIT warmup, host '
-        'caching, and random variation. Check with benchmarks :)');
+    print(
+      'Caution: timings can be misleading due to JIT warmup, host '
+      'caching, and random variation. Check with benchmarks :)',
+    );
     print('Watching for changes to: $scriptPath');
     while (true) {
       _applyResult = await macroRunner.run();
@@ -200,8 +201,9 @@ class MacroTool {
       }
 
       stdout.write(
-          'Macros ran in in ${_applyResult!.firstResultAfter.inMilliseconds}ms,'
-          ' watching...');
+        'Macros ran in in ${_applyResult!.firstResultAfter.inMilliseconds}ms,'
+        ' watching...',
+      );
       await events.first;
       print('changed, rerunning.');
       macroRunner.notifyChange(SourceFile(scriptPath!));

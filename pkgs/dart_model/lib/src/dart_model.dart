@@ -34,8 +34,11 @@ extension ModelExtension on Model {
   int get fingerprint {
     // TODO: Implementation for non-buffer maps?
     var node = this.node as MapInBuffer;
-    return node.buffer.fingerprint(node.pointer,
-        type: Type.typedMapPointer, alreadyDereferenced: true);
+    return node.buffer.fingerprint(
+      node.pointer,
+      type: Type.typedMapPointer,
+      alreadyDereferenced: true,
+    );
   }
 
   /// Looks up [name] in `this`.
@@ -49,7 +52,8 @@ extension ModelExtension on Model {
     if (library == null) return null;
     if (name.scope == null) {
       throw UnsupportedError(
-          'Can only look up names in nested scopes for now.');
+        'Can only look up names in nested scopes for now.',
+      );
     }
     final scope = library.scopes[name.scope!];
     if (scope == null) return null;
@@ -95,17 +99,24 @@ extension ModelExtension on Model {
 
     if (path case [final uri, 'scopes', final name]) {
       return QualifiedName(uri: uri, name: name);
-    } else if (path
-        case [final uri, 'scopes', final scope, 'members', final name]) {
+    } else if (path case [
+      final uri,
+      'scopes',
+      final scope,
+      'members',
+      final name,
+    ]) {
       return QualifiedName(
-          uri: uri,
-          scope: scope,
-          name: name,
-          isStatic: Member.fromJson(model).properties.isStatic);
+        uri: uri,
+        scope: scope,
+        name: name,
+        isStatic: Member.fromJson(model).properties.isStatic,
+      );
     }
     throw UnsupportedError(
-        'Unsupported node type for `qualifiedNameOf`, only top level members '
-        'are supported for now. $path');
+      'Unsupported node type for `qualifiedNameOf`, only top level members '
+      'are supported for now. $path',
+    );
   }
 
   /// Returns the key of [value] in [map].
@@ -147,8 +158,10 @@ extension ModelExtension on Model {
   }
 
   /// Builds a `Map` from values to parent `Map`s.
-  static void _buildParentsMap(Map<String, Object?> parent,
-      Map<Map<String, Object?>, Map<String, Object?>> result) {
+  static void _buildParentsMap(
+    Map<String, Object?> parent,
+    Map<Map<String, Object?>, Map<String, Object?>> result,
+  ) {
     for (final child in parent.values.whereType<Map<String, Object?>>()) {
       for (final map in child.expandWithMerged) {
         if (result.containsKey(map)) continue;

@@ -51,7 +51,7 @@ class _ClosedList with ListMixin<Object?> {
   final int length;
 
   _ClosedList(this._buffer, this._pointer)
-      : length = _buffer._readLength(_pointer);
+    : length = _buffer._readLength(_pointer);
 
   @override
   Object? operator [](int index) {
@@ -95,9 +95,9 @@ class _ClosedListIterator<T extends Object?> implements Iterator<T> {
   _Pointer _pointer;
 
   _ClosedListIterator(this._buffer, _Pointer pointer, int length)
-      : _last = pointer + _lengthSize + length * ClosedLists._valueSize,
-        // Subtract because `moveNext` is called before reading.
-        _pointer = pointer + _lengthSize - ClosedLists._valueSize;
+    : _last = pointer + _lengthSize + length * ClosedLists._valueSize,
+      // Subtract because `moveNext` is called before reading.
+      _pointer = pointer + _lengthSize - ClosedLists._valueSize;
 
   @override
   T get current => _buffer._readAny(_pointer) as T;
