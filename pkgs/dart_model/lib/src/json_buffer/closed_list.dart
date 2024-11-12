@@ -56,11 +56,8 @@ class _ClosedList with ListMixin<Object?> {
   @override
   Object? operator [](int index) {
     RangeError.checkValidIndex(index, this);
-    final iterator = _ClosedListIterator(_buffer, _pointer, length);
-    for (var i = -1; i != index; ++i) {
-      iterator.moveNext();
-    }
-    return iterator.current;
+    final pointer = _pointer + _lengthSize + index * ClosedLists._valueSize;
+    return _buffer._readAny(pointer);
   }
 
   @override
