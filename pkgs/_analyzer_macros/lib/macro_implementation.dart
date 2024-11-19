@@ -82,6 +82,8 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
   /// The name of the macro implementation class itself.
   final QualifiedName implementation;
 
+  Set<macros_api_v1.Phase>? _phasesToExecute;
+
   AnalyzerRunningMacro._(this._impl, this.name, this.implementation);
 
   static AnalyzerRunningMacro run(
@@ -104,6 +106,18 @@ class AnalyzerRunningMacro implements injected.RunningMacro {
           ),
         )).asQueryResponse.model,
   );
+
+  @override
+  Future<Set<macros_api_v1.Phase>> get phasesToExecute async =>
+      _phasesToExecute ??= {
+        for (final phase in await _impl._host.queryMacroPhases(name))
+          switch (phase) {
+            1 => macros_api_v1.Phase.types,
+            2 => macros_api_v1.Phase.declarations,
+            3 => macros_api_v1.Phase.definitions,
+            _ => throw ArgumentError(phase),
+          },
+      };
 
   @override
   Future<AnalyzerMacroExecutionResult> executeDeclarationsPhase(

@@ -20,7 +20,6 @@ void main() {
                   properties: Properties(isClass: true),
                 )),
   );
-  final packageConfig = Isolate.packageConfigSync!;
 
   for (final protocol in [
     Protocol(encoding: ProtocolEncoding.json, version: ProtocolVersion.macros1),
@@ -44,9 +43,7 @@ void main() {
         );
 
         expect(host.isMacro(macroAnnotation), true);
-        expect(await host.queryMacroPhases(packageConfig, macroAnnotation), {
-          2,
-        });
+        expect(await host.queryMacroPhases(macroAnnotation), {2});
 
         expect(
           await host.augment(
@@ -76,12 +73,8 @@ void main() {
           queryService: queryService,
         );
 
-        final packageConfig = Isolate.packageConfigSync!;
-
         expect(host.isMacro(macroAnnotation), true);
-        expect(await host.queryMacroPhases(packageConfig, macroAnnotation), {
-          3,
-        });
+        expect(await host.queryMacroPhases(macroAnnotation), {3});
 
         expect(
           await host.augment(

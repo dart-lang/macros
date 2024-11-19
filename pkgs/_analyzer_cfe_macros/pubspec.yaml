@@ -4,7 +4,7 @@ description: Macro support for the analyzer and CFE.
 resolution: workspace
 
 environment:
-  sdk: ^3.7.0-123.0.dev
+  sdk: ^3.7.0-157.0.dev
 
 dependencies:
   _fe_analyzer_shared: any

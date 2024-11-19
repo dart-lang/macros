@@ -62,10 +62,7 @@ class MacroHost {
       macroPackageConfig.lookupMacroImplementation(annotation);
 
   /// Determines which phases the macro triggered by [annotation] runs in.
-  Future<Set<int>> queryMacroPhases(
-    Uri packageConfig,
-    QualifiedName annotation,
-  ) async {
+  Future<Set<int>> queryMacroPhases(QualifiedName annotation) async {
     await _ensureRunning(annotation);
     return _hostService._macroState[annotation.asString]!.phases;
   }
