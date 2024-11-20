@@ -2,24 +2,89 @@ part of 'package:foo/built_value/built_value_test.dart';
 
 import 'package:_test_macros/built_value.dart' as prefix0;
 import 'package:foo/built_value/built_value_test.dart' as prefix1;
+import 'dart:core' as prefix2;
 
 @prefix0.BuiltValueBuilder()
 class EmptyBuilder {}
 
+@prefix0.BuiltValueBuilder()
+class PrimitiveFieldsBuilder {}
+
+@prefix0.BuiltValueBuilder()
+class NestedFieldsBuilder {}
+
 augment class Empty {
-Empty([void Function(prefix1.EmptyBuilder)? updates]) {}
+factory Empty([void Function(prefix1.EmptyBuilder)? updates]) =>
+  (prefix1.EmptyBuilder()..update(updates)).build();
 Empty._() {}
 
 prefix1.EmptyBuilder toBuilder() => prefix1.EmptyBuilder()..replace(this);
 prefix1.Empty rebuild(void Function(prefix1.EmptyBuilder) updates) =>
     (toBuilder()..update(updates)).build();
 
-  bool operator==(Object other) => other is prefix1.Empty;
+  prefix2.int get hashCode => prefix2.Object.hashAll([]);
+
+  prefix2.bool operator==(prefix2.Object other) =>
+      other is prefix1.Empty;
+
+  prefix2.String toString() => 'Empty()';
+
+}
+augment class PrimitiveFields {
+factory PrimitiveFields([void Function(prefix1.PrimitiveFieldsBuilder)? updates]) =>
+  (prefix1.PrimitiveFieldsBuilder()..update(updates)).build();
+PrimitiveFields._({required this.anInt,required this.aString,}) {}
+
+prefix1.PrimitiveFieldsBuilder toBuilder() => prefix1.PrimitiveFieldsBuilder()..replace(this);
+prefix1.PrimitiveFields rebuild(void Function(prefix1.PrimitiveFieldsBuilder) updates) =>
+    (toBuilder()..update(updates)).build();
+
+  prefix2.int get hashCode => prefix2.Object.hashAll([anInt,aString,]);
+
+  prefix2.bool operator==(prefix2.Object other) =>
+      other is prefix1.PrimitiveFields&& anInt == other.anInt&& aString == other.aString;
+
+  prefix2.String toString() => 'PrimitiveFields(anInt: $anInt, aString: $aString)';
+
+}
+augment class NestedFields {
+factory NestedFields([void Function(prefix1.NestedFieldsBuilder)? updates]) =>
+  (prefix1.NestedFieldsBuilder()..update(updates)).build();
+NestedFields._({required this.aPrimitiveFields,required this.aString,}) {}
+
+prefix1.NestedFieldsBuilder toBuilder() => prefix1.NestedFieldsBuilder()..replace(this);
+prefix1.NestedFields rebuild(void Function(prefix1.NestedFieldsBuilder) updates) =>
+    (toBuilder()..update(updates)).build();
+
+  prefix2.int get hashCode => prefix2.Object.hashAll([aPrimitiveFields,aString,]);
+
+  prefix2.bool operator==(prefix2.Object other) =>
+      other is prefix1.NestedFields&& aPrimitiveFields == other.aPrimitiveFields&& aString == other.aString;
+
+  prefix2.String toString() => 'NestedFields(aPrimitiveFields: $aPrimitiveFields, aString: $aString)';
+
+}
+augment class NestedFieldsBuilder {
+prefix1.PrimitiveFieldsBuilder aPrimitiveFields = prefix1.PrimitiveFieldsBuilder();prefix2.String? aString;
+
+void replace(prefix1.NestedFields other) {  this.aPrimitiveFields = other.aPrimitiveFields.toBuilder();this.aString = other.aString; }
+void update(void Function(prefix1.NestedFieldsBuilder)? updates) => updates?.call(this);
+prefix1.NestedFields build() => prefix1.NestedFields._(aPrimitiveFields: aPrimitiveFields.build(),aString: aString!,);
+
+}
+augment class PrimitiveFieldsBuilder {
+prefix2.int? anInt;prefix2.String? aString;
+
+void replace(prefix1.PrimitiveFields other) {  this.anInt = other.anInt;this.aString = other.aString; }
+void update(void Function(prefix1.PrimitiveFieldsBuilder)? updates) => updates?.call(this);
+prefix1.PrimitiveFields build() => prefix1.PrimitiveFields._(anInt: anInt!,aString: aString!,);
 
 }
 augment class EmptyBuilder {
-void replace(prefix1.Empty other) {}
-void update(void Function(prefix1.EmptyBuilder) updates) => updates(this);
+
+
+void replace(prefix1.Empty other) {   }
+void update(void Function(prefix1.EmptyBuilder)? updates) => updates?.call(this);
 prefix1.Empty build() => prefix1.Empty._();
 
 }

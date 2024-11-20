@@ -8,17 +8,71 @@ import 'package:test/test.dart';
 void main() {
   group('Empty class', () {
     test('instantiation, builder, rebuild, comparison', () {
-      final empty = Empty();
-      final empty2 = empty.rebuild((b) {});
-      expect(empty2, empty);
+      final value = Empty();
+      final sameValue = value.rebuild((b) {});
+      expect(sameValue, value);
 
       // analyzer: The function 'EmptyBuilder' isn't defined.
-      // final emptyBuilder = EmptyBuilder();
-      // final empty3 = emptyBuilder.build();
-      // expect(empty3, empty);
+      // final valueBuilder = EmptyBuilder();
+      // final value3 = valueBuilder.build();
+      // expect(value3, value);
+    });
+  });
+
+  group('Class with primitive fields', () {
+    test('instantiation, builder, rebuild, comparison, hash code, '
+        'toString', () {
+      final value = PrimitiveFields(
+        (b) =>
+            b
+              ..anInt = 3
+              ..aString = 'four',
+      );
+      final value2 = value.rebuild(
+        (b) =>
+            b
+              ..anInt = 4
+              ..aString = 'five',
+      );
+      expect(value2, isNot(value));
+      expect(value2.hashCode, isNot(value.hashCode));
+      expect(value2.toString(), 'PrimitiveFields(anInt: 4, aString: five)');
+
+      final sameValue = value.rebuild((b) => b);
+      expect(sameValue, value);
+      expect(sameValue.hashCode, value.hashCode);
+    });
+  });
+
+  group('Class with nested fields', () {
+    test('has nested builder', () {
+      final value = NestedFields(
+        (b) =>
+            b
+              ..aPrimitiveFields.anInt = 3
+              ..aPrimitiveFields.aString = 'four'
+              ..aString = 'five',
+      );
+      expect(
+        value.toString(),
+        'NestedFields(aPrimitiveFields: PrimitiveFields('
+        'anInt: 3, aString: four), aString: five)',
+      );
     });
   });
 }
 
 @BuiltValue()
 class Empty {}
+
+@BuiltValue()
+class PrimitiveFields {
+  final int anInt;
+  final String aString;
+}
+
+@BuiltValue()
+class NestedFields {
+  final PrimitiveFields aPrimitiveFields;
+  final String aString;
+}
