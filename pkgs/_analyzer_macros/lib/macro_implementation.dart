@@ -54,8 +54,11 @@ class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
   AnalyzerMacroPackageConfigs(this._impl);
 
   @override
-  bool isMacro(Uri uri, String name) =>
-      _impl._host.isMacro(QualifiedName(uri: '$uri', name: name));
+  bool isMacro(Uri uri, String name) {
+    // TODO(davidmorgan): do this in the analyzer.
+    name = _removePrefix(name);
+    return _impl._host.isMacro(QualifiedName(uri: '$uri', name: name));
+  }
 }
 
 class AnalyzerMacroRunner implements injected.MacroRunner {
@@ -64,13 +67,22 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
   AnalyzerMacroRunner(this._impl);
 
   @override
-  injected.RunningMacro run(Uri uri, String name) => AnalyzerRunningMacro.run(
-    _impl,
-    QualifiedName(uri: '$uri', name: name),
-    _impl._host.lookupMacroImplementation(
+  injected.RunningMacro run(Uri uri, String name) {
+    // TODO(davidmorgan): do this in the analyzer.
+    name = _removePrefix(name);
+    return AnalyzerRunningMacro.run(
+      _impl,
       QualifiedName(uri: '$uri', name: name),
-    )!,
-  );
+      _impl._host.lookupMacroImplementation(
+        QualifiedName(uri: '$uri', name: name),
+      )!,
+    );
+  }
+}
+
+String _removePrefix(String name) {
+  final index = name.indexOf('.');
+  return index == -1 ? name : name.substring(index + 1);
 }
 
 class AnalyzerRunningMacro implements injected.RunningMacro {
@@ -190,17 +202,23 @@ class AnalyzerMacroExecutionResult
   @override
   final Map<macros_api_v1.Identifier, Iterable<macros_api_v1.DeclarationCode>>
   typeAugmentations;
+  @override
+  final Iterable<macros_api_v1.DeclarationCode> libraryAugmentations;
+  @override
+  final List<String> newTypeNames;
 
   AnalyzerMacroExecutionResult(
-    this.target,
-    Iterable<macros_api_v1.DeclarationCode> declarations,
-  )
+    this.target, {
+    required Iterable<macros_api_v1.DeclarationCode> declarations,
+    required this.libraryAugmentations,
+    required this.newTypeNames,
+  })
     // TODO(davidmorgan): this assumes augmentations are for the macro
     // application target. Instead, it should be explicit in
     // `AugmentResponse`.
     : typeAugmentations = {
-        (target as macros_api_v1.Declaration).identifier: declarations,
-      };
+         (target as macros_api_v1.Declaration).identifier: declarations,
+       };
 
   static Future<AnalyzerMacroExecutionResult> dartModelToInjected(
     macros_api_v1.MacroTarget target,
@@ -228,9 +246,10 @@ class AnalyzerMacroExecutionResult
       }
     }
 
+    final libraryDeclarations = <macros_api_v1.DeclarationCode>[];
     for (final augmentation
         in augmentResponse.libraryAugmentations ?? const <Augmentation>[]) {
-      declarations.add(
+      libraryDeclarations.add(
         macros_api_v1.DeclarationCode.fromParts(
           await _resolveNames(augmentation.code),
         ),
@@ -246,7 +265,12 @@ class AnalyzerMacroExecutionResult
       throw UnimplementedError('Type augmentations are not implemented');
     }
 
-    return AnalyzerMacroExecutionResult(target, declarations);
+    return AnalyzerMacroExecutionResult(
+      target,
+      declarations: declarations,
+      libraryAugmentations: libraryDeclarations,
+      newTypeNames: augmentResponse.newTypeNames ?? [],
+    );
   }
 
   @override
@@ -268,14 +292,8 @@ class AnalyzerMacroExecutionResult
   get interfaceAugmentations => {};
 
   @override
-  Iterable<macros_api_v1.DeclarationCode> get libraryAugmentations => {};
-
-  @override
   Map<macros_api_v1.Identifier, Iterable<macros_api_v1.TypeAnnotationCode>>
   get mixinAugmentations => {};
-
-  @override
-  Iterable<String> get newTypeNames => [];
 
   @override
   void serialize(Object serializer) => throw UnimplementedError();

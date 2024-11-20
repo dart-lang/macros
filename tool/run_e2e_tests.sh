@@ -7,7 +7,7 @@ cd $(dirname ${BASH_SOURCE[0]})
 
 echo "Testing goldens/foo/*_test.dart..."
 
-for test_file in $(ls ../goldens/foo/lib/ | egrep '_test.dart$'); do
+for test_file in $(cd ../goldens/foo/lib/; find . -name \*_test.dart); do
   echo "Testing $test_file..."
   if dart run _macro_tool \
       --workspace=../goldens/foo \

@@ -18,6 +18,8 @@ dev_dependencies:
   test: ^1.25.0
 
 # TODO(language/3728): use the real feature when there is one.
+# macro lib/built_value.dart#BuiltValue package:_test_macros/built_value.dart#BuiltValueImplementation
+# macro lib/built_value.dart#BuiltValueBuilder package:_test_macros/built_value.dart#BuiltValueBuilderImplementation
 # macro lib/declare_x_macro.dart#DeclareX package:_test_macros/declare_x_macro.dart#DeclareXImplementation
 # macro lib/json_codable.dart#JsonCodable package:_test_macros/json_codable.dart#JsonCodableImplementation
 # macro lib/query_class.dart#QueryClass package:_test_macros/query_class.dart#QueryClassImplementation
