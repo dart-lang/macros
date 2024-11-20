@@ -201,7 +201,8 @@ class MacroTool {
       }
 
       stdout.write(
-        'Macros ran in in ${_applyResult!.firstResultAfter.inMilliseconds}ms,'
+        'Macros ran in ${_applyResult!.firstResultAfter.inMilliseconds}ms '
+        '(${_applyResult!.lastResultAfter.inMilliseconds}ms total),'
         ' watching...',
       );
       await events.first;

@@ -1,3 +1,4 @@
 **/.dart_tool
 **/pubspec.lock
 goldens/foo/lib/generated/**
+*.macro_tool_output
