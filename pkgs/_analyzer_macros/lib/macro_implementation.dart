@@ -55,7 +55,6 @@ class AnalyzerMacroPackageConfigs implements injected.MacroPackageConfigs {
 
   @override
   bool isMacro(Uri uri, String name) {
-    // TODO(davidmorgan): do this in the analyzer.
     name = _removePrefix(name);
     return _impl._host.isMacro(QualifiedName(uri: '$uri', name: name));
   }
@@ -68,7 +67,6 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
 
   @override
   injected.RunningMacro run(Uri uri, String name) {
-    // TODO(davidmorgan): do this in the analyzer.
     name = _removePrefix(name);
     return AnalyzerRunningMacro.run(
       _impl,
@@ -80,6 +78,9 @@ class AnalyzerMacroRunner implements injected.MacroRunner {
   }
 }
 
+// The analyzer currently sends import prefixes, for example
+// `prefix0.BuiltValueBuilder` when it should send just `BuiltValueBuilder`.
+// TODO(davidmorgan): fix in the analyzer instead.
 String _removePrefix(String name) {
   final index = name.indexOf('.');
   return index == -1 ? name : name.substring(index + 1);
