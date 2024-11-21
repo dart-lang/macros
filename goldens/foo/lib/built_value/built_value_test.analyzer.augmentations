@@ -1,0 +1,25 @@
+part of 'package:foo/built_value/built_value_test.dart';
+
+import 'package:_test_macros/built_value.dart' as prefix0;
+import 'package:foo/built_value/built_value_test.dart' as prefix1;
+
+@prefix0.BuiltValueBuilder()
+class EmptyBuilder {}
+
+augment class Empty {
+Empty([void Function(prefix1.EmptyBuilder)? updates]) {}
+Empty._() {}
+
+prefix1.EmptyBuilder toBuilder() => prefix1.EmptyBuilder()..replace(this);
+prefix1.Empty rebuild(void Function(prefix1.EmptyBuilder) updates) =>
+    (toBuilder()..update(updates)).build();
+
+  bool operator==(Object other) => other is prefix1.Empty;
+
+}
+augment class EmptyBuilder {
+void replace(prefix1.Empty other) {}
+void update(void Function(prefix1.EmptyBuilder) updates) => updates(this);
+prefix1.Empty build() => prefix1.Empty._();
+
+}

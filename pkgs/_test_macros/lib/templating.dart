@@ -9,6 +9,9 @@ extension TemplatingExtension on QualifiedName {
   String get code => '{{$uri#$name}}';
 }
 
+Augmentation augmentation(String template) =>
+    Augmentation(code: expandTemplate(template));
+
 /// Converts [template] to a mix of `Identifier` and `String`.
 ///
 /// References of the form `{{uri#name}}` become [QualifiedName] wrapped in

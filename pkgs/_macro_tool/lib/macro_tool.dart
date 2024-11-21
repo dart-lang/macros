@@ -30,21 +30,21 @@ class MacroTool {
 
   /// Runs macros.
   ///
-  /// Throws `StateError` if there are any errors.
+  /// Writes macro augmentations next to each source file with the extension
+  /// `.macro_tool_output`.
   ///
-  /// Otherwise, writes macro augmentations next to each source file with the
-  /// extension `.macro_tool_output`.
+  /// Then throws `StateError` if there were any errors.
   Future<void> apply() async {
     _applyResult = await macroRunner.run();
-
-    if (_applyResult!.allErrors.isNotEmpty) {
-      throw StateError('Errors: ${_applyResult!.allErrors}');
-    }
 
     for (final result in _applyResult!.fileResults) {
       if (result.output != null) {
         result.sourceFile.writeOutput(macroRunner, result.output!);
       }
+    }
+
+    if (_applyResult!.allErrors.isNotEmpty) {
+      throw StateError('Errors: ${_applyResult!.allErrors}');
     }
   }
 
