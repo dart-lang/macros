@@ -5,7 +5,7 @@ Generates code that uses macros, for benchmarking.
 Example use, from the root of this repo:
 
 ```
-dart run benchmark_generator large macro 64
+dart run benchmark_generator large 64 BuiltValue JsonCodable
 dart run _macro_tool \
     --workspace=goldens/foo \
     --packageConfig=.dart_tool/package_config.json \

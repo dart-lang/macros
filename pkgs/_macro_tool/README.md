@@ -19,7 +19,7 @@ All examples are run from the root of this repo.
 Benchmarks require that you first create sources to benchmark with:
 
 ```bash
-dart run benchmark_generator large macro 16
+dart run benchmark_generator large 16 BuiltValue JsonCodable
 ```
 
 Benchmark running macros:

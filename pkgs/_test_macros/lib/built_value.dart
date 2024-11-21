@@ -152,7 +152,7 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
     // TODO(davidmorgan): there should be a way to do this in one query.
     final fieldTypes = <String>{};
     for (final field in fields) {
-      final qualifiedName = field.value.returnType.asNamedTypeDesc.name;
+      final qualifiedName = field.value.returnType.qualifiedName;
       if (qualifiedName.uri != 'dart:core') {
         fieldTypes.add(qualifiedName.asString);
       }
@@ -191,8 +191,7 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
 
     final fieldDeclarations = StringBuffer();
     for (final field in fields) {
-      final fieldTypeQualifiedName =
-          field.value.returnType.asNamedTypeDesc.name;
+      final fieldTypeQualifiedName = field.value.returnType.qualifiedName;
       if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
         final fieldBuilderQualifiedName = QualifiedName(
           uri: fieldTypeQualifiedName.uri,
@@ -211,8 +210,7 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
 
     final copyFields = StringBuffer();
     for (final field in fields) {
-      final fieldTypeQualifiedName =
-          field.value.returnType.asNamedTypeDesc.name;
+      final fieldTypeQualifiedName = field.value.returnType.qualifiedName;
       if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
         copyFields.write('this.${field.key} = other.${field.key}.toBuilder();');
       } else {
@@ -222,12 +220,12 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
 
     final buildParams = StringBuffer();
     for (final field in fields) {
-      final fieldTypeQualifiedName =
-          field.value.returnType.asNamedTypeDesc.name;
+      final fieldTypeQualifiedName = field.value.returnType.qualifiedName;
       if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
         buildParams.write('${field.key}: ${field.key}.build(),');
       } else {
-        buildParams.write('${field.key}: ${field.key}!,');
+        final maybeNotNull = field.value.returnType.isNullable ? '' : '!';
+        buildParams.write('${field.key}: ${field.key}$maybeNotNull,');
       }
     }
 
@@ -240,5 +238,18 @@ void update(void Function(${builderName.code})? updates) => updates?.call(this);
 ${valueName.code} build() => ${valueName.code}._($buildParams);
 '''),
     );
+  }
+}
+
+extension StaticTypeDescExtension on StaticTypeDesc {
+  bool get isNullable => type == StaticTypeDescType.nullableTypeDesc;
+
+  QualifiedName get qualifiedName {
+    return switch (type) {
+      StaticTypeDescType.namedTypeDesc => asNamedTypeDesc.name,
+      StaticTypeDescType.nullableTypeDesc =>
+        asNullableTypeDesc.inner.qualifiedName,
+      _ => throw ArgumentError(type),
+    };
   }
 }
