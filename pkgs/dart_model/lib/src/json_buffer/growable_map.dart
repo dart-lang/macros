@@ -176,13 +176,16 @@ class _GrowableMap<V>
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int get fingerprint {
-    var iterator = _GrowableMapHashIterator(buffer, null, pointer);
-    var hash = 0;
+  void buildDigest(ByteConversionSink byteSink) {
+    var iterator = _GrowableMapPointerIterator(buffer, null, pointer);
     while (iterator.moveNext()) {
-      hash = Object.hash(hash, iterator.current);
+      buffer._buildDigest(
+        iterator.current.$1,
+        byteSink,
+        type: Type.stringPointer,
+      );
+      buffer._buildDigest(iterator.current.$2, byteSink);
     }
-    return hash;
   }
 }
 
@@ -233,12 +236,13 @@ class _GrowableMapEntryIterator<V>
   MapEntry<String, V> get current => MapEntry(_currentKey, _currentValue as V);
 }
 
-class _GrowableMapHashIterator extends _GrowableMapIterator<int> {
-  _GrowableMapHashIterator(super._buffer, super._parent, super._pointer);
+class _GrowableMapPointerIterator
+    extends _GrowableMapIterator<(int keyPointer, int valuePointer)> {
+  _GrowableMapPointerIterator(super._buffer, super._parent, super._pointer);
 
   @override
-  int get current => Object.hash(
-    _buffer._fingerprint(_pointer + _pointerSize, Type.stringPointer),
-    _buffer.fingerprint(_pointer + _pointerSize + GrowableMaps._keySize),
+  (int keyPointer, int valuePointer) get current => (
+    _pointer + _pointerSize,
+    _pointer + _pointerSize + GrowableMaps._keySize,
   );
 }

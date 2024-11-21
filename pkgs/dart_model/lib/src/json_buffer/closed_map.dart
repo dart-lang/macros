@@ -123,13 +123,16 @@ class _ClosedMap
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int get fingerprint {
-    var iterator = _ClosedMapHashIterator(buffer, null, pointer, length);
-    var hash = 0;
+  void buildDigest(ByteConversionSink byteSink) {
+    var iterator = _ClosedMapPointerIterator(buffer, null, pointer, length);
     while (iterator.moveNext()) {
-      hash = Object.hash(hash, iterator.current);
+      buffer._buildDigest(
+        iterator.current.$1,
+        byteSink,
+        type: Type.stringPointer,
+      );
+      buffer._buildDigest(iterator.current.$2, byteSink);
     }
-    return hash;
   }
 }
 
@@ -199,8 +202,9 @@ class _ClosedMapEntryIterator
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }
 
-class _ClosedMapHashIterator extends _ClosedMapIterator<int> {
-  _ClosedMapHashIterator(
+class _ClosedMapPointerIterator
+    extends _ClosedMapIterator<(int keyPointer, int valuePointer)> {
+  _ClosedMapPointerIterator(
     super._buffer,
     super._parent,
     super.pointer,
@@ -208,8 +212,8 @@ class _ClosedMapHashIterator extends _ClosedMapIterator<int> {
   );
 
   @override
-  int get current => Object.hash(
-    _buffer._fingerprint(_pointer, Type.stringPointer),
-    _buffer.fingerprint(_pointer + ClosedMaps._keySize),
+  (int keyPointer, int valuePointer) get current => (
+    _pointer,
+    _pointer + ClosedMaps._keySize,
   );
 }

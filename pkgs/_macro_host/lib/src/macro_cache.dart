@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
 import 'package:dart_model/dart_model.dart';
 import 'package:macro_service/macro_service.dart';
 
@@ -32,14 +33,14 @@ class MacroResultsCache {
       phase: request.phase,
     )] = (
       queries: queryResults.map((q) => q.query),
-      resultsHash:
+      resultsDigest:
           queryResults
               .skip(1)
               .fold(
                 queryResults.first.response,
                 (model, next) => model.mergeWith(next.response),
               )
-              .fingerprint,
+              .digest,
       response: response,
     );
   }
@@ -67,15 +68,15 @@ class MacroResultsCache {
         ),
       ),
     );
-    final newResultsHash =
+    final newResultsDigest =
         queryResults
             .skip(1)
             .fold(
               queryResults.first.model,
               (model, next) => model.mergeWith(next.model),
             )
-            .fingerprint;
-    if (newResultsHash != cached.resultsHash) {
+            .digest;
+    if (newResultsDigest != cached.resultsDigest) {
       _cache.remove(cacheKey);
       return null;
     }
@@ -91,8 +92,8 @@ typedef _MacroResultsCacheValue =
       /// All queries done by a macro in a given phase.
       Iterable<Query> queries,
 
-      /// The `identityHash` of the merged model from all query responses.
-      int resultsHash,
+      /// The [Digest] of the merged model from all query responses.
+      Digest resultsDigest,
 
       /// The macro augmentation response that was cached.
       AugmentResponse response,

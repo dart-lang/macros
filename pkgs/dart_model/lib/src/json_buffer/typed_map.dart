@@ -468,19 +468,39 @@ class _TypedMap
   @override
   int get hashCode => Object.hash(buffer, pointer);
 
-  int get fingerprint {
+  /// Up to 16 fields supported, increase this to support more.
+  static final _indexBytes = Uint8List(2);
+
+  void buildDigest(ByteConversionSink byteSink) {
+    assert(
+      _schema._fieldSetSize <= _indexBytes.length,
+      'Update indexBytes to support schemas with more fields',
+    );
+
     // Note: we could include the schema but don't need to. If something can
     // be one of multiple types, that type will be included in a `type` field
-    // in the map.
-    var hash = 0;
-    final iterator =
-        _schema._isAllBooleans
-            ? _AllBoolsTypedMapHashIterator(this)
-            : _PartialTypedMapHashIterator(this);
-    while (iterator.moveNext()) {
-      hash = Object.hash(hash, iterator.current);
+    // in the map
+    if (_schema._isAllBooleans) {
+      var iterator = _AllBoolsTypedMapPointerIterator(this);
+      while (iterator.moveNext()) {
+        _indexBytes[0] = iterator.current.$1;
+        _indexBytes[1] = iterator.current.$1 >> 8;
+        byteSink.add(_indexBytes);
+        byteSink.add(iterator.current.$2 ? const [1] : const [0]);
+      }
+    } else {
+      var iterator = _PartialTypedMapPointerIterator(this);
+      while (iterator.moveNext()) {
+        _indexBytes[0] = iterator.current.$1;
+        _indexBytes[1] = iterator.current.$1 >> 8;
+        byteSink.add(_indexBytes);
+        buffer._buildDigest(
+          iterator.current.$2,
+          byteSink,
+          type: iterator.current.$3,
+        );
+      }
     }
-    return hash;
   }
 }
 
@@ -557,13 +577,15 @@ class _PartialTypedMapEntryIterator
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }
 
-class _PartialTypedMapHashIterator extends _PartialTypedMapIterator<int> {
-  _PartialTypedMapHashIterator(super._map);
+class _PartialTypedMapPointerIterator
+    extends _PartialTypedMapIterator<(int index, int valuePointer, Type type)> {
+  _PartialTypedMapPointerIterator(super._map);
 
   @override
-  int get current => Object.hash(
-    _currentKey,
-    _buffer._fingerprint(_valuesPointer + _offset, _schema._valueTypes[_index]),
+  (int index, int valuePointer, Type type) get current => (
+    _index,
+    _valuesPointer + _offset,
+    _schema._valueTypes[_index],
   );
 }
 
@@ -596,7 +618,7 @@ abstract class _AllBoolsTypedMapIterator<T> implements Iterator<T> {
   T get current;
 
   String get _currentKey => _schema._keys[_index];
-  Object? get _currentValue =>
+  bool get _currentValue =>
       _buffer._readBit(_valuesPointer + _intOffset, _bitOffset);
 
   @override
@@ -631,7 +653,7 @@ class _AllBoolsTypedMapValueIterator
   _AllBoolsTypedMapValueIterator(super._map);
 
   @override
-  Object? get current => _currentValue;
+  bool get current => _currentValue;
 }
 
 class _AllBoolsTypedMapEntryIterator
@@ -642,9 +664,10 @@ class _AllBoolsTypedMapEntryIterator
   MapEntry<String, Object?> get current => MapEntry(_currentKey, _currentValue);
 }
 
-class _AllBoolsTypedMapHashIterator extends _AllBoolsTypedMapIterator<int> {
-  _AllBoolsTypedMapHashIterator(super._map);
+class _AllBoolsTypedMapPointerIterator
+    extends _AllBoolsTypedMapIterator<(int index, bool value)> {
+  _AllBoolsTypedMapPointerIterator(super._map);
 
   @override
-  int get current => Object.hash(_currentKey, _currentValue);
+  (int index, bool value) get current => (_index, _currentValue);
 }

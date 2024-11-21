@@ -6,6 +6,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
+
 part 'closed_list.dart';
 part 'closed_map.dart';
 part 'explanations.dart';
@@ -62,29 +65,30 @@ class JsonBufferBuilder {
   /// If [alreadyDereferenced] is `true`, then for types which are pointers,
   /// [pointer] already points at the top of the object, and should not be
   /// followed before reading the object.
-  int fingerprint(int pointer, {Type? type, bool alreadyDereferenced = false}) {
+  Digest digest(int pointer, {Type? type, bool alreadyDereferenced = false}) {
+    var output = AccumulatorSink<Digest>();
+    var input = md5.startChunkedConversion(output);
+    _buildDigest(
+      pointer,
+      input,
+      type: type,
+      alreadyDereferenced: alreadyDereferenced,
+    );
+    input.close();
+    return output.events.single;
+  }
+
+  /// See [digest].
+  void _buildDigest(
+    int pointer,
+    ByteConversionSink byteSink, {
+    Type? type,
+    bool alreadyDereferenced = false,
+  }) {
     if (type == null) {
       type = _readType(pointer);
       pointer += _typeSize;
     }
-    return _fingerprint(
-      pointer,
-      type,
-      alreadyDereferenced: alreadyDereferenced,
-    );
-  }
-
-  /// Computes the identity hash of the object at [pointer] with a known [type]
-  /// from its raw bytes.
-  ///
-  /// If [alreadyDereferenced] is `true`, then for types which are pointers,
-  /// [pointer] already points at the top of the object, and should not be
-  /// followed before reading the object.
-  int _fingerprint(
-    _Pointer pointer,
-    Type type, {
-    bool alreadyDereferenced = false,
-  }) {
     // Dereference [pointer] if it is a pointer type, and hasn't already been
     // dereferenced.
     if (type.isPointer && !alreadyDereferenced) {
@@ -93,29 +97,29 @@ class JsonBufferBuilder {
 
     switch (type) {
       case Type.nil:
-        return null.hashCode;
+        return byteSink.add(const [0]);
       case Type.type:
-        return _buffer[pointer];
+        byteSink.addSlice(_buffer, pointer, pointer + _typeSize, false);
       case Type.pointer:
-        return fingerprint(pointer);
+        _buildDigest(pointer, byteSink);
       case Type.uint32:
-        return _readUint32(pointer);
+        byteSink.addSlice(_buffer, pointer, pointer + 4, false);
       case Type.boolean:
-        return _buffer[pointer];
+        byteSink.addSlice(_buffer, pointer, pointer + 1, false);
       case Type.anyPointer:
-        return fingerprint(pointer);
+        _buildDigest(pointer, byteSink);
       case Type.stringPointer:
         final length = _readLength(pointer);
         pointer += _lengthSize;
-        return Object.hashAll(_buffer.sublist(pointer, pointer + length));
+        byteSink.addSlice(_buffer, pointer, pointer + length, false);
       case Type.closedListPointer:
-        return _ClosedList(this, pointer).fingerprint;
+        _ClosedList(this, pointer).buildDigest(byteSink);
       case Type.closedMapPointer:
-        return _ClosedMap(this, pointer, null).fingerprint;
+        return _ClosedMap(this, pointer, null).buildDigest(byteSink);
       case Type.growableMapPointer:
-        return _GrowableMap<Object?>(this, pointer, null).fingerprint;
+        return _GrowableMap<Object?>(this, pointer, null).buildDigest(byteSink);
       case Type.typedMapPointer:
-        return _TypedMap(this, pointer, null).fingerprint;
+        return _TypedMap(this, pointer, null).buildDigest(byteSink);
     }
   }
 
