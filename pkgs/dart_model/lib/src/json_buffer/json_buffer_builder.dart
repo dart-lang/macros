@@ -105,7 +105,8 @@ class JsonBufferBuilder {
       case Type.uint32:
         byteSink.addSlice(_buffer, pointer, pointer + 4, false);
       case Type.boolean:
-        byteSink.addSlice(_buffer, pointer, pointer + 1, false);
+        // We use [1] and [2] because [0] is `null`.
+        byteSink.add(_readBoolean(pointer) ? const [2] : const [1]);
       case Type.anyPointer:
         _buildDigest(pointer, byteSink);
       case Type.stringPointer:

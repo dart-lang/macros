@@ -486,7 +486,8 @@ class _TypedMap
         _indexBytes[0] = iterator.current.$1;
         _indexBytes[1] = iterator.current.$1 >> 8;
         byteSink.add(_indexBytes);
-        byteSink.add(iterator.current.$2 ? const [1] : const [0]);
+        // We use [1] and [2] because [0] is `null`.
+        byteSink.add(iterator.current.$2 ? const [2] : const [1]);
       }
     } else {
       var iterator = _PartialTypedMapPointerIterator(this);
