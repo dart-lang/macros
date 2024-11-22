@@ -75,13 +75,11 @@ class _ClosedList with ListMixin<Object?> {
     throw UnsupportedError('This JsonBufferBuilder list is read-only.');
   }
 
-  int get fingerprint {
-    var iterator = _ClosedListHashIterator(_buffer, _pointer, length);
-    var hash = 0;
+  void buildDigest(ByteConversionSink byteSink) {
+    var iterator = _ClosedListPointerIterator(_buffer, _pointer, length);
     while (iterator.moveNext()) {
-      hash = Object.hash(hash, iterator.current);
+      _buffer._buildDigest(iterator.current, byteSink);
     }
-    return hash;
   }
 }
 
@@ -108,9 +106,9 @@ class _ClosedListIterator<T extends Object?> implements Iterator<T> {
   }
 }
 
-class _ClosedListHashIterator extends _ClosedListIterator<int> {
-  _ClosedListHashIterator(super.buffer, super.pointer, super.length);
+class _ClosedListPointerIterator extends _ClosedListIterator<_Pointer> {
+  _ClosedListPointerIterator(super.buffer, super.pointer, super.length);
 
   @override
-  int get current => _buffer.fingerprint(_pointer);
+  _Pointer get current => _pointer;
 }

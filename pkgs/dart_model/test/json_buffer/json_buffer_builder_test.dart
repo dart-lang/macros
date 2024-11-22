@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 import 'package:test/test.dart';
 
@@ -89,63 +90,63 @@ void main() {
       expect(() => deserializedBuilder.map['a'] = 'b', throwsStateError);
     });
 
-    group('fingerprint', () {
-      /// Re-usable fingerprint tests, [a] and [b] should be different values,
+    group('digest', () {
+      /// Re-usable digest tests, [a] and [b] should be different values,
       /// possibly of different types.
-      void testFingerprint(Object? a, Object? b) {
+      void testDigest(Object? a, Object? b) {
         assert(a != b);
-        expect(fingerprint({'a': a}), equals(fingerprint({'a': a})));
+        expect(digest({'a': a}), equals(digest({'a': a})));
         expect(
-          fingerprint({
+          digest({
             'a': {'b': b},
           }),
           equals(
-            fingerprint({
+            digest({
               'a': {'b': b},
             }),
           ),
         );
-        expect(fingerprint({'a': a}), isNot(equals(fingerprint({'a': b}))));
-        expect(fingerprint({'a': a}), isNot(equals(fingerprint({'b': a}))));
+        expect(digest({'a': a}), isNot(equals(digest({'a': b}))));
+        expect(digest({'a': a}), isNot(equals(digest({'b': a}))));
         expect(
-          fingerprint({'a': a, 'b': b}),
-          isNot(equals(fingerprint({'a': b, 'b': a}))),
+          digest({'a': a, 'b': b}),
+          isNot(equals(digest({'a': b, 'b': a}))),
         );
       }
 
       test('boolean fields', () {
-        testFingerprint(true, false);
+        testDigest(true, false);
       });
 
       test('String fields', () {
-        testFingerprint('a', 'b');
+        testDigest('a', 'b');
       });
 
       test('int fields', () {
-        testFingerprint(1, 2);
+        testDigest(1, 2);
       });
 
       test('null fields', () {
-        testFingerprint(null, 0);
-        testFingerprint(null, true);
-        testFingerprint(null, false);
-        testFingerprint(null, <String, Object?>{});
+        testDigest(null, 0);
+        testDigest(null, true);
+        testDigest(null, false);
+        testDigest(null, <String, Object?>{});
       });
 
       test('closed list fields', () {
-        testFingerprint([], [1]);
-        testFingerprint([1, 2], [2, 1]);
+        testDigest([], [1]);
+        testDigest([1, 2], [2, 1]);
       });
 
       test('closed map fields', () {
-        testFingerprint(<String, Object?>{}, {'a': 1});
-        testFingerprint({'a': 'b'}, {'b': 'a'});
+        testDigest(<String, Object?>{}, {'a': 1});
+        testDigest({'a': 'b'}, {'b': 'a'});
       });
 
       test('growable map fields', () {
         final builderA = JsonBufferBuilder();
         final builderB = JsonBufferBuilder();
-        testFingerprint(
+        testDigest(
           builderA.createGrowableMap<Object?>()..['a'] = 1,
           builderB.createGrowableMap<Object?>()..['a'] = 2,
         );
@@ -155,7 +156,7 @@ void main() {
         final builderA = JsonBufferBuilder();
         final builderB = JsonBufferBuilder();
         final schema = TypedMapSchema({'a': Type.stringPointer});
-        testFingerprint(
+        testDigest(
           builderA.createTypedMap(schema, 'a'),
           builderB.createTypedMap(schema, 'b'),
         );
@@ -164,11 +165,11 @@ void main() {
   });
 }
 
-int fingerprint(Map<String, Object?> map) {
+Digest digest(Map<String, Object?> map) {
   final builder =
       map is MapInBuffer ? (map as MapInBuffer).buffer : JsonBufferBuilder()
         ..map.deepCopy(map);
-  return builder.fingerprint(
+  return builder.digest(
     (builder.map as MapInBuffer).pointer,
     type: Type.growableMapPointer,
     alreadyDereferenced: true,
