@@ -24,11 +24,14 @@
                 "type": "ConstructorInvocation",
                 "value": {
                   "type": {
-                    "reference": {
-                      "type": "ClassReference",
-                      "value": {}
-                    },
-                    "typeArguments": []
+                    "type": "NamedTypeAnnotation",
+                    "value": {
+                      "reference": {
+                        "type": "ClassReference",
+                        "value": {}
+                      },
+                      "typeArguments": []
+                    }
                   },
                   "constructor": {
                     "type": "ConstructorReference",
@@ -43,11 +46,14 @@
                 "type": "ConstructorInvocation",
                 "value": {
                   "type": {
-                    "reference": {
-                      "type": "ClassReference",
-                      "value": {}
-                    },
-                    "typeArguments": []
+                    "type": "NamedTypeAnnotation",
+                    "value": {
+                      "reference": {
+                        "type": "ClassReference",
+                        "value": {}
+                      },
+                      "typeArguments": []
+                    }
                   },
                   "constructor": {
                     "type": "ConstructorReference",

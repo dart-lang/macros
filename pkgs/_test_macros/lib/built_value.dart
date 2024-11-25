@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:dart_model/dart_model.dart';
+// ignore: implementation_imports
+import 'package:dart_model/src/macro_metadata.g.dart';
 import 'package:macro/macro.dart';
 import 'package:macro_service/macro_service.dart';
 
@@ -53,17 +55,57 @@ class $builderSimpleName {}
       uri: valueName.uri,
       name: '${valueName.name}Builder',
     );
-    // TODO(davidmorgan): query for fields, set and compare fields.
+
+    final fields =
+        builder.target.members.entries
+            .where((e) => e.value.properties.isField)
+            .toList();
+
+    final constructorParams = StringBuffer();
+    if (fields.isNotEmpty) {
+      constructorParams.write('{');
+      for (final field in fields) {
+        constructorParams.write('required this.${field.key},');
+      }
+      constructorParams.write('}');
+    }
+
+    final computeHash = StringBuffer('{{dart:core#Object}}.hashAll([');
+    for (final field in fields) {
+      computeHash.write('${field.key},');
+    }
+    computeHash.write('])');
+
+    final comparisons = StringBuffer();
+    for (final field in fields) {
+      comparisons.write('&& ${field.key} == other.${field.key}');
+    }
+
+    final toString = StringBuffer('${valueName.name}(');
+    for (final field in fields) {
+      toString.write('${field.key}: \$${field.key}');
+      if (field != fields.last) {
+        toString.write(', ');
+      }
+    }
+    toString.write(')');
+
     builder.declareInType(
       augmentation('''
-${valueName.name}([void Function(${builderName.code})? updates]) {}
-${valueName.name}._() {}
+factory ${valueName.name}([void Function(${builderName.code})? updates]) =>
+  (${builderName.code}()..update(updates)).build();
+${valueName.name}._($constructorParams) {}
 
 ${builderName.code} toBuilder() => ${builderName.code}()..replace(this);
 ${valueName.code} rebuild(void Function(${builderName.code}) updates) =>
     (toBuilder()..update(updates)).build();
 
-  bool operator==(Object other) => other is ${valueName.code};
+  {{dart:core#int}} get hashCode => $computeHash;
+
+  {{dart:core#bool}} operator==({{dart:core#Object}} other) =>
+      other is ${valueName.code}$comparisons;
+
+  {{dart:core#String}} toString() => '$toString';
 '''),
     );
   }
@@ -94,13 +136,108 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
       throw StateError('Builder class should have name ending "Builder".');
     }
     final valueName = QualifiedName(uri: builderName.uri, name: valueShortName);
+    await builder.query(Query(target: valueName));
 
-    // TODO(davidmorgan): query for fields, actually build fields.
+    final valueInterface =
+        builder.model.uris[valueName.uri]!.scopes[valueName.name]!;
+    final fields =
+        valueInterface.members.entries
+            .where((e) => e.value.properties.isField)
+            .toList();
+
+    // Check which field types are annotated with `@BuiltValue`, meaning they
+    // should use nested Builders.
+    //
+    // First, find all the types and query for them.
+    // TODO(davidmorgan): there should be a way to do this in one query.
+    final fieldTypes = <String>{};
+    for (final field in fields) {
+      final qualifiedName = field.value.returnType.asNamedTypeDesc.name;
+      if (qualifiedName.uri != 'dart:core') {
+        fieldTypes.add(qualifiedName.asString);
+      }
+    }
+    for (final fieldType in fieldTypes) {
+      final qualifiedName = QualifiedName.parse(fieldType);
+      await builder.query(Query(target: qualifiedName));
+    }
+
+    // Now check which field types have the annotation.
+    final nestedBuilderTypes = <String>{};
+    for (final fieldType in fieldTypes) {
+      final qualifiedName = QualifiedName.parse(fieldType);
+      final fieldTypeAnnotations =
+          builder
+              .model
+              .uris[qualifiedName.uri]!
+              .scopes[qualifiedName.name]!
+              .metadataAnnotations;
+      for (final fieldTypeAnnotation in fieldTypeAnnotations) {
+        if (fieldTypeAnnotation.expression.type !=
+            ExpressionType.constructorInvocation) {
+          continue;
+        }
+        final constructorInvocation =
+            fieldTypeAnnotation.expression.asConstructorInvocation;
+        if (constructorInvocation.type.type !=
+            TypeAnnotationType.namedTypeAnnotation) {
+          continue;
+        }
+        // TODO(davidmorgan): macro metadata model doesn't actually have the
+        // name yet, just assume any constructor annotation is `BuiltValue`.
+        nestedBuilderTypes.add(qualifiedName.asString);
+      }
+    }
+
+    final fieldDeclarations = StringBuffer();
+    for (final field in fields) {
+      final fieldTypeQualifiedName =
+          field.value.returnType.asNamedTypeDesc.name;
+      if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
+        final fieldBuilderQualifiedName = QualifiedName(
+          uri: fieldTypeQualifiedName.uri,
+          name: '${fieldTypeQualifiedName.name}Builder',
+        );
+        fieldDeclarations.write(
+          '${fieldBuilderQualifiedName.code} ${field.key} = '
+          '${fieldBuilderQualifiedName.code}();',
+        );
+      } else {
+        fieldDeclarations.write(
+          '${fieldTypeQualifiedName.code}? ${field.key};',
+        );
+      }
+    }
+
+    final copyFields = StringBuffer();
+    for (final field in fields) {
+      final fieldTypeQualifiedName =
+          field.value.returnType.asNamedTypeDesc.name;
+      if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
+        copyFields.write('this.${field.key} = other.${field.key}.toBuilder();');
+      } else {
+        copyFields.write('this.${field.key} = other.${field.key};');
+      }
+    }
+
+    final buildParams = StringBuffer();
+    for (final field in fields) {
+      final fieldTypeQualifiedName =
+          field.value.returnType.asNamedTypeDesc.name;
+      if (nestedBuilderTypes.contains(fieldTypeQualifiedName.asString)) {
+        buildParams.write('${field.key}: ${field.key}.build(),');
+      } else {
+        buildParams.write('${field.key}: ${field.key}!,');
+      }
+    }
+
     builder.declareInType(
       augmentation('''
-void replace(${valueName.code} other) {}
-void update(void Function(${builderName.code}) updates) => updates(this);
-${valueName.code} build() => ${valueName.code}._();
+$fieldDeclarations
+
+void replace(${valueName.code} other) {  $copyFields }
+void update(void Function(${builderName.code})? updates) => updates?.call(this);
+${valueName.code} build() => ${valueName.code}._($buildParams);
 '''),
     );
   }
