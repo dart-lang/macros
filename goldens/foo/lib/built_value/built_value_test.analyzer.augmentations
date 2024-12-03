@@ -33,18 +33,18 @@ prefix1.Empty rebuild(void Function(prefix1.EmptyBuilder) updates) =>
 augment class PrimitiveFields {
 factory PrimitiveFields([void Function(prefix1.PrimitiveFieldsBuilder)? updates]) =>
   (prefix1.PrimitiveFieldsBuilder()..update(updates)).build();
-PrimitiveFields._({required this.anInt,required this.aString,}) {}
+PrimitiveFields._({required this.anInt,required this.aString,required this.aNullableString,}) {}
 
 prefix1.PrimitiveFieldsBuilder toBuilder() => prefix1.PrimitiveFieldsBuilder()..replace(this);
 prefix1.PrimitiveFields rebuild(void Function(prefix1.PrimitiveFieldsBuilder) updates) =>
     (toBuilder()..update(updates)).build();
 
-  prefix2.int get hashCode => prefix2.Object.hashAll([anInt,aString,]);
+  prefix2.int get hashCode => prefix2.Object.hashAll([anInt,aString,aNullableString,]);
 
   prefix2.bool operator==(prefix2.Object other) =>
-      other is prefix1.PrimitiveFields&& anInt == other.anInt&& aString == other.aString;
+      other is prefix1.PrimitiveFields&& anInt == other.anInt&& aString == other.aString&& aNullableString == other.aNullableString;
 
-  prefix2.String toString() => 'PrimitiveFields(anInt: $anInt, aString: $aString)';
+  prefix2.String toString() => 'PrimitiveFields(anInt: $anInt, aString: $aString, aNullableString: $aNullableString)';
 
 }
 augment class NestedFields {
@@ -73,11 +73,11 @@ prefix1.NestedFields build() => prefix1.NestedFields._(aPrimitiveFields: aPrimit
 
 }
 augment class PrimitiveFieldsBuilder {
-prefix2.int? anInt;prefix2.String? aString;
+prefix2.int? anInt;prefix2.String? aString;prefix2.String? aNullableString;
 
-void replace(prefix1.PrimitiveFields other) {  this.anInt = other.anInt;this.aString = other.aString; }
+void replace(prefix1.PrimitiveFields other) {  this.anInt = other.anInt;this.aString = other.aString;this.aNullableString = other.aNullableString; }
 void update(void Function(prefix1.PrimitiveFieldsBuilder)? updates) => updates?.call(this);
-prefix1.PrimitiveFields build() => prefix1.PrimitiveFields._(anInt: anInt!,aString: aString!,);
+prefix1.PrimitiveFields build() => prefix1.PrimitiveFields._(anInt: anInt!,aString: aString!,aNullableString: aNullableString,);
 
 }
 augment class EmptyBuilder {

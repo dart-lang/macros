@@ -36,7 +36,10 @@ void main() {
       );
       expect(value2, isNot(value));
       expect(value2.hashCode, isNot(value.hashCode));
-      expect(value2.toString(), 'PrimitiveFields(anInt: 4, aString: five)');
+      expect(
+        value2.toString(),
+        'PrimitiveFields(anInt: 4, aString: five, aNullableString: null)',
+      );
 
       final sameValue = value.rebuild((b) => b);
       expect(sameValue, value);
@@ -56,7 +59,7 @@ void main() {
       expect(
         value.toString(),
         'NestedFields(aPrimitiveFields: PrimitiveFields('
-        'anInt: 3, aString: four), aString: five)',
+        'anInt: 3, aString: four, aNullableString: null), aString: five)',
       );
     });
   });
@@ -69,6 +72,7 @@ class Empty {}
 class PrimitiveFields {
   final int anInt;
   final String aString;
+  final String? aNullableString;
 }
 
 @BuiltValue()

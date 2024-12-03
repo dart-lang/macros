@@ -4,30 +4,50 @@
 
 import 'dart:io';
 
-import 'package:benchmark_generator/json_encodable/input_generator.dart';
+import 'package:benchmark_generator/input_generator.dart';
 import 'package:benchmark_generator/workspace.dart';
+import 'package:dart_model/dart_model.dart';
 
 Future<void> main(List<String> arguments) async {
-  if (arguments.length != 3) {
+  if (arguments.length < 3) {
     print('''
-Creates packages to benchmark macro performance. Usage:
+Creates packages to benchmark macro performance.
 
-  dart run benchmark_generator <workspace name> <macro|manual|none> <# libraries>
+Available macro names: BuiltValue, JsonCodable
+
+Usage:
+
+  dart run benchmark_generator <workspace name> <# libraries> <macro name> [additional macro names]
 ''');
     exit(1);
   }
 
   final workspaceName = arguments[0];
-  final strategy = Strategy.values.where((e) => e.name == arguments[1]).single;
-  final libraryCount = int.parse(arguments[2]);
+  final libraryCount = int.parse(arguments[1]);
+
+  final macroNames = arguments.skip(2).toList();
+  final macros = <QualifiedName>[
+    for (final macroName in macroNames)
+      switch (macroName) {
+        'BuiltValue' => QualifiedName(
+          uri: 'package:_test_macros/built_value.dart',
+          name: 'BuiltValue',
+        ),
+        'JsonCodable' => QualifiedName(
+          uri: 'package:_test_macros/json_codable.dart',
+          name: 'JsonCodable',
+        ),
+        _ => throw ArgumentError(macroName),
+      },
+  ];
 
   final workspace = Workspace(workspaceName);
   print('Creating under: ${workspace.directory.path}');
-  final inputGenerator = JsonEncodableInputGenerator(
+  final inputGenerator = ClassesAndFieldsInputGenerator(
+    macros: macros,
     fieldsPerClass: 100,
     classesPerLibrary: 10,
     librariesPerCycle: libraryCount,
-    strategy: strategy,
   );
   inputGenerator.generate(workspace);
 }
