@@ -6,6 +6,8 @@ import 'dart:typed_data';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 
+import 'lazy_wrappers_buffer_wire_benchmark.dart';
+
 const mapSize = 10000;
 final mapKeys = List.generate(mapSize, (i) => i.toString());
 
@@ -62,6 +64,8 @@ class ProcessBenchmark extends BenchmarkBase {
       final value = entry.value;
       if (value is Map) {
         result ^= deepHash(value);
+      } else if (value is Serializable) {
+        result ^= deepHash(value.toJson());
       } else {
         result ^= value.hashCode;
       }

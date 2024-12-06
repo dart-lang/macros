@@ -8,6 +8,8 @@ import 'builder_maps_builder_wire_benchmark.dart';
 import 'builder_maps_json_wire_benchmark.dart';
 import 'lazy_maps_buffer_wire_benchmark.dart';
 import 'lazy_maps_json_wire_benchmark.dart';
+import 'lazy_wrappers_buffer_wire_benchmark.dart';
+import 'lazy_wrappers_buffer_wire_benchmark.dart' as wrapped;
 import 'sdk_maps_buffer_wire_benchmark.dart';
 import 'sdk_maps_builder_wire_benchmark.dart';
 import 'sdk_maps_json_wire_benchmark.dart';
@@ -15,6 +17,7 @@ import 'sdk_maps_json_wire_benchmark.dart';
 void main() {
   final sdkMapsJsonWireBenchmark = SdkMapsJsonWireBenchmark();
   final lazyMapsBufferWireBenchmark = LazyMapsBufferWireBenchmark();
+  final lazyWrappersBufferWireBenchmark = LazyWrappersBufferWireBenchmark();
   final builderMapsBuilderWireBenchmark = BuilderMapsBuilderWireBenchmark();
   final serializationBenchmarks = [
     sdkMapsJsonWireBenchmark,
@@ -22,6 +25,7 @@ void main() {
     SdkMapsBuilderWireBenchmark(),
     LazyMapsJsonWireBenchmark(),
     lazyMapsBufferWireBenchmark,
+    lazyWrappersBufferWireBenchmark,
     BuilderMapsJsonWireBenchmark(),
     builderMapsBuilderWireBenchmark,
   ];
@@ -41,6 +45,7 @@ void main() {
     for (final benchmark in [
       sdkMapsJsonWireBenchmark.processBenchmark(),
       lazyMapsBufferWireBenchmark.processBenchmark(),
+      lazyWrappersBufferWireBenchmark.processBenchmark(),
       builderMapsBuilderWireBenchmark.processBenchmark(),
     ]) {
       final measure = benchmark.measure().toMilliseconds;
@@ -51,8 +56,15 @@ void main() {
     }
 
     for (final benchmark in serializationBenchmarks.skip(1)) {
+      var deserialized = benchmark.deserialized;
+      // Need to unwrap these to compare them as raw maps.
+      if (deserialized is Map<String, wrapped.Interface>) {
+        deserialized = deserialized.map<String, Object?>(
+          (k, v) => MapEntry(k, v.toJson()),
+        );
+      }
       if (!const DeepCollectionEquality().equals(
-        benchmark.deserialized,
+        deserialized,
         serializationBenchmarks.first.deserialized,
       )) {
         throw StateError(
