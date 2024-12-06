@@ -10,7 +10,9 @@ import 'serialization_benchmark.dart';
 
 JsonBufferBuilder? runningBuffer;
 
-/// Benchmark accumulating data directly into a [JsonBufferBuilder].
+/// Benchmark accumulating data directly into a [JsonBufferBuilder] with an
+/// indirection through a thin wrapper type (which is a real type, not an
+/// extension type).
 class LazyWrappersBufferWireBenchmark extends SerializationBenchmark {
   @override
   void run() {
