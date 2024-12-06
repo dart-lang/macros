@@ -11,14 +11,12 @@ import 'generate_dart_model.dart';
 final definitions = [
   Definition.union(
     'Argument',
-    createInBuffer: true,
     description: '',
     types: ['PositionalArgument', 'NamedArgument'],
     properties: [],
   ),
   Definition.union(
     'Element',
-    createInBuffer: true,
     description: '',
     types: [
       'ExpressionElement',
@@ -30,7 +28,6 @@ final definitions = [
   ),
   Definition.union(
     'Expression',
-    createInBuffer: true,
     description: '',
     types: [
       'InvalidExpression',
@@ -71,14 +68,12 @@ final definitions = [
   ),
   Definition.union(
     'RecordField',
-    createInBuffer: true,
     description: '',
     types: ['RecordNamedField', 'RecordPositionalField'],
     properties: [],
   ),
   Definition.union(
     'Reference',
-    createInBuffer: true,
     description: '',
     types: [
       'FieldReference',
@@ -90,20 +85,19 @@ final definitions = [
       'ExtensionReference',
       'ExtensionTypeReference',
       'EnumReference',
+      'MixinReference',
       'FunctionTypeParameterReference',
     ],
     properties: [],
   ),
   Definition.union(
     'StringLiteralPart',
-    createInBuffer: true,
     description: '',
     types: ['StringPart', 'InterpolationPart'],
     properties: [],
   ),
   Definition.union(
     'TypeAnnotation',
-    createInBuffer: true,
     description: '',
     types: [
       'NamedTypeAnnotation',
@@ -147,8 +141,14 @@ final definitions = [
     values: ['minus', 'bang', 'tilde'],
   ),
   Definition.clazz(
+    'AdjacentStringLiterals',
+    description: '',
+    properties: [
+      Property('expressions', type: 'List<Expression>', description: ''),
+    ],
+  ),
+  Definition.clazz(
     'AsExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('expression', type: 'Expression', description: ''),
@@ -157,7 +157,6 @@ final definitions = [
   ),
   Definition.clazz(
     'BinaryExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('left', type: 'Expression', description: ''),
@@ -167,19 +166,16 @@ final definitions = [
   ),
   Definition.clazz(
     'BooleanLiteral',
-    createInBuffer: true,
     description: '',
-    properties: [Property('text', type: 'String', description: '')],
+    properties: [Property('value', type: 'bool', description: '')],
   ),
   Definition.clazz(
     'ClassReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'ConditionalExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('condition', type: 'Expression', description: ''),
@@ -189,7 +185,6 @@ final definitions = [
   ),
   Definition.clazz(
     'ConstructorInvocation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('type', type: 'TypeAnnotation', description: ''),
@@ -199,13 +194,11 @@ final definitions = [
   ),
   Definition.clazz(
     'ConstructorReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'ConstructorTearOff',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('type', type: 'TypeAnnotation', description: ''),
@@ -214,25 +207,24 @@ final definitions = [
   ),
   Definition.clazz(
     'DoubleLiteral',
-    createInBuffer: true,
     description: '',
-    properties: [Property('text', type: 'String', description: '')],
+    properties: [
+      Property('text', type: 'String', description: ''),
+      Property('value', type: 'double', description: ''),
+    ],
   ),
   Definition.clazz(
     'DynamicTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [Property('reference', type: 'Reference', description: '')],
   ),
   Definition.clazz(
     'EnumReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'EqualityExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('left', type: 'Expression', description: ''),
@@ -242,7 +234,6 @@ final definitions = [
   ),
   Definition.clazz(
     'ExpressionElement',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('expression', type: 'Expression', description: ''),
@@ -251,43 +242,32 @@ final definitions = [
   ),
   Definition.clazz(
     'ExtensionReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'ExtensionTypeReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'FieldReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
-  Definition.clazz(
-    'FormalParameter',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
-  Definition.clazz(
-    'FormalParameterGroup',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('FormalParameter', description: '', properties: [
+  ],
+),
+  Definition.clazz('FormalParameterGroup', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'FunctionReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'FunctionTearOff',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('reference', type: 'FunctionReference', description: ''),
@@ -295,7 +275,6 @@ final definitions = [
   ),
   Definition.clazz(
     'FunctionTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property(
@@ -316,21 +295,16 @@ final definitions = [
       ),
     ],
   ),
-  Definition.clazz(
-    'FunctionTypeParameter',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('FunctionTypeParameter', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'FunctionTypeParameterReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'FunctionTypeParameterType',
-    createInBuffer: true,
     description: '',
     properties: [
       Property(
@@ -342,7 +316,6 @@ final definitions = [
   ),
   Definition.clazz(
     'IfElement',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('condition', type: 'Expression', description: ''),
@@ -352,7 +325,6 @@ final definitions = [
   ),
   Definition.clazz(
     'IfNull',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('left', type: 'Expression', description: ''),
@@ -361,7 +333,6 @@ final definitions = [
   ),
   Definition.clazz(
     'ImplicitInvocation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('receiver', type: 'Expression', description: ''),
@@ -371,7 +342,6 @@ final definitions = [
   ),
   Definition.clazz(
     'Instantiation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('receiver', type: 'Expression', description: ''),
@@ -380,31 +350,25 @@ final definitions = [
   ),
   Definition.clazz(
     'IntegerLiteral',
-    createInBuffer: true,
     description: '',
-    properties: [Property('text', type: 'String', description: '')],
+    properties: [
+      Property('text', type: 'String', description: '', nullable: true),
+      Property('value', type: 'int', description: '', nullable: true),
+    ],
   ),
   Definition.clazz(
     'InterpolationPart',
-    createInBuffer: true,
     description: '',
     properties: [Property('expression', type: 'Expression', description: '')],
   ),
-  Definition.clazz(
-    'InvalidExpression',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
-  Definition.clazz(
-    'InvalidTypeAnnotation',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('InvalidExpression', description: '', properties: [
+  ],
+),
+  Definition.clazz('InvalidTypeAnnotation', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'IsTest',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('expression', type: 'Expression', description: ''),
@@ -414,7 +378,6 @@ final definitions = [
   ),
   Definition.clazz(
     'ListLiteral',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('typeArguments', type: 'List<TypeAnnotation>', description: ''),
@@ -423,7 +386,6 @@ final definitions = [
   ),
   Definition.clazz(
     'LogicalExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('left', type: 'Expression', description: ''),
@@ -433,7 +395,6 @@ final definitions = [
   ),
   Definition.clazz(
     'MapEntryElement',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('key', type: 'Expression', description: ''),
@@ -444,7 +405,6 @@ final definitions = [
   ),
   Definition.clazz(
     'MethodInvocation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('receiver', type: 'Expression', description: ''),
@@ -454,8 +414,12 @@ final definitions = [
     ],
   ),
   Definition.clazz(
+    'MixinReference',
+    description: '',
+    properties: [Property('name', type: 'String', description: '')],
+  ),
+  Definition.clazz(
     'NamedArgument',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('name', type: 'String', description: ''),
@@ -464,7 +428,6 @@ final definitions = [
   ),
   Definition.clazz(
     'NamedTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('reference', type: 'Reference', description: ''),
@@ -473,7 +436,6 @@ final definitions = [
   ),
   Definition.clazz(
     'NullableTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('typeAnnotation', type: 'TypeAnnotation', description: ''),
@@ -481,7 +443,6 @@ final definitions = [
   ),
   Definition.clazz(
     'NullAwarePropertyGet',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('receiver', type: 'Expression', description: ''),
@@ -490,31 +451,24 @@ final definitions = [
   ),
   Definition.clazz(
     'NullCheck',
-    createInBuffer: true,
     description: '',
     properties: [Property('expression', type: 'Expression', description: '')],
   ),
-  Definition.clazz(
-    'NullLiteral',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('NullLiteral', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'ParenthesizedExpression',
-    createInBuffer: true,
     description: '',
     properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'PositionalArgument',
-    createInBuffer: true,
     description: '',
     properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'PropertyGet',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('receiver', type: 'Expression', description: ''),
@@ -523,7 +477,6 @@ final definitions = [
   ),
   Definition.clazz(
     'RecordLiteral',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('fields', type: 'List<RecordField>', description: ''),
@@ -531,7 +484,6 @@ final definitions = [
   ),
   Definition.clazz(
     'RecordNamedField',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('name', type: 'String', description: ''),
@@ -540,34 +492,25 @@ final definitions = [
   ),
   Definition.clazz(
     'RecordPositionalField',
-    createInBuffer: true,
     description: '',
     properties: [Property('expression', type: 'Expression', description: '')],
   ),
   Definition.clazz(
     'RecordTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('positional', type: 'List<RecordTypeEntry>', description: ''),
       Property('named', type: 'List<RecordTypeEntry>', description: ''),
     ],
   ),
-  Definition.clazz(
-    'RecordTypeEntry',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
-  Definition.clazz(
-    'References',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('RecordTypeEntry', description: '', properties: [
+  ],
+),
+  Definition.clazz('References', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'SetOrMapLiteral',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('typeArguments', type: 'List<TypeAnnotation>', description: ''),
@@ -576,7 +519,6 @@ final definitions = [
   ),
   Definition.clazz(
     'SpreadElement',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('expression', type: 'Expression', description: ''),
@@ -585,7 +527,6 @@ final definitions = [
   ),
   Definition.clazz(
     'StaticGet',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('reference', type: 'FieldReference', description: ''),
@@ -593,7 +534,6 @@ final definitions = [
   ),
   Definition.clazz(
     'StaticInvocation',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('function', type: 'FunctionReference', description: ''),
@@ -602,16 +542,7 @@ final definitions = [
     ],
   ),
   Definition.clazz(
-    'AdjacentStringLiterals',
-    createInBuffer: true,
-    description: '',
-    properties: [
-      Property('expressions', type: 'List<Expression>', description: ''),
-    ],
-  ),
-  Definition.clazz(
     'StringLiteral',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('parts', type: 'List<StringLiteralPart>', description: ''),
@@ -619,60 +550,45 @@ final definitions = [
   ),
   Definition.clazz(
     'StringPart',
-    createInBuffer: true,
     description: '',
     properties: [Property('text', type: 'String', description: '')],
   ),
   Definition.clazz(
     'SymbolLiteral',
-    createInBuffer: true,
     description: '',
     properties: [Property('parts', type: 'List<String>', description: '')],
   ),
   Definition.clazz(
     'TypedefReference',
-    createInBuffer: true,
     description: '',
-    properties: [],
+    properties: [Property('name', type: 'String', description: '')],
   ),
   Definition.clazz(
     'TypeLiteral',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('typeAnnotation', type: 'TypeAnnotation', description: ''),
     ],
   ),
-  Definition.clazz(
-    'TypeReference',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('TypeReference', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'UnaryExpression',
-    createInBuffer: true,
     description: '',
     properties: [
       Property('operator', type: 'UnaryOperator', description: ''),
       Property('expression', type: 'Expression', description: ''),
     ],
   ),
-  Definition.clazz(
-    'UnresolvedExpression',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
-  Definition.clazz(
-    'UnresolvedTypeAnnotation',
-    createInBuffer: true,
-    description: '',
-    properties: [],
-  ),
+  Definition.clazz('UnresolvedExpression', description: '', properties: [
+  ],
+),
+  Definition.clazz('UnresolvedTypeAnnotation', description: '', properties: [
+  ],
+),
   Definition.clazz(
     'VoidTypeAnnotation',
-    createInBuffer: true,
     description: '',
     properties: [Property('reference', type: 'Reference', description: '')],
   ),

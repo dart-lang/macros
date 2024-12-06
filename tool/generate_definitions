@@ -7,7 +7,7 @@
 #
 # mkdir /tmp/inputs
 # cp ~/git/dart-sdk/sdk/pkg/_fe_analyzer_shared/lib/src/metadata/* /tmp/inputs
-# rm /tmp/inputs/proto.dart /tmp/inputs/parser.dart /tmp/inputs/scope.dart
+# rm /tmp/inputs/proto.dart /tmp/inputs/parser.dart /tmp/inputs/scope.dart /tmp/inputs/evaluate.dart
 # tool/generate_definitions /tmp/inputs
 
 path="$1"
@@ -40,7 +40,7 @@ done
 
 # Enums.
 for type in $(echo "$source" \
-  | egrep '^enum [A-Z]' \
+  | grep -E '^enum [A-Z]' \
   | sed -e 's#enum ##' \
   | sed -e 's# .*##' \
   | sort); do
@@ -50,10 +50,10 @@ for type in $(echo "$source" \
   for line in $(echo "$source" \
     | grep -A1000000 "enum $type " \
     | tail -n +2); do
-    if echo "$line" | grep -q ';'; then
+    if echo "$line" | grep -q -e ';' -e '}'; then
       break
     else
-      value=$(echo $line | sed -e 's#  ##' | sed -e 's#(.*##')
+      value=$(echo $line | sed -e 's#  ##' | sed -e 's#(.*##' | sed -e 's#,##')
       echo "    '$value',"
     fi
   done
@@ -63,7 +63,7 @@ done
 
 # Classes.
 for type in $(echo "$source" \
-  | egrep '^[a-z ]*class ' \
+  | grep -E '^[a-z ]*class ' \
   | grep -v 'sealed' \
   | sed -e 's#abstract ##' \
   | sed -e 's#class ##' \
@@ -82,7 +82,19 @@ for type in $(echo "$source" \
         continue
       fi
       field_type=$(echo $line | sed -e 's#  final ##' | sed -e 's# .*##')
-      if echo "$field_type" | fgrep -q '?'; then
+      if echo "$field_type" | grep -F -q '?'; then
+        field_type=$(echo "$field_type" | sed -e 's#?##')
+        echo "    Property('$field_name', type: '$field_type', description: '', nullable: true),"
+      else
+        echo "    Property('$field_name', type: '$field_type', description: ''),"
+      fi
+    elif echo "$line" | grep -q ' get '; then
+      field_name=$(echo $line | sed -e 's#.* get ##' | sed -e 's#;##')
+      if test "$field_name" == "unresolved"; then
+        continue
+      fi
+      field_type=$(echo $line | sed -e 's#  ##' | sed -e 's# get .*##')
+      if echo "$field_type" | grep -F -q '?'; then
         field_type=$(echo "$field_type" | sed -e 's#?##')
         echo "    Property('$field_name', type: '$field_type', description: '', nullable: true),"
       else

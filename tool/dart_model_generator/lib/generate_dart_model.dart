@@ -459,6 +459,11 @@ class TypeReference {
         'type': 'integer',
         if (description != null) 'description': description,
       };
+    } else if (name == 'double') {
+      return {
+        'type': 'double',
+        if (description != null) 'description': description,
+      };
     }
     // Not a built-in type, look up a user-defined type. This throws if there
     // is no such type defined.
