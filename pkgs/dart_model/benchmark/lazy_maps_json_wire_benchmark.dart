@@ -16,5 +16,5 @@ class LazyMapsJsonWireBenchmark extends LazyMapsBufferWireBenchmark {
 
   @override
   Map<String, Object?> deserialize(Uint8List serialized) =>
-      json.fuse(utf8).decode(serialized!) as Map<String, Object?>;
+      json.fuse(utf8).decode(serialized) as Map<String, Object?>;
 }

@@ -53,7 +53,7 @@ void main() {
 
         switch (stage) {
           case BenchmarkStage.serialize:
-            final paddedBytes = '${benchmark.serialized.length}'.padLeft(7);
+            final paddedBytes = '${benchmark.bytes}'.padLeft(7);
             buffer.write(', $paddedBytes bytes');
           case BenchmarkStage.process:
             buffer.write(', hash ${benchmark.hashResult}');

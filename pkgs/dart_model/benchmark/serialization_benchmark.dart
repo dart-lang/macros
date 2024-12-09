@@ -20,7 +20,7 @@ abstract class SerializationBenchmark extends BenchmarkBase {
 
   /// The result of [serialize]; used to report the size and passed to
   /// [deserialize] later.
-  late Uint8List serialized;
+  late Uint8List _serialized;
 
   /// The result of [deserialize]; used to check correctness and passed to
   /// [deepHash] later.
@@ -32,6 +32,10 @@ abstract class SerializationBenchmark extends BenchmarkBase {
 
   SerializationBenchmark() : super('');
 
+  /// The length of the serialized bytes, only valid to call after running
+  /// [BenchmarkStage.serialize].
+  int get bytes => _serialized.lengthInBytes;
+
   @override
   String get name => '$runtimeType-${stage.name}';
 
@@ -41,9 +45,9 @@ abstract class SerializationBenchmark extends BenchmarkBase {
       case BenchmarkStage.create:
         _data = createData();
       case BenchmarkStage.serialize:
-        serialized = serialize(_data);
+        _serialized = serialize(_data);
       case BenchmarkStage.deserialize:
-        deserialized = deserialize(serialized);
+        deserialized = deserialize(_serialized);
       case BenchmarkStage.process:
         hashResult = deepHash(deserialized);
     }
@@ -53,15 +57,15 @@ abstract class SerializationBenchmark extends BenchmarkBase {
   Map<String, Object?> createData();
 
   /// Used to measure [BenchmarkStage.serialize], called with [data], sets
-  /// [serialized] to the result.
+  /// [_serialized] to the result.
   Uint8List serialize(Map<String, Object?> data);
 
   /// Used to measure [BenchmarkStage.deserialize], called with
-  /// [serialized], sets [deserialized] to the result.
+  /// [_serialized], sets [deserialized] to the result.
   Map<String, Object?> deserialize(Uint8List data);
 
   /// Used to measure [BenchmarkStage.process], called with
-  /// [serialized], sets [deserialized] to the result.
+  /// [_serialized], sets [deserialized] to the result.
   ///
   /// Default implementation works only for JSON style maps.
   int deepHash(Map<String, Object?> deserialized) {
