@@ -5,10 +5,10 @@ augment class Foo {
  // aNum: 8.0, double
  // aDouble: 9.0, double
  // aString: 10, String
- // anObject: {type: {type: NamedTypeAnnotation, value: {reference: {type: ClassReference, value: {}}, typeArguments: []}}, constructor: {type: ConstructorReference, value: {}}, arguments: [{type: NamedArgument, value: {name: a, expression: {type: BooleanLiteral, value: {text: true}}}}, {type: NamedArgument, value: {name: b, expression: {type: BooleanLiteral, value: {text: false}}}}]}, String
+ // anObject: {type: {type: NamedTypeAnnotation, value: {reference: {type: ClassReference, value: {name: Bar}}, typeArguments: []}}, constructor: {type: ConstructorReference, value: {name: new}}, arguments: [{type: NamedArgument, value: {name: a, expression: {type: BooleanLiteral, value: {value: true}}}}, {type: NamedArgument, value: {name: b, expression: {type: BooleanLiteral, value: {value: false}}}}]}, String
  // ints: [11, 12], List<Object>
  // nums: [13.0, 14], List<Object>
  // doubles: [15.0, 16], List<Object>
  // strings: [17, eighteen], List<Object>
- // objects: [19, {type: {type: NamedTypeAnnotation, value: {reference: {type: ClassReference, value: {}}, typeArguments: []}}, constructor: {type: ConstructorReference, value: {}}, arguments: [{type: NamedArgument, value: {name: a, expression: {type: BooleanLiteral, value: {text: true}}}}, {type: NamedArgument, value: {name: b, expression: {type: BooleanLiteral, value: {text: false}}}}]}], List<Object>
+ // objects: [19, {type: {type: NamedTypeAnnotation, value: {reference: {type: ClassReference, value: {name: Bar}}, typeArguments: []}}, constructor: {type: ConstructorReference, value: {name: new}}, arguments: [{type: NamedArgument, value: {name: a, expression: {type: BooleanLiteral, value: {value: true}}}}, {type: NamedArgument, value: {name: b, expression: {type: BooleanLiteral, value: {value: false}}}}]}], List<Object>
 }

@@ -28,14 +28,18 @@
                     "value": {
                       "reference": {
                         "type": "ClassReference",
-                        "value": {}
+                        "value": {
+                          "name": "QueryClass"
+                        }
                       },
                       "typeArguments": []
                     }
                   },
                   "constructor": {
                     "type": "ConstructorReference",
-                    "value": {}
+                    "value": {
+                      "name": "new"
+                    }
                   },
                   "arguments": []
                 }
@@ -50,14 +54,18 @@
                     "value": {
                       "reference": {
                         "type": "ClassReference",
-                        "value": {}
+                        "value": {
+                          "name": "Annotation"
+                        }
                       },
                       "typeArguments": []
                     }
                   },
                   "constructor": {
                     "type": "ConstructorReference",
-                    "value": {}
+                    "value": {
+                      "name": "new"
+                    }
                   },
                   "arguments": [
                     {
@@ -67,7 +75,7 @@
                         "expression": {
                           "type": "BooleanLiteral",
                           "value": {
-                            "text": "true"
+                            "value": true
                           }
                         }
                       }
@@ -79,7 +87,8 @@
                         "expression": {
                           "type": "IntegerLiteral",
                           "value": {
-                            "text": "23"
+                            "text": "23",
+                            "value": 23
                           }
                         }
                       }

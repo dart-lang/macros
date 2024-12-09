@@ -208,14 +208,18 @@
                     "value": {
                       "reference": {
                         "type": "ClassReference",
-                        "value": {}
+                        "value": {
+                          "name": "QueryClass"
+                        }
                       },
                       "typeArguments": []
                     }
                   },
                   "constructor": {
                     "type": "ConstructorReference",
-                    "value": {}
+                    "value": {
+                      "name": "new"
+                    }
                   },
                   "arguments": []
                 }
@@ -272,14 +276,18 @@
                     "value": {
                       "reference": {
                         "type": "ClassReference",
-                        "value": {}
+                        "value": {
+                          "name": "QueryClass"
+                        }
                       },
                       "typeArguments": []
                     }
                   },
                   "constructor": {
                     "type": "ConstructorReference",
-                    "value": {}
+                    "value": {
+                      "name": "new"
+                    }
                   },
                   "arguments": []
                 }

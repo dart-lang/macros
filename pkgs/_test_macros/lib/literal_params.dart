@@ -93,9 +93,9 @@ class LiteralParamsImplementation implements ClassDeclarationsMacro {
 extension ExpressionExtension on Expression {
   Object get evaluate => switch (type) {
     ExpressionType.integerLiteral => int.parse(asIntegerLiteral.text),
-    ExpressionType.doubleLiteral => double.parse(asDoubleLiteral.text),
+    ExpressionType.doubleLiteral => asDoubleLiteral.value,
     ExpressionType.stringLiteral => asStringLiteral.evaluate,
-    ExpressionType.booleanLiteral => bool.parse(asBooleanLiteral.text),
+    ExpressionType.booleanLiteral => asBooleanLiteral.value,
     ExpressionType.listLiteral =>
       asListLiteral.elements.map((e) => e.evaluate).toList(),
     // TODO(davidmorgan): need the type name to do something useful here,

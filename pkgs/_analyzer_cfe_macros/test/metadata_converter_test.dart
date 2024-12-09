@@ -20,7 +20,7 @@ void main() {
       expect(convert<Object>(invocation), <String, Object?>{
         'receiver': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'},
+          'value': {'text': '1.23', 'value': 1.23},
         },
         'name': 'round',
         'typeArguments': [],
@@ -40,12 +40,12 @@ void main() {
       expect(convert<Object>(expression), <String, Object?>{
         'left': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'},
+          'value': {'text': '1.23', 'value': 1.23},
         },
         'operator': 'minus',
         'right': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.24'},
+          'value': {'text': '1.24', 'value': 1.24},
         },
       });
     });
@@ -63,7 +63,7 @@ void main() {
       expect(convert<Object>(invocation), <String, Object?>{
         'receiver': {
           'type': 'DoubleLiteral',
-          'value': {'text': '1.23'},
+          'value': {'text': '1.23', 'value': 1.23},
         },
         'name': 'round',
         'typeArguments': [],
