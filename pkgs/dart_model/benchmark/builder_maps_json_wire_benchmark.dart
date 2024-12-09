@@ -11,12 +11,10 @@ import 'builder_maps_builder_wire_benchmark.dart';
 /// serializing it to JSON.
 class BuilderMapsJsonWireBenchmark extends BuilderMapsBuilderWireBenchmark {
   @override
-  void run() {
-    serialized = json.fuse(utf8).encode(createData()) as Uint8List;
-  }
+  Uint8List serialize(Map<String, Object?> data) =>
+      json.fuse(utf8).encode(data) as Uint8List;
 
   @override
-  void deserialize() {
-    deserialized = json.fuse(utf8).decode(serialized!) as Map<String, Object?>;
-  }
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      json.fuse(utf8).decode(serialized) as Map<String, Object?>;
 }

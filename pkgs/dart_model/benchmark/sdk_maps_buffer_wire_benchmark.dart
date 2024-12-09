@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'json_buffer.dart';
 import 'sdk_maps_json_wire_benchmark.dart';
 
@@ -9,12 +11,10 @@ import 'sdk_maps_json_wire_benchmark.dart';
 /// [JsonBuffer].
 class SdkMapsBufferWireBenchmark extends SdkMapsJsonWireBenchmark {
   @override
-  void run() {
-    serialized = JsonBuffer(createData()).serialize();
-  }
+  Uint8List serialize(Map<String, Object?> data) =>
+      JsonBuffer(data).serialize();
 
   @override
-  void deserialize() {
-    deserialized = JsonBuffer.deserialize(serialized!).asMap;
-  }
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      JsonBuffer.deserialize(serialized).asMap;
 }
