@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 
 import 'serialization_benchmark.dart';
@@ -11,12 +13,12 @@ JsonBufferBuilder? runningBuffer;
 /// Benchmark accumulating data directly into a [JsonBufferBuilder].
 class BuilderMapsBuilderWireBenchmark extends SerializationBenchmark {
   @override
-  void run() {
-    createData();
-
-    serialized = runningBuffer!.serialize();
+  Uint8List serialize(Map<String, Object?> data) {
+    assert(data == runningBuffer!.map);
+    return runningBuffer!.serialize();
   }
 
+  @override
   Map<String, Object?> createData() {
     final buffer = runningBuffer = JsonBufferBuilder();
     final map = buffer.map;
@@ -44,9 +46,8 @@ class BuilderMapsBuilderWireBenchmark extends SerializationBenchmark {
   }
 
   @override
-  void deserialize() {
-    deserialized = JsonBufferBuilder.deserialize(serialized!).map;
-  }
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      JsonBufferBuilder.deserialize(serialized).map;
 
   Member _makeMember(String key) {
     final intKey = key.length;

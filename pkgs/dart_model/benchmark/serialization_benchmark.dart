@@ -13,22 +13,75 @@ final mapKeys = List.generate(mapSize, (i) => i.toString());
 
 /// Benchmark serializing `dart_model` data.
 abstract class SerializationBenchmark extends BenchmarkBase {
-  /// The serialized result; used to report the size.
-  Uint8List? serialized;
+  late BenchmarkStage stage;
 
-  /// The deserialized result; used to check correctness.
-  Map<String, Object?>? deserialized;
+  /// The result of [createData]; passed to [serialize] later.
+  late Map<String, Object?> _data;
+
+  /// The result of [serialize]; used to report the size and passed to
+  /// [deserialize] later.
+  late Uint8List serialized;
+
+  /// The result of [deserialize]; used to check correctness and passed to
+  /// [deepHash] later.
+  late Map<String, Object?> deserialized;
+
+  /// The result of [deepHash]; result should be identical from all
+  /// implementations.
+  late int hashResult;
 
   SerializationBenchmark() : super('');
 
   @override
-  String get name => runtimeType.toString();
+  String get name => '$runtimeType-${stage.name}';
 
-  /// For [ProcessBenchmark].
-  void deserialize();
+  @override
+  void run() {
+    switch (stage) {
+      case BenchmarkStage.create:
+        _data = createData();
+      case BenchmarkStage.serialize:
+        serialized = serialize(_data);
+      case BenchmarkStage.deserialize:
+        deserialized = deserialize(serialized);
+      case BenchmarkStage.process:
+        hashResult = deepHash(deserialized);
+    }
+  }
 
-  /// Creates a [ProcessBenchmark] based on the deserialized data.
-  ProcessBenchmark processBenchmark() => ProcessBenchmark(this);
+  /// Used to measure [BenchmarkStage.create], sets [_data] to the result.
+  Map<String, Object?> createData();
+
+  /// Used to measure [BenchmarkStage.serialize], called with [data], sets
+  /// [serialized] to the result.
+  Uint8List serialize(Map<String, Object?> data);
+
+  /// Used to measure [BenchmarkStage.deserialize], called with
+  /// [serialized], sets [deserialized] to the result.
+  Map<String, Object?> deserialize(Uint8List data);
+
+  /// Used to measure [BenchmarkStage.process], called with
+  /// [serialized], sets [deserialized] to the result.
+  ///
+  /// Default implementation works only for JSON style maps.
+  int deepHash(Map<String, Object?> deserialized) {
+    var result = 0;
+    for (final entry in deserialized.entries) {
+      result ^= entry.key.hashCode;
+      final value = entry.value;
+      result ^= switch (value) {
+        Map<String, Object?>() => deepHash(value),
+        Serializable() => deepHash(value.toJson()),
+        String() || int() || bool() => value.hashCode,
+        _ =>
+          throw StateError(
+            'Unrecognized JSON value $value, '
+            'custom hash function needed?',
+          ),
+      };
+    }
+    return result;
+  }
 
   List<String> makeMemberNames(int key) {
     final length = key % 10;
@@ -40,36 +93,4 @@ abstract class SerializationBenchmark extends BenchmarkBase {
   }
 }
 
-/// Benchmark that walks the full deserialized data.
-class ProcessBenchmark extends BenchmarkBase {
-  final SerializationBenchmark serializationBenchmark;
-
-  /// The hash of all the data; used to check correctness.
-  int? computedResult;
-
-  ProcessBenchmark(this.serializationBenchmark) : super('');
-
-  @override
-  String get name => 'Process${serializationBenchmark.name}';
-
-  @override
-  void run() {
-    computedResult = deepHash(serializationBenchmark.deserialized!);
-  }
-
-  int deepHash(Map<Object?, Object?> map) {
-    var result = 0;
-    for (final entry in map.entries) {
-      result ^= entry.key.hashCode;
-      final value = entry.value;
-      if (value is Map) {
-        result ^= deepHash(value);
-      } else if (value is Serializable) {
-        result ^= deepHash(value.toJson());
-      } else {
-        result ^= value.hashCode;
-      }
-    }
-    return result;
-  }
-}
+enum BenchmarkStage { create, serialize, deserialize, process }
