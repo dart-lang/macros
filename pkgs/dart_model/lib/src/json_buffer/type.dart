@@ -27,6 +27,7 @@ enum Type {
   type(false),
   pointer(true),
   uint32(false),
+  float64(false),
   boolean(false),
   anyPointer(false), // This is actually a type followed by a pointer.
   stringPointer(true),
@@ -52,6 +53,8 @@ enum Type {
         return Type.stringPointer;
       case int():
         return Type.uint32;
+      case double():
+        return Type.float64;
       case bool():
         return Type.boolean;
       case Type():
@@ -92,6 +95,8 @@ enum Type {
         return 4;
       case anyPointer:
         return 5;
+      case float64:
+        return 8;
     }
   }
 }

@@ -24,6 +24,7 @@ for union in $(
   | sed -e 's# {##' \
   | sort); do
   echo "Definition.union('$union',"
+  echo "  createInBuffer: true,"
   echo "  description: '',"
   echo "  types: ["
   for type in $(echo "$source" \
@@ -71,6 +72,7 @@ for type in $(echo "$source" \
   | sed -e 's# {##' \
   | sort); do
   echo "Definition.clazz('$type',"
+  echo "  createInBuffer: true,"
   echo "  description: '',"
   echo "  properties: ["
   for line in $(echo "$source" \

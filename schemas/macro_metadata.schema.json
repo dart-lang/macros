@@ -459,7 +459,7 @@
           "description": ""
         },
         "value": {
-          "type": "double",
+          "type": "number",
           "description": ""
         }
       }

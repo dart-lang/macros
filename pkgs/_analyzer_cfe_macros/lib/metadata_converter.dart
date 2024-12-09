@@ -281,7 +281,7 @@ T? convert<T>(Object? object) => switch (object) {
         as T,
   front_end.ConstructorInvocation o =>
     dart_model.ConstructorInvocation(
-          type: convert(o.type),
+          type: convertToTypeAnnotation(o.type),
           constructor: convertToReference(o.constructor),
           arguments: convert(o.arguments),
         )
