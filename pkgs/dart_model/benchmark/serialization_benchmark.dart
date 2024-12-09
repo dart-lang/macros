@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 
-import 'lazy_wrappers_buffer_wire_benchmark.dart';
+import 'lazy_wrappers_buffer_wire_benchmark.dart' as wrapped;
 
 const mapSize = 10000;
 final mapKeys = List.generate(mapSize, (i) => i.toString());
@@ -64,12 +64,19 @@ class ProcessBenchmark extends BenchmarkBase {
       final value = entry.value;
       if (value is Map) {
         result ^= deepHash(value);
-      } else if (value is Serializable) {
+      } else if (value is wrapped.Serializable) {
         result ^= deepHash(value.toJson());
+      } else if (value is Hashable) {
+        result ^= value.deepHash;
       } else {
         result ^= value.hashCode;
       }
     }
     return result;
   }
+}
+
+/// Interface for computing a hash, when the underlying object isn't a Map.
+abstract interface class Hashable {
+  int get deepHash;
 }

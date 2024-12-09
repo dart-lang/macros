@@ -10,6 +10,8 @@ import 'lazy_maps_buffer_wire_benchmark.dart';
 import 'lazy_maps_json_wire_benchmark.dart';
 import 'lazy_wrappers_buffer_wire_benchmark.dart';
 import 'lazy_wrappers_buffer_wire_benchmark.dart' as wrapped;
+import 'regular_dart_classes.dart';
+import 'regular_dart_classes.dart' as regular;
 import 'sdk_maps_buffer_wire_benchmark.dart';
 import 'sdk_maps_builder_wire_benchmark.dart';
 import 'sdk_maps_json_wire_benchmark.dart';
@@ -19,6 +21,7 @@ void main() {
   final lazyMapsBufferWireBenchmark = LazyMapsBufferWireBenchmark();
   final lazyWrappersBufferWireBenchmark = LazyWrappersBufferWireBenchmark();
   final builderMapsBuilderWireBenchmark = BuilderMapsBuilderWireBenchmark();
+  final regularClassesBufferWireBenchmark = RegularClassesBufferWireBenchmark();
   final serializationBenchmarks = [
     sdkMapsJsonWireBenchmark,
     SdkMapsBufferWireBenchmark(),
@@ -28,6 +31,7 @@ void main() {
     lazyWrappersBufferWireBenchmark,
     BuilderMapsJsonWireBenchmark(),
     builderMapsBuilderWireBenchmark,
+    regularClassesBufferWireBenchmark,
   ];
 
   for (var i = 0; i != 3; ++i) {
@@ -47,6 +51,7 @@ void main() {
       lazyMapsBufferWireBenchmark.processBenchmark(),
       lazyWrappersBufferWireBenchmark.processBenchmark(),
       builderMapsBuilderWireBenchmark.processBenchmark(),
+      regularClassesBufferWireBenchmark.processBenchmark(),
     ]) {
       final measure = benchmark.measure().toMilliseconds;
       final paddedName = benchmark.name.padLeft(36);
@@ -59,6 +64,10 @@ void main() {
       var deserialized = benchmark.deserialized;
       // Need to unwrap these to compare them as raw maps.
       if (deserialized is Map<String, wrapped.Interface>) {
+        deserialized = deserialized.map<String, Object?>(
+          (k, v) => MapEntry(k, v.toJson()),
+        );
+      } else if (deserialized is Map<String, regular.Interface>) {
         deserialized = deserialized.map<String, Object?>(
           (k, v) => MapEntry(k, v.toJson()),
         );
