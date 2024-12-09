@@ -1,0 +1,22 @@
+name: _augmentation_examples
+publish-to: none
+description: Examples of codegen with and without augmentations.
+# Can't use because build_runner doesn't support dart_style 3.0.0.
+# resolution: workspace
+
+environment:
+  sdk: ^3.7.0-157.0.dev
+
+dependencies:
+  built_collection: ^5.1.1
+  built_value: ^8.9.2
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  build_runner: ^2.3.3
+  built_value_generator: ^8.0.0
+  dart_flutter_team_lints: ^3.0.0
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  test: ^1.25.0
