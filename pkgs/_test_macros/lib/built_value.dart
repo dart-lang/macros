@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dart_model/dart_model.dart';
 // ignore: implementation_imports
@@ -183,8 +184,20 @@ class BuiltValueBuilderImplementation implements ClassDeclarationsMacro {
             TypeAnnotationType.namedTypeAnnotation) {
           continue;
         }
-        // TODO(davidmorgan): macro metadata model doesn't actually have the
-        // name yet, just assume any constructor annotation is `BuiltValue`.
+
+        final namedTypeAnnotation =
+            constructorInvocation.type.asNamedTypeAnnotation;
+        if (namedTypeAnnotation.reference.type !=
+            ReferenceType.classReference) {
+          continue;
+        }
+
+        final constructorReference =
+            namedTypeAnnotation.reference.asClassReference;
+        if (constructorReference.name != 'BuiltValue') {
+          continue;
+        }
+
         nestedBuilderTypes.add(qualifiedName.asString);
       }
     }
