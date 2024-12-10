@@ -50,26 +50,26 @@ prefix1.PrimitiveFields rebuild(void Function(prefix1.PrimitiveFieldsBuilder) up
 augment class NestedFields {
 factory NestedFields([void Function(prefix1.NestedFieldsBuilder)? updates]) =>
   (prefix1.NestedFieldsBuilder()..update(updates)).build();
-NestedFields._({required this.aPrimitiveFields,required this.aString,}) {}
+NestedFields._({required this.aPrimitiveFields,required this.stringWrapper,required this.aString,}) {}
 
 prefix1.NestedFieldsBuilder toBuilder() => prefix1.NestedFieldsBuilder()..replace(this);
 prefix1.NestedFields rebuild(void Function(prefix1.NestedFieldsBuilder) updates) =>
     (toBuilder()..update(updates)).build();
 
-  prefix2.int get hashCode => prefix2.Object.hashAll([aPrimitiveFields,aString,]);
+  prefix2.int get hashCode => prefix2.Object.hashAll([aPrimitiveFields,stringWrapper,aString,]);
 
   prefix2.bool operator==(prefix2.Object other) =>
-      other is prefix1.NestedFields&& aPrimitiveFields == other.aPrimitiveFields&& aString == other.aString;
+      other is prefix1.NestedFields&& aPrimitiveFields == other.aPrimitiveFields&& stringWrapper == other.stringWrapper&& aString == other.aString;
 
-  prefix2.String toString() => 'NestedFields(aPrimitiveFields: $aPrimitiveFields, aString: $aString)';
+  prefix2.String toString() => 'NestedFields(aPrimitiveFields: $aPrimitiveFields, stringWrapper: $stringWrapper, aString: $aString)';
 
 }
 augment class NestedFieldsBuilder {
-prefix1.PrimitiveFieldsBuilder aPrimitiveFields = prefix1.PrimitiveFieldsBuilder();prefix2.String? aString;
+prefix1.PrimitiveFieldsBuilder aPrimitiveFields = prefix1.PrimitiveFieldsBuilder();prefix1.StringWrapper? stringWrapper;prefix2.String? aString;
 
-void replace(prefix1.NestedFields other) {  this.aPrimitiveFields = other.aPrimitiveFields.toBuilder();this.aString = other.aString; }
+void replace(prefix1.NestedFields other) {  this.aPrimitiveFields = other.aPrimitiveFields.toBuilder();this.stringWrapper = other.stringWrapper;this.aString = other.aString; }
 void update(void Function(prefix1.NestedFieldsBuilder)? updates) => updates?.call(this);
-prefix1.NestedFields build() => prefix1.NestedFields._(aPrimitiveFields: aPrimitiveFields.build(),aString: aString!,);
+prefix1.NestedFields build() => prefix1.NestedFields._(aPrimitiveFields: aPrimitiveFields.build(),stringWrapper: stringWrapper!,aString: aString!,);
 
 }
 augment class PrimitiveFieldsBuilder {

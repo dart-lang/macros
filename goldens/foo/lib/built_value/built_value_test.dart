@@ -55,7 +55,7 @@ void main() {
               ..aPrimitiveFields.anInt = 3
               ..aPrimitiveFields.aString = 'four'
               ..aString = 'five'
-              ..stringWrapper = StringWraper('six'),
+              ..stringWrapper = StringWrapper('six'),
       );
       expect(
         value.toString(),
@@ -72,8 +72,8 @@ class NonMacro {
 }
 
 @NonMacro()
-class StringWraper {
-  const StringWraper(this.aString);
+class StringWrapper {
+  const StringWrapper(this.aString);
 
   final String aString;
 
@@ -94,6 +94,6 @@ class PrimitiveFields {
 @BuiltValue()
 class NestedFields {
   final PrimitiveFields aPrimitiveFields;
-  final StringWraper stringWrapper;
+  final StringWrapper stringWrapper;
   final String aString;
 }
