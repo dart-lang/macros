@@ -76,7 +76,7 @@ abstract class SerializationBenchmark extends BenchmarkBase {
       result ^= switch (value) {
         Map<String, Object?>() => deepHash(value),
         Hashable() => value.deepHash,
-        Serializable() => deepHash(value.toJson()),
+        wrapped.Serializable() => deepHash(value.toJson()),
         String() || int() || bool() => value.hashCode,
         _ =>
           throw StateError(
@@ -99,3 +99,8 @@ abstract class SerializationBenchmark extends BenchmarkBase {
 }
 
 enum BenchmarkStage { create, serialize, deserialize, process }
+
+/// Interface for computing a hash, when the underlying object isn't a Map.
+abstract interface class Hashable {
+  int get deepHash;
+}
