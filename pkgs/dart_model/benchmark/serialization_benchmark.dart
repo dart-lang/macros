@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 
-import 'lazy_wrappers_buffer_wire_benchmark.dart';
+import 'lazy_wrappers_buffer_wire_benchmark.dart' as wrapped;
 
 const mapSize = 10000;
 final mapKeys = List.generate(mapSize, (i) => i.toString());
@@ -75,6 +75,7 @@ abstract class SerializationBenchmark extends BenchmarkBase {
       final value = entry.value;
       result ^= switch (value) {
         Map<String, Object?>() => deepHash(value),
+        Hashable() => value.deepHash,
         Serializable() => deepHash(value.toJson()),
         String() || int() || bool() => value.hashCode,
         _ =>

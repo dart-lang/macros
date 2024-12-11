@@ -414,6 +414,8 @@ class TypeReference {
       return 'Type.boolean';
     } else if (name == 'int') {
       return 'Type.uint32';
+    } else if (name == 'double') {
+      return 'Type.float64';
     } else {
       final representationType =
           context.lookupDefinition(name).representationTypeName;
@@ -457,6 +459,11 @@ class TypeReference {
     } else if (name == 'int') {
       return {
         'type': 'integer',
+        if (description != null) 'description': description,
+      };
+    } else if (name == 'double') {
+      return {
+        'type': 'number',
         if (description != null) 'description': description,
       };
     }

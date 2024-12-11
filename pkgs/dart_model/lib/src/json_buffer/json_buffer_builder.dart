@@ -104,6 +104,8 @@ class JsonBufferBuilder {
         _buildDigest(pointer, byteSink);
       case Type.uint32:
         byteSink.addSlice(_buffer, pointer, pointer + 4, false);
+      case Type.float64:
+        byteSink.addSlice(_buffer, pointer, pointer + 8, false);
       case Type.boolean:
         // We use [1] and [2] because [0] is `null`.
         byteSink.add(_readBoolean(pointer) ? const [2] : const [1]);
@@ -151,6 +153,8 @@ class JsonBufferBuilder {
         return _readPointer(pointer);
       case Type.uint32:
         return _readUint32(pointer);
+      case Type.float64:
+        return _readFloat64(pointer);
       case Type.boolean:
         return _readBoolean(pointer);
       case Type.anyPointer:
@@ -205,6 +209,9 @@ class JsonBufferBuilder {
 
       case Type.uint32:
         _writeUint32(pointer, value as int);
+
+      case Type.float64:
+        _writeFloat64(pointer, value as double);
 
       case Type.boolean:
         _writeBoolean(pointer, value as bool);
@@ -324,6 +331,24 @@ class JsonBufferBuilder {
       (_buffer[pointer + 1] << 8) +
       (_buffer[pointer + 2] << 16) +
       (_buffer[pointer + 3] << 24);
+
+  /// Writes [value] at [pointer].
+  void _writeFloat64(_Pointer pointer, double value) {
+    _explanations?.push('_writeFloat64 $value');
+    __writeFloat64(pointer, value);
+    _explanations?.pop();
+  }
+
+  void __writeFloat64(_Pointer pointer, double value) {
+    final byteData = ByteData(8);
+    byteData.setFloat64(0, value, Endian.big);
+    _setRange(pointer, pointer + 8, byteData.buffer.asUint8List());
+  }
+
+  /// Reads the float64 at [_Pointer].
+  double _readFloat64(_Pointer pointer) {
+    return ByteData.sublistView(_buffer).getFloat64(pointer, Endian.big);
+  }
 
   /// Writes [boolean] at [pointer].
   void _writeBoolean(_Pointer pointer, bool boolean) {

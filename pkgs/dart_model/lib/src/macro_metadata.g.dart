@@ -678,6 +678,7 @@ enum ReferenceType {
   extensionReference,
   extensionTypeReference,
   enumReference,
+  mixinReference,
   functionTypeParameterReference;
 
   bool get isKnown => this != _unknown;
@@ -726,6 +727,10 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
       Reference.fromJson(
         Scope.createMap(_schema, 'EnumReference', enumReference),
       );
+  static Reference mixinReference(MixinReference mixinReference) =>
+      Reference.fromJson(
+        Scope.createMap(_schema, 'MixinReference', mixinReference),
+      );
   static Reference functionTypeParameterReference(
     FunctionTypeParameterReference functionTypeParameterReference,
   ) => Reference.fromJson(
@@ -755,6 +760,8 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
         return ReferenceType.extensionTypeReference;
       case 'EnumReference':
         return ReferenceType.enumReference;
+      case 'MixinReference':
+        return ReferenceType.mixinReference;
       case 'FunctionTypeParameterReference':
         return ReferenceType.functionTypeParameterReference;
       default:
@@ -825,6 +832,13 @@ extension type Reference.fromJson(Map<String, Object?> node) implements Object {
       throw StateError('Not a EnumReference.');
     }
     return EnumReference.fromJson(node['value'] as Map<String, Object?>);
+  }
+
+  MixinReference get asMixinReference {
+    if (node['type'] != 'MixinReference') {
+      throw StateError('Not a MixinReference.');
+    }
+    return MixinReference.fromJson(node['value'] as Map<String, Object?>);
   }
 
   FunctionTypeParameterReference get asFunctionTypeParameterReference {
@@ -1113,6 +1127,19 @@ extension type const UnaryOperator.fromJson(String string) implements Object {
 }
 
 ///
+extension type AdjacentStringLiterals.fromJson(Map<String, Object?> node)
+    implements Object {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'expressions': Type.closedListPointer,
+  });
+  AdjacentStringLiterals({List<Expression>? expressions})
+    : this.fromJson(Scope.createMap(_schema, expressions));
+
+  ///
+  List<Expression> get expressions => (node['expressions'] as List).cast();
+}
+
+///
 extension type AsExpression.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
@@ -1156,21 +1183,25 @@ extension type BinaryExpression.fromJson(Map<String, Object?> node)
 ///
 extension type BooleanLiteral.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({
-    'text': Type.stringPointer,
-  });
-  BooleanLiteral({String? text})
-    : this.fromJson(Scope.createMap(_schema, text));
+  static final TypedMapSchema _schema = TypedMapSchema({'value': Type.boolean});
+  BooleanLiteral({bool? value})
+    : this.fromJson(Scope.createMap(_schema, value));
 
   ///
-  String get text => node['text'] as String;
+  bool get value => node['value'] as bool;
 }
 
 ///
 extension type ClassReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  ClassReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  ClassReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1224,8 +1255,14 @@ extension type ConstructorInvocation.fromJson(Map<String, Object?> node)
 ///
 extension type ConstructorReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  ConstructorReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  ConstructorReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1251,11 +1288,16 @@ extension type DoubleLiteral.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
+    'value': Type.float64,
   });
-  DoubleLiteral({String? text}) : this.fromJson(Scope.createMap(_schema, text));
+  DoubleLiteral({String? text, double? value})
+    : this.fromJson(Scope.createMap(_schema, text, value));
 
   ///
   String get text => node['text'] as String;
+
+  ///
+  double get value => node['value'] as double;
 }
 
 ///
@@ -1274,8 +1316,13 @@ extension type DynamicTypeAnnotation.fromJson(Map<String, Object?> node)
 ///
 extension type EnumReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  EnumReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  EnumReference({String? name}) : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1319,22 +1366,40 @@ extension type ExpressionElement.fromJson(Map<String, Object?> node)
 ///
 extension type ExtensionReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  ExtensionReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  ExtensionReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
 extension type ExtensionTypeReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  ExtensionTypeReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  ExtensionTypeReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
 extension type FieldReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  FieldReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  FieldReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1354,8 +1419,14 @@ extension type FormalParameterGroup.fromJson(Map<String, Object?> node)
 ///
 extension type FunctionReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  FunctionReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  FunctionReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1411,8 +1482,14 @@ extension type FunctionTypeParameterReference.fromJson(
   Map<String, Object?> node
 )
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  FunctionTypeParameterReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  FunctionTypeParameterReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1515,12 +1592,16 @@ extension type IntegerLiteral.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
     'text': Type.stringPointer,
+    'value': Type.uint32,
   });
-  IntegerLiteral({String? text})
-    : this.fromJson(Scope.createMap(_schema, text));
+  IntegerLiteral({String? text, int? value})
+    : this.fromJson(Scope.createMap(_schema, text, value));
 
   ///
   String get text => node['text'] as String;
+
+  ///
+  int? get value => node['value'] as int?;
 }
 
 ///
@@ -1673,6 +1754,19 @@ extension type MethodInvocation.fromJson(Map<String, Object?> node)
 
   ///
   List<Argument> get arguments => (node['arguments'] as List).cast();
+}
+
+///
+extension type MixinReference.fromJson(Map<String, Object?> node)
+    implements Object {
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  MixinReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
@@ -1957,19 +2051,6 @@ extension type StaticInvocation.fromJson(Map<String, Object?> node)
 }
 
 ///
-extension type AdjacentStringLiterals.fromJson(Map<String, Object?> node)
-    implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({
-    'expressions': Type.closedListPointer,
-  });
-  AdjacentStringLiterals({List<Expression>? expressions})
-    : this.fromJson(Scope.createMap(_schema, expressions));
-
-  ///
-  List<Expression> get expressions => (node['expressions'] as List).cast();
-}
-
-///
 extension type StringLiteral.fromJson(Map<String, Object?> node)
     implements Object {
   static final TypedMapSchema _schema = TypedMapSchema({
@@ -2010,8 +2091,14 @@ extension type SymbolLiteral.fromJson(Map<String, Object?> node)
 ///
 extension type TypedefReference.fromJson(Map<String, Object?> node)
     implements Object {
-  static final TypedMapSchema _schema = TypedMapSchema({});
-  TypedefReference() : this.fromJson(Scope.createMap(_schema));
+  static final TypedMapSchema _schema = TypedMapSchema({
+    'name': Type.stringPointer,
+  });
+  TypedefReference({String? name})
+    : this.fromJson(Scope.createMap(_schema, name));
+
+  ///
+  String get name => node['name'] as String;
 }
 
 ///
