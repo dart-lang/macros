@@ -54,15 +54,31 @@ void main() {
             b
               ..aPrimitiveFields.anInt = 3
               ..aPrimitiveFields.aString = 'four'
-              ..aString = 'five',
+              ..aString = 'five'
+              ..stringWrapper = StringWrapper('six'),
       );
       expect(
         value.toString(),
         'NestedFields(aPrimitiveFields: PrimitiveFields('
-        'anInt: 3, aString: four, aNullableString: null), aString: five)',
+        'anInt: 3, aString: four, aNullableString: null), '
+        'stringWrapper: StringWrapper(aString: six), aString: five)',
       );
     });
   });
+}
+
+class NonMacro {
+  const NonMacro();
+}
+
+@NonMacro()
+class StringWrapper {
+  const StringWrapper(this.aString);
+
+  final String aString;
+
+  @override
+  String toString() => 'StringWrapper(aString: $aString)';
 }
 
 @BuiltValue()
@@ -78,5 +94,6 @@ class PrimitiveFields {
 @BuiltValue()
 class NestedFields {
   final PrimitiveFields aPrimitiveFields;
+  final StringWrapper stringWrapper;
   final String aString;
 }

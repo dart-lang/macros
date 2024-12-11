@@ -186,6 +186,9 @@ dart_model.Reference? convertToReference(Object? object) => switch (object) {
   front_end.EnumReference o => dart_model.Reference.enumReference(
     convert<dart_model.EnumReference>(o)!,
   ),
+  front_end.MixinReference o => dart_model.Reference.mixinReference(
+    convert<dart_model.MixinReference>(o)!,
+  ),
   front_end.FunctionTypeParameterReference o => dart_model
       .Reference.functionTypeParameterReference(
     convert<dart_model.FunctionTypeParameterReference>(o)!,
@@ -250,6 +253,8 @@ T? convert<T>(Object? object) => switch (object) {
   front_end.BinaryOperator o => o.name as T,
   front_end.LogicalOperator o => o.name as T,
   front_end.UnaryOperator o => o.name as T,
+  front_end.AdjacentStringLiterals o =>
+    dart_model.AdjacentStringLiterals(expressions: convert(o.expressions)) as T,
   front_end.AsExpression o =>
     dart_model.AsExpression(
           expression: convertToExpression(o.expression),
@@ -264,8 +269,9 @@ T? convert<T>(Object? object) => switch (object) {
         )
         as T,
   front_end.BooleanLiteral o =>
-    dart_model.BooleanLiteral(text: convert(o.value.toString())) as T,
-  front_end.ClassReference o => dart_model.ClassReference() as T,
+    dart_model.BooleanLiteral(value: convert(o.value)) as T,
+  front_end.ClassReference o =>
+    dart_model.ClassReference(name: convert(o.name)) as T,
   front_end.ConditionalExpression o =>
     dart_model.ConditionalExpression(
           condition: convertToExpression(o.condition),
@@ -280,7 +286,8 @@ T? convert<T>(Object? object) => switch (object) {
           arguments: convert(o.arguments),
         )
         as T,
-  front_end.ConstructorReference o => dart_model.ConstructorReference() as T,
+  front_end.ConstructorReference o =>
+    dart_model.ConstructorReference(name: convert(o.name)) as T,
   front_end.ConstructorTearOff o =>
     dart_model.ConstructorTearOff(
           type: convert(o.type),
@@ -288,11 +295,13 @@ T? convert<T>(Object? object) => switch (object) {
         )
         as T,
   front_end.DoubleLiteral o =>
-    dart_model.DoubleLiteral(text: convert(o.text)) as T,
+    dart_model.DoubleLiteral(text: convert(o.text), value: convert(o.value))
+        as T,
   front_end.DynamicTypeAnnotation o =>
     dart_model.DynamicTypeAnnotation(reference: convertToReference(o.reference))
         as T,
-  front_end.EnumReference o => dart_model.EnumReference() as T,
+  front_end.EnumReference o =>
+    dart_model.EnumReference(name: convert(o.name)) as T,
   front_end.EqualityExpression o =>
     dart_model.EqualityExpression(
           left: convertToExpression(o.left),
@@ -306,13 +315,16 @@ T? convert<T>(Object? object) => switch (object) {
           isNullAware: convert(o.isNullAware),
         )
         as T,
-  front_end.ExtensionReference o => dart_model.ExtensionReference() as T,
+  front_end.ExtensionReference o =>
+    dart_model.ExtensionReference(name: convert(o.name)) as T,
   front_end.ExtensionTypeReference o =>
-    dart_model.ExtensionTypeReference() as T,
-  front_end.FieldReference o => dart_model.FieldReference() as T,
+    dart_model.ExtensionTypeReference(name: convert(o.name)) as T,
+  front_end.FieldReference o =>
+    dart_model.FieldReference(name: convert(o.name)) as T,
   front_end.FormalParameter o => dart_model.FormalParameter() as T,
   front_end.FormalParameterGroup o => dart_model.FormalParameterGroup() as T,
-  front_end.FunctionReference o => dart_model.FunctionReference() as T,
+  front_end.FunctionReference o =>
+    dart_model.FunctionReference(name: convert(o.name)) as T,
   front_end.FunctionTearOff o =>
     dart_model.FunctionTearOff(reference: convert(o.reference)) as T,
   front_end.FunctionTypeAnnotation o =>
@@ -324,7 +336,7 @@ T? convert<T>(Object? object) => switch (object) {
         as T,
   front_end.FunctionTypeParameter o => dart_model.FunctionTypeParameter() as T,
   front_end.FunctionTypeParameterReference o =>
-    dart_model.FunctionTypeParameterReference() as T,
+    dart_model.FunctionTypeParameterReference(name: convert(o.name)) as T,
   front_end.FunctionTypeParameterType o =>
     dart_model.FunctionTypeParameterType(
           functionTypeParameter: convert(o.functionTypeParameter),
@@ -357,7 +369,8 @@ T? convert<T>(Object? object) => switch (object) {
         )
         as T,
   front_end.IntegerLiteral o =>
-    dart_model.IntegerLiteral(text: convert(o.text)) as T,
+    dart_model.IntegerLiteral(text: convert(o.text), value: convert(o.value))
+        as T,
   front_end.InterpolationPart o =>
     dart_model.InterpolationPart(expression: convertToExpression(o.expression))
         as T,
@@ -399,6 +412,8 @@ T? convert<T>(Object? object) => switch (object) {
           arguments: convert(o.arguments),
         )
         as T,
+  front_end.MixinReference o =>
+    dart_model.MixinReference(name: convert(o.name)) as T,
   front_end.NamedArgument o =>
     dart_model.NamedArgument(
           name: convert(o.name),
@@ -479,14 +494,13 @@ T? convert<T>(Object? object) => switch (object) {
           arguments: convert(o.arguments),
         )
         as T,
-  front_end.AdjacentStringLiterals o =>
-    dart_model.AdjacentStringLiterals(expressions: convert(o.expressions)) as T,
   front_end.StringLiteral o =>
     dart_model.StringLiteral(parts: convert(o.parts)) as T,
   front_end.StringPart o => dart_model.StringPart(text: convert(o.text)) as T,
   front_end.SymbolLiteral o =>
     dart_model.SymbolLiteral(parts: convert(o.parts)) as T,
-  front_end.TypedefReference o => dart_model.TypedefReference() as T,
+  front_end.TypedefReference o =>
+    dart_model.TypedefReference(name: convert(o.name)) as T,
   front_end.TypeLiteral o =>
     dart_model.TypeLiteral(typeAnnotation: convert(o.typeAnnotation)) as T,
   front_end.TypeReference o => dart_model.TypeReference() as T,

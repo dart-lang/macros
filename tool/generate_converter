@@ -7,7 +7,7 @@
 #
 # mkdir /tmp/inputs
 # cp ~/git/dart-sdk/sdk/pkg/_fe_analyzer_shared/lib/src/metadata/* /tmp/inputs
-# rm /tmp/inputs/proto.dart /tmp/inputs/parser.dart /tmp/inputs/scope.dart
+# rm /tmp/inputs/proto.dart /tmp/inputs/parser.dart /tmp/inputs/scope.dart /tmp/inputs/evaluate.dart
 # tool/generate_converter /tmp/inputs
 
 path="$1"
@@ -39,7 +39,7 @@ echo "T? convert<T>(Object? object) => switch (object) {"
 
 # Enums.
 for type in $(echo "$source" \
-  | egrep '^enum [A-Z]' \
+  | grep -E '^enum [A-Z]' \
   | sed -e 's#enum ##' \
   | sed -e 's# .*##' \
   | sort); do
@@ -48,7 +48,7 @@ done
 
 # Classes.
 for type in $(echo "$source" \
-  | egrep '^[a-z ]*class ' \
+  | grep -E '^[a-z ]*class ' \
   | grep -v 'sealed' \
   | sed -e 's#abstract ##' \
   | sed -e 's#class ##' \
@@ -65,7 +65,18 @@ for type in $(echo "$source" \
         continue
       fi
       field_type=$(echo $line | sed -e 's#  final ##' | sed -e 's# .*##')
-      if echo "$field_type" | egrep -q '^(Argument|Element|Expression|RecordField|Reference|StringLiteralPart)$'; then
+      if echo "$field_type" | grep -E -q '^(Argument|Element|Expression|RecordField|Reference|StringLiteralPart)$'; then
+        echo "    $field_name: convertTo$field_type(o.$field_name),"
+      else
+        echo "    $field_name: convert(o.$field_name),"
+      fi
+    elif echo "$line" | grep -q ' get '; then
+      field_name=$(echo $line | sed -e 's#.* get ##' | sed -e 's#;##')
+      if test "$field_name" == "unresolved"; then
+        continue
+      fi
+      field_type=$(echo $line | sed -e 's#  ##' | sed -e 's# get .*##')
+      if echo "$field_type" | grep -E -q '^(Argument|Element|Expression|RecordField|Reference|StringLiteralPart)$'; then
         echo "    $field_name: convertTo$field_type(o.$field_name),"
       else
         echo "    $field_name: convert(o.$field_name),"
