@@ -2,16 +2,18 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'json_buffer.dart';
 import 'serialization_benchmark.dart';
 
 /// Benchmark accumulating data into a [JsonBuffer] via [LazyMap].
 class LazyMapsBufferWireBenchmark extends SerializationBenchmark {
   @override
-  void run() {
-    serialized = JsonBuffer(createData()).serialize();
-  }
+  Uint8List serialize(Map<String, Object?> data) =>
+      JsonBuffer(data).serialize();
 
+  @override
   LazyMap createData() {
     return LazyMap(mapKeys, (key) {
       final intKey = int.parse(key);
@@ -44,9 +46,8 @@ class LazyMapsBufferWireBenchmark extends SerializationBenchmark {
   }
 
   @override
-  void deserialize() {
-    deserialized = JsonBuffer.deserialize(serialized!).asMap;
-  }
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      JsonBuffer.deserialize(serialized).asMap;
 }
 
 /// An interface.
