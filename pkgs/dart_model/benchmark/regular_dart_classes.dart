@@ -2,25 +2,18 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 
 import 'serialization_benchmark.dart';
 
 JsonBufferBuilder? runningBuffer;
 
-/// Benchmark accumulating data directly into a [JsonBufferBuilder] with an
-/// indirection through a thin wrapper type (which is a real type, not an
-/// extension type).
+/// Benchmark for regular dart classes which serialize and deserializ into
+/// a [JsonBufferBuilder].
 class RegularClassesBufferWireBenchmark extends SerializationBenchmark {
   @override
-  void run() {
-    var data = createData();
-
-    final buffer = runningBuffer = JsonBufferBuilder();
-    data.forEach((k, v) => buffer.map[k] = v.toJson());
-    serialized = runningBuffer!.serialize();
-  }
-
   /// Creates the data, but its not ready yet to be serialized.
   Map<String, Interface> createData() {
     final map = <String, Interface>{};
@@ -62,12 +55,16 @@ class RegularClassesBufferWireBenchmark extends SerializationBenchmark {
   }
 
   @override
-  void deserialize() {
-    deserialized = JsonBufferBuilder.deserialize(
-      serialized!,
-    ).map.map<String, Interface>(
-      (k, v) => MapEntry(k, Interface.fromJson(v as Map<String, Object?>)),
-    );
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      JsonBufferBuilder.deserialize(serialized).map.map<String, Interface>(
+        (k, v) => MapEntry(k, Interface.fromJson(v as Map<String, Object?>)),
+      );
+
+  @override
+  Uint8List serialize(Map<String, Object?> data) {
+    final buffer = runningBuffer = JsonBufferBuilder();
+    data.forEach((k, v) => buffer.map[k] = (v as Interface).toJson());
+    return runningBuffer!.serialize();
   }
 }
 

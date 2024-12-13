@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:dart_model/src/json_buffer/json_buffer_builder.dart';
 
@@ -15,12 +16,12 @@ JsonBufferBuilder? runningBuffer;
 /// extension type).
 class LazyWrappersBufferWireBenchmark extends SerializationBenchmark {
   @override
-  void run() {
-    createData();
-
-    serialized = runningBuffer!.serialize();
+  Uint8List serialize(Map<String, Object?> data) {
+    assert(data == runningBuffer!.map);
+    return runningBuffer!.serialize();
   }
 
+  @override
   Map<String, Object?> createData() {
     final buffer = runningBuffer = JsonBufferBuilder();
     final map = buffer.map;
@@ -62,13 +63,12 @@ class LazyWrappersBufferWireBenchmark extends SerializationBenchmark {
   }
 
   @override
-  void deserialize() {
-    deserialized = _LazyMap<Object?, Interface>(
-      JsonBufferBuilder.deserialize(serialized!).map,
-      (json) => Interface.fromJson(json as Map<String, Object?>),
-      (i) => i.toJson(),
-    );
-  }
+  Map<String, Object?> deserialize(Uint8List serialized) =>
+      _LazyMap<Object?, Interface>(
+        JsonBufferBuilder.deserialize(serialized).map,
+        (json) => Interface.fromJson(json as Map<String, Object?>),
+        (i) => i.toJson(),
+      );
 }
 
 class _LazyMap<From, To> extends MapBase<String, To> {

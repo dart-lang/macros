@@ -10,10 +10,10 @@ import 'serialization_benchmark.dart';
 /// Benchmark accumulating data into SDK maps then serializing it to JSON.
 class SdkMapsJsonWireBenchmark extends SerializationBenchmark {
   @override
-  void run() {
-    serialized = json.fuse(utf8).encode(createData()) as Uint8List;
-  }
+  Uint8List serialize(Map<String, Object?> data) =>
+      json.fuse(utf8).encode(data) as Uint8List;
 
+  @override
   Map<String, Object?> createData() {
     return Map<String, Object?>.fromIterable(
       mapKeys,
@@ -53,8 +53,8 @@ class SdkMapsJsonWireBenchmark extends SerializationBenchmark {
   }
 
   @override
-  void deserialize() {
-    deserialized = json.fuse(utf8).decode(serialized!) as Map<String, Object?>;
+  Map<String, Object?> deserialize(Uint8List serialized) {
+    return json.fuse(utf8).decode(serialized) as Map<String, Object?>;
   }
 }
 
