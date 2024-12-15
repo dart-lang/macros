@@ -81,4 +81,28 @@ void main() {
       });
     });
   });
+
+  test('converts a type literal', () {
+    final invocation = TypeLiteral(NamedTypeAnnotation(TestClassReference()));
+
+    Scope.query.run(() {
+      expect(convert<Object>(invocation), <String, Object?>{
+        'typeAnnotation': {
+          'type': 'NamedTypeAnnotation',
+          'value': {
+            'reference': {
+              'type': 'ClassReference',
+              'value': {'name': 'Test'},
+            },
+            'typeArguments': <Object>[],
+          },
+        },
+      });
+    });
+  });
+}
+
+class TestClassReference implements ClassReference {
+  @override
+  String get name => 'Test';
 }

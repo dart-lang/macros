@@ -502,7 +502,10 @@ T? convert<T>(Object? object) => switch (object) {
   front_end.TypedefReference o =>
     dart_model.TypedefReference(name: convert(o.name)) as T,
   front_end.TypeLiteral o =>
-    dart_model.TypeLiteral(typeAnnotation: convert(o.typeAnnotation)) as T,
+    dart_model.TypeLiteral(
+          typeAnnotation: convertToTypeAnnotation(o.typeAnnotation),
+        )
+        as T,
   front_end.TypeReference o => dart_model.TypeReference() as T,
   front_end.UnaryExpression o =>
     dart_model.UnaryExpression(
