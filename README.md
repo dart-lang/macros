@@ -2,7 +2,14 @@
 
 ## Overview
 
-This repository is home to various macro related Dart packages.
+This repository was a work in progress prototype for the [macros](https://github.com/dart-lang/language/blob/b268fe0380995b074176e335beec476553eb3c04/working/macros/feature-specification.md)
+feature, which was [canceled](https://medium.com/dartlang/an-update-on-dart-macros-data-serialization-06d3037d4f12) in January 2025.
+
+For related work, see:
+
+ - [Augmentations](https://github.com/dart-lang/language/blob/main/working/augmentation-libraries/feature-specification.md) feature
+ - [`build_runner`](https://github.com/dart-lang/build/issues/3800) performance improvements
+ - [Static Metaprogramming](https://github.com/dart-lang/language/issues/1482) feature request
 
 ## Packages
 
