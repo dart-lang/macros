@@ -2,8 +2,11 @@
 
 ## Overview
 
-This repository was a work in progress prototype for the [macros](https://github.com/dart-lang/language/blob/b268fe0380995b074176e335beec476553eb3c04/working/macros/feature-specification.md)
-feature, which was [canceled](https://medium.com/dartlang/an-update-on-dart-macros-data-serialization-06d3037d4f12) in January 2025.
+> [!IMPORTANT]  
+> This repository was a work-in-progress prototype for the
+> [macros](https://github.com/dart-lang/language/blob/b268fe0380995b074176e335beec476553eb3c04/working/macros/feature-specification.md)
+> feature, which was [canceled](https://medium.com/dartlang/an-update-on-dart-macros-data-serialization-06d3037d4f12)
+> in January 2025.
 
 For related work, see:
 
